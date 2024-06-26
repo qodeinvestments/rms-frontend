@@ -1,0 +1,192 @@
+<script setup>
+import { onMounted, onUnmounted, ref, watch } from 'vue'
+import {
+    useVueTable,
+    FlexRender,
+    getCoreRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    getFilteredRowModel,
+} from '@tanstack/vue-table'
+
+// Define the props
+const props = defineProps({
+    data: {
+        type: Array,
+        required: true
+    },
+    columns: {
+        type: Array,
+        required: true
+    }
+})
+
+// Create a ref for the data to make it reactive
+const data = ref(props.data)
+
+// Watch the prop `data` and update the reactive `data` variable
+watch(() => props.data, (newData) => {
+    data.value = newData
+}, { immediate: true })
+
+
+const sorting = ref([])
+const filter = ref('')
+
+// Initialize the table using the useVueTable hook
+const table = useVueTable({
+    get data() {
+        return data.value
+    },
+    columns: props.columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    state: {
+        get sorting() {
+            return sorting.value
+        },
+        get globalFilter() {
+            return filter.value
+        },
+    },
+    onSortingChange: updaterOrValue => {
+        sorting.value =
+            typeof updaterOrValue === 'function'
+                ? updaterOrValue(sorting.value)
+                : updaterOrValue
+    },
+})
+
+</script>
+
+<template>
+    <div class="px-4 sm:px-6 lg:px-8">
+        <div class="mt-8 flow-root ">
+            <div class="my-4">
+                <input type="text" class="border border-gray-400 rounded px-2 py-2" placeholder="Search"
+                    v-model="filter" />
+            </div>
+            <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8  ">
+                <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8 ">
+                    <table class="min-w-full divide-y divide-gray-300  ">
+                        <thead>
+                            <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+                                <th v-for="header in headerGroup.headers" :key="header.id" scope="col"
+                                    class="whitespace-nowrap px-3 py-3.5 text-left text-sm font-semibold text-gray-900 borderright"
+                                    :class="{
+                                        'cursor-pointer select-none': header.column.getCanSort(),
+                                        'sticky-header': header.index === 0,
+                                    }" @click="header.column.getToggleSortingHandler()?.($event)">
+                                    <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
+                                    {{ { asc: ' ↑', desc: '↓' }[header.column.getIsSorted()] }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr v-for="row in table.getRowModel().rows" :key="row.id">
+                                <td v-for="(cell, index) in row.getVisibleCells()" :key="cell.id"
+                                    class="maxwidth150 break-words whitespace-normal px-3 py-4 text-sm text-gray-500"
+                                    :class="{ 'sticky-header': index === 0 }">
+                                    <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="mt-8">
+                Page {{ table.getState().pagination.pageIndex + 1 }} of
+                {{ table.getPageCount() }} -
+                {{ table.getFilteredRowModel().rows.length }} results
+            </div>
+            <div class="mt-8 space-x-4">
+                <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    @click="table.setPageSize(5)">
+                    Page Size 5
+                </button>
+                <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    @click="table.setPageSize(10)">
+                    Page Size 10
+                </button>
+                <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    @click="table.setPageSize(20)">
+                    Page Size 20
+                </button>
+            </div>
+            <div class="space-x-4 mt-8">
+                <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    @click="table.setPageIndex(0)">
+                    First page
+                </button>
+                <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    @click="table.setPageIndex(table.getPageCount() - 1)">
+                    Last page
+                </button>
+                <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    :disabled="!table.getCanPreviousPage()" @click="table.previousPage()">
+                    Prev page
+                </button>
+                <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    :disabled="!table.getCanNextPage()" @click="table.nextPage()">
+                    Next page
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+
+<style scoped>
+table {
+    border-right: none;
+    border-left: none;
+}
+
+::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.borderright {
+    border-right: none;
+}
+
+.backred {
+    background: red;
+}
+
+.maxwidth150 {
+    max-width: 150px;
+}
+
+.sticky-header {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: white;
+}
+
+.sticky-header:nth-child(1) {
+    left: 0px;
+    /* Adjust as per the width of the first column */
+}
+</style>
