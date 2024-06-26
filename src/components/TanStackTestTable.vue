@@ -9,6 +9,7 @@ import {
     getFilteredRowModel,
 } from '@tanstack/vue-table'
 
+const map = ["PortfolioValue"];
 // Define the props
 const props = defineProps({
     data: {
@@ -88,7 +89,11 @@ const table = useVueTable({
                             <tr v-for="row in table.getRowModel().rows" :key="row.id">
                                 <td v-for="(cell, index) in row.getVisibleCells()" :key="cell.id"
                                     class="maxwidth150 break-words whitespace-normal px-3 py-4 text-sm text-gray-500"
-                                    :class="{ 'sticky-header': index === 0 }">
+                                    :class="{
+                                        'sticky-header': index === 0,
+                                        'red': cell.getValue() < 0 && map.includes(cell.id.substring(2)),
+                                        'green': cell.getValue() > 0 && map.includes(cell.id.substring(2))
+                                    }">
                                     <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                                 </td>
                             </tr>
@@ -140,6 +145,14 @@ const table = useVueTable({
 
 
 <style scoped>
+.red {
+    color: red;
+}
+
+.green {
+    color: rgb(80, 185, 80);
+}
+
 table {
     border-right: none;
     border-left: none;

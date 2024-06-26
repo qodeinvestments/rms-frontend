@@ -141,26 +141,65 @@ const columns = [
 
 
 
-onMounted(() => {
+// onMounted(() => {
 
-  console.log('in mounted')
-  const socket = new WebSocket('ws://localhost:8000/ws')
-  console.log(socket)
-  socket.onmessage = (event) => {
+//   console.log('in mounted')
+//   const socket = new WebSocket('ws://localhost:8000/ws')
+//   console.log(socket)
+//   socket.onmessage = (event) => {
+//     const updatedData = [...data.value]
+//     updatedData[0]['PortfolioValue'] = Number(event.data) // Update the age
+//     data.value = updatedData
+//     console.log(event.data, "  ", data.value)
+//   }
+
+//   socket.onclose = () => {
+//     console.log('WebSocket connection closed.')
+//   }
+//   socket.onerror = (e) => {
+//     console.log(e)
+//   }
+
+// })
+
+
+
+
+const messages = ref([])
+let eventSource = null
+
+const connectToSSE = () => {
+  eventSource = new EventSource('http://localhost:5000/stream')
+
+  eventSource.onmessage = (event) => {
+    const Value = Number(JSON.parse(event.data))
     const updatedData = [...data.value]
-    updatedData[0]['PortfolioValue'] = Number(event.data) // Update the age
+    updatedData[0]['PortfolioValue'] = Value// Update the age
     data.value = updatedData
-    console.log(event.data, "  ", data.value)
+    console.log(Value, "  ", data.value)
   }
 
-  socket.onclose = () => {
-    console.log('WebSocket connection closed.')
-  }
-  socket.onerror = (e) => {
-    console.log(e)
+  eventSource.onopen = () => {
+    messages.value.push('Connection opened')
   }
 
+  eventSource.onerror = () => {
+    messages.value.push('Error occurred')
+    eventSource.close()
+  }
+}
+
+onMounted(() => {
+  connectToSSE()
 })
+
+onUnmounted(() => {
+  if (eventSource) {
+    eventSource.close()
+  }
+})
+
+
 </script>
 
 <template>
