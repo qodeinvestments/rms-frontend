@@ -120,6 +120,8 @@
 </template>
 
 <script>
+import { useRouter } from 'vue-router';
+
 export default {
   data() {
     return {
@@ -127,7 +129,10 @@ export default {
       selected: '',
       selectedsubCat: '',
       showoptions: false,
-      togglesubCategory: ['Audience', 'Income']
+      togglesubCategory: ['Audience', 'Income'],
+      navigateMap: {
+        'Dashboard': '/'
+      }
 
     }
   },
@@ -144,7 +149,7 @@ export default {
         this.selectedsubCat = '';
       }
       this.selected = val;
-
+      this.$router.push(this.navigateMap[val]);
 
     },
     changeSelectedSubCat(val) {

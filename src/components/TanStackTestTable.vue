@@ -1,5 +1,7 @@
 <script setup>
 import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router';
+const router = useRouter();
 import {
     useVueTable,
     FlexRender,
@@ -9,7 +11,6 @@ import {
     getFilteredRowModel,
 } from '@tanstack/vue-table'
 
-const map = ["PortfolioValue"];
 // Define the props
 const props = defineProps({
     data: {
@@ -19,8 +20,27 @@ const props = defineProps({
     columns: {
         type: Array,
         required: true
+    },
+    hasColor: {
+        type: Array,
+        required: true
+    },
+    navigateTo: {
+        type: Object,
+        required: true
     }
 })
+
+const checkNavigate = (data) => {
+    console.log("data is:", data);
+    console.log(data.getValue() + " " + data.id.substring(2));
+    let link = props.navigateTo[data.id.substring(2)] + data.getValue()
+    router.push(link);
+    console.log(props.navigateTo[data.id.substring(2)])
+}
+
+
+
 
 // Create a ref for the data to make it reactive
 const data = ref(props.data)
@@ -91,9 +111,9 @@ const table = useVueTable({
                                     class="maxwidth150 break-words whitespace-normal px-3 py-4 text-sm text-gray-500"
                                     :class="{
                                         'sticky-header': index === 0,
-                                        'red': cell.getValue() < 0 && map.includes(cell.id.substring(2)),
-                                        'green': cell.getValue() > 0 && map.includes(cell.id.substring(2))
-                                    }">
+                                        'red': cell.getValue() < 0 && hasColor.includes(cell.id.substring(2)),
+                                        'green': cell.getValue() > 0 && hasColor.includes(cell.id.substring(2))
+                                    }" @click="checkNavigate(cell)">
                                     <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                                 </td>
                             </tr>

@@ -8,7 +8,7 @@ import {
 } from '@tanstack/vue-table'
 import { ref } from 'vue'
 import TanStackTestTable from './TanStackTestTable.vue'
-
+import Chart from './Chart.vue'
 
 
 
@@ -16,6 +16,7 @@ const defaultData = [
   {
     "id": 1,
     "AccountName": "Abhinav",
+    "IdealMTM": 0,
     "PortfolioValue": "250000",
     "Day_PL": "25000",
     "PositionDayPL": "25000000000",
@@ -32,6 +33,7 @@ const defaultData = [
   {
     "id": 2,
     "AccountName": "chirag",
+    "IdealMTM": 0,
     "PortfolioValue": "250000",
     "Day_PL": "25000",
     "PositionDayPL": "25000000000",
@@ -48,6 +50,7 @@ const defaultData = [
   {
     "id": 3,
     "AccountName": "ashwin",
+    "IdealMTM": 0,
     "PortfolioValue": "250000",
     "Day_PL": "25000",
     "PositionDayPL": "25000000000",
@@ -63,6 +66,10 @@ const defaultData = [
   },
 
 ]
+const NavigationMap = {
+  "AccountName": "/user/"
+};
+
 const data = ref(defaultData)
 
 const columnHelper = createColumnHelper()
@@ -73,16 +80,22 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'Account Name',
   }),
-  columnHelper.accessor(row => row.PortfolioValue, {
-    id: 'PortfolioValue',
+  columnHelper.accessor(row => row.IdealMTM, {
+    id: 'IdealMTM',
     cell: info => info.getValue(),
-    header: () => 'Portfolio Value',
+    header: () => 'Ideal MTM',
   }),
   columnHelper.accessor(row => row.Day_PL, {
     id: 'Day_PL',
     cell: info => info.getValue(),
     header: () => 'Day_PL',
   }),
+  columnHelper.accessor(row => row.PortfolioValue, {
+    id: 'PortfolioValue',
+    cell: info => info.getValue(),
+    header: () => 'Portfolio Value',
+  }),
+
   columnHelper.accessor(row => row.PositionDayPL, {
     id: 'PositionDayPL',
     cell: info => info.getValue(),
@@ -166,17 +179,23 @@ const columns = [
 
 
 const messages = ref([])
+const MTMTable = ref([])
 let eventSource = null
 
 const connectToSSE = () => {
   eventSource = new EventSource('http://localhost:5000/stream')
 
   eventSource.onmessage = (event) => {
-    const Value = Number(JSON.parse(event.data))
+    let client_data = JSON.parse(event.data);
+
+    let mapobj = JSON.parse(client_data);
+
     const updatedData = [...data.value]
-    updatedData[0]['PortfolioValue'] = Value// Update the age
+    updatedData[0]['Day_PL'] = Number(mapobj[0]['MTM'])// Update the age
+    updatedData[0]['IdealMTM'] = Number(mapobj[0]['ideal_MTM'])// Update the age
+    updatedData[0]['AccountName'] = mapobj[0]['name']// Update the age
+    MTMTable.value = mapobj[0]["MTMTable"]
     data.value = updatedData
-    console.log(Value, "  ", data.value)
   }
 
   eventSource.onopen = () => {
@@ -214,8 +233,11 @@ onUnmounted(() => {
     <TableTanstack :data="cars" :columns="columnsCars" />
   </div> -->
       <div class="my-8">
-        <TanStackTestTable :data="data" :columns="columns" />
+        <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL']"
+          :navigateTo="NavigationMap" />
       </div>
+      <Chart :data="MTMTable" />
+
     </div>
 
   </div>
@@ -227,27 +249,5 @@ onUnmounted(() => {
 html {
   font-family: sans-serif;
   font-size: 14px;
-}
-
-table {
-  border: 1px solid lightgray;
-}
-
-tbody {
-  border-bottom: 1px solid lightgray;
-}
-
-th {
-  border-bottom: 1px solid lightgray;
-  border-right: 1px solid lightgray;
-  padding: 2px 4px;
-}
-
-tfoot {
-  color: gray;
-}
-
-tfoot th {
-  font-weight: normal;
 }
 </style>
