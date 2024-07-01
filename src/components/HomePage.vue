@@ -13,57 +13,7 @@ import Chart from './Chart.vue'
 
 
 const defaultData = [
-  {
-    "id": 1,
-    "AccountName": "Abhinav",
-    "IdealMTM": 0,
-    "PortfolioValue": "250000",
-    "Day_PL": "25000",
-    "PositionDayPL": "25000000000",
-    "HoldingsDayPL": 250000,
-    "TotalOrderCount": 250000,
-    "OpenOrderCount": 40,
-    "CompleteOrderCount": 10,
-    "PositionsCount": 20,
-    "HoldingsCount": 10,
-    "Used_Margin": 50000,
-    "AvailableMargin": 250000,
-    "Cash": 2500000
-  },
-  {
-    "id": 2,
-    "AccountName": "chirag",
-    "IdealMTM": 0,
-    "PortfolioValue": "250000",
-    "Day_PL": "25000",
-    "PositionDayPL": "25000000000",
-    "HoldingsDayPL": 250000,
-    "TotalOrderCount": 250000,
-    "OpenOrderCount": 40,
-    "CompleteOrderCount": 10,
-    "PositionsCount": 20,
-    "HoldingsCount": 10,
-    "Used_Margin": 50000,
-    "AvailableMargin": 250000,
-    "Cash": 2500000
-  },
-  {
-    "id": 3,
-    "AccountName": "ashwin",
-    "IdealMTM": 0,
-    "PortfolioValue": "250000",
-    "Day_PL": "25000",
-    "PositionDayPL": "25000000000",
-    "HoldingsDayPL": 250000,
-    "TotalOrderCount": 250000,
-    "OpenOrderCount": 40,
-    "CompleteOrderCount": 10,
-    "PositionsCount": 20,
-    "HoldingsCount": 10,
-    "Used_Margin": 50000,
-    "AvailableMargin": 250000,
-    "Cash": 2500000
-  },
+
 
 ]
 const NavigationMap = {
@@ -107,16 +57,28 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'HoldingsDayPL',
   }),
+  columnHelper.accessor(row => row.RejectedOrderCount, {
+    id: 'RejectedOrderCount',
+    cell: info => info.getValue(),
+    header: () => 'RejectedOrderCount',
+  }),
+  columnHelper.accessor(row => row.PendingOrderCount, {
+    id: 'PendingOrderCount',
+    cell: info => info.getValue(),
+    header: () => 'PendingOrderCount',
+  }),
   columnHelper.accessor(row => row.TotalOrderCount, {
     id: 'TotalOrderCount',
     cell: info => info.getValue(),
     header: () => 'TotalOrderCount',
   }),
+
   columnHelper.accessor(row => row.OpenOrderCount, {
     id: 'OpenOrderCount',
     cell: info => info.getValue(),
     header: () => 'OpenOrderCount',
   }),
+
   columnHelper.accessor(row => row.CompleteOrderCount, {
     id: 'CompleteOrderCount',
     cell: info => info.getValue(),
@@ -180,22 +142,37 @@ const columns = [
 
 const messages = ref([])
 const MTMTable = ref([])
+const basket_chart_data = ref([])
 let eventSource = null
 
 const connectToSSE = () => {
   eventSource = new EventSource('http://localhost:5000/stream')
 
   eventSource.onmessage = (event) => {
-    let client_data = JSON.parse(event.data);
+    let Response = JSON.parse(event.data);
 
-    let mapobj = JSON.parse(client_data);
+    let mapobj = JSON.parse(Response);
+    let clients_data = mapobj.client_data
+    // const updatedData = [...data.value]
+    // updatedData[0]['Day_PL'] = Number(mapobj[0]['MTM'])// Update the age
+    // updatedData[0]['IdealMTM'] = Number(mapobj[0]['ideal_MTM'])// Update the age
+    // updatedData[0]['AccountName'] = mapobj[0]['name']// Update the age
 
-    const updatedData = [...data.value]
-    updatedData[0]['Day_PL'] = Number(mapobj[0]['MTM'])// Update the age
-    updatedData[0]['IdealMTM'] = Number(mapobj[0]['ideal_MTM'])// Update the age
-    updatedData[0]['AccountName'] = mapobj[0]['name']// Update the age
-    MTMTable.value = mapobj[0]["MTMTable"]
-    data.value = updatedData
+    data.value = clients_data.map(item => ({
+      AccountName: item.name,
+      IdealMTM: Number(item.ideal_MTM),
+      Day_PL: Number(item.MTM),
+      RejectedOrderCount: Number(item.Rejected_orders),
+      PendingOrderCount: Number(item.Pending_orders)
+    }));
+
+
+
+    MTMTable.value = clients_data[0]["MTMTable"]
+    basket_chart_data.value = mapobj.basket_data
+    console.log(basket_chart_data.value)
+
+
   }
 
   eventSource.onopen = () => {
@@ -234,10 +211,14 @@ onUnmounted(() => {
   </div> -->
       <div class="my-8">
         <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL']"
-          :navigateTo="NavigationMap" />
+          :navigateTo="NavigationMap" :showPagination=true />
       </div>
-      <Chart :data="MTMTable" />
+      <!-- 
+      <Chart v-if="basket_chart_data.length > 0" :data="basket_chart_data" :labels="chart_labels" /> -->
 
+
+      <Chart v-if="basket_chart_data.length > 0" :data="basket_chart_data"
+        :lineNames="['Directional', 'NikBuy', 'Non-Directional']" />
     </div>
 
   </div>

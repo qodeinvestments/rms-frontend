@@ -1,4 +1,6 @@
 <script setup>
+
+
 import { onMounted, onUnmounted } from 'vue'
 import {
   FlexRender,
@@ -9,85 +11,53 @@ import {
 import { ref } from 'vue'
 import { useRoute } from 'vue-router';
 import TanStackTestTable from './TanStackTestTable.vue'
+import Chart from './Chart.vue'
+
 
 
 const route = useRoute();
+const user_data = ref('')
 
-const defaultData = [
-  {
-    "id": 1,
-    "AccountName": "Abhinav",
-    "PortfolioValue": "250000",
-    "Day_PL": "25000",
-    "PositionDayPL": "25000000000",
-    "HoldingsDayPL": 250000,
-    "TotalOrderCount": 250000,
-    "OpenOrderCount": 40,
-    "CompleteOrderCount": 10,
-    "PositionsCount": 20,
-    "HoldingsCount": 10,
-    "Used_Margin": 50000,
-    "AvailableMargin": 250000,
-    "Cash": 2500000
-  },
-  {
-    "id": 2,
-    "AccountName": "chirag",
-    "PortfolioValue": "250000",
-    "Day_PL": "25000",
-    "PositionDayPL": "25000000000",
-    "HoldingsDayPL": 250000,
-    "TotalOrderCount": 250000,
-    "OpenOrderCount": 40,
-    "CompleteOrderCount": 10,
-    "PositionsCount": 20,
-    "HoldingsCount": 10,
-    "Used_Margin": 50000,
-    "AvailableMargin": 250000,
-    "Cash": 2500000
-  },
-  {
-    "id": 3,
-    "AccountName": "ashwin",
-    "PortfolioValue": "250000",
-    "Day_PL": "25000",
-    "PositionDayPL": "25000000000",
-    "HoldingsDayPL": 250000,
-    "TotalOrderCount": 250000,
-    "OpenOrderCount": 40,
-    "CompleteOrderCount": 10,
-    "PositionsCount": 20,
-    "HoldingsCount": 10,
-    "Used_Margin": 50000,
-    "AvailableMargin": 250000,
-    "Cash": 2500000
-  },
-
-]
-const NavigationMap = {
-  "AccountName": "/user/"
-};
-
-const data = ref(defaultData)
-
+const defaultData = [{
+  "id": 1,
+  "AccountName": "Abhinav",
+  "IdealMTM": 0,
+  "PortfolioValue": "250000",
+  "Day_PL": "25000",
+  "PositionDayPL": "25000000000",
+  "HoldingsDayPL": 250000,
+  "TotalOrderCount": 250000,
+  "OpenOrderCount": 40,
+  "CompleteOrderCount": 10,
+  "PositionsCount": 20,
+  "HoldingsCount": 10,
+  "Used_Margin": 50000,
+  "AvailableMargin": 250000,
+  "Cash": 2500000
+}];
 const columnHelper = createColumnHelper()
-
 const columns = [
   columnHelper.accessor(row => row.AccountName, {
     id: 'AccountName',
     cell: info => info.getValue(),
     header: () => 'Account Name',
   }),
-  columnHelper.accessor(row => row.PortfolioValue, {
-    id: 'PortfolioValue',
+  columnHelper.accessor(row => row.IdealMTM, {
+    id: 'IdealMTM',
     cell: info => info.getValue(),
-    header: () => 'Portfolio Value',
+    header: () => 'Ideal MTM',
   }),
   columnHelper.accessor(row => row.Day_PL, {
     id: 'Day_PL',
     cell: info => info.getValue(),
     header: () => 'Day_PL',
   }),
+  columnHelper.accessor(row => row.PortfolioValue, {
+    id: 'PortfolioValue',
+    cell: info => info.getValue(),
+    header: () => 'Portfolio Value',
+  }),
+
   columnHelper.accessor(row => row.PositionDayPL, {
     id: 'PositionDayPL',
     cell: info => info.getValue(),
@@ -99,16 +69,28 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'HoldingsDayPL',
   }),
+  columnHelper.accessor(row => row.RejectedOrderCount, {
+    id: 'RejectedOrderCount',
+    cell: info => info.getValue(),
+    header: () => 'RejectedOrderCount',
+  }),
+  columnHelper.accessor(row => row.PendingOrderCount, {
+    id: 'PendingOrderCount',
+    cell: info => info.getValue(),
+    header: () => 'PendingOrderCount',
+  }),
   columnHelper.accessor(row => row.TotalOrderCount, {
     id: 'TotalOrderCount',
     cell: info => info.getValue(),
     header: () => 'TotalOrderCount',
   }),
+
   columnHelper.accessor(row => row.OpenOrderCount, {
     id: 'OpenOrderCount',
     cell: info => info.getValue(),
     header: () => 'OpenOrderCount',
   }),
+
   columnHelper.accessor(row => row.CompleteOrderCount, {
     id: 'CompleteOrderCount',
     cell: info => info.getValue(),
@@ -143,24 +125,42 @@ const columns = [
 
 
 
+
 const messages = ref([])
+
+
 let eventSource = null
+
+
+
+const data = ref([])
+
 
 const connectToSSE = () => {
   eventSource = new EventSource('http://localhost:5000/stream')
 
+
   eventSource.onmessage = (event) => {
-    const Value = Number(JSON.parse(event.data))
-    const updatedData = [...data.value]
-    updatedData[0]['PortfolioValue'] = Value// Update the age
-    data.value = updatedData
-    console.log(Value, "  ", data.value)
+
+    let c_d = JSON.parse(event.data);
+    let response = JSON.parse(c_d)
+    let result = response.client_data.find(client => client.name === name.value);
+    result = result
+    user_data.value = result;
+
+    data.value = [{
+      AccountName: result.name,
+      IdealMTM: Number(result.ideal_MTM),
+      Day_PL: Number(result.MTM),
+      RejectedOrderCount: Number(result.Rejected_orders),
+      PendingOrderCount: Number(result.Pending_orders)
+
+    }]
   }
 
   eventSource.onopen = () => {
     messages.value.push('Connection opened')
   }
-
   eventSource.onerror = () => {
     messages.value.push('Error occurred')
     eventSource.close()
@@ -168,7 +168,6 @@ const connectToSSE = () => {
 }
 
 const name = ref('');
-
 
 onMounted(() => {
   connectToSSE();
@@ -187,10 +186,25 @@ onUnmounted(() => {
 </script>
 
 <template>
+
   <div class="container mx-auto px-8 py-8 pageContainer">
+    <div class="container mx-auto px-8 py-8">
+
+      <!-- <TableOriginal /> -->
+      <!-- <TableTanstack :data="people" :columns="columnsPeople" />
+
+<div class="my-8">
+<TableTanstack :data="cars" :columns="columnsCars" />
+</div> -->
+      <div class="my-8">
+        <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL']" :navigateTo="[]"
+          :showPagination=false />
+      </div>
 
 
-    <p class="headingContainer">{{ name }}</p>
+    </div>
+
+    <!-- <p class="headingContainer">{{ name }}</p>
     <div class="profitContainer">
       <div class="priceContainer">
         <p class="labeltag">Portfolio Value : </p>
@@ -205,8 +219,10 @@ onUnmounted(() => {
         <p>3423424</p>
       </div>
 
-    </div>
+    </div> -->
 
+
+    <Chart v-if="user_data" :data="user_data['MTMTable']" :lineNames="['MTM']" />
   </div>
 
 

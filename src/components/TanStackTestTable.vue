@@ -28,15 +28,22 @@ const props = defineProps({
     navigateTo: {
         type: Object,
         required: true
+    },
+    showPagination: {
+        type: Boolean,
+        required: true
     }
+
 })
 
 const checkNavigate = (data) => {
     console.log("data is:", data);
     console.log(data.getValue() + " " + data.id.substring(2));
-    let link = props.navigateTo[data.id.substring(2)] + data.getValue()
-    router.push(link);
-    console.log(props.navigateTo[data.id.substring(2)])
+    if (props.navigateTo[data.id.substring(2)]) {
+        let link = props.navigateTo[data.id.substring(2)] + data.getValue()
+        router.push(link);
+    }
+
 }
 
 
@@ -87,7 +94,7 @@ const table = useVueTable({
         <div class="mt-8 flow-root ">
             <div class="my-4">
                 <input type="text" class="border border-gray-400 rounded px-2 py-2" placeholder="Search"
-                    v-model="filter" />
+                    v-model="filter" v-if="showPagination" />
             </div>
             <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8  ">
                 <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8 ">
@@ -121,12 +128,12 @@ const table = useVueTable({
                     </table>
                 </div>
             </div>
-            <div class="mt-8">
+            <div class="mt-8" v-if="showPagination">
                 Page {{ table.getState().pagination.pageIndex + 1 }} of
                 {{ table.getPageCount() }} -
                 {{ table.getFilteredRowModel().rows.length }} results
             </div>
-            <div class="mt-8 space-x-4">
+            <div class="mt-8 space-x-4" v-if="showPagination">
                 <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     @click="table.setPageSize(5)">
                     Page Size 5
@@ -140,7 +147,7 @@ const table = useVueTable({
                     Page Size 20
                 </button>
             </div>
-            <div class="space-x-4 mt-8">
+            <div class="space-x-4 mt-8" v-if="showPagination">
                 <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     @click="table.setPageIndex(0)">
                     First page
