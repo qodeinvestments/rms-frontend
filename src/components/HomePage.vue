@@ -9,13 +9,9 @@ import {
 import { ref } from 'vue'
 import TanStackTestTable from './TanStackTestTable.vue'
 import Chart from './Chart.vue'
+import MultiLineChart from './HighCharts.vue'
 
-
-
-const defaultData = [
-
-
-]
+const defaultData = []
 const NavigationMap = {
   "AccountName": "/user/"
 };
@@ -45,12 +41,10 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'Portfolio Value',
   }),
-
   columnHelper.accessor(row => row.PositionDayPL, {
     id: 'PositionDayPL',
     cell: info => info.getValue(),
     header: () => 'PositionDayPL',
-
   }),
   columnHelper.accessor(row => row.HoldingsDayPL, {
     id: 'HoldingsDayPL',
@@ -72,13 +66,11 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'TotalOrderCount',
   }),
-
   columnHelper.accessor(row => row.OpenOrderCount, {
     id: 'OpenOrderCount',
     cell: info => info.getValue(),
     header: () => 'OpenOrderCount',
   }),
-
   columnHelper.accessor(row => row.CompleteOrderCount, {
     id: 'CompleteOrderCount',
     cell: info => info.getValue(),
@@ -166,13 +158,8 @@ const connectToSSE = () => {
       PendingOrderCount: Number(item.Pending_orders)
     }));
 
-
-
     MTMTable.value = clients_data[0]["MTMTable"]
     basket_chart_data.value = mapobj.basket_data
-    console.log(basket_chart_data.value)
-
-
   }
 
   eventSource.onopen = () => {
@@ -195,12 +182,10 @@ onUnmounted(() => {
   }
 })
 
-
 </script>
 
 <template>
   <div class="homePage_Container">
-
     <div class="container mx-auto px-8 py-8">
 
       <!-- <TableOriginal /> -->
@@ -216,14 +201,10 @@ onUnmounted(() => {
       <!-- 
       <Chart v-if="basket_chart_data.length > 0" :data="basket_chart_data" :labels="chart_labels" /> -->
 
-
-      <Chart v-if="basket_chart_data.length > 0" :data="basket_chart_data"
+      <MultiLineChart v-if="basket_chart_data.length > 0" :chartData="basket_chart_data"
         :lineNames="['Directional', 'NikBuy', 'Non-Directional']" />
     </div>
-
   </div>
-
-
 </template>
 
 <style>
