@@ -195,7 +195,7 @@ const data = ref([])
 const client_live_trade_book = ref([])
 
 const connectToSSE = () => {
-  eventSource = new EventSource('https://localhost:5000/stream')
+  eventSource = new EventSource('http://localhost:5000/stream')
 
 
   eventSource.onmessage = (event) => {
@@ -290,7 +290,6 @@ onUnmounted(() => {
           <p class="labeltag">Day Profit And Loss : </p>
           <p>3423424</p>
         </div>
-        
         <div class="priceContainer">
           <p class="labeltag">Ideal Profit And Loss : </p>
           <p>3423424</p>
