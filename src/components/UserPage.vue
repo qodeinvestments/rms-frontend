@@ -11,7 +11,9 @@ import {
 import { ref } from 'vue'
 import { useRoute } from 'vue-router';
 import TanStackTestTable from './TanStackTestTable.vue'
-import Chart from './Chart.vue'
+import Chart from './Chart.vue';
+
+import MultiLineChart from './HighCharts.vue'
 
 
 
@@ -201,7 +203,7 @@ const connectToSSE = () => {
     let c_d = JSON.parse(event.data);
     let response = JSON.parse(c_d)
     let result = response.client_data.find(client => client.name === name.value);
-    console.log(result)
+
 
     user_data.value = result;
 
@@ -273,26 +275,27 @@ onUnmounted(() => {
           :navigateTo="[]" :showPagination=true />
       </div>
 
+      <MultiLineChart v-if="user_data" :chartData="[user_data['MTMTable']]" :lineNames="['MTM']" />
 
     </div>
-    <Chart v-if="user_data" :data="user_data['MTMTable']" :lineNames="['MTM']" />
 
-    <!-- <p class="headingContainer">{{ name }}</p>
-    <div class="profitContainer">
-      <div class="priceContainer">
-        <p class="labeltag">Portfolio Value : </p>
-        <p>3423424</p>
-      </div>
-      <div class="priceContainer">
-        <p class="labeltag">Day Profit And Loss : </p>
-        <p>3423424</p>
-      </div>
-      <div class="priceContainer">
-        <p class="labeltag">Ideal Profit And Loss : </p>
-        <p>3423424</p>
-      </div>
 
-    </div> -->
+    <!-- < p class=" headingContainer">{{ name }}</p>
+      <div class="profitContainer">
+        <div class="priceContainer">
+          <p class="labeltag">Portfolio Value : </p>
+          <p>3423424</p>
+        </div>
+        <div class="priceContainer">
+          <p class="labeltag">Day Profit And Loss : </p>
+          <p>3423424</p>
+        </div>
+        <div class="priceContainer">
+          <p class="labeltag">Ideal Profit And Loss : </p>
+          <p>3423424</p>
+        </div>
+
+      </div> -->
 
 
 

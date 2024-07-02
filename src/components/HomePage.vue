@@ -10,7 +10,7 @@ import { ref } from 'vue'
 import TanStackTestTable from './TanStackTestTable.vue'
 import Chart from './Chart.vue'
 import MultiLineChart from './HighCharts.vue'
-
+import WarningSignal from './WarningSignal.vue'
 const defaultData = []
 const NavigationMap = {
   "AccountName": "/user/"
@@ -159,7 +159,6 @@ const connectToSSE = () => {
     let Response = JSON.parse(event.data);
 
     let mapobj = JSON.parse(Response);
-    console.log(mapobj)
     index_data.value = mapobj.live_index;
     let clients_data = mapobj.client_data
 
@@ -209,6 +208,7 @@ onUnmounted(() => {
 
 <template>
   <div class="homePage_Container bg-[#efefef]/30">
+
     <div class="nav_index_container font-semibold bg-white  drop-shadow-sm">
       <p>BANKNIFTY : {{ index_data.BANKNIFTYSPOT }}</p>
       <p>FINNIFTY : {{ index_data.FINNIFTYSPOT }}</p>
@@ -216,7 +216,10 @@ onUnmounted(() => {
       <p>NIFTY : {{ index_data.NIFTYSPOT }}</p>
       <p> SENSEX : {{ index_data.SENSEXSPOT }}</p>
     </div>
-    <div class="container mx-auto px-8 py-8">
+
+
+    <WarningSignal />
+    <div class="mx-auto px-8 py-8">
 
       <!-- <TableOriginal /> -->
       <!-- <TableTanstack :data="people" :columns="columnsPeople" />
