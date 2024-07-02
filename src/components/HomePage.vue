@@ -19,7 +19,6 @@ const NavigationMap = {
 const data = ref(defaultData)
 
 const columnHelper = createColumnHelper()
-
 const columns = [
   columnHelper.accessor(row => row.AccountName, {
     id: 'AccountName',
@@ -36,6 +35,31 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'Day_PL',
   }),
+  columnHelper.accessor(row => row.Friction, {
+    id: 'Friction',
+    cell: info => info.getValue(),
+    header: () => 'Friction',
+  }),
+  columnHelper.accessor(row => row.NetQuantity, {
+    id: 'NetQuantity',
+    cell: info => info.getValue(),
+    header: () => 'NetQuantity',
+  }),
+  columnHelper.accessor(row => row.OpenQuantity, {
+    id: 'OpenQuantity',
+    cell: info => info.getValue(),
+    header: () => 'OpenQuantity',
+  }),
+  columnHelper.accessor(row => row.RejectedOrderCount, {
+    id: 'RejectedOrderCount',
+    cell: info => info.getValue(),
+    header: () => 'RejectedOrderCount',
+  }),
+  columnHelper.accessor(row => row.PendingOrderCount, {
+    id: 'PendingOrderCount',
+    cell: info => info.getValue(),
+    header: () => 'PendingOrderCount',
+  }),
   columnHelper.accessor(row => row.PortfolioValue, {
     id: 'PortfolioValue',
     cell: info => info.getValue(),
@@ -51,16 +75,7 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'HoldingsDayPL',
   }),
-  columnHelper.accessor(row => row.RejectedOrderCount, {
-    id: 'RejectedOrderCount',
-    cell: info => info.getValue(),
-    header: () => 'RejectedOrderCount',
-  }),
-  columnHelper.accessor(row => row.PendingOrderCount, {
-    id: 'PendingOrderCount',
-    cell: info => info.getValue(),
-    header: () => 'PendingOrderCount',
-  }),
+
   columnHelper.accessor(row => row.TotalOrderCount, {
     id: 'TotalOrderCount',
     cell: info => info.getValue(),
@@ -131,7 +146,7 @@ const columns = [
 
 
 
-
+const index_data = ref("hello")
 const messages = ref([])
 const MTMTable = ref([])
 const basket_chart_data = ref([])
@@ -144,7 +159,11 @@ const connectToSSE = () => {
     let Response = JSON.parse(event.data);
 
     let mapobj = JSON.parse(Response);
+    console.log(mapobj)
+    index_data.value = mapobj.live_index;
     let clients_data = mapobj.client_data
+
+
     // const updatedData = [...data.value]
     // updatedData[0]['Day_PL'] = Number(mapobj[0]['MTM'])// Update the age
     // updatedData[0]['IdealMTM'] = Number(mapobj[0]['ideal_MTM'])// Update the age
@@ -154,8 +173,12 @@ const connectToSSE = () => {
       AccountName: item.name,
       IdealMTM: Number(item.ideal_MTM),
       Day_PL: Number(item.MTM),
+      Friction: Number(item.MTM) - Number(item.ideal_MTM),
       RejectedOrderCount: Number(item.Rejected_orders),
-      PendingOrderCount: Number(item.Pending_orders)
+      PendingOrderCount: Number(item.Pending_orders),
+      OpenQuantity: Number(item.OpenQuantity),
+      NetQuantity: Number(item.NetQuantity)
+
     }));
 
     MTMTable.value = clients_data[0]["MTMTable"]
@@ -185,7 +208,14 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="homePage_Container">
+  <div class="homePage_Container bg-[#efefef]/30">
+    <div class="nav_index_container font-semibold bg-white  drop-shadow-sm">
+      <p>BANKNIFTY : {{ index_data.BANKNIFTYSPOT }}</p>
+      <p>FINNIFTY : {{ index_data.FINNIFTYSPOT }}</p>
+      <p>MIDCPNIFTY : {{ index_data.MIDCPNIFTYSPOT }}</p>
+      <p>NIFTY : {{ index_data.NIFTYSPOT }}</p>
+      <p> SENSEX : {{ index_data.SENSEXSPOT }}</p>
+    </div>
     <div class="container mx-auto px-8 py-8">
 
       <!-- <TableOriginal /> -->
@@ -195,9 +225,11 @@ onUnmounted(() => {
     <TableTanstack :data="cars" :columns="columnsCars" />
   </div> -->
       <div class="my-8">
-        <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL']"
+        <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL', 'Friction']"
           :navigateTo="NavigationMap" :showPagination=true />
       </div>
+
+
       <!-- 
       <Chart v-if="basket_chart_data.length > 0" :data="basket_chart_data" :labels="chart_labels" /> -->
 
@@ -209,7 +241,17 @@ onUnmounted(() => {
 
 <style>
 html {
-  font-family: sans-serif;
   font-size: 14px;
+}
+
+.nav_index_container {
+  /* padding-top: 20px; */
+  display: flex;
+  margin-top: 10px;
+  align-items: center;
+  /* gap: 60px; */
+  padding: 10px 30px;
+  font-size: 16px;
+  justify-content: space-between;
 }
 </style>

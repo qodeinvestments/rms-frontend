@@ -90,7 +90,7 @@ const table = useVueTable({
 </script>
 
 <template>
-    <div class="px-4 sm:px-6 lg:px-8">
+    <div class="px-4 sm:px-6 lg:px-8 pb-8 bg-white  drop-shadow-sm">
         <div class="mt-8 flow-root ">
             <div class="my-4">
                 <input type="text" class="border border-gray-400 rounded px-2 py-2" placeholder="Search"
@@ -172,6 +172,10 @@ const table = useVueTable({
 
 
 <style scoped>
+.colorcontainer {
+    background: pink;
+}
+
 .red {
     color: red;
 }
@@ -222,7 +226,6 @@ table {
     position: sticky;
     left: 0;
     z-index: 1;
-    background: white;
 }
 
 .sticky-header:nth-child(1) {

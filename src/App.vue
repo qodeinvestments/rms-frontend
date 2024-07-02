@@ -26,14 +26,18 @@ export default {
 <template>
   <div class="pageLayout">
     <SideBar @State="ChangeSideBarState($event)" class="sideBar" />
+
     <router-view :class="sideBarState ? 'content' : 'content2'" />
   </div>
 </template>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
 body {
   margin: 0;
   /* Ensure body has no margin */
+  font-family: "Inter", sans-serif;
   width: 100%;
   height: 100%;
 }

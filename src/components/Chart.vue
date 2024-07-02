@@ -1,5 +1,5 @@
 <template>
-    <div class="chart-container" ref="chartContainer">
+    <div class="chart-container drop-shadow-sm" ref="chartContainer">
         <Line :data="chartData" :options="chartOptions" ref="chart" />
         <button @click="resetZoom" class="reset-zoom">Reset Zoom</button>
         <button @click="toggleFullScreen" class="full-screen">

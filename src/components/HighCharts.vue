@@ -1,6 +1,6 @@
 <template>
     <!-- {{ chartData }} -->
-    <div>
+    <div class=" drop-shadow-sm">
         <div id="chart-container" style="width: 100%; height: 400px;"></div>
     </div>
 </template>
@@ -42,7 +42,7 @@ export default {
                     const minutesSince915 = (hours * 60 + minutes) - (9 * 60 + 15)
                     return [minutesSince915, value]
                 }).filter(([minutes]) => minutes >= 0 && minutes <= (6 * 60 + 15))
-                console.log("data is:", data);
+
                 return {
                     name: this.lineNames[index] || `Dataset ${index + 1}`,
                     data: data

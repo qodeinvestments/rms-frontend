@@ -22,8 +22,11 @@ const defaultData = [{
   "id": 1,
   "AccountName": "Abhinav",
   "IdealMTM": 0,
-  "PortfolioValue": "250000",
   "Day_PL": "25000",
+  'Friction': 0,
+  'OpenQuantity': 0,
+  'NetQuantity': 0,
+  "PortfolioValue": "250000",
   "PositionDayPL": "25000000000",
   "HoldingsDayPL": 250000,
   "TotalOrderCount": 250000,
@@ -36,6 +39,46 @@ const defaultData = [{
   "Cash": 2500000
 }];
 const columnHelper = createColumnHelper()
+const live_trade_book_columns = [
+  columnHelper.accessor(row => row.OrderGeneratedDateTime, {
+    id: 'OrderGeneratedDateTime',
+    cell: info => info.getValue(),
+    header: () => 'OrderGeneratedDateTime',
+  }),
+  columnHelper.accessor(row => row.ExchangeTransactTime, {
+    id: 'ExchangeTransactTime',
+    cell: info => info.getValue(),
+    header: () => 'ExchangeTransactTime',
+  }),
+  columnHelper.accessor(row => row.ExchangeInstrumentID, {
+    id: 'ExchangeInstrumentID',
+    cell: info => info.getValue(),
+    header: () => 'ExchangeInstrumentID',
+  }),
+  columnHelper.accessor(row => row.OrderAverageTradedPrice, {
+    id: 'OrderAverageTradedPrice',
+    cell: info => info.getValue(),
+    header: () => 'OrderAverageTradedPrice',
+  }),
+  columnHelper.accessor(row => row.OrderSide, {
+    id: 'OrderSide',
+    cell: info => info.getValue(),
+    header: () => 'OrderSide',
+  }),
+  columnHelper.accessor(row => row.LeavesQuantity, {
+    id: 'LeavesQuantity',
+    cell: info => info.getValue(),
+    header: () => 'LeavesQuantity',
+  }),
+  columnHelper.accessor(row => row.OrderQuantity, {
+    id: 'OrderQuantity',
+    cell: info => info.getValue(),
+    header: () => 'OrderQuantity',
+  }),
+
+
+
+]
 const columns = [
   columnHelper.accessor(row => row.AccountName, {
     id: 'AccountName',
@@ -52,22 +95,20 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'Day_PL',
   }),
-  columnHelper.accessor(row => row.PortfolioValue, {
-    id: 'PortfolioValue',
+  columnHelper.accessor(row => row.Friction, {
+    id: 'Friction',
     cell: info => info.getValue(),
-    header: () => 'Portfolio Value',
+    header: () => 'Friction',
   }),
-
-  columnHelper.accessor(row => row.PositionDayPL, {
-    id: 'PositionDayPL',
+  columnHelper.accessor(row => row.NetQuantity, {
+    id: 'NetQuantity',
     cell: info => info.getValue(),
-    header: () => 'PositionDayPL',
-
+    header: () => 'NetQuantity',
   }),
-  columnHelper.accessor(row => row.HoldingsDayPL, {
-    id: 'HoldingsDayPL',
+  columnHelper.accessor(row => row.OpenQuantity, {
+    id: 'OpenQuantity',
     cell: info => info.getValue(),
-    header: () => 'HoldingsDayPL',
+    header: () => 'OpenQuantity',
   }),
   columnHelper.accessor(row => row.RejectedOrderCount, {
     id: 'RejectedOrderCount',
@@ -79,18 +120,32 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'PendingOrderCount',
   }),
+  columnHelper.accessor(row => row.PortfolioValue, {
+    id: 'PortfolioValue',
+    cell: info => info.getValue(),
+    header: () => 'Portfolio Value',
+  }),
+  columnHelper.accessor(row => row.PositionDayPL, {
+    id: 'PositionDayPL',
+    cell: info => info.getValue(),
+    header: () => 'PositionDayPL',
+  }),
+  columnHelper.accessor(row => row.HoldingsDayPL, {
+    id: 'HoldingsDayPL',
+    cell: info => info.getValue(),
+    header: () => 'HoldingsDayPL',
+  }),
+
   columnHelper.accessor(row => row.TotalOrderCount, {
     id: 'TotalOrderCount',
     cell: info => info.getValue(),
     header: () => 'TotalOrderCount',
   }),
-
   columnHelper.accessor(row => row.OpenOrderCount, {
     id: 'OpenOrderCount',
     cell: info => info.getValue(),
     header: () => 'OpenOrderCount',
   }),
-
   columnHelper.accessor(row => row.CompleteOrderCount, {
     id: 'CompleteOrderCount',
     cell: info => info.getValue(),
@@ -132,9 +187,10 @@ const messages = ref([])
 let eventSource = null
 
 
-
+const date = ref()
 const data = ref([])
 
+const client_live_trade_book = ref([])
 
 const connectToSSE = () => {
   eventSource = new EventSource('http://localhost:5000/stream')
@@ -145,17 +201,27 @@ const connectToSSE = () => {
     let c_d = JSON.parse(event.data);
     let response = JSON.parse(c_d)
     let result = response.client_data.find(client => client.name === name.value);
-    result = result
+    console.log(result)
+
     user_data.value = result;
 
     data.value = [{
       AccountName: result.name,
       IdealMTM: Number(result.ideal_MTM),
       Day_PL: Number(result.MTM),
+      Friction: Number(result.MTM) - Number(result.ideal_MTM),
+      OpenQuantity: Number(result.OpenQuantity),
+      NetQuantity: Number(result.NetQuantity),
       RejectedOrderCount: Number(result.Rejected_orders),
       PendingOrderCount: Number(result.Pending_orders)
 
     }]
+    let tradeArray = Object.values(result.Live_Trade_Book);
+    let prev = client_live_trade_book.value.length
+    if (prev < tradeArray.length)
+      client_live_trade_book.value = tradeArray;
+
+
   }
 
   eventSource.onopen = () => {
@@ -197,12 +263,19 @@ onUnmounted(() => {
 <TableTanstack :data="cars" :columns="columnsCars" />
 </div> -->
       <div class="my-8">
-        <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL']" :navigateTo="[]"
-          :showPagination=false />
+        <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL', 'Friction']"
+          :navigateTo="[]" :showPagination=false />
+      </div>
+
+      <input type="date" v-model="date" />
+      <div class="my-8">
+        <TanStackTestTable :data="client_live_trade_book" :columns="live_trade_book_columns" :hasColor="[]"
+          :navigateTo="[]" :showPagination=true />
       </div>
 
 
     </div>
+    <Chart v-if="user_data" :data="user_data['MTMTable']" :lineNames="['MTM']" />
 
     <!-- <p class="headingContainer">{{ name }}</p>
     <div class="profitContainer">
@@ -222,7 +295,7 @@ onUnmounted(() => {
     </div> -->
 
 
-    <Chart v-if="user_data" :data="user_data['MTMTable']" :lineNames="['MTM']" />
+
   </div>
 
 
@@ -256,7 +329,7 @@ onUnmounted(() => {
 }
 
 html {
-  font-family: poppins;
+  /* font-family: poppins; */
   font-size: 14px;
 }
 
