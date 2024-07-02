@@ -211,7 +211,7 @@ const connectToSSE = () => {
       AccountName: result.name,
       IdealMTM: Number(result.ideal_MTM),
       Day_PL: Number(result.MTM),
-      Friction: Number(result.MTM) - Number(result.ideal_MTM),
+      Friction: (Number(result.MTM) - Number(result.ideal_MTM)).toFixed(2),
       OpenQuantity: Number(result.OpenQuantity),
       NetQuantity: Number(result.NetQuantity),
       RejectedOrderCount: Number(result.Rejected_orders),
@@ -290,6 +290,7 @@ onUnmounted(() => {
           <p class="labeltag">Day Profit And Loss : </p>
           <p>3423424</p>
         </div>
+        
         <div class="priceContainer">
           <p class="labeltag">Ideal Profit And Loss : </p>
           <p>3423424</p>

@@ -6,7 +6,9 @@ import {
   useVueTable,
   createColumnHelper,
 } from '@tanstack/vue-table'
+
 import { ref } from 'vue'
+import axios from 'axios';
 import TanStackTestTable from './TanStackTestTable.vue'
 import Chart from './Chart.vue'
 import MultiLineChart from './HighCharts.vue'
@@ -153,7 +155,7 @@ const basket_chart_data = ref([])
 let eventSource = null
 
 const connectToSSE = () => {
-  eventSource = new EventSource('http://localhost:5000/stream')
+  eventSource = new EventSource('http://139.5.189.188:5000')
 
   eventSource.onmessage = (event) => {
     let Response = JSON.parse(event.data);
@@ -172,7 +174,7 @@ const connectToSSE = () => {
       AccountName: item.name,
       IdealMTM: Number(item.ideal_MTM),
       Day_PL: Number(item.MTM),
-      Friction: Number(item.MTM) - Number(item.ideal_MTM),
+      Friction: (Number(item.MTM) - Number(item.ideal_MTM)).toFixed(2),
       RejectedOrderCount: Number(item.Rejected_orders),
       PendingOrderCount: Number(item.Pending_orders),
       OpenQuantity: Number(item.OpenQuantity),
@@ -196,6 +198,13 @@ const connectToSSE = () => {
 
 onMounted(() => {
   connectToSSE()
+  // axios.get('http://localhost:8001/api/message')
+  //   .then(function (response) {
+  //     console.log(response);
+  //   })
+  //   .catch((error) => {
+  //     console.log(error);
+  //   })
 })
 
 onUnmounted(() => {

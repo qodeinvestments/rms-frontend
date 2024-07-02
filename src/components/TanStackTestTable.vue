@@ -226,6 +226,7 @@ table {
     position: sticky;
     left: 0;
     z-index: 1;
+    background: white;
 }
 
 .sticky-header:nth-child(1) {
