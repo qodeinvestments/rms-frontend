@@ -195,7 +195,7 @@ const data = ref([])
 const client_live_trade_book = ref([])
 
 const connectToSSE = () => {
-  eventSource = new EventSource('http://localhost:5000/stream')
+  eventSource = new EventSource('https://localhost:5000/stream')
 
 
   eventSource.onmessage = (event) => {

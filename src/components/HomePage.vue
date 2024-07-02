@@ -155,7 +155,7 @@ const basket_chart_data = ref([])
 let eventSource = null
 
 const connectToSSE = () => {
-  eventSource = new EventSource('http://139.5.189.188:5000')
+  eventSource = new EventSource('https://139.5.189.188:5000')
 
   eventSource.onmessage = (event) => {
     let Response = JSON.parse(event.data);
