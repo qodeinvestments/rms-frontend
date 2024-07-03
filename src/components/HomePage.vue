@@ -165,7 +165,6 @@ const connectToSSE = () => {
     let mapobj = JSON.parse(Response);
     index_data.value = mapobj.live_index;
     let clients_data = mapobj.client_data
-    console.log(mapobj)
 
     // const updatedData = [...data.value]
     // updatedData[0]['Day_PL'] = Number(mapobj[0]['MTM'])// Update the age

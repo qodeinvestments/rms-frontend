@@ -37,8 +37,8 @@ const props = defineProps({
 })
 
 const checkNavigate = (data) => {
-    console.log("data is:", data);
-    console.log(data.getValue() + " " + data.id.substring(2));
+    // console.log("data is:", data);
+    // console.log(data.getValue() + " " + data.id.substring(2));
     if (props.navigateTo[data.id.substring(2)]) {
         let link = props.navigateTo[data.id.substring(2)] + data.getValue()
         router.push(link);
