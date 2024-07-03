@@ -195,7 +195,7 @@ const data = ref([])
 const client_live_trade_book = ref([])
 
 const connectToSSE = () => {
-  eventSource = new EventSource('http://139.5.189.188:5000/stream')
+  eventSource = new EventSource('https://api.swancapital.in/stream')
 
 
   eventSource.onmessage = (event) => {

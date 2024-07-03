@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [vue()],
   server: {
     proxy: {
-      '/stream': 'http://139.5.189.188:5000',
+      '/stream': 'https://api.swancapital.in',
     },
   },
   resolve: {

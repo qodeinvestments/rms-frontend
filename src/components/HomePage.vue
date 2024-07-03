@@ -155,7 +155,7 @@ const basket_chart_data = ref([])
 let eventSource = null
 
 const connectToSSE = () => {
-  eventSource = new EventSource('http://139.5.189.188:5000/stream')
+  eventSource = new EventSource('https://api.swancapital.in/stream')
 
   eventSource.onmessage = (event) => {
     let Response = JSON.parse(event.data);
