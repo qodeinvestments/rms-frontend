@@ -152,6 +152,7 @@ const index_data = ref("hello")
 const messages = ref([])
 const MTMTable = ref([])
 const basket_chart_data = ref([])
+const basket_chart_name = ref([])
 let eventSource = null
 
 const connectToSSE = () => {
@@ -163,7 +164,7 @@ const connectToSSE = () => {
     let mapobj = JSON.parse(Response);
     index_data.value = mapobj.live_index;
     let clients_data = mapobj.client_data
-
+    console.log(mapobj)
 
     // const updatedData = [...data.value]
     // updatedData[0]['Day_PL'] = Number(mapobj[0]['MTM'])// Update the age
@@ -183,7 +184,13 @@ const connectToSSE = () => {
     }));
 
     MTMTable.value = clients_data[0]["MTMTable"]
-    basket_chart_data.value = mapobj.basket_data
+
+
+    basket_chart_name.value = mapobj.basket_data.map(obj => Object.keys(obj)[0]);
+    basket_chart_data.value = mapobj.basket_data.map(obj => Object.values(obj)[0]);
+
+
+
   }
 
   eventSource.onopen = () => {
@@ -246,7 +253,7 @@ onUnmounted(() => {
       <Chart v-if="basket_chart_data.length > 0" :data="basket_chart_data" :labels="chart_labels" /> -->
 
       <MultiLineChart v-if="basket_chart_data.length > 0" :chartData="basket_chart_data"
-        :lineNames="['Directional', 'NikBuy', 'Non-Directional']" />
+        :lineNames="basket_chart_name" />
     </div>
   </div>
 </template>
