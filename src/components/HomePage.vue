@@ -154,6 +154,7 @@ const MTMTable = ref([])
 const basket_chart_data = ref([])
 const basket_chart_name = ref([])
 let eventSource = null
+const pulse_signal = ref([])
 
 const connectToSSE = () => {
   eventSource = new EventSource('https://api.swancapital.in/stream')
@@ -182,6 +183,7 @@ const connectToSSE = () => {
       NetQuantity: Number(item.NetQuantity)
 
     }));
+    pulse_signal.value = mapobj.pulse;
 
     MTMTable.value = clients_data[0]["MTMTable"]
 
@@ -234,7 +236,7 @@ onUnmounted(() => {
     </div>
 
 
-    <WarningSignal />
+    <WarningSignal :signals="pulse_signal" />
     <div class="mx-auto px-8 py-8">
 
       <!-- <TableOriginal /> -->

@@ -1,31 +1,40 @@
 <template>
     <div class="warningsignal-container text-sm font-semibold">
         <div class="signal-container">
-            <p class="textContainer"> DataBase :</p>
-            <span :class="signals[0] === 1 ? 'greensignal' : 'redsignal'"></span>
+            <p class="textContainer"> Strategy :</p>
+            <span :class="signals.pulse_run_strats ? 'greensignal' : 'redsignal'"></span>
         </div>
         <div class="signal-container">
-            <p class="textContainer"> Order Management :</p>
-            <span :class="signals[0] === 1 ? 'greensignal' : 'redsignal'"></span>
+            <p class="textContainer"> Web Socket 3 :</p>
+            <span :class="signals.pulse_web_socket3 ? 'greensignal' : 'redsignal'"></span>
         </div>
         <div class="signal-container">
-            <p class="textContainer"> Broker Connection :</p>
-            <span :class="signals[0] === 1 ? 'greensignal' : 'redsignal'"></span>
+            <p class="textContainer"> Web Socket 4 :</p>
+            <span :class="signals.pulse_web_socket4 ? 'greensignal' : 'redsignal'"></span>
         </div>
-
     </div>
-
 </template>
 
 <script setup>
+import { watch } from 'vue';
+import { toRefs } from 'vue';
 
-import { ref } from 'vue'
-const signals = ref([1, 1, 1]);
+const props = defineProps({
+    signals: {
+        type: Object,
+        required: true,
+    }
+});
+
+const { signals } = toRefs(props);
+
+// watch(signals, (newSignals) => {
+//     // React to changes in the signals prop if needed
+// }, { immediate: true });
 </script>
 
 <style>
 .warningsignal-container {
-
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -33,7 +42,6 @@ const signals = ref([1, 1, 1]);
     width: 100%;
     margin-top: 40px;
     gap: 10px;
-
 }
 
 .signal-container {
