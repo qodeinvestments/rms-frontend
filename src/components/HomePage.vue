@@ -169,7 +169,6 @@ const connectToSSE = () => {
     try {
         // Parse the event data
         let mapobj = JSON.parse(event.data);
-        console.log("response data", mapobj);
 
         // Check if live_index and client_data are present in the parsed object
         if (mapobj && mapobj.live_index && Array.isArray(mapobj.client_data)) {
@@ -191,10 +190,10 @@ const connectToSSE = () => {
                 NetQuantity: item.NetQuantity !== undefined ? Number(item.NetQuantity) : 0
             }));
 
-            // Logging other parts of the response for future use
-            console.log("basket_data", mapobj.basket_data);
-            console.log("live_positions", mapobj.live_positions);
-            console.log("pulse", mapobj.pulse);
+            // // Logging other parts of the response for future use
+            // console.log("basket_data", mapobj.basket_data);
+            // console.log("live_positions", mapobj.live_positions);
+            // console.log("pulse", mapobj.pulse);
 
             // Update additional values
             pulse_signal.value = mapobj.pulse;
@@ -241,11 +240,15 @@ onUnmounted(() => {
 
 <template>
 
+
   <div class="homePage_Container bg-[#efefef]/30">
-    
-    <SignalForTable :color="true" />
-
-
+    <div class="nav_index_container font-semibold bg-white  drop-shadow-sm">
+      <p>BANKNIFTY : {{ index_data.BANKNIFTYSPOT }}</p>
+      <p>FINNIFTY : {{ index_data.FINNIFTYSPOT }}</p>
+      <p>MIDCPNIFTY : {{ index_data.MIDCPNIFTYSPOT }}</p>
+      <p>NIFTY : {{ index_data.NIFTYSPOT }}</p>
+      <p> SENSEX : {{ index_data.SENSEXSPOT }}</p>
+    </div>
     <WarningSignal :signals="pulse_signal" />
     <div class="mx-auto px-8 py-8">
 
