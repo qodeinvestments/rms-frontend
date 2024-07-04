@@ -32,6 +32,10 @@ const props = defineProps({
     showPagination: {
         type: Boolean,
         required: true
+    },
+    hasRowcolor: {
+        type: Array,
+        required: false
     }
 
 })

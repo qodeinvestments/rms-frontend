@@ -194,46 +194,54 @@ const data = ref([])
 
 const client_live_trade_book = ref([])
 
-const connectToSSE = () => {
-  eventSource = new EventSource('https://api.swancapital.in/stream')
 
+const connectToSSE = () => {
+  const eventSource = new EventSource('https://api.swancapital.in/stream');
 
   eventSource.onmessage = (event) => {
+    try {
+      let response = JSON.parse(event.data);
+      let result = response.client_data.find(client => client.name === name.value);
 
-    let c_d = JSON.parse(event.data);
-    let response = JSON.parse(c_d)
-    let result = response.client_data.find(client => client.name === name.value);
+      if (result) {
+        user_data.value = result;
 
+        data.value = [{
+          AccountName: result.name || '',
+          IdealMTM: result.ideal_MTM !== undefined ? Number(result.ideal_MTM) : 0,
+          Day_PL: result.MTM !== undefined ? Number(result.MTM) : 0,
+          Friction: result.MTM !== undefined && result.ideal_MTM !== undefined 
+              ? (Number(result.MTM) - Number(result.ideal_MTM)).toFixed(2) 
+              : '0.00',
+          OpenQuantity: result.OpenQuantity !== undefined ? Number(result.OpenQuantity) : 0,
+          NetQuantity: result.NetQuantity !== undefined ? Number(result.NetQuantity) : 0,
+          RejectedOrderCount: result.Rejected_orders !== undefined ? Number(result.Rejected_orders) : 0,
+          PendingOrderCount: result.Pending_orders !== undefined ? Number(result.Pending_orders) : 0
+        }];
 
-    user_data.value = result;
-
-    data.value = [{
-      AccountName: result.name,
-      IdealMTM: Number(result.ideal_MTM),
-      Day_PL: Number(result.MTM),
-      Friction: (Number(result.MTM) - Number(result.ideal_MTM)).toFixed(2),
-      OpenQuantity: Number(result.OpenQuantity),
-      NetQuantity: Number(result.NetQuantity),
-      RejectedOrderCount: Number(result.Rejected_orders),
-      PendingOrderCount: Number(result.Pending_orders)
-
-    }]
-    let tradeArray = Object.values(result.Live_Trade_Book);
-    let prev = client_live_trade_book.value.length
-    if (prev < tradeArray.length)
-      client_live_trade_book.value = tradeArray;
-
-
-  }
+        let tradeArray = Object.values(result.Live_Trade_Book || {});
+        let prev = client_live_trade_book.value.length;
+        if (prev < tradeArray.length) {
+          client_live_trade_book.value = tradeArray;
+        }
+      } else {
+        console.error('No client data found for the specified name:', name.value);
+      }
+    } catch (error) {
+      console.error('Error parsing event data or updating data:', error);
+    }
+  };
 
   eventSource.onopen = () => {
-    messages.value.push('Connection opened')
-  }
+    messages.value.push('Connection opened');
+  };
+
   eventSource.onerror = () => {
-    messages.value.push('Error occurred')
-    eventSource.close()
-  }
-}
+    messages.value.push('Error occurred');
+    eventSource.close();
+  };
+};
+
 
 const name = ref('');
 
@@ -255,29 +263,27 @@ onUnmounted(() => {
 
 <template>
 
-  <div class="container mx-auto px-8 py-8 pageContainer">
-    <div class="container mx-auto px-8 py-8">
+  <div class="px-8 py-8 pageContainer">
 
-      <!-- <TableOriginal /> -->
-      <!-- <TableTanstack :data="people" :columns="columnsPeople" />
+    <!-- <TableOriginal /> -->
+    <!-- <TableTanstack :data="people" :columns="columnsPeople" />
 
 <div class="my-8">
 <TableTanstack :data="cars" :columns="columnsCars" />
 </div> -->
-      <div class="my-8">
-        <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL', 'Friction']"
-          :navigateTo="[]" :showPagination=false />
-      </div>
-
-      <input type="date" v-model="date" />
-      <div class="my-8">
-        <TanStackTestTable :data="client_live_trade_book" :columns="live_trade_book_columns" :hasColor="[]"
-          :navigateTo="[]" :showPagination=true />
-      </div>
-
-      <MultiLineChart v-if="user_data" :chartData="[user_data['MTMTable']]" :lineNames="['MTM']" />
-
+    <div class="my-8">
+      <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL', 'Friction']" :navigateTo="[]"
+        :showPagination=false />
     </div>
+
+    <input type="date" v-model="date" />
+    <div class="my-8">
+      <TanStackTestTable :data="client_live_trade_book" :columns="live_trade_book_columns" :hasColor="[]"
+        :navigateTo="[]" :showPagination=true />
+    </div>
+
+    <MultiLineChart v-if="user_data" :chartData="[user_data['MTMTable']]" :lineNames="['MTM']" />
+
 
 
     <!-- < p class=" headingContainer">{{ name }}</p>

@@ -6,13 +6,14 @@ import {
   useVueTable,
   createColumnHelper,
 } from '@tanstack/vue-table'
-
-import { ref } from 'vue'
+import SignalForTable from './SignalForTable.vue'
+import { ref,h } from 'vue'
 import axios from 'axios';
 import TanStackTestTable from './TanStackTestTable.vue'
 import Chart from './Chart.vue'
 import MultiLineChart from './HighCharts.vue'
 import WarningSignal from './WarningSignal.vue'
+import { map } from 'highcharts';
 const defaultData = []
 const NavigationMap = {
   "AccountName": "/user/"
@@ -22,6 +23,11 @@ const data = ref(defaultData)
 
 const columnHelper = createColumnHelper()
 const columns = [
+  columnHelper.accessor(row => row.AccountName, {
+    id: 'Working',
+    cell: ({row}) => h(SignalForTable, {color: true}),
+    header: () => 'Account Name',
+  }),
   columnHelper.accessor(row => row.AccountName, {
     id: 'AccountName',
     cell: info => info.getValue(),
@@ -160,39 +166,49 @@ const connectToSSE = () => {
   eventSource = new EventSource('https://api.swancapital.in/stream')
 
   eventSource.onmessage = (event) => {
-    let Response = JSON.parse(event.data);
+    try {
+        // Parse the event data
+        let mapobj = JSON.parse(event.data);
+        console.log("response data", mapobj);
 
-    let mapobj = JSON.parse(Response);
-    index_data.value = mapobj.live_index;
-    let clients_data = mapobj.client_data
+        // Check if live_index and client_data are present in the parsed object
+        if (mapobj && mapobj.live_index && Array.isArray(mapobj.client_data)) {
+            index_data.value = mapobj.live_index;
 
-    // const updatedData = [...data.value]
-    // updatedData[0]['Day_PL'] = Number(mapobj[0]['MTM'])// Update the age
-    // updatedData[0]['IdealMTM'] = Number(mapobj[0]['ideal_MTM'])// Update the age
-    // updatedData[0]['AccountName'] = mapobj[0]['name']// Update the age
+            let clients_data = mapobj.client_data;
 
-    data.value = clients_data.map(item => ({
-      AccountName: item.name,
-      IdealMTM: Number(item.ideal_MTM),
-      Day_PL: Number(item.MTM),
-      Friction: (Number(item.MTM) - Number(item.ideal_MTM)).toFixed(2),
-      RejectedOrderCount: Number(item.Rejected_orders),
-      PendingOrderCount: Number(item.Pending_orders),
-      OpenQuantity: Number(item.OpenQuantity),
-      NetQuantity: Number(item.NetQuantity)
+            // Transform client_data and update the data.value
+            data.value = clients_data.map(item => ({
+                AccountName: item.name || '',
+                IdealMTM: item.ideal_MTM !== undefined ? Number(item.ideal_MTM) : 0,
+                Day_PL: item.MTM !== undefined ? Number(item.MTM) : 0,
+                Friction: item.MTM !== undefined && item.ideal_MTM !== undefined 
+                    ? (Number(item.MTM) - Number(item.ideal_MTM)).toFixed(2) 
+                    : '0.00',
+                RejectedOrderCount: item.Rejected_orders !== undefined ? Number(item.Rejected_orders) : 0,
+                PendingOrderCount: item.Pending_orders !== undefined ? Number(item.Pending_orders) : 0,
+                OpenQuantity: item.OpenQuantity !== undefined ? Number(item.OpenQuantity) : 0,
+                NetQuantity: item.NetQuantity !== undefined ? Number(item.NetQuantity) : 0
+            }));
 
-    }));
-    pulse_signal.value = mapobj.pulse;
+            // Logging other parts of the response for future use
+            console.log("basket_data", mapobj.basket_data);
+            console.log("live_positions", mapobj.live_positions);
+            console.log("pulse", mapobj.pulse);
 
-    MTMTable.value = clients_data[0]["MTMTable"]
+            // Update additional values
+            pulse_signal.value = mapobj.pulse;
+            MTMTable.value = clients_data[0]["MTMTable"];
+            basket_chart_name.value = mapobj.basket_data.map(obj => Object.keys(obj)[0]);
+            basket_chart_data.value = mapobj.basket_data.map(obj => Object.values(obj)[0]);
+        } else {
+            console.error('Invalid structure of mapobj:', mapobj);
+        }
+    } catch (error) {
+        console.error('Error parsing event data or updating data:', error);
+    }
+}
 
-
-    basket_chart_name.value = mapobj.basket_data.map(obj => Object.keys(obj)[0]);
-    basket_chart_data.value = mapobj.basket_data.map(obj => Object.values(obj)[0]);
-
-
-
-  }
 
   eventSource.onopen = () => {
     messages.value.push('Connection opened')
@@ -224,15 +240,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="homePage_Container bg-[#efefef]/30">
 
-    <div class="nav_index_container font-semibold bg-white  drop-shadow-sm">
-      <p>BANKNIFTY : {{ index_data.BANKNIFTYSPOT }}</p>
-      <p>FINNIFTY : {{ index_data.FINNIFTYSPOT }}</p>
-      <p>MIDCPNIFTY : {{ index_data.MIDCPNIFTYSPOT }}</p>
-      <p>NIFTY : {{ index_data.NIFTYSPOT }}</p>
-      <p> SENSEX : {{ index_data.SENSEXSPOT }}</p>
-    </div>
+  <div class="homePage_Container bg-[#efefef]/30">
+    
+    <SignalForTable :color="true" />
 
 
     <WarningSignal :signals="pulse_signal" />

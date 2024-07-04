@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@material-tailwind/html": "^2.2.2",
     "@tanstack/vue-table": "^8.17.3",
     "axios": "^1.7.2",
     "chart.js": "^4.4.3",
