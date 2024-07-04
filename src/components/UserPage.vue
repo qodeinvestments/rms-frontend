@@ -1,13 +1,18 @@
+
+
 <script setup>
 
 
 import { onMounted, onUnmounted } from 'vue'
+import BarChart from './Barchart.vue';
 import {
   FlexRender,
   getCoreRowModel,
   useVueTable,
   createColumnHelper,
 } from '@tanstack/vue-table'
+
+import { MyEnum } from '../Enums/Prefix.js';
 import { ref } from 'vue'
 import { useRoute } from 'vue-router';
 import TanStackTestTable from './TanStackTestTable.vue'
@@ -20,6 +25,12 @@ import MultiLineChart from './HighCharts.vue'
 const route = useRoute();
 const user_data = ref('')
 
+
+const barChartData= [
+        { "category": -10 },
+        { "category1":  20 },
+        { "category2":  30 }
+]
 const defaultData = [{
   "id": 1,
   "AccountName": "Abhinav",
@@ -194,9 +205,8 @@ const data = ref([])
 
 const client_live_trade_book = ref([])
 
-
 const connectToSSE = () => {
-  const eventSource = new EventSource('https://api.swancapital.in/stream');
+  const eventSource = new EventSource(MyEnum.backendURL);
 
   eventSource.onmessage = (event) => {
     try {
@@ -236,11 +246,29 @@ const connectToSSE = () => {
     messages.value.push('Connection opened');
   };
 
-  eventSource.onerror = () => {
+  eventSource.onerror = (error) => {
     messages.value.push('Error occurred');
-    eventSource.close();
+
+    if (error.target.readyState === EventSource.CLOSED) {
+      messages.value.push('Connection closed');
+      setTimeout(() => {
+        connectToSSE();  // Attempt to reconnect
+      }, 2000);  // Retry connection after 5 seconds
+    } else if (error.target.readyState === EventSource.CONNECTING) {
+      messages.value.push('Reconnecting...');
+    }
+
+    // If the error is due to a 404, attempt to reconnect
+    if (error.status === 404) {
+      messages.value.push('404 error occurred, attempting to reconnect');
+      eventSource.close();
+      setTimeout(() => {
+        connectToSSE();  // Attempt to reconnect
+      }, 2000);  // Retry connection after 5 seconds
+    }
   };
 };
+
 
 
 const name = ref('');
@@ -276,16 +304,17 @@ onUnmounted(() => {
         :showPagination=false />
     </div>
 
-    <input type="date" v-model="date" />
+    <!-- <input type="date" v-model="date" /> -->
+    
+
+    <MultiLineChart v-if="user_data" :chartData="[user_data['MTMTable'],user_data['ideal_MTMTable']]" :lineNames="['Actual MTM','Ideal MTM']" />
+
+    <BarChart v-if="user_data['Live_Client_Positions']" :chartData='user_data["Live_Client_Positions"]' />
+
     <div class="my-8">
       <TanStackTestTable :data="client_live_trade_book" :columns="live_trade_book_columns" :hasColor="[]"
         :navigateTo="[]" :showPagination=true />
     </div>
-
-    <MultiLineChart v-if="user_data" :chartData="[user_data['MTMTable']]" :lineNames="['MTM']" />
-
-
-
     <!-- < p class=" headingContainer">{{ name }}</p>
       <div class="profitContainer">
         <div class="priceContainer">

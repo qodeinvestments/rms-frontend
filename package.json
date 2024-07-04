@@ -10,14 +10,16 @@
   "dependencies": {
     "@material-tailwind/html": "^2.2.2",
     "@tanstack/vue-table": "^8.17.3",
+    "apexcharts": "^3.49.2",
     "axios": "^1.7.2",
     "chart.js": "^4.4.3",
     "chartjs-plugin-zoom": "^2.0.1",
-    "highcharts": "^11.4.3",
+    "highcharts": "^11.4.4",
     "highcharts-vue": "^2.0.1",
     "vue": "^3.3.4",
     "vue-chartjs": "^5.3.1",
-    "vue-router": "^4.0.13"
+    "vue-router": "^4.0.13",
+    "vue3-apexcharts": "^1.5.3"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",

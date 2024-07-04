@@ -1,3 +1,4 @@
+
 <script setup>
 import { onMounted, onUnmounted } from 'vue'
 import {
@@ -14,6 +15,7 @@ import Chart from './Chart.vue'
 import MultiLineChart from './HighCharts.vue'
 import WarningSignal from './WarningSignal.vue'
 import { map } from 'highcharts';
+import { MyEnum } from '../Enums/Prefix.js';
 const defaultData = []
 const NavigationMap = {
   "AccountName": "/user/"
@@ -23,11 +25,7 @@ const data = ref(defaultData)
 
 const columnHelper = createColumnHelper()
 const columns = [
-  columnHelper.accessor(row => row.AccountName, {
-    id: 'Working',
-    cell: ({row}) => h(SignalForTable, {color: true}),
-    header: () => 'Account Name',
-  }),
+ 
   columnHelper.accessor(row => row.AccountName, {
     id: 'AccountName',
     cell: info => info.getValue(),
@@ -161,73 +159,98 @@ const basket_chart_data = ref([])
 const basket_chart_name = ref([])
 let eventSource = null
 const pulse_signal = ref([])
+const time=ref([])
+const user_infected=ref([])
+const checkBackendConnection=ref(true)
 
 const connectToSSE = () => {
-  eventSource = new EventSource('https://api.swancapital.in/stream')
+  const eventSource = new EventSource(MyEnum.backendURL);
 
   eventSource.onmessage = (event) => {
     try {
-        // Parse the event data
-        let mapobj = JSON.parse(event.data);
+      // Parse the event data
+      let mapobj = JSON.parse(event.data);
+   
 
-        // Check if live_index and client_data are present in the parsed object
-        if (mapobj && mapobj.live_index && Array.isArray(mapobj.client_data)) {
-            index_data.value = mapobj.live_index;
+      // Check if live_index and client_data are present in the parsed object
+      if (mapobj && mapobj.live_index && Array.isArray(mapobj.client_data)) {
+        checkBackendConnection.value=true;
+        index_data.value = mapobj.live_index;
 
-            let clients_data = mapobj.client_data;
+        let clients_data = mapobj.client_data;
+        time.value = mapobj.time;
+        user_infected.value = Object.keys(mapobj.pulse)
+        .filter(key => key.startsWith('pulse_trader_xts:'))
+        .map(key => key.split('pulse_trader_xts:')[1]);
+        // Transform client_data and update the data.value
+        data.value = clients_data.map(item => ({
+          AccountName: item.name || '',
+          IdealMTM: item.ideal_MTM !== undefined ? Number(item.ideal_MTM) : 0,
+          Day_PL: item.MTM !== undefined ? Number(item.MTM) : 0,
+          Friction: item.MTM !== undefined && item.ideal_MTM !== undefined 
+            ? (Number(item.MTM) - Number(item.ideal_MTM)).toFixed(2) 
+            : '0.00',
+          RejectedOrderCount: item.Rejected_orders !== undefined ? Number(item.Rejected_orders) : 0,
+          PendingOrderCount: item.Pending_orders !== undefined ? Number(item.Pending_orders) : 0,
+          OpenQuantity: item.OpenQuantity !== undefined ? Number(item.OpenQuantity) : 0,
+          NetQuantity: item.NetQuantity !== undefined ? Number(item.NetQuantity) : 0
+        }));
 
-            // Transform client_data and update the data.value
-            data.value = clients_data.map(item => ({
-                AccountName: item.name || '',
-                IdealMTM: item.ideal_MTM !== undefined ? Number(item.ideal_MTM) : 0,
-                Day_PL: item.MTM !== undefined ? Number(item.MTM) : 0,
-                Friction: item.MTM !== undefined && item.ideal_MTM !== undefined 
-                    ? (Number(item.MTM) - Number(item.ideal_MTM)).toFixed(2) 
-                    : '0.00',
-                RejectedOrderCount: item.Rejected_orders !== undefined ? Number(item.Rejected_orders) : 0,
-                PendingOrderCount: item.Pending_orders !== undefined ? Number(item.Pending_orders) : 0,
-                OpenQuantity: item.OpenQuantity !== undefined ? Number(item.OpenQuantity) : 0,
-                NetQuantity: item.NetQuantity !== undefined ? Number(item.NetQuantity) : 0
-            }));
+        // Logging other parts of the response for future use
+        // console.log("basket_data", mapobj.basket_data);
+        // console.log("live_positions", mapobj.live_positions);
+        // console.log("pulse", mapobj.pulse);
 
-            // // Logging other parts of the response for future use
-            // console.log("basket_data", mapobj.basket_data);
-            // console.log("live_positions", mapobj.live_positions);
-            // console.log("pulse", mapobj.pulse);
-
-            // Update additional values
-            pulse_signal.value = mapobj.pulse;
-            MTMTable.value = clients_data[0]["MTMTable"];
-            basket_chart_name.value = mapobj.basket_data.map(obj => Object.keys(obj)[0]);
-            basket_chart_data.value = mapobj.basket_data.map(obj => Object.values(obj)[0]);
-        } else {
-            console.error('Invalid structure of mapobj:', mapobj);
-        }
+        // Update additional values
+        pulse_signal.value = mapobj.pulse;
+        pulse_signal.value.backendConnection=checkBackendConnection;
+        MTMTable.value = clients_data[0]["MTMTable"];
+        basket_chart_name.value = mapobj.basket_data.map(obj => Object.keys(obj)[0]);
+        basket_chart_data.value = mapobj.basket_data.map(obj => Object.values(obj)[0]);
+      } else {
+        checkBackendConnection.value=false;
+        console.error('Invalid structure of mapobj:', mapobj);
+      }
     } catch (error) {
-        console.error('Error parsing event data or updating data:', error);
+      checkBackendConnection.value=false;
+      console.error('Error parsing event data or updating data:', error);
     }
-}
-
+  };
 
   eventSource.onopen = () => {
-    messages.value.push('Connection opened')
-  }
+    checkBackendConnection.value=false;
+    messages.value.push('Connection opened');
+  };
 
-  eventSource.onerror = () => {
-    messages.value.push('Error occurred')
-    eventSource.close()
-  }
-}
+  eventSource.onerror = (error) => {
+    checkBackendConnection.value=false;
+    messages.value.push('Error occurred');
+
+    if (error.target.readyState === EventSource.CLOSED) {
+      messages.value.push('Connection closed');
+      setTimeout(() => {
+        connectToSSE();  // Attempt to reconnect
+      }, 2000);  // Retry connection after 5 seconds
+    } else if (error.target.readyState === EventSource.CONNECTING) {
+      messages.value.push('Reconnecting...');
+    }
+
+    // If the error is due to a 404, attempt to reconnect
+    if (error.status === 404) {
+      messages.value.push('404 error occurred, attempting to reconnect');
+      eventSource.close();
+      setTimeout(() => {
+        connectToSSE();  // Attempt to reconnect
+      }, 2000);  // Retry connection after 5 seconds
+    }
+  };
+};
+
+
+
 
 onMounted(() => {
-  connectToSSE()
-  // axios.get('http://localhost:8001/api/message')
-  //   .then(function (response) {
-  //     console.log(response);
-  //   })
-  //   .catch((error) => {
-  //     console.log(error);
-  //   })
+  connectToSSE();
 })
 
 onUnmounted(() => {
@@ -249,7 +272,9 @@ onUnmounted(() => {
       <p>NIFTY : {{ index_data.NIFTYSPOT }}</p>
       <p> SENSEX : {{ index_data.SENSEXSPOT }}</p>
     </div>
-    <WarningSignal :signals="pulse_signal" />
+   
+    <div class="time-container"><p class="timeDiv">   Time:{{time}}</p><WarningSignal :signals="pulse_signal" /></div>
+    
     <div class="mx-auto px-8 py-8">
 
       <!-- <TableOriginal /> -->
@@ -260,7 +285,7 @@ onUnmounted(() => {
   </div> -->
       <div class="my-8">
         <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL', 'Friction']"
-          :navigateTo="NavigationMap" :showPagination=true />
+          :navigateTo="NavigationMap" :showPagination=true :hasRowcolor="{'columnName':'AccountName','arrayValues':user_infected}" />
       </div>
 
 
@@ -287,5 +312,17 @@ html {
   padding: 10px 30px;
   font-size: 16px;
   justify-content: space-between;
+}
+.time-container{
+  display: flex;
+  margin-top:20px;
+  margin-left:30px;
+  font-weight: 600;
+}
+.timeDiv{
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  width:100%;
 }
 </style>

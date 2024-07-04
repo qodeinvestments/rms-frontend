@@ -34,7 +34,7 @@ const props = defineProps({
         required: true
     },
     hasRowcolor: {
-        type: Array,
+        type: Object,
         required: false
     }
 
@@ -119,12 +119,15 @@ const table = useVueTable({
                         <tbody class="divide-y divide-gray-200">
                             <tr v-for="row in table.getRowModel().rows" :key="row.id">
                                 <td v-for="(cell, index) in row.getVisibleCells()" :key="cell.id"
-                                    class="maxwidth150 break-words whitespace-normal px-3 py-4 text-sm text-gray-500"
+                                    class="maxwidth150 break-words whitespace-normal px-3 py-4 text-sm text-black-600 "
                                     :class="{
-                                        'sticky-header': index === 0,
+                                        'sticky-column': index === 0,
                                         'red': cell.getValue() < 0 && hasColor.includes(cell.id.substring(2)),
-                                        'green': cell.getValue() > 0 && hasColor.includes(cell.id.substring(2))
+                                        'green': cell.getValue() > 0 && hasColor.includes(cell.id.substring(2)),
+                                        'redbackground': hasRowcolor && hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]) ,
+                                        'greenbackground': hasRowcolor && !(hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]))
                                     }" @click="checkNavigate(cell)">
+
                                     <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                                 </td>
                             </tr>
@@ -187,7 +190,12 @@ const table = useVueTable({
 .green {
     color: rgb(80, 185, 80);
 }
-
+.redbackground {
+    background-color: rgb(255, 215, 215);
+}
+.greenbackground {
+    background-color: rgb(217, 246, 217);
+}
 table {
     border-right: none;
     border-left: none;
@@ -232,6 +240,12 @@ table {
     z-index: 1;
     background: white;
 }
+.sticky-column {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+}
+
 
 .sticky-header:nth-child(1) {
     left: 0px;

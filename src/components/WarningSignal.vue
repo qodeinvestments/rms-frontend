@@ -13,9 +13,10 @@
             <span :class="signals.pulse_web_socket4 ? 'greensignal' : 'redsignal'"></span>
         </div>
         <div class="signal-container">
-            <p class="textContainer">Money Maker :</p>
-            <span :class="signals['pulse_trader_xts_Money Maker'] ? 'greensignal' : 'redsignal'"></span>
+            <p class="textContainer">BackEnd Connection :</p>
+            <span :class="signals['backendConnection'] ? 'greensignal' : 'redsignal'"></span>
         </div>
+        
     </div>
 </template>
 
