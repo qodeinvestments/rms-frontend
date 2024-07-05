@@ -41,17 +41,11 @@ const props = defineProps({
 })
 
 const checkNavigate = (data) => {
-    // console.log("data is:", data);
-    // console.log(data.getValue() + " " + data.id.substring(2));
     if (props.navigateTo[data.id.substring(2)]) {
         let link = props.navigateTo[data.id.substring(2)] + data.getValue()
         router.push(link);
     }
-
 }
-
-
-
 
 // Create a ref for the data to make it reactive
 const data = ref(props.data)
@@ -91,18 +85,36 @@ const table = useVueTable({
     },
 })
 
+const handleMouseWheel = (event) => {
+    const container = document.querySelector('.table-container');
+    if (event.deltaY !== 0) {
+        container.scrollLeft += event.deltaY;
+        event.preventDefault();
+    }
+}
+
+onMounted(() => {
+    const container = document.querySelector('.table-container');
+    container.addEventListener('wheel', handleMouseWheel);
+})
+
+onUnmounted(() => {
+    const container = document.querySelector('.table-container');
+    container.removeEventListener('wheel', handleMouseWheel);
+})
+
 </script>
 
 <template>
-    <div class="px-4 sm:px-6 lg:px-8 pb-8 bg-white  drop-shadow-sm">
-        <div class="mt-8 flow-root ">
+    <div class="px-4 sm:px-6 lg:px-8 pb-8 bg-white drop-shadow-sm">
+        <div class="mt-8 flow-root">
             <div class="my-4">
                 <input type="text" class="border border-gray-400 rounded px-2 py-2" placeholder="Search"
                     v-model="filter" v-if="showPagination" />
             </div>
-            <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8  ">
-                <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8 ">
-                    <table class="min-w-full divide-y divide-gray-300  ">
+            <div class="table-container -mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                    <table class="min-w-full divide-y divide-gray-300">
                         <thead>
                             <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
                                 <th v-for="header in headerGroup.headers" :key="header.id" scope="col"
@@ -119,15 +131,14 @@ const table = useVueTable({
                         <tbody class="divide-y divide-gray-200">
                             <tr v-for="row in table.getRowModel().rows" :key="row.id">
                                 <td v-for="(cell, index) in row.getVisibleCells()" :key="cell.id"
-                                    class="maxwidth150 break-words whitespace-normal px-3 py-4 text-sm text-black-600 "
+                                    class="maxwidth150 break-words whitespace-normal px-3 py-4 text-sm text-black-600"
                                     :class="{
                                         'sticky-column': index === 0,
                                         'red': cell.getValue() < 0 && hasColor.includes(cell.id.substring(2)),
                                         'green': cell.getValue() > 0 && hasColor.includes(cell.id.substring(2)),
-                                        'redbackground': hasRowcolor && hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]) ,
+                                        'redbackground': hasRowcolor && hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]),
                                         'greenbackground': hasRowcolor && !(hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]))
                                     }" @click="checkNavigate(cell)">
-
                                     <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                                 </td>
                             </tr>
@@ -176,8 +187,6 @@ const table = useVueTable({
     </div>
 </template>
 
-
-
 <style scoped>
 .colorcontainer {
     background: pink;
@@ -190,12 +199,15 @@ const table = useVueTable({
 .green {
     color: rgb(80, 185, 80);
 }
+
 .redbackground {
     background-color: rgb(255, 215, 215);
 }
+
 .greenbackground {
     background-color: rgb(217, 246, 217);
 }
+
 table {
     border-right: none;
     border-left: none;
@@ -240,15 +252,20 @@ table {
     z-index: 1;
     background: white;
 }
+
 .sticky-column {
     position: sticky;
     left: 0;
     z-index: 1;
 }
 
-
 .sticky-header:nth-child(1) {
     left: 0px;
     /* Adjust as per the width of the first column */
+}
+
+.table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 </style>
