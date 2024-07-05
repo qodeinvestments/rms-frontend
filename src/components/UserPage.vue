@@ -1,5 +1,3 @@
-
-
 <script setup>
 
 
@@ -26,10 +24,10 @@ const route = useRoute();
 const user_data = ref('')
 
 
-const barChartData= [
-        { "category": -10 },
-        { "category1":  20 },
-        { "category2":  30 }
+const barChartData = [
+  { "category": -10 },
+  { "category1": 20 },
+  { "category2": 30 }
 ]
 const defaultData = [{
   "id": 1,
@@ -49,7 +47,9 @@ const defaultData = [{
   "HoldingsCount": 10,
   "Used_Margin": 50000,
   "AvailableMargin": 250000,
-  "Cash": 2500000
+  "Cash": 2500000,
+  "Margin": 0,
+  "VAR": 0
 }];
 const columnHelper = createColumnHelper()
 const live_trade_book_columns = [
@@ -93,6 +93,7 @@ const live_trade_book_columns = [
 
 ]
 const columns = [
+
   columnHelper.accessor(row => row.AccountName, {
     id: 'AccountName',
     cell: info => info.getValue(),
@@ -133,6 +134,18 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'PendingOrderCount',
   }),
+  columnHelper.accessor(row => row.MARGIN, {
+    id: 'MARGIN',
+    cell: info => info.getValue(),
+    header: () => 'Margin',
+  }),
+  columnHelper.accessor(row => row.VAR, {
+    id: 'VAR',
+    cell: info => info.getValue(),
+    header: () => 'VAR',
+  }),
+
+
   columnHelper.accessor(row => row.PortfolioValue, {
     id: 'PortfolioValue',
     cell: info => info.getValue(),
@@ -192,6 +205,70 @@ const columns = [
 ]
 
 
+const rms_df_columns = [
+  columnHelper.accessor(row => row.symbol, {
+    id: 'Symbol',
+    cell: info => info.getValue(),
+    header: () => 'Symbol',
+  }),
+  columnHelper.accessor(row => row.ltp, {
+    id: 'Ltp',
+    cell: info => info.getValue(),
+    header: () => 'Ltp',
+  }),
+  columnHelper.accessor(row => row.pnl, {
+    id: 'pnl',
+    cell: info => info.getValue(),
+    header: () => 'PnL',
+  }),
+  columnHelper.accessor(row => row.buy_qty, {
+    id: 'buy_qty',
+    cell: info => info.getValue(),
+    header: () => 'Buy Qty',
+  }),
+  columnHelper.accessor(row => row.buy_price, {
+    id: 'buy_price',
+    cell: info => info.getValue(),
+    header: () => 'Buy Price',
+  }),
+  columnHelper.accessor(row => row.buy_value, {
+    id: 'buy_value',
+    cell: info => info.getValue(),
+    header: () => 'Buy Value',
+  }),
+  columnHelper.accessor(row => row.net_price, {
+    id: 'net_price',
+    cell: info => info.getValue(),
+    header: () => 'Net Price',
+  }),
+  columnHelper.accessor(row => row.net_value, {
+    id: 'net_value',
+    cell: info => info.getValue(),
+    header: () => 'Net Value',
+  }),
+  columnHelper.accessor(row => row.sell_price, {
+    id: 'sell_price',
+    cell: info => info.getValue(),
+    header: () => 'Sell Price',
+  }),
+  columnHelper.accessor(row => row.sell_qty, {
+    id: 'sell_qty',
+    cell: info => info.getValue(),
+    header: () => 'Sell Qty',
+  }),
+  columnHelper.accessor(row => row.sell_value, {
+    id: 'sell_value',
+    cell: info => info.getValue(),
+    header: () => 'Sell Value',
+  }),
+  columnHelper.accessor(row => row.turnover, {
+    id: 'turnover',
+    cell: info => info.getValue(),
+    header: () => 'Turnover',
+  }),
+]
+
+
 
 
 const messages = ref([])
@@ -202,6 +279,7 @@ let eventSource = null
 
 const date = ref()
 const data = ref([])
+const user_infected = ref([])
 
 const client_live_trade_book = ref([])
 
@@ -211,22 +289,31 @@ const connectToSSE = () => {
   eventSource.onmessage = (event) => {
     try {
       let response = JSON.parse(event.data);
+      user_infected.value = Object.keys(response.pulse)
+        .filter(key => (key.startsWith('pulse_trader_xts:') || key.startsWith('pulse_trader_zerodha:')) && response.pulse[key] === false)
+        .map(key => key.split(':')[1]);
+
       let result = response.client_data.find(client => client.name === name.value);
 
       if (result) {
         user_data.value = result;
+        console.log("result is:", result)
+
+
 
         data.value = [{
           AccountName: result.name || '',
           IdealMTM: result.ideal_MTM !== undefined ? Number(result.ideal_MTM) : 0,
           Day_PL: result.MTM !== undefined ? Number(result.MTM) : 0,
-          Friction: result.MTM !== undefined && result.ideal_MTM !== undefined 
-              ? (Number(result.MTM) - Number(result.ideal_MTM)).toFixed(2) 
-              : '0.00',
+          Friction: result.MTM !== undefined && result.ideal_MTM !== undefined
+            ? (Number(result.MTM) - Number(result.ideal_MTM)).toFixed(2)
+            : '0.00',
           OpenQuantity: result.OpenQuantity !== undefined ? Number(result.OpenQuantity) : 0,
           NetQuantity: result.NetQuantity !== undefined ? Number(result.NetQuantity) : 0,
           RejectedOrderCount: result.Rejected_orders !== undefined ? Number(result.Rejected_orders) : 0,
-          PendingOrderCount: result.Pending_orders !== undefined ? Number(result.Pending_orders) : 0
+          PendingOrderCount: result.Pending_orders !== undefined ? Number(result.Pending_orders) : 0,
+          MARGIN: result.Live_Client_Margin !== undefined ? Number(result.Live_Client_Margin) : 0,
+          VAR: result.Live_Client_Var !== undefined ? Number(result.Live_Client_Var) : 0,
         }];
 
         let tradeArray = Object.values(result.Live_Trade_Book || {});
@@ -301,13 +388,21 @@ onUnmounted(() => {
 </div> -->
     <div class="my-8">
       <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL', 'Friction']" :navigateTo="[]"
-        :showPagination=false />
+        :showPagination=false :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': user_infected }" />
     </div>
 
-    <!-- <input type="date" v-model="date" /> -->
-    
+    <div class="my-8" v-if="user_data">
+      <TanStackTestTable :data="user_data['Live_Client_RMS_df']" :columns="rms_df_columns" :hasColor="['pnl']"
+        :navigateTo="[]" :showPagination=true />
+    </div>
 
-    <MultiLineChart v-if="user_data" :chartData="[user_data['MTMTable'],user_data['ideal_MTMTable']]" :lineNames="['Actual MTM','Ideal MTM']" />
+
+
+    <!-- <input type="date" v-model="date" /> -->
+
+
+    <MultiLineChart v-if="user_data" :chartData="[user_data['MTMTable'], user_data['ideal_MTMTable']]"
+      :lineNames="['Actual MTM', 'Ideal MTM']" />
 
     <BarChart v-if="user_data['Live_Client_Positions']" :chartData='user_data["Live_Client_Positions"]' />
 

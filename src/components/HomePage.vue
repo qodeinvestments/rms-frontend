@@ -65,6 +65,18 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'PendingOrderCount',
   }),
+  columnHelper.accessor(row => row.MARGIN, {
+    id: 'MARGIN',
+    cell: info => info.getValue(),
+    header: () => 'Margin',
+  }),
+  columnHelper.accessor(row => row.VAR, {
+    id: 'VAR',
+    cell: info => info.getValue(),
+    header: () => 'VAR',
+  }),
+
+
   columnHelper.accessor(row => row.PortfolioValue, {
     id: 'PortfolioValue',
     cell: info => info.getValue(),
@@ -170,7 +182,7 @@ const connectToSSE = () => {
       // Parse the event data
       let mapobj = JSON.parse(event.data);
 
-
+      console.log(mapobj)
       // Check if live_index and client_data are present in the parsed object
       if (mapobj && mapobj.live_index && Array.isArray(mapobj.client_data)) {
         checkBackendConnection.value = true;
@@ -197,7 +209,9 @@ const connectToSSE = () => {
           RejectedOrderCount: item.Rejected_orders !== undefined ? Number(item.Rejected_orders) : 0,
           PendingOrderCount: item.Pending_orders !== undefined ? Number(item.Pending_orders) : 0,
           OpenQuantity: item.OpenQuantity !== undefined ? Number(item.OpenQuantity) : 0,
-          NetQuantity: item.NetQuantity !== undefined ? Number(item.NetQuantity) : 0
+          NetQuantity: item.NetQuantity !== undefined ? Number(item.NetQuantity) : 0,
+          MARGIN: item.Live_Client_Margin !== undefined ? Number(item.Live_Client_Margin) : 0,
+          VAR: item.Live_Client_Var !== undefined ? Number(item.Live_Client_Var) : 0,
         }));
 
         // Logging other parts of the response for future use
