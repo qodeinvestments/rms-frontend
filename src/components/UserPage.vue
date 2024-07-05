@@ -297,7 +297,6 @@ const connectToSSE = () => {
 
       if (result) {
         user_data.value = result;
-        console.log("result is:", result)
 
 
 
