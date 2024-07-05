@@ -1,4 +1,3 @@
-
 <script setup>
 import { onMounted, onUnmounted } from 'vue'
 import {
@@ -8,7 +7,7 @@ import {
   createColumnHelper,
 } from '@tanstack/vue-table'
 import SignalForTable from './SignalForTable.vue'
-import { ref,h } from 'vue'
+import { ref, h } from 'vue'
 import axios from 'axios';
 import TanStackTestTable from './TanStackTestTable.vue'
 import Chart from './Chart.vue'
@@ -25,7 +24,7 @@ const data = ref(defaultData)
 
 const columnHelper = createColumnHelper()
 const columns = [
- 
+
   columnHelper.accessor(row => row.AccountName, {
     id: 'AccountName',
     cell: info => info.getValue(),
@@ -159,9 +158,9 @@ const basket_chart_data = ref([])
 const basket_chart_name = ref([])
 let eventSource = null
 const pulse_signal = ref([])
-const time=ref([])
-const user_infected=ref([])
-const checkBackendConnection=ref(true)
+const time = ref([])
+const user_infected = ref([])
+const checkBackendConnection = ref(true)
 
 const connectToSSE = () => {
   const eventSource = new EventSource(MyEnum.backendURL);
@@ -170,25 +169,30 @@ const connectToSSE = () => {
     try {
       // Parse the event data
       let mapobj = JSON.parse(event.data);
-   
+
 
       // Check if live_index and client_data are present in the parsed object
       if (mapobj && mapobj.live_index && Array.isArray(mapobj.client_data)) {
-        checkBackendConnection.value=true;
+        checkBackendConnection.value = true;
         index_data.value = mapobj.live_index;
 
         let clients_data = mapobj.client_data;
         time.value = mapobj.time;
+
+
         user_infected.value = Object.keys(mapobj.pulse)
-        .filter(key => key.startsWith('pulse_trader_xts:'))
-        .map(key => key.split('pulse_trader_xts:')[1]);
-        // Transform client_data and update the data.value
+          .filter(key => (key.startsWith('pulse_trader_xts:') || key.startsWith('pulse_trader_zerodha:')) && mapobj.pulse[key] === false)
+          .map(key => key.split(':')[1]);
+
+
+
+
         data.value = clients_data.map(item => ({
           AccountName: item.name || '',
           IdealMTM: item.ideal_MTM !== undefined ? Number(item.ideal_MTM) : 0,
           Day_PL: item.MTM !== undefined ? Number(item.MTM) : 0,
-          Friction: item.MTM !== undefined && item.ideal_MTM !== undefined 
-            ? (Number(item.MTM) - Number(item.ideal_MTM)).toFixed(2) 
+          Friction: item.MTM !== undefined && item.ideal_MTM !== undefined
+            ? (Number(item.MTM) - Number(item.ideal_MTM)).toFixed(2)
             : '0.00',
           RejectedOrderCount: item.Rejected_orders !== undefined ? Number(item.Rejected_orders) : 0,
           PendingOrderCount: item.Pending_orders !== undefined ? Number(item.Pending_orders) : 0,
@@ -203,27 +207,27 @@ const connectToSSE = () => {
 
         // Update additional values
         pulse_signal.value = mapobj.pulse;
-        pulse_signal.value.backendConnection=checkBackendConnection;
+        pulse_signal.value.backendConnection = checkBackendConnection;
         MTMTable.value = clients_data[0]["MTMTable"];
         basket_chart_name.value = mapobj.basket_data.map(obj => Object.keys(obj)[0]);
         basket_chart_data.value = mapobj.basket_data.map(obj => Object.values(obj)[0]);
       } else {
-        checkBackendConnection.value=false;
+        checkBackendConnection.value = false;
         console.error('Invalid structure of mapobj:', mapobj);
       }
     } catch (error) {
-      checkBackendConnection.value=false;
+      checkBackendConnection.value = false;
       console.error('Error parsing event data or updating data:', error);
     }
   };
 
   eventSource.onopen = () => {
-    checkBackendConnection.value=false;
+    checkBackendConnection.value = false;
     messages.value.push('Connection opened');
   };
 
   eventSource.onerror = (error) => {
-    checkBackendConnection.value=false;
+    checkBackendConnection.value = false;
     messages.value.push('Error occurred');
 
     if (error.target.readyState === EventSource.CLOSED) {
@@ -272,9 +276,12 @@ onUnmounted(() => {
       <p>NIFTY : {{ index_data.NIFTYSPOT }}</p>
       <p> SENSEX : {{ index_data.SENSEXSPOT }}</p>
     </div>
-   
-    <div class="time-container"><p class="timeDiv">   Time:{{time}}</p><WarningSignal :signals="pulse_signal" /></div>
-    
+
+    <div class="time-container">
+      <p class="timeDiv"> Time:{{ time }}</p>
+      <WarningSignal :signals="pulse_signal" />
+    </div>
+
     <div class="mx-auto px-8 py-8">
 
       <!-- <TableOriginal /> -->
@@ -285,7 +292,8 @@ onUnmounted(() => {
   </div> -->
       <div class="my-8">
         <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL', 'Friction']"
-          :navigateTo="NavigationMap" :showPagination=true :hasRowcolor="{'columnName':'AccountName','arrayValues':user_infected}" />
+          :navigateTo="NavigationMap" :showPagination=true
+          :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': user_infected }" />
       </div>
 
 
@@ -313,16 +321,18 @@ html {
   font-size: 16px;
   justify-content: space-between;
 }
-.time-container{
+
+.time-container {
   display: flex;
-  margin-top:20px;
-  margin-left:30px;
+  margin-top: 20px;
+  margin-left: 30px;
   font-weight: 600;
 }
-.timeDiv{
+
+.timeDiv {
   justify-content: center;
   align-items: center;
   display: flex;
-  width:100%;
+  width: 100%;
 }
 </style>
