@@ -95,7 +95,7 @@ const handleMouseWheel = (event) => {
 
 onMounted(() => {
     const container = document.querySelector('.table-container');
-    container.addEventListener('wheel', handleMouseWheel);
+    container.addEventListener('wheel', handleMouseWheel, { passive: true });
 })
 
 onUnmounted(() => {

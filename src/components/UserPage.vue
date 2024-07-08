@@ -246,6 +246,12 @@ const rms_df_columns = [
     cell: info => info.getValue(),
     header: () => 'Net Value',
   }),
+  columnHelper.accessor(row => row.net_qty, {
+    id: '  net_qty',
+    cell: info => info.getValue(),
+    header: () => ' Net Qty',
+  }),
+
   columnHelper.accessor(row => row.sell_price, {
     id: 'sell_price',
     cell: info => info.getValue(),
@@ -386,11 +392,13 @@ onUnmounted(() => {
 <TableTanstack :data="cars" :columns="columnsCars" />
 </div> -->
     <div class="my-8">
+      <p class="table-heading">Account Details </p>
       <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL', 'Friction']" :navigateTo="[]"
         :showPagination=false :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': user_infected }" />
     </div>
 
     <div class="my-8" v-if="user_data">
+      <p class="table-heading">Live Trade Book</p>
       <TanStackTestTable :data="user_data['Live_Client_RMS_df']" :columns="rms_df_columns" :hasColor="['pnl']"
         :navigateTo="[]" :showPagination=true />
     </div>
@@ -438,6 +446,12 @@ onUnmounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.table-heading {
+  font-size: 22px;
+  font-weight: 600;
+  margin-left: 30px;
 }
 
 .profitContainer {

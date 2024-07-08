@@ -181,8 +181,8 @@ const connectToSSE = () => {
     try {
       // Parse the event data
       let mapobj = JSON.parse(event.data);
+      // console.log(mapobj.time)
 
-      console.log(mapobj)
       // Check if live_index and client_data are present in the parsed object
       if (mapobj && mapobj.live_index && Array.isArray(mapobj.client_data)) {
         checkBackendConnection.value = true;
@@ -305,6 +305,7 @@ onUnmounted(() => {
     <TableTanstack :data="cars" :columns="columnsCars" />
   </div> -->
       <div class="my-8">
+        <p class="table-heading">Accounts</p>
         <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL', 'Friction']"
           :navigateTo="NavigationMap" :showPagination=true
           :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': user_infected }" />
@@ -323,6 +324,12 @@ onUnmounted(() => {
 <style>
 html {
   font-size: 14px;
+}
+
+.table-heading {
+  font-size: 22px;
+  font-weight: 600;
+  margin-left: 30px;
 }
 
 .nav_index_container {

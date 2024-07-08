@@ -1,6 +1,5 @@
 <template>
-    <!-- {{ chartData }} -->
-    <div class=" drop-shadow-sm">
+    <div class="drop-shadow-sm">
         <div id="chart-container" style="width: 100%; height: 400px;"></div>
     </div>
 </template>
@@ -34,20 +33,23 @@ export default {
     mounted() {
         this.initChart()
     },
+    watch: {
+        chartData: {
+            handler: 'updateChart',
+            deep: true
+        }
+    },
     methods: {
         initChart() {
-            const series = this.chartData.map((dataset, index) => {
-                const data = Object.entries(dataset).map(([time, value]) => {
-                    const [hours, minutes] = time.split(' ')[1].split(':').map(Number)
-                    const minutesSince915 = (hours * 60 + minutes) - (9 * 60 + 15)
-                    return [minutesSince915, value]
-                }).filter(([minutes]) => minutes >= 0 && minutes <= (6 * 60 + 15))
+            if (!this.chartData || this.chartData.length === 0) {
+                console.warn('No chart data available');
+                return;
+            }
 
-                return {
-                    name: this.lineNames[index] || `Dataset ${index + 1}`,
-                    data: data
-                }
-            })
+            const series = this.chartData.map((dataset, index) => ({
+                name: this.lineNames[index] || `Dataset ${index + 1}`,
+                data: this.processData(dataset)
+            }));
 
             this.chart = Highcharts.chart('chart-container', {
                 chart: {
@@ -117,6 +119,39 @@ export default {
                     }
                 }
             })
+        },
+        updateChart() {
+            if (this.chart) {
+                this.chartData.forEach((dataset, index) => {
+                    const data = this.processData(dataset);
+                    if (this.chart.series[index]) {
+                        this.chart.series[index].setData(data, false);
+                    } else {
+                        this.chart.addSeries({
+                            name: this.lineNames[index] || `Dataset ${index + 1}`,
+                            data: data
+                        }, false);
+                    }
+                });
+                this.chart.redraw();
+            } else {
+                this.initChart();
+            }
+        },
+        processData(dataset) {
+            try {
+                return Object.entries(dataset).map(([time, value]) => {
+                    const [hours, minutes] = time.split(' ')[1].split(':').map(Number);
+                    if (isNaN(hours) || isNaN(minutes)) {
+                        throw new Error(`Invalid time format: ${time}`);
+                    }
+                    const minutesSince915 = (hours * 60 + minutes) - (9 * 60 + 15);
+                    return [minutesSince915, value];
+                }).filter(([minutes]) => minutes >= 0 && minutes <= (6 * 60 + 15));
+            } catch (error) {
+                console.error('Error processing chart data:', error);
+                return [];
+            }
         },
         toggleFullscreen() {
             if (this.chart) {
