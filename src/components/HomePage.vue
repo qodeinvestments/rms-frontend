@@ -315,8 +315,12 @@ onUnmounted(() => {
       <!-- 
       <Chart v-if="basket_chart_data.length > 0" :data="basket_chart_data" :labels="chart_labels" /> -->
 
-      <MultiLineChart v-if="basket_chart_data.length > 0" :chartData="basket_chart_data"
-        :lineNames="basket_chart_name" />
+
+      <div class="my-8">
+        <p class="table-heading">Basket-wise Ideal MTM</p>
+        <MultiLineChart v-if="basket_chart_data.length > 0" :chartData="basket_chart_data"
+          :lineNames="basket_chart_name" />
+      </div>
     </div>
   </div>
 </template>
@@ -331,6 +335,7 @@ html {
   font-weight: 600;
   margin-left: 30px;
 }
+
 
 .nav_index_container {
   /* padding-top: 20px; */

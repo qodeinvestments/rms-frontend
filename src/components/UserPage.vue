@@ -405,15 +405,18 @@ onUnmounted(() => {
 
 
 
-    <!-- <input type="date" v-model="date" /> -->
+    <!--  <input type="date" v-model="date" /> -->
 
 
-    <MultiLineChart v-if="user_data" :chartData="[user_data['MTMTable'], user_data['ideal_MTMTable']]"
-      :lineNames="['Actual MTM', 'Ideal MTM']" />
-
-    <BarChart v-if="user_data['Live_Client_Positions']" :chartData='user_data["Live_Client_Positions"]' />
+    <div class="my-8" v-if="user_data">
+      <p class="table-heading">User MTM</p>
+      <MultiLineChart v-if="user_data" :chartData="[user_data['MTMTable'], user_data['ideal_MTMTable']]"
+        :lineNames="['Actual MTM', 'Ideal MTM']" />
+    </div>
+    <!--  <BarChart v-if="user_data['Live_Client_Positions']" :chartData='user_data["Live_Client_Positions"]' /> -->
 
     <div class="my-8">
+      <p class="table-heading">Complete Trade Book</p>
       <TanStackTestTable :data="client_live_trade_book" :columns="live_trade_book_columns" :hasColor="[]"
         :navigateTo="[]" :showPagination=true />
     </div>
