@@ -211,7 +211,7 @@ const connectToSSE = () => {
           OpenQuantity: item.OpenQuantity !== undefined ? Number(item.OpenQuantity) : 0,
           NetQuantity: item.NetQuantity !== undefined ? Number(item.NetQuantity) : 0,
           MARGIN: item.Live_Client_Margin !== undefined ? Number(item.Live_Client_Margin) : 0,
-          VAR: item.Live_Client_Var !== undefined ? Number(item.Live_Client_Var) : 0,
+          VAR: item.Live_Client_Var !== undefined ? ((Number(item.Live_Client_Var) / Number(item.Live_Client_Margin)) * 100).toPrecision(4) : 0,
         }));
 
         // Logging other parts of the response for future use
