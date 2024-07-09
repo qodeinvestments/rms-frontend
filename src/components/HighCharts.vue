@@ -59,7 +59,8 @@ export default {
                         enabled: true,
                         type: 'xy'
                     },
-                    panKey: 'shift'
+                    panKey: 'shift',
+                    animation: false // Disable animation
                 },
                 title: {
                     text: 'Multiple Line Chart (9:15 AM to 3:30 PM IST)'
@@ -120,6 +121,7 @@ export default {
                 }
             })
         },
+
         updateChart() {
             if (this.chart) {
                 this.chartData.forEach((dataset, index) => {
