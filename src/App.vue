@@ -1,11 +1,12 @@
 <script>
 import { RouterView } from 'vue-router'
 import SideBar from './components/SideBar.vue';
-
+import Toast from './components/Toast.vue';
 
 export default {
   components: {
-    SideBar
+    SideBar,
+    Toast
   },
   data() {
     return {
@@ -26,7 +27,7 @@ export default {
 <template>
   <div class="pageLayout">
     <SideBar @State="ChangeSideBarState($event)" class="sideBar" />
-
+    <Toast />
     <router-view :class="sideBarState ? 'content' : 'content2'" />
   </div>
 </template>

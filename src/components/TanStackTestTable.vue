@@ -1,12 +1,11 @@
 <script setup>
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { ref, watchEffect, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router';
 const router = useRouter();
 import {
     useVueTable,
     FlexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     getSortedRowModel,
     getFilteredRowModel,
 } from '@tanstack/vue-table'
@@ -37,7 +36,6 @@ const props = defineProps({
         type: Object,
         required: false
     }
-
 })
 
 const checkNavigate = (data) => {
@@ -47,26 +45,20 @@ const checkNavigate = (data) => {
     }
 }
 
-// Create a ref for the data to make it reactive
-const data = ref(props.data)
-
-// Watch the prop `data` and update the reactive `data` variable
-watch(() => props.data, (newData) => {
-    data.value = newData
-}, { immediate: true })
-
-
 const sorting = ref([])
 const filter = ref('')
+
+// Custom pagination state
+const currentPage = ref(0)
+const pageSize = ref(10)
 
 // Initialize the table using the useVueTable hook
 const table = useVueTable({
     get data() {
-        return data.value
+        return props.data
     },
     columns: props.columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     state: {
@@ -84,6 +76,39 @@ const table = useVueTable({
                 : updaterOrValue
     },
 })
+
+// Computed properties for pagination
+const pageCount = ref(0)
+const rows = ref([])
+
+watchEffect(() => {
+    const filteredRows = table.getFilteredRowModel().rows
+    const sortedRows = table.getSortedRowModel().rows
+    const finalRows = sortedRows.length > 0 ? sortedRows : filteredRows
+
+    pageCount.value = Math.ceil(finalRows.length / pageSize.value)
+    const start = currentPage.value * pageSize.value
+    const end = start + pageSize.value
+    rows.value = finalRows.slice(start, end)
+})
+
+// Pagination methods
+const nextPage = () => {
+    if (currentPage.value < pageCount.value - 1) {
+        currentPage.value++
+    }
+}
+
+const previousPage = () => {
+    if (currentPage.value > 0) {
+        currentPage.value--
+    }
+}
+
+const setPageSize = (size) => {
+    pageSize.value = size
+    currentPage.value = 0  // Reset to first page when changing page size
+}
 
 const handleMouseWheel = (event) => {
     const container = document.querySelector('.table-container');
@@ -129,16 +154,17 @@ onUnmounted(() => {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
-                            <tr v-for="row in table.getRowModel().rows" :key="row.id">
+                            <tr v-for="row in rows" :key="row.id">
                                 <td v-for="(cell, index) in row.getVisibleCells()" :key="cell.id"
                                     class="maxwidth150 break-words whitespace-normal px-3 py-4 text-sm text-black-600"
                                     :class="{
                                         'sticky-column': index === 0,
-                                        'red': cell.getValue() < 0 && hasColor.includes(cell.id.substring(2)),
-                                        'green': cell.getValue() > 0 && hasColor.includes(cell.id.substring(2)),
+                                        'red': cell.getValue() < 0 && hasColor.includes(cell.id.split('_')[1]),
+                                        'green': cell.getValue() > 0 && hasColor.includes(cell.id.split('_')[1]),
                                         'redbackground': hasRowcolor && hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]),
                                         'greenbackground': hasRowcolor && !(hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]))
                                     }" @click="checkNavigate(cell)">
+
                                     <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                                 </td>
                             </tr>
@@ -147,39 +173,38 @@ onUnmounted(() => {
                 </div>
             </div>
             <div class="mt-8" v-if="showPagination">
-                Page {{ table.getState().pagination.pageIndex + 1 }} of
-                {{ table.getPageCount() }} -
+                Page {{ currentPage + 1 }} of {{ pageCount }} -
                 {{ table.getFilteredRowModel().rows.length }} results
             </div>
             <div class="mt-8 space-x-4" v-if="showPagination">
                 <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    @click="table.setPageSize(5)">
+                    @click="setPageSize(5)">
                     Page Size 5
                 </button>
                 <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    @click="table.setPageSize(10)">
+                    @click="setPageSize(10)">
                     Page Size 10
                 </button>
                 <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    @click="table.setPageSize(20)">
+                    @click="setPageSize(20)">
                     Page Size 20
                 </button>
             </div>
             <div class="space-x-4 mt-8" v-if="showPagination">
                 <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    @click="table.setPageIndex(0)">
+                    @click="currentPage = 0">
                     First page
                 </button>
                 <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    @click="table.setPageIndex(table.getPageCount() - 1)">
+                    @click="currentPage = pageCount - 1">
                     Last page
                 </button>
                 <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    :disabled="!table.getCanPreviousPage()" @click="table.previousPage()">
+                    :disabled="currentPage === 0" @click="previousPage">
                     Prev page
                 </button>
                 <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    :disabled="!table.getCanNextPage()" @click="table.nextPage()">
+                    :disabled="currentPage === pageCount - 1" @click="nextPage">
                     Next page
                 </button>
             </div>

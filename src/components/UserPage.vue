@@ -417,22 +417,7 @@ onUnmounted(() => {
       <TanStackTestTable :data="client_live_trade_book" :columns="live_trade_book_columns" :hasColor="[]"
         :navigateTo="[]" :showPagination=true />
     </div>
-    <!-- < p class=" headingContainer">{{ name }}</p>
-      <div class="profitContainer">
-        <div class="priceContainer">
-          <p class="labeltag">Portfolio Value : </p>
-          <p>3423424</p>
-        </div>
-        <div class="priceContainer">
-          <p class="labeltag">Day Profit And Loss : </p>
-          <p>3423424</p>
-        </div>
-        <div class="priceContainer">
-          <p class="labeltag">Ideal Profit And Loss : </p>
-          <p>3423424</p>
-        </div>
 
-      </div> -->
 
 
 
