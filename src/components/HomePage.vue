@@ -45,6 +45,22 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'Friction',
   }),
+  columnHelper.accessor(row => row.MARGIN, {
+    id: 'MARGIN',
+    cell: info => info.getValue(),
+    header: () => 'Margin',
+  }),
+  columnHelper.accessor(row => row.VAR, {
+    id: 'VAR',
+    cell: info => info.getValue(),
+    header: () => 'VAR \u20B9',
+  }),
+  columnHelper.accessor(row => row.VAR_PERCENTAGE, {
+    id: 'VAR %',
+    cell: info => info.getValue() + "%",
+    header: () => 'VAR %',
+  }),
+
   columnHelper.accessor(row => row.NetQuantity, {
     id: 'NetQuantity',
     cell: info => info.getValue(),
@@ -64,16 +80,6 @@ const columns = [
     id: 'PendingOrderCount',
     cell: info => info.getValue(),
     header: () => 'PendingOrderCount',
-  }),
-  columnHelper.accessor(row => row.MARGIN, {
-    id: 'MARGIN',
-    cell: info => info.getValue(),
-    header: () => 'Margin',
-  }),
-  columnHelper.accessor(row => row.VAR, {
-    id: 'VAR',
-    cell: info => info.getValue() + "%",
-    header: () => 'VAR',
   }),
 
 
@@ -211,7 +217,8 @@ const connectToSSE = () => {
           OpenQuantity: item.OpenQuantity !== undefined ? Number(item.OpenQuantity) : 0,
           NetQuantity: item.NetQuantity !== undefined ? Number(item.NetQuantity) : 0,
           MARGIN: item.Live_Client_Margin !== undefined ? Number(item.Live_Client_Margin) : 0,
-          VAR: item.Live_Client_Var !== undefined ? ((Number(item.Live_Client_Var) / Number(item.Live_Client_Margin)) * 100).toPrecision(4) : 0,
+          VAR_PERCENTAGE: item.Live_Client_Var !== undefined ? ((Number(item.Live_Client_Var) / Number(item.Live_Client_Margin)) * 100).toPrecision(4) : 0,
+          VAR: item.Live_Client_Var !== undefined ? Number(item.Live_Client_Var) : 0,
         }));
 
         // Logging other parts of the response for future use
