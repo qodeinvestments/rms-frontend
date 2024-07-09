@@ -72,7 +72,7 @@ const columns = [
   }),
   columnHelper.accessor(row => row.VAR, {
     id: 'VAR',
-    cell: info => info.getValue(),
+    cell: info => info.getValue() + "%",
     header: () => 'VAR',
   }),
 
