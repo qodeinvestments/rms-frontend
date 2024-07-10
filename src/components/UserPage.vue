@@ -15,7 +15,7 @@ import { ref } from 'vue'
 import { useRoute } from 'vue-router';
 import TanStackTestTable from './TanStackTestTable.vue'
 import Chart from './Chart.vue';
-
+import NavBar from './NavBar.vue';
 import MultiLineChart from './HighCharts.vue'
 
 
@@ -78,19 +78,58 @@ const live_trade_book_columns = [
     cell: info => info.getValue(),
     header: () => 'OrderSide',
   }),
-  columnHelper.accessor(row => row.LeavesQuantity, {
-    id: 'LeavesQuantity',
-    cell: info => info.getValue(),
-    header: () => 'LeavesQuantity',
-  }),
+
   columnHelper.accessor(row => row.OrderQuantity, {
     id: 'OrderQuantity',
     cell: info => info.getValue(),
     header: () => 'OrderQuantity',
   }),
+]
 
 
+const live_order_book_columns = [
 
+  columnHelper.accessor(row => row.OrderGeneratedDateTime, {
+    id: 'OrderGeneratedDateTime',
+    cell: info => info.getValue(),
+    header: () => 'OrderGeneratedDateTime',
+  }),
+  columnHelper.accessor(row => row.ExchangeTransactTime, {
+    id: 'ExchangeTransactTime',
+    cell: info => info.getValue(),
+    header: () => 'ExchangeTransactTime',
+  }),
+  columnHelper.accessor(row => row.ExchangeInstrumentID, {
+    id: 'ExchangeInstrumentID',
+    cell: info => info.getValue(),
+    header: () => 'ExchangeInstrumentID',
+  }),
+  columnHelper.accessor(row => row.OrderAverageTradedPrice, {
+    id: 'OrderAverageTradedPrice',
+    cell: info => info.getValue(),
+    header: () => 'OrderAverageTradedPrice',
+  }),
+  columnHelper.accessor(row => row.OrderSide, {
+    id: 'OrderSide',
+    cell: info => info.getValue(),
+    header: () => 'OrderSide',
+  }),
+
+  columnHelper.accessor(row => row.OrderQuantity, {
+    id: 'OrderQuantity',
+    cell: info => info.getValue(),
+    header: () => 'OrderQuantity',
+  }),
+  columnHelper.accessor(row => row.OrderStatus, {
+    id: 'OrderStatus',
+    cell: info => info.getValue(),
+    header: () => 'OrderStatus',
+  }),
+  columnHelper.accessor(row => row.CancelRejectReason, {
+    id: 'CancelRejectReason',
+    cell: info => info.getValue(),
+    header: () => 'CancelRejectReason',
+  }),
 ]
 const columns = [
 
@@ -294,6 +333,10 @@ const data = ref([])
 const user_infected = ref([])
 
 const client_live_trade_book = ref([])
+const client_live_order_book = ref([])
+const handleColumnClick = ({ item, index }) => {
+  showOnPage.value = item;
+}
 
 const connectToSSE = () => {
   const eventSource = new EventSource(MyEnum.backendURL);
@@ -304,6 +347,7 @@ const connectToSSE = () => {
       user_infected.value = Object.keys(response.pulse)
         .filter(key => (key.startsWith('pulse_trader_xts:') || key.startsWith('pulse_trader_zerodha:')) && response.pulse[key] === false)
         .map(key => key.split(':')[1]);
+
 
       let result = response.client_data.find(client => client.name === name.value);
 
@@ -330,10 +374,11 @@ const connectToSSE = () => {
         }];
 
         let tradeArray = Object.values(result.Live_Trade_Book || {});
-        let prev = client_live_trade_book.value.length;
-        if (prev < tradeArray.length) {
-          client_live_trade_book.value = tradeArray;
-        }
+        let orderBookArray = Object.values(result.Live_Order_Book || {});
+
+        client_live_trade_book.value = tradeArray;
+        client_live_order_book.value = orderBookArray;
+
       } else {
         console.error('No client data found for the specified name:', name.value);
       }
@@ -372,6 +417,7 @@ const connectToSSE = () => {
 
 
 const name = ref('');
+const showOnPage = ref('Positions')
 
 onMounted(() => {
   connectToSSE();
@@ -405,14 +451,6 @@ onUnmounted(() => {
         :showPagination=false :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': user_infected }" />
     </div>
 
-    <div class="my-8" v-if="user_data">
-      <p class="table-heading">Live Trade Book</p>
-      <TanStackTestTable :data="user_data['Live_Client_RMS_df']" :columns="rms_df_columns" :hasColor="['pnl']"
-        :navigateTo="[]" :showPagination=true />
-    </div>
-
-
-
     <!--  <input type="date" v-model="date" /> -->
 
 
@@ -422,12 +460,34 @@ onUnmounted(() => {
         :lineNames="['Actual MTM', 'Ideal MTM']" />
     </div>
     <!--  <BarChart v-if="user_data['Live_Client_Positions']" :chartData='user_data["Live_Client_Positions"]' /> -->
+    <div class="navContainer">
+      <NavBar :navColumns="['Positions', 'Order', 'Holdings', 'TradeBook']" @column-clicked="handleColumnClick" />
+    </div>
 
-    <div class="my-8">
+    <div class="my-8" v-if="user_data && showOnPage === 'Positions'">
+      <p class="table-heading">Live Positions</p>
+      <TanStackTestTable :data="user_data['Live_Client_RMS_df']" :columns="rms_df_columns" :hasColor="['pnl']"
+        :navigateTo="[]" :showPagination=true />
+    </div>
+
+
+
+
+    <div class="my-8" v-if="showOnPage === 'TradeBook'">
       <p class="table-heading">Complete Trade Book</p>
       <TanStackTestTable :data="client_live_trade_book" :columns="live_trade_book_columns" :hasColor="[]"
         :navigateTo="[]" :showPagination=true />
     </div>
+
+
+    <div class="my-8" v-if="showOnPage === 'Order'">
+      <p class="table-heading">Complete Order Book</p>
+      <TanStackTestTable :data="client_live_order_book" :columns="live_order_book_columns" :hasColor="[]"
+        :navigateTo="[]" :showPagination=true />
+    </div>
+
+
+
 
 
 
@@ -442,6 +502,13 @@ onUnmounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.navContainer {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
 }
 
 .table-heading {

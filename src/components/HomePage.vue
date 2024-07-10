@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, onUnmounted } from 'vue'
+import NavBar from './NavBar.vue'
 import {
   FlexRender,
   getCoreRowModel,
@@ -297,7 +298,6 @@ onUnmounted(() => {
       <p>NIFTY : {{ index_data.NIFTYSPOT }}</p>
       <p> SENSEX : {{ index_data.SENSEXSPOT }}</p>
     </div>
-
     <div class="time-container">
       <p class="timeDiv"> Time:{{ time }}</p>
       <WarningSignal :signals="pulse_signal" />
