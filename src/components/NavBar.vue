@@ -1,6 +1,7 @@
 <template>
     <div class="nav-container">
-        <div v-for="(p, index) in navColumns" :key="index" class="nav-item" @click="handleClick(p, index)">
+        <div v-for="(p, index) in navColumns" :key="index" :class="selectedValue === p ? 'selectedValue-color' : ''"
+            class="nav-item" @click="handleClick(p, index)">
             <p>{{ p }}</p>
         </div>
     </div>
@@ -17,12 +18,14 @@ const props = defineProps({
     }
 })
 
+const selectedValue = ref(props.navColumns[0]);
 // Define the emit function
 const emit = defineEmits(['column-clicked'])
 
 // Handle click event
 const handleClick = (item, index) => {
     emit('column-clicked', { item, index })
+    selectedValue.value = item;
 }
 </script>
 <style scoped>
@@ -34,6 +37,10 @@ const handleClick = (item, index) => {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     align-items: center;
     justify-content: space-around;
+}
+
+.selectedValue-color {
+    color: #007bff;
 }
 
 .nav-item {
