@@ -1,6 +1,9 @@
 <template>
-    <div class="drop-shadow-sm">
-        <div id="chart-container" style="width: 100%; height: 400px;"></div>
+    <div>
+        <div class="drop-shadow-sm">
+            <div :id="chartId" style="width: 100%; height: 400px;"></div>
+        </div>
+        <LineSelector :lines="lineNames" :visible-lines="visibleLines" @update-visibility="updateVisibility" />
     </div>
 </template>
 
@@ -8,67 +11,134 @@
 import Highcharts from 'highcharts'
 import FullScreen from 'highcharts/modules/full-screen'
 import Exporting from 'highcharts/modules/exporting'
+import Accessibility from 'highcharts/modules/accessibility'
+import LineSelector from './LineSelector.vue'
 
 // Initialize the modules
 FullScreen(Highcharts)
 Exporting(Highcharts)
+Accessibility(Highcharts)
 
 export default {
     name: 'MultiLineChart',
+    components: {
+        LineSelector
+    },
     props: {
         chartData: {
             type: Array,
-            required: true
+            required: true,
+            validator: function (value) {
+                return Array.isArray(value) && value.every(item => typeof item === 'object');
+            }
         },
         lineNames: {
             type: Array,
             default: () => []
+        },
+        chartType: {
+            type: String,
+            default: 'line'
+        },
+        yAxisTitle: {
+            type: String,
+            default: 'Values'
+        },
+        xAxisTitle: {
+            type: String,
+            default: 'Time'
+        },
+        chartTitle: {
+            type: String,
+            default: 'Multiple Line Chart (9:15 AM to 3:30 PM IST)'
         }
     },
     data() {
         return {
-            chart: null
+            chart: null,
+            chartId: `chart-${Math.random().toString(36).substr(2, 9)}`,
+            resizeListener: null,
+            visibleLines: []
         }
     },
-    mounted() {
-        this.initChart()
+    computed: {
+        autoColors() {
+            return this.generateColors(this.chartData.length)
+        }
     },
     watch: {
         chartData: {
-            handler: 'updateChart',
-            deep: true
+            handler(newData) {
+                this.$nextTick(() => {
+                    this.updateChartData(newData);
+                });
+            },
+            deep: true,
+            immediate: true
         }
+    },
+    mounted() {
+        this.$nextTick(() => {
+            this.initChart()
+            this.setupResizeListener()
+        })
+    },
+    beforeUnmount() {
+        this.cleanupChart()
     },
     methods: {
         initChart() {
-            if (!this.chartData || this.chartData.length === 0) {
-                console.warn('No chart data available');
+            try {
+                const options = this.getChartOptions();
+                if (this.chart) {
+                    this.chart.destroy();
+                }
+                this.chart = Highcharts.chart(this.chartId, options);
+                this.visibleLines = this.lineNames.map((_, index) => index);
+                this.updateChartData(this.chartData);
+            } catch (error) {
+                console.error('Error initializing chart:', error);
+            }
+        },
+        updateChartData(newData) {
+            if (!this.chart) {
+                this.initChart();
                 return;
             }
 
-            const series = this.chartData.map((dataset, index) => ({
-                name: this.lineNames[index] || `Dataset ${index + 1}`,
-                data: this.processData(dataset)
-            }));
+            newData.forEach((dataset, index) => {
+                const processedData = this.processData(dataset);
+                if (this.chart.series[index]) {
+                    this.chart.series[index].setData(processedData, false);
+                } else {
+                    this.chart.addSeries({
+                        name: this.lineNames[index] || `Dataset ${index + 1}`,
+                        data: processedData,
+                        color: this.autoColors[index]
+                    }, false);
+                }
+            });
 
-            this.chart = Highcharts.chart('chart-container', {
+            // Remove extra series if necessary
+            while (this.chart.series.length > newData.length) {
+                this.chart.series[this.chart.series.length - 1].remove(false);
+            }
+
+            this.chart.redraw();
+            this.updateVisibility(this.visibleLines);
+        },
+        getChartOptions() {
+            return {
                 chart: {
-                    type: 'line',
+                    type: this.chartType,
                     zoomType: 'xy',
-                    panning: {
-                        enabled: true,
-                        type: 'xy'
-                    },
+                    panning: { enabled: true, type: 'xy' },
                     panKey: 'shift',
-                    animation: false // Disable animation
+                    animation: false
                 },
-                title: {
-                    text: 'Multiple Line Chart (9:15 AM to 3:30 PM IST)'
-                },
+                title: { text: this.chartTitle },
                 xAxis: {
-                    title: {
-                        text: 'Time'
-                    },
+                    title: { text: this.xAxisTitle },
                     labels: {
                         formatter: function () {
                             const totalMinutes = this.value + (9 * 60 + 15)
@@ -81,11 +151,7 @@ export default {
                     min: 0,
                     max: 6 * 60 + 15
                 },
-                yAxis: {
-                    title: {
-                        text: 'Values'
-                    }
-                },
+                yAxis: { title: { text: this.yAxisTitle } },
                 tooltip: {
                     shared: true,
                     crosshairs: true,
@@ -102,10 +168,21 @@ export default {
                         return tooltipContent
                     }
                 },
-                legend: {
-                    enabled: true
+                legend: { enabled: false },
+                plotOptions: {
+                    series: {
+                        states: {
+                            hover: {
+                                enabled: false
+                            },
+                            inactive: {
+                                opacity: 1
+                            }
+                        }
+                    }
                 },
-                series: series,
+                series: [],
+                colors: this.autoColors,
                 exporting: {
                     enabled: true,
                     buttons: {
@@ -114,39 +191,21 @@ export default {
                         }
                     }
                 },
-                navigation: {
-                    buttonOptions: {
+                navigation: { buttonOptions: { enabled: true } },
+                accessibility: {
+                    enabled: true,
+                    description: `Chart showing ${this.chartTitle}`,
+                    keyboardNavigation: {
                         enabled: true
                     }
                 }
-            })
-        },
-
-        updateChart() {
-            if (this.chart) {
-                this.chartData.forEach((dataset, index) => {
-                    const data = this.processData(dataset);
-                    if (this.chart.series[index]) {
-                        this.chart.series[index].setData(data, false);
-                    } else {
-                        this.chart.addSeries({
-                            name: this.lineNames[index] || `Dataset ${index + 1}`,
-                            data: data
-                        }, false);
-                    }
-                });
-                this.chart.redraw();
-            } else {
-                this.initChart();
             }
         },
         processData(dataset) {
             try {
                 return Object.entries(dataset).map(([time, value]) => {
-                    const [hours, minutes] = time.split(' ')[1].split(':').map(Number);
-                    if (isNaN(hours) || isNaN(minutes)) {
-                        throw new Error(`Invalid time format: ${time}`);
-                    }
+                    const [, timeString] = time.split(' ');
+                    const [hours, minutes] = timeString.split(':').map(Number);
                     const minutesSince915 = (hours * 60 + minutes) - (9 * 60 + 15);
                     return [minutesSince915, value];
                 }).filter(([minutes]) => minutes >= 0 && minutes <= (6 * 60 + 15));
@@ -155,11 +214,56 @@ export default {
                 return [];
             }
         },
+        setupResizeListener() {
+            this.resizeListener = () => {
+                if (this.chart) {
+                    this.chart.reflow()
+                }
+            }
+            window.addEventListener('resize', this.resizeListener)
+        },
+        cleanupChart() {
+            if (this.chart) {
+                this.chart.destroy()
+            }
+            if (this.resizeListener) {
+                window.removeEventListener('resize', this.resizeListener)
+            }
+        },
         toggleFullscreen() {
             if (this.chart) {
                 this.chart.fullscreen.toggle()
             }
-        }
+        },
+        generateColors(count) {
+            const baseColors = [
+                '#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+                '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'
+            ]
+
+            if (count <= baseColors.length) {
+                return baseColors.slice(0, count)
+            }
+
+            const colors = [...baseColors]
+            for (let i = baseColors.length; i < count; i++) {
+                const hue = (i * 137.508) % 360
+                colors.push(`hsl(${hue}, 70%, 60%)`)
+            }
+            return colors
+        },
+        updateVisibility(visibleIndexes) {
+            if (!this.chart) return;
+
+            this.chart.series.forEach((series, index) => {
+                if (visibleIndexes.includes(index)) {
+                    series.show();
+                } else {
+                    series.hide();
+                }
+            });
+            this.visibleLines = visibleIndexes;
+        },
     }
 }
 </script>

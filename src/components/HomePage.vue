@@ -175,6 +175,8 @@ const messages = ref([])
 const MTMTable = ref([])
 const basket_chart_data = ref([])
 const basket_chart_name = ref([])
+const strategy_mtm_chart_data = ref([])
+const strategy_mtm_chart_name = ref([])
 let eventSource = null
 const pulse_signal = ref([])
 const time = ref([])
@@ -182,13 +184,14 @@ const user_infected = ref([])
 const checkBackendConnection = ref(true)
 
 const connectToSSE = () => {
+
   const eventSource = new EventSource(MyEnum.backendURL);
 
   eventSource.onmessage = (event) => {
     try {
       // Parse the event data
       let mapobj = JSON.parse(event.data);
-      // console.log(mapobj.time)
+
 
       // Check if live_index and client_data are present in the parsed object
       if (mapobj && mapobj.live_index && Array.isArray(mapobj.client_data)) {
@@ -218,7 +221,7 @@ const connectToSSE = () => {
           OpenQuantity: item.OpenQuantity !== undefined ? Number(item.OpenQuantity) : 0,
           NetQuantity: item.NetQuantity !== undefined ? Number(item.NetQuantity) : 0,
           MARGIN: item.Live_Client_Margin !== undefined ? Number(item.Live_Client_Margin) : 0,
-          VAR_PERCENTAGE: item.Live_Client_Var !== undefined ? ((Number(item.Live_Client_Var) / Number(item.Live_Client_Margin)) * 100).toPrecision(4) : 0,
+          VAR_PERCENTAGE: item.Live_Client_Var !== undefined && (item.Live_Client_Margin > 0) ? ((Number(item.Live_Client_Var) / Number(item.Live_Client_Margin)) * 100).toPrecision(4) : 0,
           VAR: item.Live_Client_Var !== undefined ? Number(item.Live_Client_Var) : 0,
         }));
 
@@ -233,6 +236,12 @@ const connectToSSE = () => {
         MTMTable.value = clients_data[0]["MTMTable"];
         basket_chart_name.value = mapobj.basket_data.map(obj => Object.keys(obj)[0]);
         basket_chart_data.value = mapobj.basket_data.map(obj => Object.values(obj)[0]);
+
+        strategy_mtm_chart_data.value = mapobj.strategy_mtm_chart['directional'].map(obj => Object.values(obj)[0]);
+        strategy_mtm_chart_name.value = mapobj.strategy_mtm_chart['directional'].map(obj => Object.keys(obj)[0]);
+
+
+
       } else {
         checkBackendConnection.value = false;
         console.error('Invalid structure of mapobj:', mapobj);
@@ -319,15 +328,23 @@ onUnmounted(() => {
       </div>
 
 
-      <!-- 
-      <Chart v-if="basket_chart_data.length > 0" :data="basket_chart_data" :labels="chart_labels" /> -->
-
 
       <div class="my-8">
         <p class="table-heading">Basket-wise Ideal MTM</p>
         <MultiLineChart v-if="basket_chart_data.length > 0" :chartData="basket_chart_data"
-          :lineNames="basket_chart_name" />
+          :lineNames="basket_chart_name" chartType="line" yAxisTitle="MTM Value" xAxisTitle="Time"
+          chartTitle="User MTM Comparison" />
       </div>
+      <div class="my-8">
+        <p class="table-heading">Basket-wise Ideal MTM</p>
+        <MultiLineChart v-if="strategy_mtm_chart_data.length > 0" :chartData="strategy_mtm_chart_data"
+          :lineNames="strategy_mtm_chart_name" chartType="line" yAxisTitle="MTM Value" xAxisTitle="Time"
+          chartTitle="User MTM Comparison" />
+      </div>
+
+
+
+
     </div>
   </div>
 </template>

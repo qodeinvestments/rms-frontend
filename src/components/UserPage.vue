@@ -331,6 +331,8 @@ let eventSource = null
 const date = ref()
 const data = ref([])
 const user_infected = ref([])
+const strategy_mtm_chart_data = ref([])
+const strategy_mtm_chart_name = ref([])
 
 const client_live_trade_book = ref([])
 const client_live_order_book = ref([])
@@ -347,6 +349,11 @@ const connectToSSE = () => {
       user_infected.value = Object.keys(response.pulse)
         .filter(key => (key.startsWith('pulse_trader_xts:') || key.startsWith('pulse_trader_zerodha:')) && response.pulse[key] === false)
         .map(key => key.split(':')[1]);
+
+
+
+      strategy_mtm_chart_data.value = response.strategy_mtm_chart['directional'].map(obj => Object.values(obj)[0]);
+      strategy_mtm_chart_name.value = response.strategy_mtm_chart['directional'].map(obj => Object.keys(obj)[0]);
 
 
       let result = response.client_data.find(client => client.name === name.value);
@@ -456,9 +463,23 @@ onUnmounted(() => {
 
     <div class="my-8" v-if="user_data">
       <p class="table-heading">User MTM</p>
-      <MultiLineChart v-if="user_data" :chartData="[user_data['MTMTable'], user_data['ideal_MTMTable']]"
-        :lineNames="['Actual MTM', 'Ideal MTM']" />
+      <MultiLineChart v-if="user_data" :key="'user-mtm'"
+        :chartData="[user_data['MTMTable'], user_data['ideal_MTMTable']]" :lineNames="['Actual MTM', 'Ideal MTM']"
+        chartType="line" yAxisTitle="MTM Value" xAxisTitle="Time" chartTitle="User MTM Comparison" />
     </div>
+
+
+
+    <div class="my-8">
+      <p class="table-heading">User 2 MTM</p>
+      <MultiLineChart :key="'user2-mtm'" :chartData="strategy_mtm_chart_data" :lineNames="strategy_mtm_chart_name"
+        chartType="line" yAxisTitle="MTM Value" xAxisTitle="Time" chartTitle="User MTM Comparison" />
+    </div>
+
+
+
+
+
     <!--  <BarChart v-if="user_data['Live_Client_Positions']" :chartData='user_data["Live_Client_Positions"]' /> -->
     <div class="navContainer">
       <NavBar :navColumns="['Positions', 'Order', 'Holdings', 'TradeBook']" @column-clicked="handleColumnClick" />
