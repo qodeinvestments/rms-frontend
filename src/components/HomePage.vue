@@ -238,6 +238,7 @@ const connectToSSE = () => {
         basket_chart_data.value = mapobj.basket_data.map(obj => Object.values(obj)[0]);
 
 
+
       } else {
         checkBackendConnection.value = false;
         console.error('Invalid structure of mapobj:', mapobj);
@@ -325,7 +326,12 @@ onUnmounted(() => {
 
 
 
-
+      <div class="my-8">
+        <p class="table-heading">Basket-wise Ideal MTM</p>
+        <MultiLineChart v-if="basket_chart_data.length > 0" :chartData="basket_chart_data"
+          :lineNames="basket_chart_name" chartType="line" yAxisTitle="MTM Value" xAxisTitle="Time"
+          chartTitle="User MTM Comparison" />
+      </div>
 
 
 
