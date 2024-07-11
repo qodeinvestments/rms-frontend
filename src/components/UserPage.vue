@@ -352,9 +352,6 @@ const connectToSSE = () => {
 
 
 
-      strategy_mtm_chart_data.value = response.strategy_mtm_chart['directional'].map(obj => Object.values(obj)[0]);
-      strategy_mtm_chart_name.value = response.strategy_mtm_chart['directional'].map(obj => Object.keys(obj)[0]);
-
 
       let result = response.client_data.find(client => client.name === name.value);
 
@@ -469,12 +466,6 @@ onUnmounted(() => {
     </div>
 
 
-
-    <div class="my-8">
-      <p class="table-heading">User 2 MTM</p>
-      <MultiLineChart :key="'user2-mtm'" :chartData="strategy_mtm_chart_data" :lineNames="strategy_mtm_chart_name"
-        chartType="line" yAxisTitle="MTM Value" xAxisTitle="Time" chartTitle="User MTM Comparison" />
-    </div>
 
 
 
