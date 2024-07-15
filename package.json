@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@esbuild/win32-x64": "^0.23.0",
     "@material-tailwind/html": "^2.2.2",
     "@tanstack/vue-table": "^8.17.3",
     "apexcharts": "^3.50.0",
@@ -30,5 +31,11 @@
     "sass": "^1.77.6",
     "tailwindcss": "^3.3.3",
     "vite": "^4.3.9"
-  }
+  },
+  "optionalDependencies": {
+  "@esbuild/linux-x64": "0.23.0",
+  "@esbuild/win32-x64": "0.23.0",
+  "@esbuild/darwin-x64": "0.23.0"
+}
+
 }
