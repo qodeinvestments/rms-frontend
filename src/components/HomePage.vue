@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import NavBar from './NavBar.vue'
 import {
   FlexRender,
@@ -8,22 +8,20 @@ import {
   createColumnHelper,
 } from '@tanstack/vue-table'
 import SignalForTable from './SignalForTable.vue'
-import { ref, h } from 'vue'
-import axios from 'axios';
 import TanStackTestTable from './TanStackTestTable.vue'
 import Chart from './Chart.vue'
 import MultiLineChart from './HighCharts.vue'
 import WarningSignal from './WarningSignal.vue'
-import { map } from 'highcharts';
-import { MyEnum } from '../Enums/Prefix.js';
+import { MyEnum } from '../Enums/Prefix.js'
+
 const defaultData = []
 const NavigationMap = {
   "AccountName": "/user/"
-};
+}
 
 const data = ref(defaultData)
-
 const columnHelper = createColumnHelper()
+
 const columns = [
 
   columnHelper.accessor(row => row.AccountName, {
@@ -173,148 +171,110 @@ const connection_BackendData = ref([])
 const basket_BackendData = ref([])
 const strategy_mtm_chart_BackendData = ref([])
 
-
 const index_data = ref("hello")
 const messages = ref([])
 const basket_chart_data = ref([])
 const basket_chart_name = ref([])
 const strategy_mtm_chart_data = ref([])
 const strategy_mtm_chart_name = ref([])
-let eventSource = null
 const pulse_signal = ref([])
 const time = ref([])
 const user_infected = ref([])
 const checkBackendConnection = ref(true)
+let socket = null
 
-const separateKeysAndValues = (data) => {
-  let keys = Object.keys(data)
-  let values = Object.values(data)
-  return { keys, values }
+const handleMessage = (message) => {
+  if (message.channel === "client_dashboard_data") {
+    client_BackendData.value = message.data
+  } else if (message.channel === 'basket_dashboard_data') {
+    basket_BackendData.value = message.data
+  } else if (message.channel === 'connection_dashboard_data') {
+    connection_BackendData.value = message.data
+  } else if (message.channel === 'strategy_mtm_chart_data') {
+    strategy_mtm_chart_BackendData.value = message.data
+  }
+
+  updateData()
 }
 
-const connectToSSE = () => {
+const updateData = () => {
+  checkBackendConnection.value = true
+  index_data.value = connection_BackendData.value.live_index
 
-  const eventSource = new EventSource(MyEnum.backendURL);
+  let clients_data = client_BackendData.value.client_data
+  let basket_data = basket_BackendData.value.basket_data
+  let pulse_data = connection_BackendData.value.pulse
+  time.value = connection_BackendData.value.time
 
-  eventSource.onmessage = (event) => {
-    try {
-      // Parse the event data
-      let mapobj = JSON.parse(event.data);
-      if (mapobj.channel === "client_dashboard_data") {
-        client_BackendData.value = mapobj.data
-      }
-      else if (mapobj.channel === 'basket_dashboard_data') {
-        basket_BackendData.value = mapobj.data
-      }
-      else if (mapobj.channel === 'connection_dashboard_data') {
-        connection_BackendData.value = mapobj.data
-      }
-      else if (mapobj.channel === 'strategy_mtm_chart_data') {
-        strategy_mtm_chart_BackendData.value = mapobj.data
-      }
+  if (connection_BackendData.value.pulse) {
+    user_infected.value = Object.keys(connection_BackendData.value.pulse)
+      .filter(key => (key.startsWith('pulse_trader_xts:') || key.startsWith('pulse_trader_zerodha:')) && connection_BackendData.value.pulse[key] === false)
+      .map(key => key.split(':')[1])
+  }
 
-      // Check if live_index and client_data are present in the parsed object
-      if (mapobj) {
-        checkBackendConnection.value = true;
-        index_data.value = connection_BackendData.value.live_index;
+  if (clients_data && clients_data.length > 0) {
+    data.value = clients_data.map(item => ({
+      AccountName: item.name || '',
+      IdealMTM: item.ideal_MTM !== undefined ? Number(item.ideal_MTM) : 0,
+      Day_PL: item.MTM !== undefined ? Number(item.MTM) : 0,
+      Friction: item.MTM !== undefined && item.ideal_MTM !== undefined
+        ? (Number(item.MTM) - Number(item.ideal_MTM)).toFixed(2)
+        : '0.00',
+      RejectedOrderCount: item.Rejected_orders !== undefined ? Number(item.Rejected_orders) : 0,
+      PendingOrderCount: item.Pending_orders !== undefined ? Number(item.Pending_orders) : 0,
+      OpenQuantity: item.OpenQuantity !== undefined ? Number(item.OpenQuantity) : 0,
+      NetQuantity: item.NetQuantity !== undefined ? Number(item.NetQuantity) : 0,
+      MARGIN: item.Live_Client_Margin !== undefined ? Number(item.Live_Client_Margin) : 0,
+      VAR_PERCENTAGE: item.Live_Client_Var !== undefined && (item.Live_Client_Margin > 0) ? ((Number(item.Live_Client_Var) / Number(item.Live_Client_Margin)) * 100).toPrecision(4) : 0,
+      VAR: item.Live_Client_Var !== undefined ? Number(item.Live_Client_Var) : 0,
+    }))
+  }
 
-        let clients_data = client_BackendData.value.client_data;
-        let basket_data = basket_BackendData.value.basket_data
-        let pulse_data = connection_BackendData.value.pulse;
-        time.value = connection_BackendData.value.time;
+  if (connection_BackendData.value.pulse) {
+    pulse_signal.value = pulse_data
+    pulse_signal.value.backendConnection = checkBackendConnection
+  }
 
-
-        if (connection_BackendData.value.pulse) {
-          user_infected.value = Object.keys(connection_BackendData.value.pulse)
-            .filter(key => (key.startsWith('pulse_trader_xts:') || key.startsWith('pulse_trader_zerodha:')) && connection_BackendData.value.pulse[key] === false)
-            .map(key => key.split(':')[1]);
-        }
-        if (clients_data.length > 0) {
-
-          data.value = clients_data.map(item => ({
-            AccountName: item.name || '',
-            IdealMTM: item.ideal_MTM !== undefined ? Number(item.ideal_MTM) : 0,
-            Day_PL: item.MTM !== undefined ? Number(item.MTM) : 0,
-            Friction: item.MTM !== undefined && item.ideal_MTM !== undefined
-              ? (Number(item.MTM) - Number(item.ideal_MTM)).toFixed(2)
-              : '0.00',
-            RejectedOrderCount: item.Rejected_orders !== undefined ? Number(item.Rejected_orders) : 0,
-            PendingOrderCount: item.Pending_orders !== undefined ? Number(item.Pending_orders) : 0,
-            OpenQuantity: item.OpenQuantity !== undefined ? Number(item.OpenQuantity) : 0,
-            NetQuantity: item.NetQuantity !== undefined ? Number(item.NetQuantity) : 0,
-            MARGIN: item.Live_Client_Margin !== undefined ? Number(item.Live_Client_Margin) : 0,
-            VAR_PERCENTAGE: item.Live_Client_Var !== undefined && (item.Live_Client_Margin > 0) ? ((Number(item.Live_Client_Var) / Number(item.Live_Client_Margin)) * 100).toPrecision(4) : 0,
-            VAR: item.Live_Client_Var !== undefined ? Number(item.Live_Client_Var) : 0,
-          }));
-        }
-
-        if (connection_BackendData.value.pulse) {
-          pulse_signal.value = pulse_data
-          pulse_signal.value.backendConnection = checkBackendConnection;
-        }
-        if (basket_data) {
-          basket_chart_name.value = basket_data.map(obj => Object.keys(obj)[0]);
-          basket_chart_data.value = basket_data.map(obj => Object.values(obj)[0]);
-        }
-
-
-      } else {
-        checkBackendConnection.value = false;
-        console.error('Invalid structure of mapobj:', mapobj);
-      }
-    } catch (error) {
-      checkBackendConnection.value = false;
-      console.error('Error parsing event data or updating data:', error);
-    }
-  };
-
-  eventSource.onopen = () => {
-    checkBackendConnection.value = false;
-    messages.value.push('Connection opened');
-  };
-
-  eventSource.onerror = (error) => {
-    checkBackendConnection.value = false;
-    messages.value.push('Error occurred');
-
-    if (error.target.readyState === EventSource.CLOSED) {
-      messages.value.push('Connection closed');
-      setTimeout(() => {
-        connectToSSE();  // Attempt to reconnect
-      }, 2000);  // Retry connection after 5 seconds
-    } else if (error.target.readyState === EventSource.CONNECTING) {
-      messages.value.push('Reconnecting...');
-    }
-
-    // If the error is due to a 404, attempt to reconnect
-    if (error.status === 404) {
-      messages.value.push('404 error occurred, attempting to reconnect');
-      eventSource.close();
-      setTimeout(() => {
-        connectToSSE();  // Attempt to reconnect
-      }, 2000);  // Retry connection after 5 seconds
-    }
-  };
-};
-
-
-
+  if (basket_data) {
+    basket_chart_name.value = basket_data.map(obj => Object.keys(obj)[0])
+    basket_chart_data.value = basket_data.map(obj => Object.values(obj)[0])
+  }
+}
 
 onMounted(() => {
-  connectToSSE();
-})
+  console.log('in mounted')
+  socket = new WebSocket('ws://localhost:5000/ws')  // Update this URL to match your backend
+  console.log(socket)
 
-onUnmounted(() => {
-  if (eventSource) {
-    eventSource.close()
+  socket.onopen = () => {
+    console.log('WebSocket connection opened')
+    checkBackendConnection.value = true
+  }
+
+  socket.onmessage = (event) => {
+    const message = JSON.parse(event.data)
+    handleMessage(message)
+  }
+
+  socket.onclose = () => {
+    console.log('WebSocket connection closed.')
+    checkBackendConnection.value = false
+  }
+
+  socket.onerror = (e) => {
+    console.log('WebSocket error:', e)
+    checkBackendConnection.value = false
   }
 })
 
+onUnmounted(() => {
+  if (socket) {
+    socket.close()
+  }
+})
 </script>
 
 <template>
-
-
   <div class="homePage_Container bg-[#efefef]/30">
     <div v-if="index_data" class="nav_index_container font-semibold bg-white  drop-shadow-sm">
       <p>BANKNIFTY : {{ index_data.BANKNIFTYSPOT ? index_data.BANKNIFTYSPOT : 0 }}</p>
@@ -329,13 +289,6 @@ onUnmounted(() => {
     </div>
 
     <div class="mx-auto px-8 py-8">
-
-      <!-- <TableOriginal /> -->
-      <!-- <TableTanstack :data="people" :columns="columnsPeople" />
-
-  <div class="my-8">
-    <TableTanstack :data="cars" :columns="columnsCars" />
-  </div> -->
       <div class="my-8">
         <p class="table-heading">Accounts</p>
         <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL', 'Friction']"
@@ -343,14 +296,11 @@ onUnmounted(() => {
           :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': user_infected }" />
       </div>
 
-
       <div class="my-8">
         <p class="table-heading">Basket-wise Ideal MTM</p>
         <MultiLineChart :data="basket_chart_data" :keys="basket_chart_name">
         </MultiLineChart>
-
       </div>
-
 
       <div v-for="(value, key) in strategy_mtm_chart_BackendData" :key="key">
         <h3>{{ key }}</h3>
@@ -360,11 +310,10 @@ onUnmounted(() => {
           </li>
         </ul>
       </div>
-
-
     </div>
   </div>
 </template>
+
 
 <style>
 html {
