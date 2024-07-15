@@ -168,11 +168,14 @@ const columns = [
 
 // })
 
+const client_BackendData = ref([])
+const connection_BackendData = ref([])
+const basket_BackendData = ref([])
+const strategy_mtm_chart_BackendData = ref([])
 
 
 const index_data = ref("hello")
 const messages = ref([])
-const MTMTable = ref([])
 const basket_chart_data = ref([])
 const basket_chart_name = ref([])
 const strategy_mtm_chart_data = ref([])
@@ -183,6 +186,12 @@ const time = ref([])
 const user_infected = ref([])
 const checkBackendConnection = ref(true)
 
+const separateKeysAndValues = (data) => {
+  let keys = Object.keys(data)
+  let values = Object.values(data)
+  return { keys, values }
+}
+
 const connectToSSE = () => {
 
   const eventSource = new EventSource(MyEnum.backendURL);
@@ -191,52 +200,62 @@ const connectToSSE = () => {
     try {
       // Parse the event data
       let mapobj = JSON.parse(event.data);
-
+      if (mapobj.channel === "client_dashboard_data") {
+        client_BackendData.value = mapobj.data
+      }
+      else if (mapobj.channel === 'basket_dashboard_data') {
+        basket_BackendData.value = mapobj.data
+      }
+      else if (mapobj.channel === 'connection_dashboard_data') {
+        connection_BackendData.value = mapobj.data
+      }
+      else if (mapobj.channel === 'strategy_mtm_chart_data') {
+        strategy_mtm_chart_BackendData.value = mapobj.data
+      }
 
       // Check if live_index and client_data are present in the parsed object
-      if (mapobj && mapobj.live_index && Array.isArray(mapobj.client_data)) {
+      if (mapobj) {
         checkBackendConnection.value = true;
-        index_data.value = mapobj.live_index;
+        index_data.value = connection_BackendData.value.live_index;
 
-        let clients_data = mapobj.client_data;
-        time.value = mapobj.time;
-
-
-        user_infected.value = Object.keys(mapobj.pulse)
-          .filter(key => (key.startsWith('pulse_trader_xts:') || key.startsWith('pulse_trader_zerodha:')) && mapobj.pulse[key] === false)
-          .map(key => key.split(':')[1]);
+        let clients_data = client_BackendData.value.client_data;
+        let basket_data = basket_BackendData.value.basket_data
+        let pulse_data = connection_BackendData.value.pulse;
+        time.value = connection_BackendData.value.time;
 
 
+        if (connection_BackendData.value.pulse) {
+          user_infected.value = Object.keys(connection_BackendData.value.pulse)
+            .filter(key => (key.startsWith('pulse_trader_xts:') || key.startsWith('pulse_trader_zerodha:')) && connection_BackendData.value.pulse[key] === false)
+            .map(key => key.split(':')[1]);
+        }
+        if (clients_data.length > 0) {
 
+          data.value = clients_data.map(item => ({
+            AccountName: item.name || '',
+            IdealMTM: item.ideal_MTM !== undefined ? Number(item.ideal_MTM) : 0,
+            Day_PL: item.MTM !== undefined ? Number(item.MTM) : 0,
+            Friction: item.MTM !== undefined && item.ideal_MTM !== undefined
+              ? (Number(item.MTM) - Number(item.ideal_MTM)).toFixed(2)
+              : '0.00',
+            RejectedOrderCount: item.Rejected_orders !== undefined ? Number(item.Rejected_orders) : 0,
+            PendingOrderCount: item.Pending_orders !== undefined ? Number(item.Pending_orders) : 0,
+            OpenQuantity: item.OpenQuantity !== undefined ? Number(item.OpenQuantity) : 0,
+            NetQuantity: item.NetQuantity !== undefined ? Number(item.NetQuantity) : 0,
+            MARGIN: item.Live_Client_Margin !== undefined ? Number(item.Live_Client_Margin) : 0,
+            VAR_PERCENTAGE: item.Live_Client_Var !== undefined && (item.Live_Client_Margin > 0) ? ((Number(item.Live_Client_Var) / Number(item.Live_Client_Margin)) * 100).toPrecision(4) : 0,
+            VAR: item.Live_Client_Var !== undefined ? Number(item.Live_Client_Var) : 0,
+          }));
+        }
 
-        data.value = clients_data.map(item => ({
-          AccountName: item.name || '',
-          IdealMTM: item.ideal_MTM !== undefined ? Number(item.ideal_MTM) : 0,
-          Day_PL: item.MTM !== undefined ? Number(item.MTM) : 0,
-          Friction: item.MTM !== undefined && item.ideal_MTM !== undefined
-            ? (Number(item.MTM) - Number(item.ideal_MTM)).toFixed(2)
-            : '0.00',
-          RejectedOrderCount: item.Rejected_orders !== undefined ? Number(item.Rejected_orders) : 0,
-          PendingOrderCount: item.Pending_orders !== undefined ? Number(item.Pending_orders) : 0,
-          OpenQuantity: item.OpenQuantity !== undefined ? Number(item.OpenQuantity) : 0,
-          NetQuantity: item.NetQuantity !== undefined ? Number(item.NetQuantity) : 0,
-          MARGIN: item.Live_Client_Margin !== undefined ? Number(item.Live_Client_Margin) : 0,
-          VAR_PERCENTAGE: item.Live_Client_Var !== undefined && (item.Live_Client_Margin > 0) ? ((Number(item.Live_Client_Var) / Number(item.Live_Client_Margin)) * 100).toPrecision(4) : 0,
-          VAR: item.Live_Client_Var !== undefined ? Number(item.Live_Client_Var) : 0,
-        }));
-
-        // Logging other parts of the response for future use
-        // console.log("basket_data", mapobj.basket_data);
-        // console.log("live_positions", mapobj.live_positions);
-        // console.log("pulse", mapobj.pulse);
-
-        // Update additional values
-        pulse_signal.value = mapobj.pulse;
-        pulse_signal.value.backendConnection = checkBackendConnection;
-        MTMTable.value = clients_data[0]["MTMTable"];
-        basket_chart_name.value = mapobj.basket_data.map(obj => Object.keys(obj)[0]);
-        basket_chart_data.value = mapobj.basket_data.map(obj => Object.values(obj)[0]);
-
+        if (connection_BackendData.value.pulse) {
+          pulse_signal.value = pulse_data
+          pulse_signal.value.backendConnection = checkBackendConnection;
+        }
+        if (basket_data) {
+          basket_chart_name.value = basket_data.map(obj => Object.keys(obj)[0]);
+          basket_chart_data.value = basket_data.map(obj => Object.values(obj)[0]);
+        }
 
 
       } else {
@@ -297,12 +316,12 @@ onUnmounted(() => {
 
 
   <div class="homePage_Container bg-[#efefef]/30">
-    <div class="nav_index_container font-semibold bg-white  drop-shadow-sm">
-      <p>BANKNIFTY : {{ index_data.BANKNIFTYSPOT }}</p>
-      <p>FINNIFTY : {{ index_data.FINNIFTYSPOT }}</p>
-      <p>MIDCPNIFTY : {{ index_data.MIDCPNIFTYSPOT }}</p>
-      <p>NIFTY : {{ index_data.NIFTYSPOT }}</p>
-      <p> SENSEX : {{ index_data.SENSEXSPOT }}</p>
+    <div v-if="index_data" class="nav_index_container font-semibold bg-white  drop-shadow-sm">
+      <p>BANKNIFTY : {{ index_data.BANKNIFTYSPOT ? index_data.BANKNIFTYSPOT : 0 }}</p>
+      <p>FINNIFTY : {{ index_data.FINNIFTYSPOT ? index_data.FINNIFTYSPOT : 0 }}</p>
+      <p>MIDCPNIFTY : {{ index_data.MIDCPNIFTYSPOT ? index_data.MIDCPNIFTYSPOT : 0 }}</p>
+      <p>NIFTY : {{ index_data.NIFTYSPOT ? index_data.NIFTYSPOT : 0 }}</p>
+      <p> SENSEX : {{ index_data.SENSEXSPOT ? index_data.SENSEXSPOT : 0 }}</p>
     </div>
     <div class="time-container">
       <p class="timeDiv"> Time:{{ time }}</p>
@@ -325,14 +344,22 @@ onUnmounted(() => {
       </div>
 
 
-
       <div class="my-8">
         <p class="table-heading">Basket-wise Ideal MTM</p>
-        <MultiLineChart :key="user - mtm" v-if="basket_chart_data.length > 0" :chartData="basket_chart_data"
-          :lineNames="basket_chart_name" chartType="line" yAxisTitle="MTM Value" xAxisTitle="Time"
-          chartTitle="User MTM Comparison" />
+        <MultiLineChart :data="basket_chart_data" :keys="basket_chart_name">
+        </MultiLineChart>
+
       </div>
 
+
+      <div v-for="(value, key) in strategy_mtm_chart_BackendData" :key="key">
+        <h3>{{ key }}</h3>
+        <ul>
+          <li v-for="(nestedValue, nestedKey) in value" :key="nestedKey">
+            {{ nestedKey }}: {{ nestedValue }}
+          </li>
+        </ul>
+      </div>
 
 
     </div>
