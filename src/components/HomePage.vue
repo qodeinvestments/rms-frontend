@@ -141,30 +141,13 @@ const columns = [
 ]
 
 
+const separateKeysAndValues = (data) => {
+  let val = Object.values(data)
+  const keys = val.map(item => Object.keys(item)[0]);
+  const values = val.map(item => Object.values(item)[0]);
+  return { keys, values }
+}
 
-
-
-
-// onMounted(() => {
-
-//   console.log('in mounted')
-//   const socket = new WebSocket('ws://localhost:8000/ws')
-//   console.log(socket)
-//   socket.onmessage = (event) => {
-//     const updatedData = [...data.value]
-//     updatedData[0]['PortfolioValue'] = Number(event.data) // Update the age
-//     data.value = updatedData
-//     console.log(event.data, "  ", data.value)
-//   }
-
-//   socket.onclose = () => {
-//     console.log('WebSocket connection closed.')
-//   }
-//   socket.onerror = (e) => {
-//     console.log(e)
-//   }
-
-// })
 
 const client_BackendData = ref([])
 const connection_BackendData = ref([])
@@ -180,8 +163,13 @@ const strategy_mtm_chart_name = ref([])
 const pulse_signal = ref([])
 const time = ref([])
 const user_infected = ref([])
-const checkBackendConnection = ref(true)
+const checkBackendConnection = ref(false)
+
 let socket = null
+let reconnectAttempts = 0
+const maxReconnectAttempts = 5
+const reconnectInterval = 5000 // 5 seconds
+const pingInterval = 30000 // 30 seconds
 
 const handleMessage = (message) => {
   if (message.channel === "client_dashboard_data") {
@@ -196,6 +184,7 @@ const handleMessage = (message) => {
 
   updateData()
 }
+
 
 const updateData = () => {
   checkBackendConnection.value = true
@@ -214,6 +203,8 @@ const updateData = () => {
 
   if (clients_data && clients_data.length > 0) {
     data.value = clients_data.map(item => ({
+
+
       AccountName: item.name || '',
       IdealMTM: item.ideal_MTM !== undefined ? Number(item.ideal_MTM) : 0,
       Day_PL: item.MTM !== undefined ? Number(item.MTM) : 0,
@@ -241,38 +232,79 @@ const updateData = () => {
   }
 }
 
-onMounted(() => {
-  console.log('in mounted')
-  socket = new WebSocket('ws://localhost:5000/ws')  // Update this URL to match your backend
-  console.log(socket)
+const connectWebSocket = () => {
+  const socket = new WebSocket("wss://139.5.189.188:5000/ws");
 
   socket.onopen = () => {
     console.log('WebSocket connection opened')
     checkBackendConnection.value = true
+    reconnectAttempts = 0
+    startPingInterval()
   }
 
   socket.onmessage = (event) => {
-    const message = JSON.parse(event.data)
-    handleMessage(message)
+    if (event.data === 'ping') {
+      socket.send('pong')
+    } else {
+      const message = JSON.parse(event.data)
+      handleMessage(message)
+    }
   }
 
-  socket.onclose = () => {
-    console.log('WebSocket connection closed.')
+  socket.onclose = (event) => {
+    console.log('WebSocket connection closed:', event.reason)
     checkBackendConnection.value = false
+    stopPingInterval()
+    reconnect()
   }
 
-  socket.onerror = (e) => {
-    console.log('WebSocket error:', e)
+
+  socket.onerror = (error) => {
+    console.error('WebSocket error:', error)
     checkBackendConnection.value = false
   }
+}
+const reconnect = () => {
+  if (reconnectAttempts < maxReconnectAttempts) {
+    reconnectAttempts++
+    console.log(`Attempting to reconnect (${reconnectAttempts}/${maxReconnectAttempts})...`)
+    setTimeout(connectWebSocket, reconnectInterval)
+  } else {
+    console.log('Max reconnection attempts reached. Please refresh the page.')
+  }
+}
+
+let pingIntervalId = null
+
+const startPingInterval = () => {
+  pingIntervalId = setInterval(() => {
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send('ping')
+    }
+  }, pingInterval)
+}
+
+const stopPingInterval = () => {
+  if (pingIntervalId) {
+    clearInterval(pingIntervalId)
+    pingIntervalId = null
+  }
+}
+
+
+onMounted(() => {
+  connectWebSocket()
 })
 
 onUnmounted(() => {
   if (socket) {
     socket.close()
   }
+  stopPingInterval()
 })
 </script>
+
+
 
 <template>
   <div class="homePage_Container bg-[#efefef]/30">
@@ -303,13 +335,16 @@ onUnmounted(() => {
       </div>
 
       <div v-for="(value, key) in strategy_mtm_chart_BackendData" :key="key">
-        <h3>{{ key }}</h3>
-        <ul>
-          <li v-for="(nestedValue, nestedKey) in value" :key="nestedKey">
-            {{ nestedKey }}: {{ nestedValue }}
-          </li>
-        </ul>
+        <div class="my-8" v-for="(nestedValue, nestedKey) in value" :key="nestedKey">
+          <p class="table-heading">{{ nestedKey }}</p>
+          <MultiLineChart :data="separateKeysAndValues(nestedValue).values"
+            :keys="separateKeysAndValues(nestedValue).keys">
+          </MultiLineChart>
+        </div>
+
       </div>
+
+
     </div>
   </div>
 </template>

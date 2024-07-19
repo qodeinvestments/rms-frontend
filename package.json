@@ -8,16 +8,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@esbuild/win32-x64": "^0.23.0",
     "@material-tailwind/html": "^2.2.2",
     "@tanstack/vue-table": "^8.17.3",
+    "@vueuse/core": "^10.11.0",
     "apexcharts": "^3.50.0",
     "axios": "^1.7.2",
     "chart.js": "^4.4.3",
     "chartjs-plugin-zoom": "^2.0.1",
-    "highcharts": "^11.4.4",
+    "highcharts": "^11.4.6",
     "highcharts-vue": "^2.0.1",
+    "lightweight-charts": "^4.1.7",
+    "lodash": "^4.17.21",
     "moment-timezone": "^0.5.45",
+    "uplot": "^1.6.30",
     "uuid": "^10.0.0",
     "vue": "^3.3.4",
     "vue-chartjs": "^5.3.1",
@@ -33,9 +36,8 @@
     "vite": "^4.3.9"
   },
   "optionalDependencies": {
-  "@esbuild/linux-x64": "0.23.0",
-  "@esbuild/win32-x64": "0.23.0",
-  "@esbuild/darwin-x64": "0.23.0"
-}
-
+    "@esbuild/darwin-x64": "0.23.0",
+    "@esbuild/linux-x64": "0.23.0",
+    "@esbuild/win32-x64": "0.23.0"
+  }
 }
