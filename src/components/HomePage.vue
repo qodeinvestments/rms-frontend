@@ -233,7 +233,7 @@ const updateData = () => {
 }
 
 const connectWebSocket = () => {
-  const socket = new WebSocket("ws://139.5.189.188:5000/ws");
+  const socket = new WebSocket("wss://139.5.189.188:5000/ws");
 
   socket.onopen = () => {
     console.log('WebSocket connection opened')
