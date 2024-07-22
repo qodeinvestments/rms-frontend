@@ -14,6 +14,8 @@ import MultiLineChart from './HighCharts.vue'
 import WarningSignal from './WarningSignal.vue'
 import { MyEnum } from '../Enums/Prefix.js'
 
+import LightWeightChart from './LightWeightChart.vue';
+
 const defaultData = []
 const NavigationMap = {
   "AccountName": "/user/"
@@ -233,7 +235,7 @@ const updateData = () => {
 }
 
 const connectWebSocket = () => {
-  const socket = new WebSocket("wss://139.5.189.188:5000/ws");
+  const socket = new WebSocket('wss://api.swancapital.in/ws');
 
   socket.onopen = () => {
     console.log('WebSocket connection opened')
@@ -264,6 +266,7 @@ const connectWebSocket = () => {
     checkBackendConnection.value = false
   }
 }
+
 const reconnect = () => {
   if (reconnectAttempts < maxReconnectAttempts) {
     reconnectAttempts++
@@ -308,6 +311,8 @@ onUnmounted(() => {
 
 <template>
   <div class="homePage_Container bg-[#efefef]/30">
+    <LightWeightChart />
+
     <div v-if="index_data" class="nav_index_container font-semibold bg-white  drop-shadow-sm">
       <p>BANKNIFTY : {{ index_data.BANKNIFTYSPOT ? index_data.BANKNIFTYSPOT : 0 }}</p>
       <p>FINNIFTY : {{ index_data.FINNIFTYSPOT ? index_data.FINNIFTYSPOT : 0 }}</p>
