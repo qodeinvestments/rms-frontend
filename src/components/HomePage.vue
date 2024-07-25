@@ -176,6 +176,7 @@ const pingInterval = 30000 // 30 seconds
 const handleMessage = (message) => {
   if (message.channel === "client_dashboard_data") {
     client_BackendData.value = message.data
+
   } else if (message.channel === 'basket_dashboard_data') {
     basket_BackendData.value = message.data
   } else if (message.channel === 'connection_dashboard_data') {
@@ -193,7 +194,6 @@ const updateData = () => {
   index_data.value = connection_BackendData.value.live_index
 
   let clients_data = client_BackendData.value.client_data
-  let basket_data = basket_BackendData.value.basket_data
   let pulse_data = connection_BackendData.value.pulse
   time.value = connection_BackendData.value.time
 
@@ -228,14 +228,11 @@ const updateData = () => {
     pulse_signal.value.backendConnection = checkBackendConnection
   }
 
-  if (basket_data) {
-    basket_chart_name.value = basket_data.map(obj => Object.keys(obj)[0])
-    basket_chart_data.value = basket_data.map(obj => Object.values(obj)[0])
-  }
 }
 
 const connectWebSocket = () => {
-  const socket = new WebSocket('wss://api.swancapital.in/ws');
+  const socket = new WebSocket('ws://localhost:5000/ws');
+
 
   socket.onopen = () => {
     console.log('WebSocket connection opened')
@@ -249,6 +246,7 @@ const connectWebSocket = () => {
       socket.send('pong')
     } else {
       const message = JSON.parse(event.data)
+
       handleMessage(message)
     }
   }
@@ -311,7 +309,8 @@ onUnmounted(() => {
 
 <template>
   <div class="homePage_Container bg-[#efefef]/30">
-    <LightWeightChart />
+    <LightWeightChart v-if="basket_BackendData.basket_data"
+      :Chartdata="[basket_BackendData.basket_data['directional'], basket_BackendData.basket_data['ikigai']]" />
 
     <div v-if="index_data" class="nav_index_container font-semibold bg-white  drop-shadow-sm">
       <p>BANKNIFTY : {{ index_data.BANKNIFTYSPOT ? index_data.BANKNIFTYSPOT : 0 }}</p>

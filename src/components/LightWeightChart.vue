@@ -2,6 +2,12 @@
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 import { ref } from 'vue';
+const props = defineProps({
+    Chartdata: {
+        type: Array,
+        required: true,
+    },
+});
 
 /*
  * There are example components in both API styles: Options API, and Composition API
@@ -64,7 +70,7 @@ function generateSampleData(ohlc) {
 }
 
 const chartOptions = ref({});
-const data = ref(generateSampleData(false));
+const data = props.Chartdata;
 const seriesOptions = ref({
     color: 'rgb(45, 77, 205)',
 });

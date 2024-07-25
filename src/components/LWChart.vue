@@ -30,6 +30,10 @@ const props = defineProps({
     },
     timeScaleOptions: {
         type: Object,
+        default: () => ({
+            timeVisible: true,
+            secondsVisible: false,
+        }),
     },
     priceScaleOptions: {
         type: Object,
