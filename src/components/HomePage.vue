@@ -310,7 +310,7 @@ onUnmounted(() => {
 <template>
   <div class="homePage_Container bg-[#efefef]/30">
     <LightWeightChart v-if="basket_BackendData.basket_data"
-      :Chartdata="[basket_BackendData.basket_data['directional'], basket_BackendData.basket_data['ikigai']]" />
+      :Chartdata="basket_BackendData.basket_data['directional']" />
 
     <div v-if="index_data" class="nav_index_container font-semibold bg-white  drop-shadow-sm">
       <p>BANKNIFTY : {{ index_data.BANKNIFTYSPOT ? index_data.BANKNIFTYSPOT : 0 }}</p>
