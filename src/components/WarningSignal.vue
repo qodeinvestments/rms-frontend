@@ -16,11 +16,21 @@
             <p class="textContainer">BackEnd Connection :</p>
             <span :class="signals['backendConnection'] ? 'greensignal' : 'redsignal'"></span>
         </div>
-        
+        <div class="signal-container">
+            <p class="textContainer">FrontToBack Latency :</p>
+            <span>{{ latency }}</span>
+        </div>
+        <div class="signal-container">
+            <p class="textContainer"> FrontToBack Max Latency :</p>
+            <span>{{ max_latency }}</span>
+        </div>
+
+
     </div>
 </template>
 
 <script setup>
+
 import { watch } from 'vue';
 import { toRefs } from 'vue';
 
@@ -28,6 +38,14 @@ const props = defineProps({
     signals: {
         type: Object,
         required: true,
+    },
+    latency: {
+        type: Number,
+        required: true
+    },
+    max_latency: {
+        type: Number,
+        required: true
     }
 });
 

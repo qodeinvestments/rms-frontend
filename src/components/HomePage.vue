@@ -143,13 +143,6 @@ const columns = [
 ]
 
 
-const separateKeysAndValues = (data) => {
-  let val = Object.values(data)
-  const keys = val.map(item => Object.keys(item)[0]);
-  const values = val.map(item => Object.values(item)[0]);
-  return { keys, values }
-}
-
 
 const client_BackendData = ref([])
 const connection_BackendData = ref([])
@@ -166,6 +159,9 @@ const pulse_signal = ref([])
 const time = ref([])
 const user_infected = ref([])
 const checkBackendConnection = ref(false)
+const Latency = ref(0)
+const max_latency = ref(0);
+
 
 let socket = null
 let reconnectAttempts = 0
@@ -173,17 +169,60 @@ const maxReconnectAttempts = 5
 const reconnectInterval = 5000 // 5 seconds
 const pingInterval = 30000 // 30 seconds
 
-const handleMessage = (message) => {
-  if (message.channel === "client_dashboard_data") {
-    client_BackendData.value = message.data
+const getCurrentDateTime = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+}
+const measureLatency = (dateStr, dateStr2) => {
 
-  } else if (message.channel === 'basket_dashboard_data') {
-    basket_BackendData.value = message.data
-  } else if (message.channel === 'connection_dashboard_data') {
-    connection_BackendData.value = message.data
-  } else if (message.channel === 'strategy_mtm_chart_data') {
-    strategy_mtm_chart_BackendData.value = message.data
+  try {
+
+    let [datePart, timePart] = dateStr.split(' ');
+    let [day, month, year] = datePart.split('-').map(Number);
+    let [hours, minutes, seconds] = timePart.split(':').map(Number);
+    let milliseconds = Number(timePart.split('.')[1] || 0);
+    let date1 = new Date(year, month - 1, day, hours, minutes, seconds, milliseconds / 1000);
+
+    // Convert the second date string to a Date object
+    let [datePart2, timePart2] = dateStr2.split(' ');
+    let [year2, month2, day2] = datePart2.split('-').map(Number);
+    let [hours2, minutes2, seconds2] = timePart2.split(':').map(Number);
+    let milliseconds2 = Number(timePart2.split('.')[1] || 0);
+    let date2 = new Date(year2, month2 - 1, day2, hours2, minutes2, seconds2, milliseconds2 / 1000);
+
+    // Calculate the difference in milliseconds
+    let latency_value = Math.abs(date2 - date1);
+
+    // Convert latency from milliseconds to seconds with fractional part
+    latency_value /= 1000;
+    Latency.value = latency_value;
+    max_latency.value = Math.max(latency_value, max_latency.value);
   }
+  catch (err) {
+    console.log(err);
+  }
+
+};
+
+const handleMessage = (message) => {
+
+
+  client_BackendData.value = message.client_data
+  basket_BackendData.value = message.basket_data
+  connection_BackendData.value = message.connection_data
+
+  // strategy_mtm_chart_BackendData.value = message.strategy_mtm_chart_data
+
+
+  measureLatency(connection_BackendData.value['time'], getCurrentDateTime())
+
 
   updateData()
 }
@@ -193,7 +232,7 @@ const updateData = () => {
   checkBackendConnection.value = true
   index_data.value = connection_BackendData.value.live_index
 
-  let clients_data = client_BackendData.value.client_data
+  let clients_data = client_BackendData.value
   let pulse_data = connection_BackendData.value.pulse
   time.value = connection_BackendData.value.time
 
@@ -233,7 +272,6 @@ const updateData = () => {
 const connectWebSocket = () => {
   const socket = new WebSocket('ws://localhost:5000/ws');
 
-
   socket.onopen = () => {
     console.log('WebSocket connection opened')
     checkBackendConnection.value = true
@@ -245,8 +283,7 @@ const connectWebSocket = () => {
     if (event.data === 'ping') {
       socket.send('pong')
     } else {
-      const message = JSON.parse(event.data)
-
+      const message = JSON.parse(event.data);
       handleMessage(message)
     }
   }
@@ -309,8 +346,8 @@ onUnmounted(() => {
 
 <template>
   <div class="homePage_Container bg-[#efefef]/30">
-    <LightWeightChart v-if="basket_BackendData.basket_data"
-      :Chartdata="basket_BackendData.basket_data['directional']" />
+    <LightWeightChart v-if="Object.keys(basket_BackendData).length" :Chartdata="basket_BackendData" />
+    {{ basket_BackendData.length }}
 
     <div v-if="index_data" class="nav_index_container font-semibold bg-white  drop-shadow-sm">
       <p>BANKNIFTY : {{ index_data.BANKNIFTYSPOT ? index_data.BANKNIFTYSPOT : 0 }}</p>
@@ -321,8 +358,9 @@ onUnmounted(() => {
     </div>
     <div class="time-container">
       <p class="timeDiv"> Time:{{ time }}</p>
-      <WarningSignal :signals="pulse_signal" />
+      <WarningSignal :signals="pulse_signal" :latency="Latency" :max_latency="max_latency" />
     </div>
+
 
     <div class="mx-auto px-8 py-8">
       <div class="my-8">
@@ -332,21 +370,16 @@ onUnmounted(() => {
           :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': user_infected }" />
       </div>
 
+
+
+
       <div class="my-8">
         <p class="table-heading">Basket-wise Ideal MTM</p>
         <MultiLineChart :data="basket_chart_data" :keys="basket_chart_name">
         </MultiLineChart>
       </div>
 
-      <div v-for="(value, key) in strategy_mtm_chart_BackendData" :key="key">
-        <div class="my-8" v-for="(nestedValue, nestedKey) in value" :key="nestedKey">
-          <p class="table-heading">{{ nestedKey }}</p>
-          <MultiLineChart :data="separateKeysAndValues(nestedValue).values"
-            :keys="separateKeysAndValues(nestedValue).keys">
-          </MultiLineChart>
-        </div>
 
-      </div>
 
 
     </div>

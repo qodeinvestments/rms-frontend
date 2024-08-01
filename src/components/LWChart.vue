@@ -15,7 +15,7 @@ const props = defineProps({
         default: 'line',
     },
     data: {
-        type: Array,
+        type: Object,
         required: true,
     },
     autosize: {
@@ -47,7 +47,7 @@ function getChartSeriesConstructorName(type) {
 
 // Lightweight Charts™ instances are stored as normal JS variables
 // If you need to use a ref then it is recommended that you use `shallowRef` instead
-let series;
+let series = [];
 let chart;
 
 const chartContainer = ref();
@@ -70,11 +70,27 @@ const resizeHandler = () => {
     chart.resize(dimensions.width, dimensions.height);
 };
 
+// Function to generate a random color
+const getRandomColor = () => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+};
+
 // Creates the chart series and sets the data.
 const addSeriesAndData = props => {
     const seriesConstructor = getChartSeriesConstructorName(props.type);
-    series = chart[seriesConstructor](props.seriesOptions);
-    series.setData(props.data);
+    series = Object.keys(props.data).map(key => {
+        const newSeries = chart[seriesConstructor]({
+            ...props.seriesOptions,
+            color: getRandomColor()
+        });
+        newSeries.setData(props.data[key]);
+        return newSeries;
+    });
 };
 
 onMounted(() => {
@@ -102,8 +118,8 @@ onUnmounted(() => {
         chart.remove();
         chart = null;
     }
-    if (series) {
-        series = null;
+    if (series.length) {
+        series = [];
     }
     window.removeEventListener('resize', resizeHandler);
 });
@@ -133,8 +149,8 @@ watch(
 watch(
     () => props.type,
     newType => {
-        if (series && chart) {
-            chart.removeSeries(series);
+        if (series.length && chart) {
+            series.forEach(s => chart.removeSeries(s));
         }
         addSeriesAndData(props);
     }
@@ -143,8 +159,13 @@ watch(
 watch(
     () => props.data,
     newData => {
-        if (!series) return;
-        series.setData(newData);
+        if (!series.length) return;
+        series.forEach((s, i) => {
+            const key = Object.keys(newData)[i];
+            if (key) {
+                s.setData(newData[key]);
+            }
+        });
     }
 );
 
@@ -159,8 +180,8 @@ watch(
 watch(
     () => props.seriesOptions,
     newOptions => {
-        if (!series) return;
-        series.applyOptions(newOptions);
+        if (!series.length) return;
+        series.forEach(s => s.applyOptions(newOptions));
     }
 );
 

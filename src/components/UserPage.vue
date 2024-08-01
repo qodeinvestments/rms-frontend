@@ -18,39 +18,15 @@ import Chart from './Chart.vue';
 import NavBar from './NavBar.vue';
 import MultiLineChart from './HighCharts.vue'
 
+import LightWeightChart from './LightWeightChart.vue';
 
 
 const route = useRoute();
 const user_data = ref('')
 
 
-const barChartData = [
-  { "category": -10 },
-  { "category1": 20 },
-  { "category2": 30 }
-]
-const defaultData = [{
-  "id": 1,
-  "AccountName": "Abhinav",
-  "IdealMTM": 0,
-  "Day_PL": "25000",
-  'Friction': 0,
-  'OpenQuantity': 0,
-  'NetQuantity': 0,
-  "PortfolioValue": "250000",
-  "PositionDayPL": "25000000000",
-  "HoldingsDayPL": 250000,
-  "TotalOrderCount": 250000,
-  "OpenOrderCount": 40,
-  "CompleteOrderCount": 10,
-  "PositionsCount": 20,
-  "HoldingsCount": 10,
-  "Used_Margin": 50000,
-  "AvailableMargin": 250000,
-  "Cash": 2500000,
-  "Margin": 0,
-  "VAR": 0
-}];
+
+
 const columnHelper = createColumnHelper()
 const live_trade_book_columns = [
   columnHelper.accessor(row => row.OrderGeneratedDateTime, {
@@ -258,63 +234,63 @@ const rms_df_columns = [
   }),
   columnHelper.accessor(row => row.ltp, {
     id: 'Ltp',
-    cell: info => info.getValue(),
+    cell: info => info.getValue().toFixed(2),
     header: () => 'Ltp',
   }),
   columnHelper.accessor(row => row.pnl, {
     id: 'pnl',
-    cell: info => info.getValue(),
+    cell: info => info.getValue().toFixed(2),
     header: () => 'PnL',
   }),
   columnHelper.accessor(row => row.buy_qty, {
     id: 'buy_qty',
-    cell: info => info.getValue(),
+    cell: info => info.getValue().toFixed(2),
     header: () => 'Buy Qty',
   }),
   columnHelper.accessor(row => row.buy_price, {
     id: 'buy_price',
-    cell: info => info.getValue(),
+    cell: info => info.getValue().toFixed(2),
     header: () => 'Buy Price',
   }),
   columnHelper.accessor(row => row.buy_value, {
     id: 'buy_value',
-    cell: info => info.getValue(),
+    cell: info => info.getValue().toFixed(2),
     header: () => 'Buy Value',
   }),
   columnHelper.accessor(row => row.net_price, {
     id: 'net_price',
-    cell: info => info.getValue(),
+    cell: info => info.getValue().toFixed(2),
     header: () => 'Net Price',
   }),
   columnHelper.accessor(row => row.net_value, {
     id: 'net_value',
-    cell: info => info.getValue(),
+    cell: info => info.getValue().toFixed(2),
     header: () => 'Net Value',
   }),
   columnHelper.accessor(row => row.net_qty, {
     id: '  net_qty',
-    cell: info => info.getValue(),
+    cell: info => info.getValue().toFixed(2),
     header: () => ' Net Qty',
   }),
 
   columnHelper.accessor(row => row.sell_price, {
     id: 'sell_price',
-    cell: info => info.getValue(),
+    cell: info => info.getValue().toFixed(2),
     header: () => 'Sell Price',
   }),
   columnHelper.accessor(row => row.sell_qty, {
     id: 'sell_qty',
-    cell: info => info.getValue(),
+    cell: info => info.getValue().toFixed(2),
     header: () => 'Sell Qty',
   }),
   columnHelper.accessor(row => row.sell_value, {
     id: 'sell_value',
-    cell: info => info.getValue(),
+    cell: info => info.getValue().toFixed(2),
     header: () => 'Sell Value',
   }),
   columnHelper.accessor(row => row.turnover, {
     id: 'turnover',
-    cell: info => info.getValue(),
+    cell: info => info.getValue().toFixed(2),
     header: () => 'Turnover',
   }),
 ]
@@ -328,6 +304,8 @@ const messages = ref([])
 let eventSource = null
 
 
+const client_BackendData = ref([])
+const connection_BackendData = ref([])
 const date = ref()
 const data = ref([])
 const user_infected = ref([])
@@ -340,21 +318,14 @@ const handleColumnClick = ({ item, index }) => {
   showOnPage.value = item;
 }
 
-const connectToSSE = () => {
-  const eventSource = new EventSource(MyEnum.backendURL);
-
-  eventSource.onmessage = (event) => {
+const handleMessage = (message) => {
+  if (true) {
     try {
-      let response = JSON.parse(event.data);
-      user_infected.value = Object.keys(response.pulse)
-        .filter(key => (key.startsWith('pulse_trader_xts:') || key.startsWith('pulse_trader_zerodha:')) && response.pulse[key] === false)
-        .map(key => key.split(':')[1]);
 
 
+      client_BackendData.value = message.client_data
 
-
-      let result = response.client_data.find(client => client.name === name.value);
-
+      let result = client_BackendData.value.find(client => client.name === name.value);
       if (result) {
         user_data.value = result;
 
@@ -389,33 +360,45 @@ const connectToSSE = () => {
     } catch (error) {
       console.error('Error parsing event data or updating data:', error);
     }
-  };
-
-  eventSource.onopen = () => {
-    messages.value.push('Connection opened');
-  };
-
-  eventSource.onerror = (error) => {
-    messages.value.push('Error occurred');
-
-    if (error.target.readyState === EventSource.CLOSED) {
-      messages.value.push('Connection closed');
-      setTimeout(() => {
-        connectToSSE();  // Attempt to reconnect
-      }, 2000);  // Retry connection after 5 seconds
-    } else if (error.target.readyState === EventSource.CONNECTING) {
-      messages.value.push('Reconnecting...');
+  }
+  else if (message.channel === "connection_dashboard_data") {
+    try {
+      connection_BackendData.value = message.data
+      let response = message.data;
+      user_infected.value = Object.keys(response.pulse)
+        .filter(key => (key.startsWith('pulse_trader_xts:') || key.startsWith('pulse_trader_zerodha:')) && response.pulse[key] === false)
+        .map(key => key.split(':')[1]);
     }
-
-    // If the error is due to a 404, attempt to reconnect
-    if (error.status === 404) {
-      messages.value.push('404 error occurred, attempting to reconnect');
-      eventSource.close();
-      setTimeout(() => {
-        connectToSSE();  // Attempt to reconnect
-      }, 2000);  // Retry connection after 5 seconds
+    catch (error) {
+      console.error('Error parsing event data or updating data:', error);
     }
-  };
+  }
+}
+
+
+
+const connectToSSE = () => {
+  const socket = new WebSocket('ws://localhost:5000/ws');
+
+  socket.onmessage = (event) => {
+    if (event.data === 'ping') {
+      socket.send('pong')
+    } else {
+      const message = JSON.parse(event.data)
+      console.log(message)
+      handleMessage(message)
+    }
+  }
+  socket.onclose = (event) => {
+    console.log('WebSocket connection closed:', event.reason)
+  }
+
+  socket.onopen = () => {
+    console.log('WebSocket connection opened')
+  }
+  socket.onerror = (error) => {
+    console.error('WebSocket error:', error)
+  }
 };
 
 
@@ -458,12 +441,9 @@ onUnmounted(() => {
     <!--  <input type="date" v-model="date" /> -->
 
 
-    <div class="my-8" v-if="user_data">
-      <p class="table-heading">User MTM</p>
-      <MultiLineChart v-if="user_data" :key="'user-mtm'"
-        :chartData="[user_data['MTMTable'], user_data['ideal_MTMTable']]" :lineNames="['Actual MTM', 'Ideal MTM']"
-        chartType="line" yAxisTitle="MTM Value" xAxisTitle="Time" chartTitle="User MTM Comparison" />
-    </div>
+
+
+    <LightWeightChart v-if="user_data['MTMTable']" :Chartdata="user_data['MTMTable']" />
 
 
 
