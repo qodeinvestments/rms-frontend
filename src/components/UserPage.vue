@@ -61,8 +61,6 @@ const live_trade_book_columns = [
     header: () => 'OrderQuantity',
   }),
 ]
-
-
 const live_order_book_columns = [
 
   columnHelper.accessor(row => row.OrderGeneratedDateTime, {
@@ -224,8 +222,139 @@ const columns = [
     header: () => 'Cash',
   }),
 ]
+const combined_df_columns = [
+  columnHelper.accessor(row => row.uid, {
+    id: 'uid',
+    cell: info => info.getValue(),
+    header: () => 'uid'
+  }),
+  columnHelper.accessor(row => row.timestamp, {
+    id: 'timestamp',
+    cell: info => info.getValue(),
+    header: () => 'timestamp'
+  }),
+  columnHelper.accessor(row => row.system_tag, {
+    id: 'system_tag',
+    cell: info => info.getValue(),
+    header: () => 'system_tag'
+  }),
+  columnHelper.accessor(row => row.action, {
+    id: 'action',
+    cell: info => info.getValue(),
+    header: () => 'action'
+  }),
+  columnHelper.accessor(row => row.qty, {
+    id: 'qty',
+    cell: info => info.getValue(),
+    header: () => 'qty'
+  }),
+  columnHelper.accessor(row => row.symbol, {
+    id: 'symbol',
+    cell: info => info.getValue(),
+    header: () => 'symbol'
+  }),
+  columnHelper.accessor(row => row.price, {
+    id: 'price',
+    cell: info => info.getValue(),
+    header: () => 'price'
+  }),
+  columnHelper.accessor(row => row.value, {
+    id: 'value',
+    cell: info => info.getValue(),
+    header: () => 'value'
+  }),
+  columnHelper.accessor(row => row.system_timestamp, {
+    id: 'system_timestamp',
+    cell: info => info.getValue(),
+    header: () => 'system_timestamp'
+  }),
+  columnHelper.accessor(row => row.note, {
+    id: 'note',
+    cell: info => info.getValue(),
+    header: () => 'note'
+  }),
+  columnHelper.accessor(row => row.basket, {
+    id: 'basket',
+    cell: info => info.getValue(),
+    header: () => 'basket'
+  }),
+  columnHelper.accessor(row => row.effective_qty, {
+    id: 'effective_qty',
+    cell: info => info.getValue(),
+    header: () => 'effective_qty'
+  }),
+  columnHelper.accessor(row => row.AppOrderID, {
+    id: 'AppOrderID',
+    cell: info => info.getValue(),
+    header: () => 'AppOrderID'
+  }),
+  columnHelper.accessor(row => row.ExchangeSegment, {
+    id: 'ExchangeSegment',
+    cell: info => info.getValue(),
+    header: () => 'ExchangeSegment'
+  }),
+  columnHelper.accessor(row => row.ExchangeInstrumentID, {
+    id: 'ExchangeInstrumentID',
+    cell: info => info.getValue(),
+    header: () => 'ExchangeInstrumentID'
+  }),
+  columnHelper.accessor(row => row.OrderType, {
+    id: 'OrderType',
+    cell: info => info.getValue(),
+    header: () => 'OrderType'
+  }),
+  columnHelper.accessor(row => row.ProductType, {
+    id: 'ProductType',
+    cell: info => info.getValue(),
+    header: () => 'ProductType'
+  }),
+  columnHelper.accessor(row => row.OrderPrice, {
+    id: 'OrderPrice',
+    cell: info => info.getValue(),
+    header: () => 'OrderPrice'
+  }),
+  columnHelper.accessor(row => row.OrderQuantity, {
+    id: 'OrderQuantity',
+    cell: info => info.getValue(),
+    header: () => 'OrderQuantity'
+  }),
+  columnHelper.accessor(row => row.OrderStatus, {
+    id: 'OrderStatus',
+    cell: info => info.getValue(),
+    header: () => 'OrderStatus'
+  }),
+  columnHelper.accessor(row => row.OrderAverageTradedPrice, {
+    id: 'OrderAverageTradedPrice',
+    cell: info => info.getValue(),
+    header: () => 'OrderAverageTradedPrice'
+  }),
+  columnHelper.accessor(row => row.OrderGeneratedDateTime, {
+    id: 'OrderGeneratedDateTime',
+    cell: info => info.getValue(),
+    header: () => 'OrderGeneratedDateTime'
+  }),
+  columnHelper.accessor(row => row.ExchangeTransactTime, {
+    id: 'ExchangeTransactTime',
+    cell: info => info.getValue(),
+    header: () => 'ExchangeTransactTime'
+  }),
+  columnHelper.accessor(row => row.TradingSymbol, {
+    id: 'TradingSymbol',
+    cell: info => info.getValue(),
+    header: () => 'TradingSymbol'
+  }),
+  columnHelper.accessor(row => row.OrderUniqueIdentifier, {
+    id: 'OrderUniqueIdentifier',
+    cell: info => info.getValue(),
+    header: () => 'OrderUniqueIdentifier'
+  }),
+  columnHelper.accessor(row => row.system_tags, {
+    id: 'system_tags',
+    cell: info => info.getValue(),
+    header: () => 'system_tags'
+  }),
 
-
+]
 const rms_df_columns = [
   columnHelper.accessor(row => row.symbol, {
     id: 'Symbol',
@@ -296,11 +425,6 @@ const rms_df_columns = [
 ]
 
 
-
-
-const messages = ref([])
-
-
 let eventSource = null
 
 
@@ -314,6 +438,7 @@ const strategy_mtm_chart_name = ref([])
 
 const client_live_trade_book = ref([])
 const client_live_order_book = ref([])
+const client_combined_df = ref([])
 const handleColumnClick = ({ item, index }) => {
   showOnPage.value = item;
 }
@@ -322,7 +447,7 @@ const handleMessage = (message) => {
   if (true) {
     try {
 
-
+      if (message.client_data === undefined) return;
       client_BackendData.value = message.client_data
 
       let result = client_BackendData.value.find(client => client.name === name.value);
@@ -350,9 +475,11 @@ const handleMessage = (message) => {
 
         let tradeArray = Object.values(result.Live_Trade_Book || {});
         let orderBookArray = Object.values(result.Live_Order_Book || {});
+        let combined_df_Array = Object.values(result.Combined_df || {});
 
         client_live_trade_book.value = tradeArray;
         client_live_order_book.value = orderBookArray;
+        client_combined_df.value = combined_df_Array
 
       } else {
         console.error('No client data found for the specified name:', name.value);
@@ -385,7 +512,6 @@ const connectToSSE = () => {
       socket.send('pong')
     } else {
       const message = JSON.parse(event.data)
-      console.log(message)
       handleMessage(message)
     }
   }
@@ -453,7 +579,8 @@ onUnmounted(() => {
 
     <!--  <BarChart v-if="user_data['Live_Client_Positions']" :chartData='user_data["Live_Client_Positions"]' /> -->
     <div class="navContainer">
-      <NavBar :navColumns="['Positions', 'Order', 'Holdings', 'TradeBook']" @column-clicked="handleColumnClick" />
+      <NavBar :navColumns="['Positions', 'Order', 'Holdings', 'TradeBook', 'Combined DF']"
+        @column-clicked="handleColumnClick" />
     </div>
 
     <div class="my-8" v-if="user_data && showOnPage === 'Positions'">
@@ -477,6 +604,14 @@ onUnmounted(() => {
       <TanStackTestTable :data="client_live_order_book" :columns="live_order_book_columns" :hasColor="[]"
         :navigateTo="[]" :showPagination=true />
     </div>
+
+
+    <div class="my-8" v-if="showOnPage === 'Combined DF'">
+      <p class="table-heading">Combined DF</p>
+      <TanStackTestTable :data="client_combined_df" :columns="combined_df_columns" :hasColor="[]" :navigateTo="[]"
+        :showPagination=true />
+    </div>
+
 
 
 

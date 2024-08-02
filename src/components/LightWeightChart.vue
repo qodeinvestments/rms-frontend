@@ -1,4 +1,9 @@
 <script setup>
+import {
+
+    watch,
+    defineProps
+} from 'vue';
 // This starter template is using Vue 3 <script setup> SFCs
 import { ref } from 'vue';
 const props = defineProps({
@@ -16,6 +21,13 @@ const data = ref(props.Chartdata); // Changed to reactive reference
 const seriesOptions = ref({
     color: 'rgb(45, 77, 205)',
 });
+
+watch(
+    () => props.Chartdata,
+    newData => {
+        data.value = newData
+    }
+);
 const chartType = ref('line');
 const lwChart = ref();
 

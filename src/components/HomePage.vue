@@ -144,17 +144,14 @@ const columns = [
 
 
 
-const client_BackendData = ref([])
-const connection_BackendData = ref([])
-const basket_BackendData = ref([])
-const strategy_mtm_chart_BackendData = ref([])
+const client_BackendData = ref({})
+const connection_BackendData = ref({})
+const basket_BackendData = ref({})
+const strategy_mtm_chart_BackendData = ref({})
 
 const index_data = ref("hello")
-const messages = ref([])
 const basket_chart_data = ref([])
 const basket_chart_name = ref([])
-const strategy_mtm_chart_data = ref([])
-const strategy_mtm_chart_name = ref([])
 const pulse_signal = ref([])
 const time = ref([])
 const user_infected = ref([])
@@ -215,14 +212,10 @@ const handleMessage = (message) => {
 
 
   client_BackendData.value = message.client_data
-  basket_BackendData.value = message.basket_data
   connection_BackendData.value = message.connection_data
 
-  // strategy_mtm_chart_BackendData.value = message.strategy_mtm_chart_data
-
-
-  measureLatency(connection_BackendData.value['time'], getCurrentDateTime())
-
+  if (message.time)
+    measureLatency(message['time'], getCurrentDateTime())
 
   updateData()
 }
@@ -283,6 +276,7 @@ const connectWebSocket = () => {
     if (event.data === 'ping') {
       socket.send('pong')
     } else {
+
       const message = JSON.parse(event.data);
       handleMessage(message)
     }
@@ -301,6 +295,67 @@ const connectWebSocket = () => {
     checkBackendConnection.value = false
   }
 }
+
+
+const connectBasketChartWebSocket = () => {
+  const basketSocket = new WebSocket('ws://localhost:5000/chart/basket');
+
+  basketSocket.onopen = () => {
+    console.log('Basket Chart WebSocket connection opened');
+  }
+
+  basketSocket.onmessage = (event) => {
+    const message = JSON.parse(event.data);
+    basket_BackendData.value = message.basket_data;
+  }
+
+  basketSocket.onclose = (event) => {
+    console.log('Basket Chart WebSocket connection closed:', event.reason);
+    // Implement reconnection logic if needed
+  }
+
+  basketSocket.onerror = (error) => {
+    console.error('Basket Chart WebSocket error:', error);
+  }
+
+  return basketSocket;
+}
+
+
+const connectStrategyChartWebSocket = () => {
+  const strategySocket = new WebSocket('ws://localhost:5000/chart/strategy');
+
+
+  strategySocket.onopen = function (e) {
+    console.log("strategysocket Connection established");
+    // Send the initial set of UIDs
+    sendStrategyUIDs(['shortoptions2_sot01_0_1_FINNIFTY_P_0.4_3_FNS2ID1', 'shortoptions2_sot02_0_1_FINNIFTY_P_0.5_2_FNS2ID2', 'shortoptions2_sot03_0_1_FINNIFTY_P_0.4_3_FNS2ID3', 'shortoptions2_sot04_0_1_FINNIFTY_P_0.5_2_FNS2ID4', 'shortoptions2_sot05_0_1_FINNIFTY_P_0.4_3_FNS2ID5', 'shortoptions2_sot06_0_1_FINNIFTY_P_0.5_2_FNS2ID6', 'stg13new_0_x0_20_2_SENSEX_PCT_0.0026_3_0.2_0.7_1_False_10_3.0', 'stg13new_0_x0_190_1_SENSEX_R_1.4_3_0.2_0.7_1_False_14_2.5', 'stg13new_0_x0_235_1_SENSEX_PCT_0.0026_3_0.2_0.7_2_False_28_1.5', 'stg13new_0_x0_185_1_SENSEX_PCT_0.0016_3_0.3_0.8_1_False_14_2.0', 'stg13new_0_x0_235_2_SENSEX_R_1.3_3_0.35_0.8_2_False_28_2.0', 'stg13new_0_x0_205_1_SENSEX_PCT_0.001_3_0.3_0.7_1_False_28_2.0', 'stg13new_0_x0_60_2_SENSEX_R_1.4_3_0.3_0.9_2_False_14_3.0', 'stg13new_0_x0_60_1_SENSEX_PCT_0.0028_3_0.3_0.8_1_False_10_2.0', 'stg13new_0_x0_0_1_SENSEX_PCT_0.0018_3_0.3_0.9_2_False_28_3.0', 'stg13new_0_x0_130_1_SENSEX_R_1.1_3_0.25_0.9_1_False_14_3.0', 'stg13new_0_x0_235_2_SENSEX_PCT_0.0028_3_0.35_0.7_2_False_14_2.5', 'stg13new_0_x0_40_1_SENSEX_PCT_0.0016_3_0.35_0.7_2_False_14_2.0', 'stg13new_0_x0_210_1_SENSEX_R_1.2_3_0.2_0.8_2_False_10_2.0', 'stg13new_0_x0_55_2_SENSEX_R_1.0_3_0.35_0.7_2_False_10_3.0', 'stg13new_0_x0_115_1_SENSEX_R_1.0_3_0.35_0.8_1_False_10_1.5', 'stg13new_0_x0_45_1_SENSEX_R_1.0_3_0.25_0.7_1_False_28_3.0', 'stg13new_0_x0_0_1_SENSEX_PCT_0.0024_3_0.35_0.9_1_False_10_1.5', 'stg13new_0_x0_130_1_SENSEX_R_1.0_3_0.3_0.9_2_False_10_1.5', 'stg13new_0_x0_225_1_SENSEX_PCT_0.0012_3_0.25_0.8_1_False_28_2.5', 'stg13new_0_x0_100_2_SENSEX_PCT_0.002_3_0.35_0.9_2_False_28_2.5', 'stg13new_0_x0_90_1_SENSEX_PCT_0.001_3_0.3_0.9_1_False_10_2.0', 'stg13new_0_x0_10_1_SENSEX_R_1.2_3_0.25_0.8_1_False_14_3.0', 'stg13new_0_x0_175_2_SENSEX_R_1.1_3_0.25_0.8_1_False_28_1.5', 'stg13new_0_x0_140_2_SENSEX_PCT_0.0014_3_0.25_0.7_1_False_28_1.5', 'stg13new_0_x0_130_2_SENSEX_R_1.0_3_0.25_0.9_1_False_28_3.0', 'stg13new_0_x0_75_2_SENSEX_R_1.4_3_0.3_0.7_2_False_28_2.5', 'stg13new_0_x0_225_2_SENSEX_PCT_0.0012_3_0.3_0.9_2_False_28_2.0', 'stg13new_0_x0_170_1_SENSEX_PCT_0.0022_3_0.35_0.7_2_False_14_2.0', 'stg13new_0_x0_75_2_SENSEX_PCT_0.0012_3_0.35_0.8_2_False_10_2.5', 'stg13new_0_x0_195_2_SENSEX_R_1.4_3_0.2_0.8_2_False_28_2.0', 'stg13new_0_x0_235_1_SENSEX_R_1.4_3_0.35_0.8_2_False_14_2.0', 'stg13new_0_x0_110_1_SENSEX_R_1.2_3_0.35_0.8_2_False_14_2.0', 'stg13new_0_x0_155_2_SENSEX_R_1.0_3_0.35_0.9_2_False_10_2.0', 'stg13new_0_x0_75_1_SENSEX_PCT_0.0022_3_0.25_0.9_2_False_14_2.0', 'tridentdir_0_x0_165_1_SENSEX_PCT_0.0016_3_0.35_0.9_2_False_4_1', 'tridentdir_0_x0_180_1_SENSEX_PCT_0.002_3_0.3_0.8_2_False_2_1', 'tridentdir_0_x0_20_2_SENSEX_R_1.0_3_0.35_0.8_2_False_3_1', 'tridentdir_0_x0_100_1_SENSEX_PCT_0.0026_3_0.35_0.9_2_False_3_1', 'tridentdir_0_x0_25_1_SENSEX_PCT_0.0026_3_0.3_0.8_1_False_3_1', 'tridentdir_0_x0_215_2_SENSEX_PCT_0.0028_3_0.35_0.8_1_False_3_1', 'tridentdir_0_x0_50_1_SENSEX_R_1.3_3_0.3_0.8_2_False_2_1', 'tridentdir_0_x0_30_1_SENSEX_R_1.1_3_0.25_0.7_1_False_4_1', 'tridentdir_0_x0_30_2_SENSEX_R_1.3_3_0.3_0.7_2_False_3_1', 'tridentdir_0_x0_180_2_SENSEX_PCT_0.0012_3_0.25_0.8_1_False_2_1', 'tridentdir_0_x0_190_1_SENSEX_R_1.0_3_0.25_0.8_2_False_4_1', 'tridentdir_0_x0_165_2_SENSEX_R_1.0_3_0.3_0.8_2_False_2_1', 'tridentdir_0_x0_15_2_SENSEX_R_1.3_3_0.3_0.9_2_False_3_1', 'tridentdir_0_x0_225_2_SENSEX_PCT_0.001_3_0.3_0.7_2_False_3_1', 'tridentdir_0_x0_130_1_SENSEX_R_1.4_3_0.35_0.9_1_False_3_1', 'tridentdir_0_x0_60_2_SENSEX_R_1.4_3_0.25_0.7_2_False_2_1', 'tridentdir_0_x0_55_2_SENSEX_R_1.3_3_0.3_0.9_1_False_4_1', 'tridentdir_0_x0_0_1_SENSEX_R_1.1_3_0.35_0.9_2_False_3_1', 'tridentdir_0_x0_10_2_SENSEX_R_1.2_3_0.3_0.9_1_False_3_1', 'tridentdir_0_x0_125_2_SENSEX_R_1.2_3_0.3_0.9_2_False_2_1', 'tridentdir_0_x0_50_2_SENSEX_PCT_0.0024_3_0.35_0.9_1_False_3_1', 'tridentdir_0_x0_45_1_SENSEX_PCT_0.0016_3_0.2_0.7_2_False_3_1', 'tridentdir_0_x0_175_2_SENSEX_R_1.3_3_0.2_0.8_2_False_2_1', 'tridentdir_0_x0_130_1_SENSEX_R_1.2_3_0.35_0.9_1_False_3_1', 'tridentdir_0_x0_65_1_SENSEX_R_1.2_3_0.35_0.9_2_False_3_1', 'tridentdir_0_x0_130_2_SENSEX_R_1.1_3_0.35_0.8_2_False_3_1', 'tridentdir_0_x0_75_2_SENSEX_R_1.1_3_0.35_0.9_2_False_3_1', 'tridentdir_0_x0_135_1_SENSEX_PCT_0.0024_3_0.25_0.7_2_False_4_1', 'tridentdir_0_x0_125_2_SENSEX_PCT_0.001_3_0.3_0.8_1_False_4_1', 'tridentdir_0_x0_200_2_SENSEX_R_1.3_3_0.3_0.7_2_False_4_1', 'tridentdir_0_x0_130_1_SENSEX_PCT_0.002_3_0.3_0.7_2_False_2_1', 'tridentdir_0_x0_230_2_SENSEX_PCT_0.0012_3_0.25_0.8_1_False_3_1', 'tridentdir_0_x0_190_2_SENSEX_PCT_0.0014_3_0.3_0.8_1_False_2_1', 'tridentdir_0_x0_155_1_SENSEX_PCT_0.0022_3_0.25_0.7_1_False_3_1', 'tridentdir_0_x0_215_1_SENSEX_PCT_0.002_3_0.3_0.8_2_False_4_1', 'tridentdir_0_x0_80_1_SENSEX_PCT_0.001_3_0.3_0.7_1_False_3_1', 'tridentdir_0_x0_35_1_SENSEX_PCT_0.0014_3_0.2_0.8_2_False_3_1', 'tridentdir_0_x0_205_1_SENSEX_PCT_0.0018_3_0.35_0.8_1_False_4_1', 'tridentdir_0_x0_60_1_SENSEX_R_1.3_3_0.25_0.9_2_False_3_1', 'tridentdir_0_x0_235_2_SENSEX_R_1.1_3_0.2_0.7_1_False_2_1', 'tridentdir_0_x0_65_1_SENSEX_R_1.4_3_0.25_0.8_1_False_2_1', 'tridentdir_0_x0_10_2_SENSEX_PCT_0.001_3_0.3_0.7_2_False_4_1', 'tridentdir_0_x0_135_1_SENSEX_PCT_0.0026_3_0.25_0.8_1_False_3_1', 'tridentdir_0_x0_155_1_SENSEX_R_1.2_3_0.3_0.9_1_False_4_1', 'tridentdir_0_x0_155_1_SENSEX_R_1.4_3_0.3_0.8_1_False_2_1', 'tridentdir_0_x0_235_1_SENSEX_PCT_0.0016_3_0.25_0.7_1_False_2_1', 'tridentdir_0_x0_225_1_SENSEX_PCT_0.0024_3_0.35_0.9_2_False_2_1', 'tridentdir_0_x0_100_1_SENSEX_R_1.3_3_0.25_0.9_2_False_2_1', 'tridentdir_0_x0_100_2_SENSEX_PCT_0.0024_3_0.2_0.9_1_False_2_1', 'blackbird_0_x0_35_1_SENSEX_PCT_0.0018_3_0.25_0.9_2_False_1_100', 'blackbird_0_x0_220_1_SENSEX_PCT_0.0028_3_0.35_0.8_1_False_2_100', 'blackbird_0_x0_185_1_SENSEX_R_1.1_3_0.25_0.9_2_False_2_100', 'blackbird_0_x0_20_2_SENSEX_PCT_0.0012_3_0.2_0.9_2_False_1_250', 'blackbird_0_x0_10_2_SENSEX_PCT_0.001_3_0.2_0.8_1_False_1_250', 'blackbird_0_x0_210_1_SENSEX_PCT_0.002_3_0.3_0.8_2_False_1_200', 'blackbird_0_x0_145_1_SENSEX_PCT_0.0018_3_0.2_0.7_1_False_2_100', 'blackbird_0_x0_180_2_SENSEX_PCT_0.0026_3_0.3_0.8_2_False_1_250', 'blackbird_0_x0_35_1_SENSEX_R_1.1_3_0.2_0.7_2_False_1_200', 'blackbird_0_x0_10_1_SENSEX_R_1.2_3_0.2_0.9_2_False_1_200', 'blackbird_0_x0_50_1_SENSEX_R_1.2_3_0.3_0.9_1_False_1_150', 'blackbird_0_x0_25_2_SENSEX_PCT_0.0022_3_0.25_0.7_2_False_2_250', 'blackbird_0_x0_10_1_SENSEX_PCT_0.0016_3_0.3_0.8_1_False_1_150', 'blackbird_0_x0_25_1_SENSEX_R_1.2_3_0.3_0.7_2_False_2_200', 'blackbird_0_x0_220_2_SENSEX_PCT_0.0028_3_0.3_0.9_2_False_1_200', 'blackbird_0_x0_35_1_SENSEX_R_1.1_3_0.2_0.9_1_False_1_150', 'blackbird_0_x0_55_2_SENSEX_PCT_0.0016_3_0.25_0.8_2_False_1_250', 'blackbird_0_x0_45_2_SENSEX_R_1.1_3_0.2_0.8_1_False_1_100', 'blackbird_0_x0_120_1_SENSEX_PCT_0.001_3_0.3_0.9_2_False_1_100', 'blackbird_0_x0_100_2_SENSEX_PCT_0.0018_3_0.35_0.9_2_False_1_150', 'blackbird_0_x0_0_1_SENSEX_R_1.4_3_0.25_0.7_2_False_1_250', 'blackbird_0_x0_25_1_SENSEX_R_1.4_3_0.2_0.8_1_False_1_200', 'blackbird_0_x0_135_1_SENSEX_PCT_0.0026_3_0.25_0.9_2_False_1_100', 'blackbird_0_x0_20_1_SENSEX_R_1.2_3_0.2_0.9_2_False_1_100', 'blackbird_0_x0_5_2_SENSEX_PCT_0.0028_3_0.3_0.7_1_False_1_150', 'blackbird_0_x0_220_2_SENSEX_PCT_0.0018_3_0.3_0.8_1_False_2_250', 'blackbird_0_x0_210_1_SENSEX_PCT_0.0014_3_0.35_0.9_2_False_1_150', 'blackbird_0_x0_150_1_SENSEX_R_1.4_3_0.2_0.8_2_False_2_100', 'blackbird_0_x0_215_2_SENSEX_R_1.2_3_0.3_0.9_1_False_1_250', 'blackbird_0_x0_40_1_SENSEX_PCT_0.0016_3_0.35_0.7_1_False_1_100', 'blackbird_0_x0_140_1_SENSEX_PCT_0.0012_3_0.25_0.8_2_False_1_100', 'zzsex0_SENSEX_0_s2_30_10_4_2_PCT_0.001_5_3_0.5_PCT_1.8_False_3_0.99_True_True_-4000_1600_800_600_540', 'zzsex0_SENSEX_0_x2_10_60_2_1_PCT_0.0025_5_1_0.3_PCT_0.1_False_2_0.99_False_False_-3400_0_0_0_0', 'spikesex1_SENSEX_0_x1_10_20_1_0_P_50_3_10_0.05_0.02_2_0.05_0.0_ABS_130_False_0_4_0.0_0.8_False_True_-4600_1200_480_200_180', 'zzsex0_SENSEX_0_x1_3_0_4_1_PCT_0.002_3_2_0.5_PCT_2.0_False_0_0.99_True_False_-2900_0_0_0_0', 'spikesex1_SENSEX_0_s2_15_0_3_0_M_8_5_2_0.2_0.01_4_0.1_0.07_ABS_110_True_0_0_0.0_0.8_True_True_-1700_1500_1050_900_630', 'spikesex1_SENSEX_0_x1_45_0_3_0_M_5_5_5_1.5_0.15_1_0.0_0.3_ABS_185_False_0_3_0.0_0.75_False_False_-4900_0_0_0_0', 'spikesex1_SENSEX_0_x1_20_30_1_0_M_5_3_5_0.75_0.15_1_0.0_0.07_ABS_220_True_1_1_0.1_0.75_False_True_-3100_1800_720_500_450', 'spikesex1_SENSEX_0_x1_45_10_3_0_M_6_3_3_0.2_0.2_4_0.2_0.35_ABS_55_True_1_5_0.1_0.25_True_True_-1200_1300_520_600_300', 'spikesex1_SENSEX_0_x1_10_0_2_0_M_5_5_3_0.2_0.05_0_0.0_0.0_ABS_20_False_4_3_0.0_0.8_False_True_-2500_1500_1050_200_60', 'al_0_x0_210_1_SENSEX_PCT_0.0016_3_0.4_0.7_2_False_True', 'al_0_x0_140_1_SENSEX_R_1.2_3_0.5_0.9_3_False_True', 'al_0_x0_170_2_SENSEX_PCT_0.002_3_0.5_0.7_2_False_True', 'al_0_x0_200_1_SENSEX_PCT_0.0016_3_0.4_0.9_2_False_True', 'al_0_x0_130_2_SENSEX_PCT_0.0028_3_0.55_0.9_2_False_True', 'al_0_x0_50_2_SENSEX_R_1.2_3_0.55_0.8_2_False_True', 'al_0_x0_160_2_SENSEX_PCT_0.0026_3_0.4_0.8_3_False_True', 'al_0_x0_190_1_SENSEX_R_1.2_3_0.5_0.8_1_False_True', 'al_0_x0_120_1_SENSEX_R_1.0_3_0.55_0.7_2_False_True', 'al_0_x0_150_2_SENSEX_PCT_0.0018_3_0.55_0.9_3_False_True', 'al_0_x0_150_1_SENSEX_R_1.2_3_0.55_0.9_2_False_True', 'al_0_x0_50_2_SENSEX_R_1.0_3_0.4_0.8_3_False_True', 'al_0_x0_170_2_SENSEX_PCT_0.0014_3_0.45_0.9_2_False_True', 'al_0_x0_70_1_SENSEX_PCT_0.0024_3_0.5_0.8_2_False_True', 'al_0_x0_130_2_SENSEX_R_1.4_3_0.4_0.9_3_False_True', 'als_0_x0_170_1_SENSEX_PCT_0.002_3_0.55_0.7_3_False', 'als_0_x0_10_1_SENSEX_PCT_0.0026_3_0.5_0.8_3_False', 'als_0_x0_80_1_SENSEX_R_1.3_3_0.4_0.9_3_False', 'als_0_x0_190_1_SENSEX_R_1.2_3_0.5_0.9_2_False', 'als_0_x0_220_1_SENSEX_R_1.2_3_0.5_0.9_2_False', 'als_0_x0_40_2_SENSEX_PCT_0.0016_3_0.45_0.7_3_False', 'als_0_x0_180_1_SENSEX_PCT_0.0012_3_0.5_0.7_1_False', 'als_0_x0_30_1_SENSEX_PCT_0.0014_3_0.45_0.9_3_False', 'als_0_x0_60_2_SENSEX_R_1.0_3_0.5_0.8_3_False', 'als_0_x0_230_2_SENSEX_R_1.3_3_0.55_0.7_2_False', 'als_0_x0_20_1_SENSEX_PCT_0.0028_3_0.4_0.9_2_False', 'als_0_x0_110_2_SENSEX_PCT_0.0018_3_0.5_0.8_2_False', 'als_0_x0_10_1_SENSEX_R_1.0_3_0.4_0.9_3_False', 'als_0_x0_70_1_SENSEX_R_1.3_3_0.5_0.7_3_False', 'als_0_x0_160_1_SENSEX_PCT_0.002_3_0.55_0.8_3_False', 'als_0_x0_190_1_SENSEX_PCT_0.002_3_0.45_0.7_1_False', 'als_0_x0_100_1_SENSEX_R_1.2_3_0.4_0.8_3_False', 'als_0_x0_90_1_SENSEX_PCT_0.0012_3_0.55_0.9_3_False', 'als_0_x0_80_1_SENSEX_R_1.0_3_0.45_0.9_3_False', 'als_0_x0_40_1_SENSEX_PCT_0.0012_3_0.45_0.7_3_False', 'als_0_x0_50_1_SENSEX_R_1.1_3_0.5_0.9_3_False', 'als_0_x0_90_1_SENSEX_PCT_0.002_3_0.4_0.8_3_False', 'als_0_x0_170_2_SENSEX_PCT_0.0016_3_0.4_0.7_2_False', 'olre_0_x0_180_1_SENSEX_PCT_0.0012_3_0.45_0.9_1_False_True_True', 'olre_0_x0_230_1_SENSEX_PCT_0.0026_3_0.55_0.8_1_False_True_True', 'olre_0_x0_90_1_SENSEX_PCT_0.0014_3_0.45_0.8_3_False_True_True', 'olre_0_x0_170_2_SENSEX_PCT_0.001_3_0.5_0.8_2_False_True_True', 'olre_0_x0_40_1_SENSEX_PCT_0.002_3_0.55_0.8_3_False_True_True', 'olre_0_x0_10_1_SENSEX_R_1.0_3_0.45_0.7_3_False_True_True', 'olre_0_x0_100_2_SENSEX_PCT_0.0026_3_0.4_0.8_3_False_True_True', 'olre_0_x0_180_1_SENSEX_PCT_0.002_3_0.45_0.9_1_False_True_True', 'olre_0_x0_140_2_SENSEX_PCT_0.0012_3_0.5_0.8_3_False_True_True', 'olre_0_x0_90_2_SENSEX_PCT_0.0016_3_0.5_0.8_2_False_True_True', 'olre_0_x0_170_1_SENSEX_R_1.2_3_0.55_0.8_3_False_True_True', 'olre_0_x0_60_2_SENSEX_R_1.1_3_0.5_0.7_3_False_True_True', 'olre_0_x0_210_2_SENSEX_R_1.1_3_0.4_0.9_2_False_True_True', 'olre_0_x0_150_2_SENSEX_PCT_0.0028_3_0.45_0.9_3_False_True_True', 'olre_0_x0_20_2_SENSEX_PCT_0.001_3_0.45_0.8_3_False_True_True', 'olre_0_x0_60_2_SENSEX_PCT_0.0018_3_0.55_0.9_3_False_True_True', 'olre_0_x0_160_2_SENSEX_PCT_0.002_3_0.45_0.9_2_False_True_True', 'olre_0_x0_140_1_SENSEX_PCT_0.0024_3_0.55_0.7_2_False_True_True', 'olre_0_x0_150_1_SENSEX_PCT_0.0014_3_0.45_0.9_2_False_True_True', 'olre_0_x0_60_2_SENSEX_R_1.0_3_0.4_0.7_2_False_True_True', 'stg5dir_0_x0_190_2_SENSEX_PCT_0.0014_3_0.55_0.9_2_False_0.2', 'stg5dir_0_x0_80_2_SENSEX_R_1.0_3_0.45_0.8_2_False_0.2', 'stg5dir_0_x0_20_1_SENSEX_R_1.4_3_0.4_0.8_2_False_0.2', 'stg5dir_0_x0_30_2_SENSEX_R_1.4_3_0.5_0.8_3_False_0.2', 'stg5dir_0_x0_80_2_SENSEX_R_1.3_3_0.4_0.7_2_False_0.2', 'stg5dir_0_x0_0_2_SENSEX_R_1.0_3_0.4_0.9_2_False_0.2', 'stg5dir_0_x0_0_1_SENSEX_R_1.4_3_0.45_0.7_2_False_0.2', 'stg5dir_0_x0_210_1_SENSEX_PCT_0.001_3_0.45_0.7_1_False_0.2', 'stg5dir_0_x0_110_2_SENSEX_R_1.2_3_0.45_0.9_2_False_0.2', 'stg5dir_0_x0_220_2_SENSEX_R_1.1_3_0.4_0.9_1_False_0.2', 'stg5dir_0_x0_90_2_SENSEX_R_1.2_3_0.4_0.8_2_False_0.2', 'stg5dir_0_x0_120_1_SENSEX_PCT_0.0018_3_0.55_0.7_2_False_0.2', 'stg5dir_0_x0_30_2_SENSEX_PCT_0.0016_3_0.4_0.7_2_False_0.2', 'stg5dir_0_x0_180_1_SENSEX_R_1.1_3_0.55_0.8_2_False_0.2', 'stg5dir_0_x0_220_2_SENSEX_PCT_0.0026_3_0.4_0.9_1_False_0.2', 'stg5dir_0_x0_230_2_SENSEX_PCT_0.0012_3_0.55_0.9_2_False_0.2', 'stg5dir_0_x0_210_2_SENSEX_PCT_0.0016_3_0.4_0.9_1_False_0.2', 'stg5dir_0_x0_30_1_SENSEX_PCT_0.0014_3_0.45_0.7_3_False_0.2', 'stg5dir_0_x0_230_2_SENSEX_PCT_0.002_3_0.55_0.7_2_False_0.2', 'stg5dir_0_x0_10_2_SENSEX_PCT_0.0014_3_0.55_0.8_2_False_0.2', 'stg5dir_0_x0_90_2_SENSEX_PCT_0.0022_3_0.45_0.8_2_False_0.2', 'stg5dir_0_x0_70_1_SENSEX_PCT_0.0024_3_0.45_0.7_3_False_0.2', 'stg5dir_0_x0_150_1_SENSEX_PCT_0.001_3_0.5_0.9_3_False_0.2', 'stg5dir_0_x0_190_1_SENSEX_R_1.3_3_0.4_0.9_1_False_0.2', 'al_0_x0_150_1_SENSEX_R_1.2_3_0.55_0.9_2_False_True', 'als_0_x0_20_1_SENSEX_PCT_0.0028_3_0.4_0.9_2_False', 'als_0_x0_70_1_SENSEX_R_1.3_3_0.5_0.7_3_False', 'als_0_x0_160_1_SENSEX_PCT_0.002_3_0.55_0.8_3_False', 'olre_0_x0_150_2_SENSEX_PCT_0.0028_3_0.45_0.9_3_False_True_True', 'olre_0_x0_60_2_SENSEX_R_1.0_3_0.4_0.7_2_False_True_True', 'stg5dir_0_x0_190_2_SENSEX_PCT_0.0014_3_0.55_0.9_2_False_0.2', 'stg5dir_0_x0_220_2_SENSEX_R_1.1_3_0.4_0.9_1_False_0.2', 'stg5dir_0_x0_90_2_SENSEX_R_1.2_3_0.4_0.8_2_False_0.2', 'stg5dir_0_x0_220_2_SENSEX_PCT_0.0026_3_0.4_0.9_1_False_0.2', 'tridentdir_0_x0_20_2_SENSEX_R_1.0_3_0.35_0.8_2_False_3_1', 'tridentdir_0_x0_30_2_SENSEX_R_1.3_3_0.3_0.7_2_False_3_1', 'tridentdir_0_x0_180_2_SENSEX_PCT_0.0012_3_0.25_0.8_1_False_2_1', 'tridentdir_0_x0_15_2_SENSEX_R_1.3_3_0.3_0.9_2_False_3_1', 'tridentdir_0_x0_10_2_SENSEX_R_1.2_3_0.3_0.9_1_False_3_1', 'tridentdir_0_x0_75_2_SENSEX_R_1.1_3_0.35_0.9_2_False_3_1', 'tridentdir_0_x0_190_2_SENSEX_PCT_0.0014_3_0.3_0.8_1_False_2_1', 'tridentdir_0_x0_155_1_SENSEX_R_1.2_3_0.3_0.9_1_False_4_1', 'blackbird_0_x0_5_2_SENSEX_PCT_0.0028_3_0.3_0.7_1_False_1_150', 'zzsex0_SENSEX_0_x2_10_60_2_1_PCT_0.0025_5_1_0.3_PCT_0.1_False_2_0.99_False_False_-3400_0_0_0_0']);
+  };
+
+  strategySocket.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+    // Handle the received chart data
+
+    strategy_mtm_chart_BackendData.value = data.strategy_mtm_chart_data;
+
+  };
+  strategySocket.onerror = function (error) {
+    console.log(`[error] ${error.message}`);
+  };
+
+  function sendStrategyUIDs(uids) {
+    strategySocket.send(JSON.stringify({ strategy_uids: uids }));
+  }
+
+
+  strategySocket.onclose = (event) => {
+    console.log('Strategy Chart WebSocket connection closed:', event.reason);
+    // Implement reconnection logic if needed
+  }
+
+  return strategySocket;
+}
+
 
 const reconnect = () => {
   if (reconnectAttempts < maxReconnectAttempts) {
@@ -332,6 +387,8 @@ const stopPingInterval = () => {
 
 onMounted(() => {
   connectWebSocket()
+  connectBasketChartWebSocket()
+  connectStrategyChartWebSocket()
 })
 
 onUnmounted(() => {
@@ -347,8 +404,8 @@ onUnmounted(() => {
 <template>
   <div class="homePage_Container bg-[#efefef]/30">
     <LightWeightChart v-if="Object.keys(basket_BackendData).length" :Chartdata="basket_BackendData" />
-    {{ basket_BackendData.length }}
-
+    <LightWeightChart v-if="Object.keys(strategy_mtm_chart_BackendData).length"
+      :Chartdata="strategy_mtm_chart_BackendData" />
     <div v-if="index_data" class="nav_index_container font-semibold bg-white  drop-shadow-sm">
       <p>BANKNIFTY : {{ index_data.BANKNIFTYSPOT ? index_data.BANKNIFTYSPOT : 0 }}</p>
       <p>FINNIFTY : {{ index_data.FINNIFTYSPOT ? index_data.FINNIFTYSPOT : 0 }}</p>
