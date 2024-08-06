@@ -1,5 +1,6 @@
 <template>
     <div class="warningsignal-container text-sm font-semibold">
+        {{ signals.position_mismatch }}
         <div class="signal-container">
             <p class="textContainer"> Strategy :</p>
             <span :class="signals.pulse_run_strats ? 'greensignal' : 'redsignal'"></span>
@@ -17,6 +18,11 @@
             <span :class="signals['backendConnection'] ? 'greensignal' : 'redsignal'"></span>
         </div>
         <div class="signal-container">
+            <p class="textContainer">Position Mismatch :</p>
+            <span :class="calculate_position_mismatch() ? 'greensignal' : 'redsignal'"></span>
+
+        </div>
+        <div class="signal-container">
             <p class="textContainer">FrontToBack Latency :</p>
             <span>{{ latency }}</span>
         </div>
@@ -24,6 +30,26 @@
             <p class="textContainer"> FrontToBack Max Latency :</p>
             <span>{{ max_latency }}</span>
         </div>
+
+        <div class="signal-container">
+            <p class="textContainer">basketLatency :</p>
+            <span>{{ basketLatency }}</span>
+        </div>
+        <div class="signal-container">
+            <p class="textContainer"> max_basket_latency :</p>
+            <span>{{ max_basket_latency }}</span>
+        </div>
+
+        <div class="signal-container">
+            <p class="textContainer"> strategyLatency :</p>
+            <span>{{ strategyLatency }}</span>
+        </div>
+        <div class="signal-container">
+            <p class="textContainer"> max_strategy_latency :</p>
+            <span>{{ max_strategy_latency }}</span>
+        </div>
+
+
 
 
     </div>
@@ -33,6 +59,7 @@
 
 import { watch } from 'vue';
 import { toRefs } from 'vue';
+import { ref } from 'vue'
 
 const props = defineProps({
     signals: {
@@ -46,10 +73,41 @@ const props = defineProps({
     max_latency: {
         type: Number,
         required: true
+    },
+    basketLatency: {
+        type: Number,
+        required: true
+    },
+    max_basket_latency: {
+        type: Number,
+        required: true
+    },
+    strategyLatency: {
+        type: Number,
+        required: true
+    },
+    max_strategy_latency: {
+        type: Number,
+        required: true
     }
 });
-
 const { signals } = toRefs(props);
+const calculate_position_mismatch = () => {
+    const val = props.signals.position_mismatch;;
+    let tell = true;
+    let ans = [];
+    for (const v in val) {
+        if (val.hasOwnProperty(v)) {
+            tell = tell && (Object.keys(val[v]).length === 0);
+            if (Object.keys(val[v]).length !== 0) {
+                ans.push({ [v]: val[v] });
+            }
+        }
+    }
+    return tell;
+}
+
+
 
 // watch(signals, (newSignals) => {
 //     // React to changes in the signals prop if needed

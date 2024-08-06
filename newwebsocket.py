@@ -262,7 +262,7 @@ async def send_data(websocket: WebSocket):
                 'time': get_time(),
                 "live_index": get_index_ltp(),
                 'pulse': read_pulse_updates(),
-                #'position_mismatch': read_position_mismatch()
+                'position_mismatch': read_position_mismatch()
             },
             "time": start_global_time,
             #"strategy_mtm_chart_data": strategy_mtm_chart_data

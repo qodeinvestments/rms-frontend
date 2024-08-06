@@ -11,7 +11,7 @@ import {
 } from '@tanstack/vue-table'
 
 import { MyEnum } from '../Enums/Prefix.js';
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router';
 import TanStackTestTable from './TanStackTestTable.vue'
 import Chart from './Chart.vue';
@@ -23,7 +23,7 @@ import LightWeightChart from './LightWeightChart.vue';
 
 const route = useRoute();
 const user_data = ref('')
-
+const name = ref('');
 
 
 
@@ -233,11 +233,6 @@ const combined_df_columns = [
     cell: info => info.getValue(),
     header: () => 'timestamp'
   }),
-  columnHelper.accessor(row => row.system_tag, {
-    id: 'system_tag',
-    cell: info => info.getValue(),
-    header: () => 'system_tag'
-  }),
   columnHelper.accessor(row => row.action, {
     id: 'action',
     cell: info => info.getValue(),
@@ -348,11 +343,7 @@ const combined_df_columns = [
     cell: info => info.getValue(),
     header: () => 'OrderUniqueIdentifier'
   }),
-  columnHelper.accessor(row => row.system_tags, {
-    id: 'system_tags',
-    cell: info => info.getValue(),
-    header: () => 'system_tags'
-  }),
+
 
 ]
 const rms_df_columns = [
@@ -363,7 +354,10 @@ const rms_df_columns = [
   }),
   columnHelper.accessor(row => row.ltp, {
     id: 'Ltp',
-    cell: info => info.getValue().toFixed(2),
+    cell: info => {
+      const value = info.getValue();
+      return value !== undefined ? value.toFixed(2) : 'N/A';
+    },
     header: () => 'Ltp',
   }),
   columnHelper.accessor(row => row.pnl, {
@@ -433,73 +427,47 @@ const connection_BackendData = ref([])
 const date = ref()
 const data = ref([])
 const user_infected = ref([])
-const strategy_mtm_chart_data = ref([])
-const strategy_mtm_chart_name = ref([])
+const client_details_Latency = ref(0)
+const max_client_details_latency = ref(0)
 
-const client_live_trade_book = ref([])
-const client_live_order_book = ref([])
-const client_combined_df = ref([])
+const book = ref([])
 const handleColumnClick = ({ item, index }) => {
   showOnPage.value = item;
 }
 
 const handleMessage = (message) => {
-  if (true) {
-    try {
 
-      if (message.client_data === undefined) return;
-      client_BackendData.value = message.client_data
+  try {
 
-      let result = client_BackendData.value.find(client => client.name === name.value);
-      if (result) {
-        user_data.value = result;
+    if (message.client_data === undefined) return;
+    client_BackendData.value = message.client_data
 
+    let result = client_BackendData.value.find(client => client.name === name.value);
+    if (result) {
+      user_data.value = result;
+      data.value = [{
+        AccountName: result.name || '',
+        IdealMTM: result.ideal_MTM !== undefined ? Number(result.ideal_MTM) : 0,
+        Day_PL: result.MTM !== undefined ? Number(result.MTM) : 0,
+        Friction: result.MTM !== undefined && result.ideal_MTM !== undefined
+          ? (Number(result.MTM) - Number(result.ideal_MTM)).toFixed(2)
+          : '0.00',
+        OpenQuantity: result.OpenQuantity !== undefined ? Number(result.OpenQuantity) : 0,
+        NetQuantity: result.NetQuantity !== undefined ? Number(result.NetQuantity) : 0,
+        RejectedOrderCount: result.Rejected_orders !== undefined ? Number(result.Rejected_orders) : 0,
+        PendingOrderCount: result.Pending_orders !== undefined ? Number(result.Pending_orders) : 0,
+        MARGIN: result.Live_Client_Margin !== undefined ? Number(result.Live_Client_Margin) : 0,
+        VAR: result.Live_Client_Var !== undefined ? Number(result.Live_Client_Var) : 0,
+        VAR_PERCENTAGE: result.Live_Client_Var !== undefined ? ((Number(result.Live_Client_Var) / Number(result.Live_Client_Margin)) * 100).toPrecision(4) : 0,
 
-
-        data.value = [{
-          AccountName: result.name || '',
-          IdealMTM: result.ideal_MTM !== undefined ? Number(result.ideal_MTM) : 0,
-          Day_PL: result.MTM !== undefined ? Number(result.MTM) : 0,
-          Friction: result.MTM !== undefined && result.ideal_MTM !== undefined
-            ? (Number(result.MTM) - Number(result.ideal_MTM)).toFixed(2)
-            : '0.00',
-          OpenQuantity: result.OpenQuantity !== undefined ? Number(result.OpenQuantity) : 0,
-          NetQuantity: result.NetQuantity !== undefined ? Number(result.NetQuantity) : 0,
-          RejectedOrderCount: result.Rejected_orders !== undefined ? Number(result.Rejected_orders) : 0,
-          PendingOrderCount: result.Pending_orders !== undefined ? Number(result.Pending_orders) : 0,
-          MARGIN: result.Live_Client_Margin !== undefined ? Number(result.Live_Client_Margin) : 0,
-          VAR: result.Live_Client_Var !== undefined ? Number(result.Live_Client_Var) : 0,
-          VAR_PERCENTAGE: result.Live_Client_Var !== undefined ? ((Number(result.Live_Client_Var) / Number(result.Live_Client_Margin)) * 100).toPrecision(4) : 0,
-
-        }];
-
-        let tradeArray = Object.values(result.Live_Trade_Book || {});
-        let orderBookArray = Object.values(result.Live_Order_Book || {});
-        let combined_df_Array = Object.values(result.Combined_df || {});
-
-        client_live_trade_book.value = tradeArray;
-        client_live_order_book.value = orderBookArray;
-        client_combined_df.value = combined_df_Array
-
-      } else {
-        console.error('No client data found for the specified name:', name.value);
-      }
-    } catch (error) {
-      console.error('Error parsing event data or updating data:', error);
+      }];
+    } else {
+      console.error('No client data found for the specified name:', name.value);
     }
+  } catch (error) {
+    console.error('Error parsing event data or updating data:', error);
   }
-  else if (message.channel === "connection_dashboard_data") {
-    try {
-      connection_BackendData.value = message.data
-      let response = message.data;
-      user_infected.value = Object.keys(response.pulse)
-        .filter(key => (key.startsWith('pulse_trader_xts:') || key.startsWith('pulse_trader_zerodha:')) && response.pulse[key] === false)
-        .map(key => key.split(':')[1]);
-    }
-    catch (error) {
-      console.error('Error parsing event data or updating data:', error);
-    }
-  }
+
 }
 
 
@@ -528,13 +496,72 @@ const connectToSSE = () => {
 };
 
 
+const connectClientDetailsWebSocket = () => {
+  const clientDetailSocket = new WebSocket('ws://localhost:5000/clientdetails');
 
-const name = ref('');
+  clientDetailSocket.onopen = function (e) {
+    console.log("Client details connection established");
+    // Send the initial set of client data
+    sendClientDetails();
+  };
+
+  // clientDetailSocket.onmessage = function (event) {
+  //   const data = JSON.parse(event.data);
+  //   console.log("Received data:", data);
+  //   let Book_data = Object.values(data.table_data || {});
+  //   book.value = Book_data;
+  //   // Handle the received data here
+  // };
+  clientDetailSocket.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+    console.log("Received data:", data);
+    client_details_Latency = data['time']
+    if (data.table_data) {
+      book.value = Object.values(data.table_data);
+    } else {
+      book.value = [];
+    }
+  };
+
+  clientDetailSocket.onerror = function (error) {
+    console.log(`WebSocket error: ${error.message}`);
+  };
+
+  clientDetailSocket.onclose = function (event) {
+    console.log('Client Detail WebSocket connection closed:', event.reason);
+  };
+
+  function sendClientDetails() {
+    if (clientDetailSocket && clientDetailSocket.readyState === WebSocket.OPEN) {
+      let client_data = {
+        "name": name.value,
+        "type": showOnPage.value
+      };
+      clientDetailSocket.send(JSON.stringify({ client_data: client_data }));
+    } else {
+      console.log("WebSocket is not open. Unable to send message.");
+    }
+  }
+
+  // Call sendClientDetails whenever name or type changes
+  watch([name, showOnPage], () => {
+    sendClientDetails();
+    // Reset book when changing views
+    book.value = [];
+  });
+
+  return clientDetailSocket;
+};
+
+
+
+
 const showOnPage = ref('Positions')
 
 onMounted(() => {
   connectToSSE();
   name.value = route.params.username;
+  connectClientDetailsWebSocket();
 })
 
 onUnmounted(() => {
@@ -583,32 +610,32 @@ onUnmounted(() => {
         @column-clicked="handleColumnClick" />
     </div>
 
-    <div class="my-8" v-if="user_data && showOnPage === 'Positions'">
+    <div class="my-8" v-if="book && showOnPage === 'Positions'">
       <p class="table-heading">Live Positions</p>
-      <TanStackTestTable :data="user_data['Live_Client_RMS_df']" :columns="rms_df_columns" :hasColor="['pnl']"
-        :navigateTo="[]" :showPagination=true />
+      <TanStackTestTable :data="book" :columns="rms_df_columns" :hasColor="['pnl']" :navigateTo="[]"
+        :showPagination=true />
     </div>
 
 
 
 
-    <div class="my-8" v-if="showOnPage === 'TradeBook'">
+    <div class="my-8" v-if="book && showOnPage === 'TradeBook'">
       <p class="table-heading">Complete Trade Book</p>
-      <TanStackTestTable :data="client_live_trade_book" :columns="live_trade_book_columns" :hasColor="[]"
-        :navigateTo="[]" :showPagination=true />
+      <TanStackTestTable :data="book" :columns="live_trade_book_columns" :hasColor="[]" :navigateTo="[]"
+        :showPagination=true />
     </div>
 
 
     <div class="my-8" v-if="showOnPage === 'Order'">
       <p class="table-heading">Complete Order Book</p>
-      <TanStackTestTable :data="client_live_order_book" :columns="live_order_book_columns" :hasColor="[]"
-        :navigateTo="[]" :showPagination=true />
+      <TanStackTestTable :data="book" :columns="live_order_book_columns" :hasColor="[]" :navigateTo="[]"
+        :showPagination=true />
     </div>
 
 
     <div class="my-8" v-if="showOnPage === 'Combined DF'">
       <p class="table-heading">Combined DF</p>
-      <TanStackTestTable :data="client_combined_df" :columns="combined_df_columns" :hasColor="[]" :navigateTo="[]"
+      <TanStackTestTable :data="book" :columns="combined_df_columns" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
 

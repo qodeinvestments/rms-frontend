@@ -164,8 +164,24 @@ onUnmounted(() => {
                                         'redbackground': hasRowcolor && hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]),
                                         'greenbackground': hasRowcolor && !(hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]))
                                     }" @click="checkNavigate(cell)">
-                                    <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+                                    <template v-if="cell.getValue() !== undefined">
+                                        <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+                                    </template>
+                                    <template v-else>
+                                        N/A
+                                    </template>
                                 </td>
+                                <!-- <td v-for="(cell, index) in row.getVisibleCells()" :key="cell.id"
+                                    class="maxwidth150 break-words whitespace-normal px-3 py-4 text-sm text-black-600"
+                                    :class="{
+                                        'sticky-column': index === 0,
+                                        'red': cell.getValue() < 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
+                                        'green': cell.getValue() > 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
+                                        'redbackground': hasRowcolor && hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]),
+                                        'greenbackground': hasRowcolor && !(hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]))
+                                    }" @click="checkNavigate(cell)">
+                                    <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+                                </td> -->
                             </tr>
                         </tbody>
                     </table>
@@ -225,11 +241,11 @@ onUnmounted(() => {
 }
 
 .redbackground {
-    background-color: rgb(255, 215, 215);
+    background-color: rgb(255, 215, 215) !important;
 }
 
 .greenbackground {
-    background-color: rgb(217, 246, 217);
+    background-color: rgb(217, 246, 217) !important;
 }
 
 table {
@@ -283,8 +299,13 @@ table {
     z-index: 1;
 }
 
+.sticky-column:nth-child(1) {
+    background: white;
+}
+
 .sticky-header:nth-child(1) {
     left: 0px;
+
     /* Adjust as per the width of the first column */
 }
 
