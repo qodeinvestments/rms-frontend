@@ -473,7 +473,7 @@ const handleMessage = (message) => {
 
 
 const connectToSSE = () => {
-  const socket = new WebSocket('ws://localhost:5000/ws');
+  const socket = new WebSocket('wss://api.swancapital.in/ws');
 
   socket.onmessage = (event) => {
     if (event.data === 'ping') {
@@ -497,7 +497,7 @@ const connectToSSE = () => {
 
 
 const connectClientDetailsWebSocket = () => {
-  const clientDetailSocket = new WebSocket('ws://localhost:5000/clientdetails');
+  const clientDetailSocket = new WebSocket('wss://api.swancapital.in/clientdetails');
 
   clientDetailSocket.onopen = function (e) {
     console.log("Client details connection established");

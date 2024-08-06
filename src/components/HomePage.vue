@@ -233,7 +233,7 @@ const updateData = () => {
 }
 
 const connectWebSocket = () => {
-  const socket = new WebSocket('https:api.swancapital.in/ws');
+  const socket = new WebSocket('wss://api.swancapital.in/ws');
 
   socket.onopen = () => {
     console.log('WebSocket connection opened')
@@ -278,7 +278,7 @@ const connectWebSocket = () => {
 
 
 const connectBasketChartWebSocket = () => {
-  const basketSocket = new WebSocket('ws://localhost:5000/chart/basket');
+  const basketSocket = new WebSocket('wss://api.swancapital.in/chart/basket');
 
   basketSocket.onopen = () => {
     console.log('Basket Chart WebSocket connection opened');
@@ -315,7 +315,7 @@ const connectBasketChartWebSocket = () => {
 
 
 const connectStrategyChartWebSocket = () => {
-  const strategySocket = new WebSocket('ws://localhost:5000/chart/strategy');
+  const strategySocket = new WebSocket('wss://api.swancapital.in/chart/strategy');
 
 
   strategySocket.onopen = function (e) {
