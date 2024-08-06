@@ -387,7 +387,7 @@ const stopPingInterval = () => {
 
 onMounted(() => {
   connectWebSocket()
-  connectBasketChartWebSocket()
+  // connectBasketChartWebSocket()
   // connectStrategyChartWebSocket()
 })
 
