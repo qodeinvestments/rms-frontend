@@ -1,4 +1,5 @@
-from fastapi import FastAPI, WebSocket
+# ab tak ka best code
+from fastapi import FastAPI, WebSocket ,WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import json
@@ -8,31 +9,40 @@ import numpy as np
 import direct_redis
 import pandas as pd
 import datetime
-import pytz
 import logging
+import sys
+from starlette.websockets import WebSocketState
+from typing import List, Dict
 
 app = FastAPI()
 
-
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Or specify your frontend URL
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
 )
 
-
 r = direct_redis.DirectRedis()
+try:
+    r = direct_redis.DirectRedis()
+    logger.info("Redis connection established")
+except Exception as e:
+    logger.error(f"Failed to connect to Redis: {e}")
+    sys.exit(1)
 
 clients = r.hgetall('live_clients')
 
+# Helper functions (keep your existing helper functions here)
 def get_time():
     return datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S.%f')
+
+
 def get_index_ltp():
     ltp_dict = {}
     for i in ['NIFTYSPOT', 'BANKNIFTYSPOT', 'FINNIFTYSPOT', 'MIDCPNIFTYSPOT', 'SENSEXSPOT']:
@@ -128,9 +138,17 @@ def read_pulse_updates():
     return r.get('rms_heartbeat')
 
 def read_position_mismatch():
-    data= r.hgetall('net_positions_verification')
-    print("data is :",data)
-    return data.to_dict()
+    data = r.hgetall('net_positions_verification')
+   
+    for (key,value) in data.items():
+        if( len(value)==0):
+            data[key]=value
+        else :
+          data[key]=value.to_dict()
+        
+    return data
+   
+    
 
 def get_client_live_trade_book(client):
     exchangeTOsymbol = r.get('exchangeTOsymbol')
@@ -150,24 +168,25 @@ def get_client_combined_df(client):
         tb = pd.DataFrame(tb)
         tb = tb.fillna('')
         tb['ExchangeInstrumentID'] = tb['ExchangeInstrumentID'].apply(lambda x: exchangeTOsymbol.get(x, None))
-        timestamp_columns = tb.select_dtypes(include=['datetime64[ns]']).columns
+        timestamp_column_names = tb.select_dtypes(include=['datetime64[ns]']).columns
 
         # Convert each timestamp column to string
-        for column in timestamp_columns:
+        for column in timestamp_column_names:
          tb[column] = tb[column].astype(str)   
 
-        
-        temp_tb = tb[[
-                "uid", "timestamp", "system_tag","action", 
+        possible_columns=[
+                "uid", "timestamp","action", 
                 "qty", "symbol", "price", "value", "system_timestamp",
                 "note", "basket", "effective_qty", "AppOrderID",  
                 "ExchangeSegment","ExchangeInstrumentID", "OrderType", "ProductType",
                 "OrderPrice", "OrderQuantity",
                 "OrderStatus", "OrderAverageTradedPrice",
                 "OrderGeneratedDateTime", "ExchangeTransactTime", "TradingSymbol",
-                "OrderUniqueIdentifier","system_tags"
-                ]]
-
+                "OrderUniqueIdentifier"
+        ]
+        
+        temp_tb = tb[possible_columns]
+        
         return temp_tb.to_dict('records')
     return []
     
@@ -222,143 +241,197 @@ async def send_initial_data(websocket:WebSocket):
     }
     await websocket.send_text(json.dumps(initial_data))
 
-async def send_data(websocket: WebSocket):
-    while True:
-        
-        start_global_time = get_time()
-        s_g_t=time.time()
-        exchangeTOsymbol = r.get('exchangeTOsymbol')
-        
-        clients_obj = [
-            {
-                'name': client,
-                'ideal_MTM': round(get_idealMTM(client), 2),
-                'MTM': round(get_actual_client_MTM(client), 2),
-                "MTMTable": change_chart_data(client),
-                'ideal_MTMTable': r.hgetall(f'live_client_ideal_mtm.{client}'),
-                'Rejected_orders': getRejectedOrders(client),
-                'Pending_orders': getPendingOrders(client),
-                'OpenQuantity': get_open_qty(client),
-                "NetQuantity": get_net_qty(client),
-                "Live_Trade_Book": get_client_live_trade_book(client),
-                "Live_Order_Book": get_client_live_order_book(client),
-                "Live_Client_Positions": get_client_pos(client, exchangeTOsymbol),
-                "Live_Client_RMS_df": get_client_rms_df(client),
-                "Live_Client_Margin": get_client_margin(client),
-                "Live_Client_Var": get_client_var(client),
-                "Combined_df": get_client_combined_df(client)
-            }
-            for client in clients if client == 'PAPER TRADING 2'
-        ]
-        
-        #live_weights = r.hgetall('live_weights')
-        #strategy_mtm_chart_data = get_strategy_mtm_chart_data(live_weights)
-        # Basket_data = get_basketData(live_weights)
-        
-        data = {
-            "client_data": clients_obj,
-            #"basket_data": Basket_data,
-            "connection_data": {
-                'time': get_time(),
-                "live_index": get_index_ltp(),
-                'pulse': read_pulse_updates(),
-                'position_mismatch': read_position_mismatch()
-            },
-            "time": start_global_time,
-            #"strategy_mtm_chart_data": strategy_mtm_chart_data
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: Dict[str, List[WebSocket]] = {
+            "main": [],
+            "clientdetails": [],
+            "basket": [],
+            "strategy": []
         }
-        await websocket.send_text(json.dumps(data))
-        end_time = time.time()
-        print(f"client and connection: {end_time - s_g_t}") 
+        self.last_data: Dict[str, Dict] = {
+            "main": {},
+            "clientdetails": {},
+            "basket": {},
+            "strategy": {}
+        }
+
+    async def connect(self, websocket: WebSocket, connection_type: str):
+        await websocket.accept()
+        self.active_connections[connection_type].append(websocket)
+
+    def disconnect(self, websocket: WebSocket, connection_type: str):
+        self.active_connections[connection_type].remove(websocket)
+
+    async def broadcast(self, message: str, connection_type: str):
+        for connection in self.active_connections[connection_type]:
+            await connection.send_text(message)
+
+manager = ConnectionManager()
+
+# Data fetching functions
+def get_main_data():
+    exchangeTOsymbol = r.get('exchangeTOsymbol')
+    clients_obj = [
+        {
+            'name': client,
+            'ideal_MTM': round(get_idealMTM(client), 2),
+            'MTM': round(get_actual_client_MTM(client), 2),
+            'Rejected_orders': getRejectedOrders(client),
+            'Pending_orders': getPendingOrders(client),
+            'OpenQuantity': get_open_qty(client),
+            "NetQuantity": get_net_qty(client),
+            "Live_Client_Margin": get_client_margin(client),
+            "Live_Client_Var": get_client_var(client),
+            "MTMTable": change_chart_data(client),
+            'ideal_MTMTable': r.hgetall(f'live_client_ideal_mtm.{client}'),
+            "Live_Trade_Book": get_client_live_trade_book(client),
+            "Live_Order_Book": get_client_live_order_book(client),
+            "Live_Client_Positions": get_client_pos(client, exchangeTOsymbol),
+            "Live_Client_RMS_df": get_client_rms_df(client),
+            "Combined_df": get_client_combined_df(client)
+        }
+        for client in clients if client == 'PAPER TRADING 2'
+    ]
+    
+    return {
+        "client_data": clients_obj,
+        "connection_data": {
+            'time': get_time(),
+            "live_index": get_index_ltp(),
+            'pulse': read_pulse_updates(),
+            'position_mismatch': read_position_mismatch()
+        },
+        "time": get_time(),
+    }
+
+def get_basket_data():
+    live_weights = r.hgetall('live_weights')
+    return {
+        "basket_data": get_basketData(live_weights),
+        "time": get_time()
+    }
+
+def get_strategy_data(strategy_uids):
+    return {
+        "strategy_mtm_chart_data": get_strategy_mtm_chart_data(strategy_uids),
+        "time": get_time()
+    }
+
+# Background tasks to update data
+async def update_main_data():
+    while True:
+        manager.last_data["main"] = get_main_data()
+        await manager.broadcast(json.dumps(manager.last_data["main"]), "main")
         await asyncio.sleep(0.1)
 
-@app.get("/")
-async def root():
-    return {"message": "Welcome to Swan Capital API"}
+async def update_basket_data():
+    while True:
+        manager.last_data["basket"] = get_basket_data()
+        await manager.broadcast(json.dumps(manager.last_data["basket"]), "basket")
+        await asyncio.sleep(0.1)
 
+async def update_strategy_data():
+    while True:
+        for websocket in manager.active_connections["strategy"]:
+            strategy_uids = getattr(websocket, "strategy_uids", [])
+            data = get_strategy_data(strategy_uids)
+            await websocket.send_text(json.dumps(data))
+        await asyncio.sleep(0.1)
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(update_main_data())
+    asyncio.create_task(update_basket_data())
+    asyncio.create_task(update_strategy_data())
+
+# WebSocket endpoints
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
+    await manager.connect(websocket, "main")
     try:
-        await send_initial_data(websocket)
-        await send_data(websocket)
+        while True:
+            if websocket.client_state == WebSocketState.DISCONNECTED:
+                break
+            try:
+                await websocket.receive_text()
+                await websocket.send_text(json.dumps(manager.last_data["main"]))
+            except WebSocketDisconnect as e:
+                if e.code == 1001:
+                    logger.info(f"WebSocket closed normally with code {e.code}")
+                else:
+                    logger.warning(f"WebSocket disconnected with code {e.code}")
+                break
     except Exception as e:
-        print(f"WebSocket error: {e}")
+        logger.error(f"WebSocket error: {str(e)}")
     finally:
-        await websocket.close()
+        manager.disconnect(websocket, "main")
 
+@app.websocket("/clientdetails")
+async def clientdetails_websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket, "clientdetails")
+    try:
+        name = ""
+        type = ""
+        while True:
+            try:
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=1)
+                received_client = json.loads(data).get('client_data', {})
+                name = received_client.get('name', name)
+                type = received_client.get('type', type)
+            except asyncio.TimeoutError:
+                pass
+            
+            book = None
+            if type == "Positions":
+                book = get_client_rms_df(name)
+            elif type == "Order":
+                book = get_client_live_order_book(name)
+            elif type == "TradeBook":
+                book = get_client_live_trade_book(name)
+            elif type == "Combined DF":
+                book = get_client_combined_df(name)
 
-
-
-async def send_basket_chart_data(websocket: WebSocket):
-    while True:
-        s_g_t=time.time()
-        live_weights = r.hgetall('live_weights')
-        Basket_data = get_basketData(live_weights)
-        data = {
-            "basket_data": Basket_data,
-            "time": get_time()
-        }
-        await websocket.send_text(json.dumps(data))
-        end_time = time.time()
-        print(f"basket: {end_time - s_g_t}") 
-        await asyncio.sleep(0.1)
-
+            data = {"time": get_time(), "table_data": book}
+            await websocket.send_text(json.dumps(data))
+            await asyncio.sleep(1)
+    except Exception as e:
+        logger.error(f"Client Data WebSocket error: {e}")
+    finally:
+        manager.disconnect(websocket, "clientdetails")
 
 @app.websocket("/chart/basket")
 async def basket_chart_websocket_endpoint(websocket: WebSocket):
-    logger.info(f"Received WebSocket connection request from {websocket.client}")
+    await manager.connect(websocket, "basket")
     try:
-        await websocket.accept()
-        logger.info("WebSocket connection accepted")
-        await send_basket_chart_data(websocket)
+        while True:
+            await websocket.receive_text()
+            await websocket.send_text(json.dumps(manager.last_data["basket"]))
     except Exception as e:
-        logger.error(f"Basket Chart WebSocket error: {e}", exc_info=True)
+        logger.error(f"Basket Chart WebSocket error: {e}")
     finally:
-        await websocket.close()
-        logger.info("WebSocket connection closed")
-
-
-async def send_strategy_chart_data(websocket: WebSocket):
-    strategy_uids = []
-    while True:
-        s_g_t=time.time()
-        try:
-            # Check for any new messages (non-blocking)
-            data = await asyncio.wait_for(websocket.receive_text(), timeout=0.1)
-            received_uids = json.loads(data).get('strategy_uids', [])
-            if received_uids:
-                strategy_uids = received_uids
-                
-        except asyncio.TimeoutError:
-            # No new message, continue with current strategy_uids
-            pass
-        except Exception as e:
-            print(f"Error receiving message: {e}")
-
-        strategy_mtm_chart_data = get_strategy_mtm_chart_data(strategy_uids)
-        
-        data = {
-            "strategy_mtm_chart_data": strategy_mtm_chart_data,
-            "time": get_time()
-        }
-        end_time = time.time()
-        print(f"strategy: {end_time - s_g_t}") 
-        await websocket.send_text(json.dumps(data))
-        await asyncio.sleep(0.1)
+        manager.disconnect(websocket, "basket")
 
 @app.websocket("/chart/strategy")
 async def strategy_chart_websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
+    await manager.connect(websocket, "strategy")
     try:
-        await send_strategy_chart_data(websocket)
+        websocket.strategy_uids = []
+        while True:
+            try:
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=0.1)
+                received_uids = json.loads(data).get('strategy_uids', [])
+                if received_uids:
+                    websocket.strategy_uids = received_uids
+            except asyncio.TimeoutError:
+                pass
     except Exception as e:
         logger.error(f"Strategy Chart WebSocket error: {e}")
     finally:
-        await websocket.close()
-
+        manager.disconnect(websocket, "strategy")
 
 if __name__ == "__main__":
+    logger.info("Starting the FastAPI application")
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5000, log_level="info")
