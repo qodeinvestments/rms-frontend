@@ -165,6 +165,7 @@ const max_strategy_latency = ref(0)
 const past_time = ref(0)
 const past_time_basket = ref(0);
 const past_time_strategy = ref(0);
+const live_weights = ref([]);
 
 let socket = null
 let reconnectAttempts = 0
@@ -248,7 +249,8 @@ const connectWebSocket = () => {
     } else {
 
       const message = JSON.parse(event.data);
-
+      if (message['live_weights'])
+        live_weights.value = Object.values(message['live_weights']).flat();
       let ar2 = message.time;
       if (past_time.value === 0) past_time.value = ar2;
       let date1 = new Date(past_time.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
@@ -321,7 +323,7 @@ const connectStrategyChartWebSocket = () => {
   strategySocket.onopen = function (e) {
     console.log("strategysocket Connection established");
     // Send the initial set of UIDs
-    sendStrategyUIDs(['shortoptions2_sot01_0_1_FINNIFTY_P_0.4_3_FNS2ID1']);
+    sendStrategyUIDs(live_weights.value);
   };
 
   strategySocket.onmessage = function (event) {
@@ -387,7 +389,7 @@ const stopPingInterval = () => {
 
 onMounted(() => {
   connectWebSocket()
-  // connectBasketChartWebSocket()
+  connectBasketChartWebSocket()
   // connectStrategyChartWebSocket()
 })
 
@@ -419,7 +421,6 @@ onUnmounted(() => {
         :basketLatency="basketLatency" :max_basket_latency="max_basket_latency" :strategyLatency="strategyLatency"
         :max_strategy_latency="max_strategy_latency" />
     </div>
-
 
 
     <div class="mx-auto px-8 py-8">
