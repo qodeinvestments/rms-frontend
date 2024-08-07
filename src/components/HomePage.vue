@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import NavBar from './NavBar.vue'
 import {
   FlexRender,
@@ -14,7 +14,9 @@ import MultiLineChart from './HighCharts.vue'
 import WarningSignal from './WarningSignal.vue'
 import { MyEnum } from '../Enums/Prefix.js'
 
+
 import LightWeightChart from './LightWeightChart.vue';
+import CustomSelect from './CustomSelect.vue'
 
 const defaultData = []
 const NavigationMap = {
@@ -249,8 +251,10 @@ const connectWebSocket = () => {
     } else {
 
       const message = JSON.parse(event.data);
-      if (message['live_weights'])
-        live_weights.value = Object.values(message['live_weights']).flat();
+
+      if (message['live_weights']) {
+        live_weights.value = message['live_weights'];
+      }
       let ar2 = message.time;
       if (past_time.value === 0) past_time.value = ar2;
       let date1 = new Date(past_time.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
@@ -316,6 +320,7 @@ const connectBasketChartWebSocket = () => {
 }
 
 
+
 const connectStrategyChartWebSocket = () => {
   const strategySocket = new WebSocket('wss://api.swancapital.in/chart/strategy');
 
@@ -323,7 +328,7 @@ const connectStrategyChartWebSocket = () => {
   strategySocket.onopen = function (e) {
     console.log("strategysocket Connection established");
     // Send the initial set of UIDs
-    sendStrategyUIDs(live_weights.value);
+    sendStrategyUIDs(live_weights.value[selected_opt.value]);
   };
 
   strategySocket.onmessage = function (event) {
@@ -345,9 +350,19 @@ const connectStrategyChartWebSocket = () => {
     console.log(`[error] ${error.message}`);
   };
 
-  function sendStrategyUIDs(uids) {
-    strategySocket.send(JSON.stringify({ strategy_uids: uids }));
+
+  const sendStrategyUIDs = (uids) => {
+    if (strategySocket && strategySocket.readyState === WebSocket.OPEN) {
+      strategySocket.send(JSON.stringify({ strategy_uids: uids }));
+    } else {
+      console.log("Strategy WebSocket is not open. Unable to send message.");
+    }
   }
+  watch(selected_opt, (newValue) => {
+    if (newValue && live_weights.value[newValue]) {
+      sendStrategyUIDs(live_weights.value[newValue]);
+    }
+  });
 
 
   strategySocket.onclose = (event) => {
@@ -359,6 +374,11 @@ const connectStrategyChartWebSocket = () => {
 }
 
 
+
+const give_live_weights = () => {
+  return Object.keys(live_weights.value);
+}
+
 const reconnect = () => {
   if (reconnectAttempts < maxReconnectAttempts) {
     reconnectAttempts++
@@ -369,6 +389,7 @@ const reconnect = () => {
   }
 }
 
+const selected_opt = ref("")
 let pingIntervalId = null
 
 const startPingInterval = () => {
@@ -406,6 +427,10 @@ onUnmounted(() => {
 <template>
   <div class="homePage_Container bg-[#efefef]/30">
     <LightWeightChart v-if="Object.keys(basket_BackendData).length" :Chartdata="basket_BackendData" />
+    <div class="select-container">
+
+      <CustomSelect :options="give_live_weights()" v-model="selected_opt" label="Choose an option:" />
+    </div>
     <LightWeightChart v-if="Object.keys(strategy_mtm_chart_BackendData).length"
       :Chartdata="strategy_mtm_chart_BackendData" />
     <div v-if="index_data" class="nav_index_container font-semibold bg-white  drop-shadow-sm">
@@ -421,7 +446,6 @@ onUnmounted(() => {
         :basketLatency="basketLatency" :max_basket_latency="max_basket_latency" :strategyLatency="strategyLatency"
         :max_strategy_latency="max_strategy_latency" />
     </div>
-
 
     <div class="mx-auto px-8 py-8">
       <div class="my-8">
@@ -483,5 +507,13 @@ html {
   align-items: center;
   display: flex;
   width: 100%;
+}
+
+.select-container {
+  display: flex;
+  width: 100%;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 10px;
 }
 </style>
