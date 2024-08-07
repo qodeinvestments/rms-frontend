@@ -515,7 +515,7 @@ const connectClientDetailsWebSocket = () => {
   clientDetailSocket.onmessage = function (event) {
     const data = JSON.parse(event.data);
     console.log("Received data:", data);
-    client_details_Latency = data['time']
+    client_details_Latency.value = data['time']
     if (data.table_data) {
       book.value = Object.values(data.table_data);
     } else {
