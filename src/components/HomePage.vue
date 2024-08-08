@@ -411,7 +411,7 @@ const stopPingInterval = () => {
 onMounted(() => {
   connectWebSocket()
   connectBasketChartWebSocket()
-  connectStrategyChartWebSocket()
+  // connectStrategyChartWebSocket()
 })
 
 onUnmounted(() => {
@@ -427,10 +427,11 @@ onUnmounted(() => {
 <template>
   <div class="homePage_Container bg-[#efefef]/30">
     <LightWeightChart v-if="Object.keys(basket_BackendData).length" :Chartdata="basket_BackendData" />
+    /*
     <div class="select-container">
-
       <CustomSelect :options="give_live_weights()" v-model="selected_opt" label="Choose an option:" />
     </div>
+    */
     <LightWeightChart v-if="Object.keys(strategy_mtm_chart_BackendData).length"
       :Chartdata="strategy_mtm_chart_BackendData" />
     <div v-if="index_data" class="nav_index_container font-semibold bg-white  drop-shadow-sm">
