@@ -427,8 +427,12 @@ const connection_BackendData = ref([])
 const date = ref()
 const data = ref([])
 const user_infected = ref([])
+const client_latency = ref(0)
 const client_details_Latency = ref(0)
+const past_time_client = ref(0)
+const past_time_clientDetails = ref(0)
 const max_client_details_latency = ref(0)
+const max_client_latency = ref(0)
 
 const book = ref([])
 const handleColumnClick = ({ item, index }) => {
@@ -480,6 +484,21 @@ const connectToSSE = () => {
       socket.send('pong')
     } else {
       const message = JSON.parse(event.data)
+
+
+      let ar2 = message["time"];
+      if (past_time_client.value === 0) past_time_client.value = ar2;
+      if (past_time_client.value != 0) {
+        let date1 = new Date(past_time_client.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+        let date2 = new Date(ar2.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+        let diffInMs = date2 - date1;
+        let diffInSeconds = diffInMs / 1000;
+        client_latency.value = diffInSeconds;
+        max_client_latency.value = Math.max(max_client_latency.value, client_latency.value)
+        past_time_client.value = ar2;
+      }
+
+
       handleMessage(message)
     }
   }
@@ -515,7 +534,21 @@ const connectClientDetailsWebSocket = () => {
   clientDetailSocket.onmessage = function (event) {
     const data = JSON.parse(event.data);
     console.log("Received data:", data);
-    client_details_Latency.value = data['time']
+
+
+    let ar2 = data["time"];
+    if (past_time_clientDetails.value === 0) past_time_clientDetails.value = ar2;
+    if (past_time_clientDetails.value != 0) {
+      let date1 = new Date(past_time_clientDetails.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+      let date2 = new Date(ar2.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+      let diffInMs = date2 - date1;
+      let diffInSeconds = diffInMs / 1000;
+      client_details_Latency.value = diffInSeconds;
+      max_client_details_latency.value = Math.max(max_client_details_latency.value, client_details_Latency.value)
+      past_time_clientDetails.value = ar2;
+    }
+
+
     if (data.table_data) {
       book.value = Object.values(data.table_data);
     } else {
@@ -605,6 +638,14 @@ onUnmounted(() => {
 
 
     <!--  <BarChart v-if="user_data['Live_Client_Positions']" :chartData='user_data["Live_Client_Positions"]' /> -->
+    <div class="LatencyTable">
+      <p> Client Latency :<span class="latencyvalue">{{ client_latency }}</span></p>
+      <p> Max Client :<span class="latencyvalue">{{ max_client_latency }}</span></p>
+      <p> Client Detail Latency: <span class="latencyvalue">{{ client_details_Latency }}</span></p>
+      <p> Max Client Detail Latency :<span class="latencyvalue"> {{ max_client_details_latency }}</span></p>
+
+    </div>
+
     <div class="navContainer">
       <NavBar :navColumns="['Positions', 'Order', 'Holdings', 'TradeBook', 'Combined DF']"
         @column-clicked="handleColumnClick" />
@@ -658,11 +699,24 @@ onUnmounted(() => {
   flex-direction: column;
 }
 
+.latencyvalue {
+  font-weight: bold;
+}
+
 .navContainer {
   width: 100%;
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
+}
+
+.LatencyTable {
+  display: flex;
+  width: 100;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 20px;
+  flex-direction: column;
 }
 
 .table-heading {
