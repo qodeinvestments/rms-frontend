@@ -152,8 +152,6 @@ const basket_BackendData = ref({})
 const strategy_mtm_chart_BackendData = ref({})
 
 const index_data = ref("hello")
-const basket_chart_data = ref([])
-const basket_chart_name = ref([])
 const pulse_signal = ref([])
 const time = ref([])
 const user_infected = ref([])
@@ -411,7 +409,7 @@ const stopPingInterval = () => {
 onMounted(() => {
   connectWebSocket()
   connectBasketChartWebSocket()
-  // connectStrategyChartWebSocket()
+  connectStrategyChartWebSocket()
 })
 
 onUnmounted(() => {
