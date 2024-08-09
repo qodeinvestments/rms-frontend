@@ -372,7 +372,6 @@ const connectStrategyChartWebSocket = () => {
 }
 
 const get_uids_length = () => {
-  console.log("hello")
   if (live_weights.value) {
     if (live_weights.value[selected_opt.value]) {
       console.log(live_weights[selected_opt.value])
@@ -419,7 +418,7 @@ const stopPingInterval = () => {
 onMounted(() => {
   connectWebSocket()
   connectBasketChartWebSocket()
-  connectStrategyChartWebSocket()
+  // connectStrategyChartWebSocket()
 })
 
 onUnmounted(() => {
@@ -435,7 +434,7 @@ onUnmounted(() => {
 <template>
   <div class="homePage_Container bg-[#efefef]/30">
     <LightWeightChart v-if="Object.keys(basket_BackendData).length" :Chartdata="basket_BackendData" />
-    <p>hello:{{ get_uids_length() }}</p>
+    <p>Lenght of Uid is:{{ get_uids_length() }}</p>
     <div class="select-container">
       <CustomSelect :options="give_live_weights()" v-model="selected_opt" label="Choose an option:" />
     </div>

@@ -462,7 +462,7 @@ const handleMessage = (message) => {
         PendingOrderCount: result.Pending_orders !== undefined ? Number(result.Pending_orders) : 0,
         MARGIN: result.Live_Client_Margin !== undefined ? Number(result.Live_Client_Margin) : 0,
         VAR: result.Live_Client_Var !== undefined ? Number(result.Live_Client_Var) : 0,
-        VAR_PERCENTAGE: result.Live_Client_Var !== undefined ? ((Number(result.Live_Client_Var) / Number(result.Live_Client_Margin)) * 100).toPrecision(4) : 0,
+        VAR_PERCENTAGE: result.Live_Client_Var !== undefined && (result.Live_Client_Margin > 0) ? ((Number(result.Live_Client_Var) / Number(result.Live_Client_Margin)) * 100).toPrecision(4) : 0,
 
       }];
     } else {

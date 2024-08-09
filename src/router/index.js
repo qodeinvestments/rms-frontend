@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import UserPage from '../components/UserPage.vue'
 import HomePage from '../components/HomePage.vue'
+import SignalBook from '../components/SignalBook.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -13,6 +14,12 @@ const router = createRouter({
       path: '/user/:username',
       name: 'userPage',
       component: UserPage,
+    },
+    ,
+    {
+      path: '/signalBook',
+      name: 'SignalBook',
+      component: SignalBook,
     },
     // {
     //   path: '/about',

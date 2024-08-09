@@ -1,7 +1,7 @@
 <template>
     <div class="warningsignal-container text-sm font-semibold">
         {{ signals.position_mismatch }}
-        <div class="signal-container">
+        <div class="signal-container" @click="goToSignalBook()">
             <p class="textContainer"> Strategy :</p>
             <span :class="signals.pulse_run_strats ? 'greensignal' : 'redsignal'"></span>
         </div>
@@ -60,6 +60,8 @@
 import { watch } from 'vue';
 import { toRefs } from 'vue';
 import { ref } from 'vue'
+import { useRouter } from 'vue-router';
+
 
 const props = defineProps({
     signals: {
@@ -105,6 +107,10 @@ const calculate_position_mismatch = () => {
         }
     }
     return tell;
+}
+const route = useRouter();
+const goToSignalBook = () => {
+    route.push('/signalbook')
 }
 
 

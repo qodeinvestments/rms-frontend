@@ -137,7 +137,7 @@ onUnmounted(() => {
                 <input type="text" class="border border-gray-400 rounded px-2 py-2" placeholder="Search"
                     v-model="filter" v-if="showPagination" />
             </div>
-            <div class="table-container -mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="table-container -mx-4 -my-2 overflow-x-auto overflow-y-auto sm:-mx-6 lg:-mx-8">
                 <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                     <table class="min-w-full divide-y divide-gray-300">
                         <thead>
@@ -310,7 +310,7 @@ table {
 }
 
 .table-container {
-    overflow-x: auto;
+    overflow: auto;
     -webkit-overflow-scrolling: touch;
 }
 </style>
