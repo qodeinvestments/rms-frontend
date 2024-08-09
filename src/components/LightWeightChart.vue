@@ -21,6 +21,10 @@ const data = ref(props.Chartdata); // Changed to reactive reference
 const seriesOptions = ref({
     color: 'rgb(45, 77, 205)',
 });
+const get_data_keys = () => {
+
+    return Object.keys(data.value).length;
+}
 
 watch(
     () => props.Chartdata,
@@ -84,6 +88,7 @@ const changeColors = () => {
 </script>
 
 <template>
+    {{ get_data_keys() }}
     <div class="chart-container" style="height: 400px;">
         <LWChart :type="chartType" :data="data" :autosize="true" :chart-options="chartOptions"
             :series-options="seriesOptions" ref="lwChart" />
