@@ -127,10 +127,10 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'Friction',
   }),
-  columnHelper.accessor(row => row.MARGIN, {
-    id: 'MARGIN',
+  columnHelper.accessor(row => row.Ideal_Margin, {
+    id: 'Ideal Margin',
     cell: info => info.getValue(),
-    header: () => 'Margin',
+    header: () => 'Ideal Margin',
   }),
   columnHelper.accessor(row => row.VAR, {
     id: 'VAR',
@@ -141,6 +141,21 @@ const columns = [
     id: 'VAR %',
     cell: info => info.getValue() + "%",
     header: () => 'VAR %',
+  }),
+  columnHelper.accessor(row => row.Used_Margin, {
+    id: 'Used_Margin',
+    cell: info => info.getValue(),
+    header: () => 'Used_Margin',
+  }),
+  columnHelper.accessor(row => row.AvailableMargin, {
+    id: 'AvailableMargin',
+    cell: info => info.getValue(),
+    header: () => 'AvailableMargin',
+  }),
+  columnHelper.accessor(row => row.Cash, {
+    id: 'Cash',
+    cell: info => info.getValue(),
+    header: () => 'Cash',
   }),
   columnHelper.accessor(row => row.NetQuantity, {
     id: 'NetQuantity',
@@ -162,9 +177,6 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'PendingOrderCount',
   }),
-
-
-
   columnHelper.accessor(row => row.PortfolioValue, {
     id: 'PortfolioValue',
     cell: info => info.getValue(),
@@ -206,22 +218,9 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'HoldingsCount',
   }),
-  columnHelper.accessor(row => row.Used_Margin, {
-    id: 'Used_Margin',
-    cell: info => info.getValue(),
-    header: () => 'Used_Margin',
-  }),
-  columnHelper.accessor(row => row.AvailableMargin, {
-    id: 'AvailableMargin',
-    cell: info => info.getValue(),
-    header: () => 'AvailableMargin',
-  }),
-  columnHelper.accessor(row => row.Cash, {
-    id: 'Cash',
-    cell: info => info.getValue(),
-    header: () => 'Cash',
-  }),
+
 ]
+
 const combined_df_columns = [
   columnHelper.accessor(row => row.uid, {
     id: 'uid',
@@ -433,6 +432,7 @@ const past_time_client = ref(0)
 const past_time_clientDetails = ref(0)
 const max_client_details_latency = ref(0)
 const max_client_latency = ref(0)
+const mix_real_ideal_mtm_table = ref({})
 
 const book = ref([])
 const handleColumnClick = ({ item, index }) => {
@@ -456,15 +456,19 @@ const handleMessage = (message) => {
         Friction: result.MTM !== undefined && result.ideal_MTM !== undefined
           ? (Number(result.MTM) - Number(result.ideal_MTM)).toFixed(2)
           : '0.00',
-        OpenQuantity: result.OpenQuantity !== undefined ? Number(result.OpenQuantity) : 0,
-        NetQuantity: result.NetQuantity !== undefined ? Number(result.NetQuantity) : 0,
         RejectedOrderCount: result.Rejected_orders !== undefined ? Number(result.Rejected_orders) : 0,
         PendingOrderCount: result.Pending_orders !== undefined ? Number(result.Pending_orders) : 0,
-        MARGIN: result.Live_Client_Margin !== undefined ? Number(result.Live_Client_Margin) : 0,
+        OpenQuantity: result.OpenQuantity !== undefined ? Number(result.OpenQuantity) : 0,
+        NetQuantity: result.NetQuantity !== undefined ? Number(result.NetQuantity) : 0,
+        Ideal_Margin: result.Live_Client_Margin !== undefined ? Number(result.Live_Client_Margin) : 0,
         VAR: result.Live_Client_Var !== undefined ? Number(result.Live_Client_Var) : 0,
-        VAR_PERCENTAGE: result.Live_Client_Var !== undefined && (result.Live_Client_Margin > 0) ? ((Number(result.Live_Client_Var) / Number(result.Live_Client_Margin)) * 100).toPrecision(4) : 0,
-
+        Cash: result.cashAvailable !== undefined ? Number(result.cashAvailable) : 0,
+        AvailableMargin: result.availableMargin !== undefined ? Number(result.availableMargin) : 0,
+        Used_Margin: result.marginUtilized !== undefined ? Number(result.marginUtilized) : 0,
+        VAR_PERCENTAGE: result.Live_Client_Var !== undefined && (result.availableMargin > 0) ? ((Number(result.Live_Client_Var) / Number(result.availableMargin)) * 100).toPrecision(4) : 0,
       }];
+      mix_real_ideal_mtm_table.value = { "real": result['MTMTable'], "ideal": result['ideal_MTMTable'] }
+
     } else {
       console.error('No client data found for the specified name:', name.value);
     }
@@ -484,8 +488,6 @@ const connectToSSE = () => {
       socket.send('pong')
     } else {
       const message = JSON.parse(event.data)
-
-
       let ar2 = message["time"];
       if (past_time_client.value === 0) past_time_client.value = ar2;
       if (past_time_client.value != 0) {
@@ -533,7 +535,6 @@ const connectClientDetailsWebSocket = () => {
   // };
   clientDetailSocket.onmessage = function (event) {
     const data = JSON.parse(event.data);
-    console.log("Received data:", data);
 
 
     let ar2 = data["time"];
@@ -629,7 +630,7 @@ onUnmounted(() => {
 
 
 
-    <LightWeightChart v-if="user_data['MTMTable']" :Chartdata="user_data['MTMTable']" />
+    <LightWeightChart v-if="user_data['MTMTable']" :Chartdata="mix_real_ideal_mtm_table" />
 
 
 

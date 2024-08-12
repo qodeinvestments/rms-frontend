@@ -36,6 +36,12 @@ const columns = [
         cell: info => info.getValue(),
         header: () => 'timestamp'
     }),
+    columnHelper.accessor(row => row.system_timestamp, {
+        id: 'system_timestamp',
+        cell: info => info.getValue(),
+        header: () => 'system_timestamp'
+    }),
+
     columnHelper.accessor(row => row.action, {
         id: 'action',
         cell: info => info.getValue(),
@@ -86,11 +92,7 @@ const columns = [
         cell: info => info.getValue(),
         header: () => 'sell_value'
     }),
-    columnHelper.accessor(row => row.system_timestamp, {
-        id: 'system_timestamp',
-        cell: info => info.getValue(),
-        header: () => 'system_timestamp'
-    }),
+
     columnHelper.accessor(row => row.note, {
         id: 'note',
         cell: info => info.getValue(),
@@ -189,13 +191,6 @@ onUnmounted(() => {
     font-weight: bold;
 }
 
-.navContainer {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-end;
-}
-
 .LatencyTable {
     display: flex;
     width: 100;
@@ -211,38 +206,8 @@ onUnmounted(() => {
     margin-left: 30px;
 }
 
-.profitContainer {
-    border: 1px solid black;
-    height: auto;
-    padding: 20px;
-
-    width: fit-content;
-    border-radius: 10px;
-    display: flex;
-    font-size: 30px;
-    align-items: flex-start;
-    flex-direction: column;
-
-}
-
-.priceContainer {
-    display: flex;
-    align-items: baseline;
-    gap: 20px;
-}
-
 html {
     /* font-family: poppins; */
     font-size: 14px;
-}
-
-.labeltag {
-    font-size: 20px;
-}
-
-.headingContainer {
-    font-size: 30px;
-    font-weight: bold;
-
 }
 </style>

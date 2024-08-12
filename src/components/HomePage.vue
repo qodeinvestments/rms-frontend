@@ -48,10 +48,10 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'Friction',
   }),
-  columnHelper.accessor(row => row.MARGIN, {
-    id: 'MARGIN',
+  columnHelper.accessor(row => row.Ideal_Margin, {
+    id: 'Ideal Margin',
     cell: info => info.getValue(),
-    header: () => 'Margin',
+    header: () => 'Ideal Margin',
   }),
   columnHelper.accessor(row => row.VAR, {
     id: 'VAR',
@@ -63,7 +63,21 @@ const columns = [
     cell: info => info.getValue() + "%",
     header: () => 'VAR %',
   }),
-
+  columnHelper.accessor(row => row.Used_Margin, {
+    id: 'Used_Margin',
+    cell: info => info.getValue(),
+    header: () => 'Used_Margin',
+  }),
+  columnHelper.accessor(row => row.AvailableMargin, {
+    id: 'AvailableMargin',
+    cell: info => info.getValue(),
+    header: () => 'AvailableMargin',
+  }),
+  columnHelper.accessor(row => row.Cash, {
+    id: 'Cash',
+    cell: info => info.getValue(),
+    header: () => 'Cash',
+  }),
   columnHelper.accessor(row => row.NetQuantity, {
     id: 'NetQuantity',
     cell: info => info.getValue(),
@@ -84,8 +98,6 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'PendingOrderCount',
   }),
-
-
   columnHelper.accessor(row => row.PortfolioValue, {
     id: 'PortfolioValue',
     cell: info => info.getValue(),
@@ -127,21 +139,7 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'HoldingsCount',
   }),
-  columnHelper.accessor(row => row.Used_Margin, {
-    id: 'Used_Margin',
-    cell: info => info.getValue(),
-    header: () => 'Used_Margin',
-  }),
-  columnHelper.accessor(row => row.AvailableMargin, {
-    id: 'AvailableMargin',
-    cell: info => info.getValue(),
-    header: () => 'AvailableMargin',
-  }),
-  columnHelper.accessor(row => row.Cash, {
-    id: 'Cash',
-    cell: info => info.getValue(),
-    header: () => 'Cash',
-  }),
+
 ]
 
 
@@ -223,9 +221,13 @@ const updateData = () => {
       PendingOrderCount: item.Pending_orders !== undefined ? Number(item.Pending_orders) : 0,
       OpenQuantity: item.OpenQuantity !== undefined ? Number(item.OpenQuantity) : 0,
       NetQuantity: item.NetQuantity !== undefined ? Number(item.NetQuantity) : 0,
-      MARGIN: item.Live_Client_Margin !== undefined ? Number(item.Live_Client_Margin) : 0,
-      VAR_PERCENTAGE: item.Live_Client_Var !== undefined && (item.Live_Client_Margin > 0) ? ((Number(item.Live_Client_Var) / Number(item.Live_Client_Margin)) * 100).toPrecision(4) : 0,
+      Ideal_Margin: item.Live_Client_Margin !== undefined ? Number(item.Live_Client_Margin) : 0,
       VAR: item.Live_Client_Var !== undefined ? Number(item.Live_Client_Var) : 0,
+      Cash: item.cashAvailable !== undefined ? Number(item.cashAvailable) : 0,
+      AvailableMargin: item.availableMargin !== undefined ? Number(item.availableMargin) : 0,
+      Used_Margin: item.marginUtilized !== undefined ? Number(item.marginUtilized) : 0,
+      VAR_PERCENTAGE: item.Live_Client_Var !== undefined && (item.availableMargin > 0) ? ((Number(item.Live_Client_Var) / Number(item.availableMargin)) * 100).toPrecision(4) : 0,
+
     }))
   }
 
@@ -249,7 +251,7 @@ const connectWebSocket = () => {
     } else {
 
       const message = JSON.parse(event.data);
-
+      console.log(message)
       if (message['live_weights']) {
         live_weights.value = message['live_weights'];
       }

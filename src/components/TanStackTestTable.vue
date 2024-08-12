@@ -114,8 +114,10 @@ const handleMouseWheel = (event) => {
     const container = document.querySelector('.table-container');
     if (event.deltaY !== 0) {
         container.scrollLeft += event.deltaY;
+        container.scrollTop += event.deltaY;
         event.preventDefault();
     }
+
 }
 
 onMounted(() => {
