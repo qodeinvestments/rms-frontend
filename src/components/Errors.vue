@@ -37,28 +37,20 @@ const columns = [
         cell: info => info.getValue(),
         header: () => 'Message',
     }),
-    columnHelper.accessor(row => row.IdealMTM, {
-        id: 'IdealMTM',
+    columnHelper.accessor(row => row.timestamp, {
+        id: 'timestamp',
         cell: info => info.getValue(),
-        header: () => 'Ideal MTM',
+        header: () => 'Timestamp',
     }),
 
 
 ]
 
 let eventSource = null
-const client_BackendData = ref([])
-const connection_BackendData = ref([])
-const date = ref()
-const data = ref([])
-const user_infected = ref([])
 const client_latency = ref(0)
-const client_details_Latency = ref(0)
 const past_time_client = ref(0)
-const past_time_clientDetails = ref(0)
-const max_client_details_latency = ref(0)
 const max_client_latency = ref(0)
-const mix_real_ideal_mtm_table = ref({})
+
 
 const book = ref([])
 const handleColumnClick = ({ item, index }) => {
@@ -67,48 +59,23 @@ const handleColumnClick = ({ item, index }) => {
 
 const handleMessage = (message) => {
     try {
-        if (message.client_data === undefined) return;
-        client_BackendData.value = message.client_data
+        if (message['errors'] === undefined) return;
+        book.value = message['errors']
 
-        let result = client_BackendData.value.find(client => client.name === name.value);
-        if (result) {
-            user_data.value = result;
-            data.value = [{
-                AccountName: result.name || '',
-                IdealMTM: result.ideal_MTM !== undefined ? Number(result.ideal_MTM) : 0,
-                Day_PL: result.MTM !== undefined ? Number(result.MTM) : 0,
-                Friction: result.MTM !== undefined && result.ideal_MTM !== undefined
-                    ? (Number(result.MTM) - Number(result.ideal_MTM)).toFixed(2)
-                    : '0.00',
-                RejectedOrderCount: result.Rejected_orders !== undefined ? Number(result.Rejected_orders) : 0,
-                PendingOrderCount: result.Pending_orders !== undefined ? Number(result.Pending_orders) : 0,
-                OpenQuantity: result.OpenQuantity !== undefined ? Number(result.OpenQuantity) : 0,
-                NetQuantity: result.NetQuantity !== undefined ? Number(result.NetQuantity) : 0,
-                Ideal_Margin: result.Live_Client_Margin !== undefined ? Number(result.Live_Client_Margin) : 0,
-                VAR: result.Live_Client_Var !== undefined ? Number(result.Live_Client_Var) : 0,
-                Cash: result.cashAvailable !== undefined ? Number(result.cashAvailable) : 0,
-                AvailableMargin: result.availableMargin !== undefined ? Number(result.availableMargin) : 0,
-                Used_Margin: result.marginUtilized !== undefined ? Number(result.marginUtilized) : 0,
-                VAR_PERCENTAGE: result.Live_Client_Var !== undefined && (result.availableMargin > 0) ? ((Number(result.Live_Client_Var) / Number(result.availableMargin)) * 100).toPrecision(4) : 0,
-            }];
-            mix_real_ideal_mtm_table.value = { "real": result['MTMTable'], "ideal": result['ideal_MTMTable'] }
-
-        } else {
-            console.error('No client data found for the specified name:', name.value);
-        }
     } catch (error) {
         console.error('Error parsing event data or updating data:', error);
     }
 }
 
 const connectToSSE = () => {
-    const socket = new WebSocket('wss://api.swancapital.in/ws');
+    const socket = new WebSocket('wss://api.swancapital.in/errors');
 
     socket.onmessage = (event) => {
         if (event.data === 'ping') {
             socket.send('pong')
         } else {
             const message = JSON.parse(event.data)
+            console.log("message is:", message)
             let ar2 = message["time"];
             if (past_time_client.value === 0) past_time_client.value = ar2;
             if (past_time_client.value != 0) {
@@ -143,7 +110,7 @@ const connectToSSE = () => {
 
 
 
-const showOnPage = ref('Positions')
+const showOnPage = ref('KeyDB Logs')
 
 onMounted(() => {
     connectToSSE();
@@ -174,23 +141,19 @@ onUnmounted(() => {
         <div class="LatencyTable">
             <p> Client Latency :<span class="latencyvalue">{{ client_latency }}</span></p>
             <p> Max Client :<span class="latencyvalue">{{ max_client_latency }}</span></p>
-            <p> Client Detail Latency: <span class="latencyvalue">{{ client_details_Latency }}</span></p>
-            <p> Max Client Detail Latency :<span class="latencyvalue"> {{ max_client_details_latency }}</span></p>
         </div>
 
         <div class="navContainer">
-            <NavBar :navColumns="['Positions', 'Order', 'Holdings', 'TradeBook', 'Combined DF']"
-                @column-clicked="handleColumnClick" />
+            <NavBar :navColumns="['KeyDB Logs', 'Orders']" @column-clicked="handleColumnClick" />
         </div>
 
-        <div class="my-8" v-if="book && showOnPage === 'Positions'">
-            <p class="table-heading">Live Positions</p>
-            <TanStackTestTable :data="book" :columns="rms_df_columns" :hasColor="['pnl']" :navigateTo="[]"
-                :showPagination=true />
+        <div class="my-8" v-if="book && showOnPage === 'KeyDB Logs'">
+            <p class="table-heading">{{ showOnPage }}</p>
+            <TanStackTestTable :data="book" :columns="columns" :hasColor="[]" :navigateTo="[]" :showPagination=true />
         </div>
 
 
-
+        <!-- 
 
         <div class="my-8" v-if="book && showOnPage === 'TradeBook'">
             <p class="table-heading">Complete Trade Book</p>
@@ -210,7 +173,7 @@ onUnmounted(() => {
             <p class="table-heading">Combined DF</p>
             <TanStackTestTable :data="book" :columns="combined_df_columns" :hasColor="[]" :navigateTo="[]"
                 :showPagination=true />
-        </div>
+        </div> -->
 
     </div>
 

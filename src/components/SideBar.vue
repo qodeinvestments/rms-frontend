@@ -42,10 +42,10 @@
                 </li>
               </ul>
             </li>
-            <li :class="selected == 'Posts' ? 'active' : ''" @click="changeSelected('Posts')">
+            <li :class="selected == 'Errors' ? 'active' : ''" @click="changeSelected('Errors')">
               <a href="#">
                 <i class="icon ph-bold ph-file-text"></i>
-                <span class="text">Posts</span>
+                <span class="text">Errors</span>
               </a>
             </li>
             <li :class="selected == 'Schedules' ? 'active' : ''" @click="changeSelected('Schedules')">
@@ -131,7 +131,8 @@ export default {
       showoptions: false,
       togglesubCategory: ['Audience', 'Income'],
       navigateMap: {
-        'Dashboard': '/'
+        'Dashboard': '/',
+        'Errors': '/errors'
       }
 
     }

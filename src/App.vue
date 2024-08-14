@@ -1,4 +1,5 @@
 <script>
+import { provide } from 'vue'
 import { RouterView } from 'vue-router'
 import SideBar from './components/SideBar.vue';
 import Toast from './components/Toast.vue';
@@ -6,29 +7,42 @@ import Toast from './components/Toast.vue';
 export default {
   components: {
     SideBar,
-    Toast
+    Toast,
+    RouterView
   },
   data() {
     return {
-      sideBarState: false
-
+      sideBarState: false,
+      showToast: false,
+      toastMessage: '',
+      toastType: 'info'
     }
   },
   methods: {
     ChangeSideBarState(data) {
       this.sideBarState = data;
+    },
+    triggerToast(message, type = 'info') {
+      this.toastMessage = message;
+      this.toastType = type;
+      this.showToast = true;
+
+      setTimeout(() => {
+        this.showToast = false;
+      }, 3000);
     }
   },
-
+  created() {
+    provide('triggerToast', this.triggerToast);
+  }
 }
 </script>
-
 
 <template>
   <div class="pageLayout">
     <SideBar @State="ChangeSideBarState($event)" class="sideBar" />
-    <Toast />
-    <router-view :class="sideBarState ? 'content' : 'content2'" />
+    <Toast v-if="showToast" :message="toastMessage" :type="toastType" />
+    <RouterView :class="sideBarState ? 'content' : 'content2'" />
   </div>
 </template>
 
@@ -37,7 +51,6 @@ export default {
 
 body {
   margin: 0;
-  /* Ensure body has no margin */
   font-family: "Inter", sans-serif;
   width: 100%;
   height: 100%;
@@ -51,25 +64,19 @@ body {
 .sideBar {
   position: fixed;
   width: fit-content;
-  /* Adjust the width as needed */
   height: 100%;
-  /* Adjust the background color as needed */
 }
 
 .content {
   margin-left: 100px;
-  /* Same as sideBar width */
   width: calc(100% - 100px);
-  /* Adjust to fill the remaining space */
   height: 100%;
   transition: all 0.3s;
 }
 
 .content2 {
   margin-left: 250px;
-  /* Same as sideBar width */
   width: calc(100% - 250px);
-  /* Adjust to fill the remaining space */
   height: 100%;
   transition: all 0.3s;
 }

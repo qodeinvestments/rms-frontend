@@ -7,6 +7,7 @@ import {
   useVueTable,
   createColumnHelper,
 } from '@tanstack/vue-table'
+import { inject } from 'vue'
 import SignalForTable from './SignalForTable.vue'
 import TanStackTestTable from './TanStackTestTable.vue'
 import Chart from './Chart.vue'
@@ -251,7 +252,7 @@ const connectWebSocket = () => {
     } else {
 
       const message = JSON.parse(event.data);
-      console.log(message)
+      console.log("message is:", message)
       if (message['live_weights']) {
         live_weights.value = message['live_weights'];
       }
@@ -282,6 +283,11 @@ const connectWebSocket = () => {
   }
 }
 
+const triggerToast = inject('triggerToast')
+
+const showSuccessToast = () => {
+  triggerToast('Operation successful!', 'success')
+}
 
 const connectBasketChartWebSocket = () => {
   const basketSocket = new WebSocket('wss://api.swancapital.in/chart/basket');
@@ -376,7 +382,6 @@ const connectStrategyChartWebSocket = () => {
 const get_uids_length = () => {
   if (live_weights.value) {
     if (live_weights.value[selected_opt.value]) {
-      console.log(live_weights[selected_opt.value])
       return live_weights.value[selected_opt.value].length;
     }
   }
@@ -420,7 +425,7 @@ const stopPingInterval = () => {
 onMounted(() => {
   connectWebSocket()
   connectBasketChartWebSocket()
-  // connectStrategyChartWebSocket()
+  connectStrategyChartWebSocket()
 })
 
 onUnmounted(() => {
@@ -456,6 +461,7 @@ onUnmounted(() => {
         :basketLatency="basketLatency" :max_basket_latency="max_basket_latency" :strategyLatency="strategyLatency"
         :max_strategy_latency="max_strategy_latency" />
     </div>
+    <button @click="showSuccessToast">Show Success Toast</button>
 
     <div class="mx-auto px-8 py-8">
       <div class="my-8">

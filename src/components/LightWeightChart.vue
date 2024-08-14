@@ -44,32 +44,6 @@ const randomColor = (alpha = 1) => {
 };
 
 const colorsTypeMap = {
-    area: [
-        ['topColor', 0.4],
-        ['bottomColor', 0],
-        ['lineColor', 1],
-    ],
-    bar: [
-        ['upColor', 1],
-        ['downColor', 1],
-    ],
-    baseline: [
-        ['topFillColor1', 0.28],
-        ['topFillColor2', 0.05],
-        ['topLineColor', 1],
-        ['bottomFillColor1', 0.28],
-        ['bottomFillColor2', 0.05],
-        ['bottomLineColor', 1],
-    ],
-    candlestick: [
-        ['upColor', 1],
-        ['downColor', 1],
-        ['borderUpColor', 1],
-        ['borderDownColor', 1],
-        ['wickUpColor', 1],
-        ['wickDownColor', 1],
-    ],
-    histogram: [['color', 1]],
     line: [['color', 1]],
 };
 

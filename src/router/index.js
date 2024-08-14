@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import UserPage from '../components/UserPage.vue'
 import HomePage from '../components/HomePage.vue'
 import SignalBook from '../components/SignalBook.vue'
+import Errors from '../components/Errors.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -20,6 +21,11 @@ const router = createRouter({
       path: '/signalBook',
       name: 'SignalBook',
       component: SignalBook,
+    },
+    {
+      path: '/errors',
+      name: 'ErrorPage',
+      component: Errors,
     },
     // {
     //   path: '/about',
