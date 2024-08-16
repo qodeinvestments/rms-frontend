@@ -122,12 +122,12 @@ const handleMouseWheel = (event) => {
 
 onMounted(() => {
     const container = document.querySelector('.table-container');
-    //container.addEventListener('wheel', handleMouseWheel, { passive: false });
+    container.addEventListener('wheel', handleMouseWheel, { passive: false });
 })
 
 onUnmounted(() => {
     const container = document.querySelector('.table-container');
-    //container.removeEventListener('wheel', handleMouseWheel);
+    container.removeEventListener('wheel', handleMouseWheel);
 })
 
 </script>
