@@ -59,8 +59,8 @@ const handleColumnClick = ({ item, index }) => {
 
 const handleMessage = (message) => {
     try {
-        if (message['errors'] === undefined) return;
-        book.value = message['errors']
+        if (message['keydblogs'] === undefined) return;
+        book.value = message['keydblogs']
 
     } catch (error) {
         console.error('Error parsing event data or updating data:', error);
@@ -68,7 +68,7 @@ const handleMessage = (message) => {
 }
 
 const connectToSSE = () => {
-    const socket = new WebSocket('wss://api.swancapital.in/errors');
+    const socket = new WebSocket('wss://api.swancapital.in/keydblogs');
 
     socket.onmessage = (event) => {
         if (event.data === 'ping') {
@@ -110,7 +110,7 @@ const connectToSSE = () => {
 
 
 
-const showOnPage = ref('Orders')
+const showOnPage = ref('KeyDB Logs')
 
 onMounted(() => {
     connectToSSE();
@@ -132,19 +132,9 @@ onUnmounted(() => {
 
     <div class="px-8 py-8 pageContainer">
 
-
-
-
-
-
-        <!--  <BarChart v-if="user_data['Live_Client_Positions']" :chartData='user_data["Live_Client_Positions"]' /> -->
         <div class="LatencyTable">
             <p> Client Latency :<span class="latencyvalue">{{ client_latency }}</span></p>
             <p> Max Client :<span class="latencyvalue">{{ max_client_latency }}</span></p>
-        </div>
-
-        <div class="navContainer">
-            <NavBar :navColumns="['Orders']" @column-clicked="handleColumnClick" />
         </div>
 
         <div class="my-8" v-if="book && showOnPage === 'KeyDB Logs'">
@@ -152,28 +142,6 @@ onUnmounted(() => {
             <TanStackTestTable :data="book" :columns="columns" :hasColor="[]" :navigateTo="[]" :showPagination=true />
         </div>
 
-
-        <!-- 
-
-        <div class="my-8" v-if="book && showOnPage === 'TradeBook'">
-            <p class="table-heading">Complete Trade Book</p>
-            <TanStackTestTable :data="book" :columns="live_trade_book_columns" :hasColor="[]" :navigateTo="[]"
-                :showPagination=true />
-        </div>
-
-
-        <div class="my-8" v-if="showOnPage === 'Order'">
-            <p class="table-heading">Complete Order Book</p>
-            <TanStackTestTable :data="book" :columns="live_order_book_columns" :hasColor="[]" :navigateTo="[]"
-                :showPagination=true />
-        </div>
-
-
-        <div class="my-8" v-if="showOnPage === 'Combined DF'">
-            <p class="table-heading">Combined DF</p>
-            <TanStackTestTable :data="book" :columns="combined_df_columns" :hasColor="[]" :navigateTo="[]"
-                :showPagination=true />
-        </div> -->
 
     </div>
 

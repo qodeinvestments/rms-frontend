@@ -48,10 +48,10 @@
                 <span class="text">Errors</span>
               </a>
             </li>
-            <li :class="selected == 'Schedules' ? 'active' : ''" @click="changeSelected('Schedules')">
+            <li :class="selected == 'KeyDBLogs' ? 'active' : ''" @click="changeSelected('KeyDBLogs')">
               <a href="#">
                 <i class="icon ph-bold ph-calendar-blank"></i>
-                <span class="text">Schedules</span>
+                <span class="text">KeyDBLogs</span>
               </a>
             </li>
             <li>
@@ -132,7 +132,8 @@ export default {
       togglesubCategory: ['Audience', 'Income'],
       navigateMap: {
         'Dashboard': '/',
-        'Errors': '/errors'
+        'Errors': '/errors',
+        "KeyDBLogs": '/keydblogs'
       }
 
     }
