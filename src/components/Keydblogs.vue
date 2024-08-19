@@ -75,7 +75,6 @@ const connectToSSE = () => {
             socket.send('pong')
         } else {
             const message = JSON.parse(event.data)
-            console.log("message is:", message)
             let ar2 = message["time"];
             if (past_time_client.value === 0) past_time_client.value = ar2;
             if (past_time_client.value != 0) {

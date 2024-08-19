@@ -252,7 +252,6 @@ const connectWebSocket = () => {
     } else {
 
       const message = JSON.parse(event.data);
-      console.log("message is:", message)
       if (message['live_weights']) {
         live_weights.value = message['live_weights'];
       }

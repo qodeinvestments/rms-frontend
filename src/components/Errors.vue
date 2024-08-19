@@ -32,15 +32,41 @@ const columnHelper = createColumnHelper()
 const columns = [
 
 
+
+    columnHelper.accessor(row => row.TradingSymbol, {
+        id: 'TradingSymbol',
+        cell: info => info.getValue(),
+        header: () => 'TradingSymbol',
+    }),
+    columnHelper.accessor(row => row.OrderAverageTradedPrice, {
+        id: 'OrderAverageTradedPrice',
+        cell: info => info.getValue(),
+        header: () => 'OrderAverageTradedPrice',
+    }),
+    columnHelper.accessor(row => row.OrderQuantity, {
+        id: 'OrderQuantity',
+        cell: info => info.getValue(),
+        header: () => 'OrderQuantity',
+    }),
+    columnHelper.accessor(row => row.OrderSide, {
+        id: 'OrderSide',
+        cell: info => info.getValue(),
+        header: () => 'OrderSide',
+    }),
+    columnHelper.accessor(row => row.order_id, {
+        id: 'order_id',
+        cell: info => info.getValue(),
+        header: () => 'order_id',
+    }),
     columnHelper.accessor(row => row.message, {
         id: 'message',
         cell: info => info.getValue(),
         header: () => 'Message',
     }),
-    columnHelper.accessor(row => row.timestamp, {
-        id: 'timestamp',
+    columnHelper.accessor(row => row.time, {
+        id: 'Time',
         cell: info => info.getValue(),
-        header: () => 'Timestamp',
+        header: () => 'Time',
     }),
 
 
@@ -59,9 +85,8 @@ const handleColumnClick = ({ item, index }) => {
 
 const handleMessage = (message) => {
     try {
-        if (message['errors'] === undefined) return;
-        book.value = message['errors']
-
+        if (message === undefined) return;
+        book.value = message['Order_Errors']['PAPER TRADING 2']
     } catch (error) {
         console.error('Error parsing event data or updating data:', error);
     }
@@ -74,8 +99,7 @@ const connectToSSE = () => {
         if (event.data === 'ping') {
             socket.send('pong')
         } else {
-            const message = JSON.parse(event.data)
-            console.log("message is:", message)
+            const message = JSON.parse(event.data);
             let ar2 = message["time"];
             if (past_time_client.value === 0) past_time_client.value = ar2;
             if (past_time_client.value != 0) {
@@ -147,7 +171,7 @@ onUnmounted(() => {
             <NavBar :navColumns="['Orders']" @column-clicked="handleColumnClick" />
         </div>
 
-        <div class="my-8" v-if="book && showOnPage === 'KeyDB Logs'">
+        <div class="my-8" v-if="book && showOnPage === 'Orders'">
             <p class="table-heading">{{ showOnPage }}</p>
             <TanStackTestTable :data="book" :columns="columns" :hasColor="[]" :navigateTo="[]" :showPagination=true />
         </div>
