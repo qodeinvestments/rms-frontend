@@ -93,7 +93,7 @@ const handleMessage = (message) => {
 }
 
 const connectToSSE = () => {
-    const socket = new WebSocket('wss://api.swancapital.in/errors');
+    const socket = new WebSocket('wss://api.swancapital.in/errorLogs');
 
     socket.onmessage = (event) => {
         if (event.data === 'ping') {
