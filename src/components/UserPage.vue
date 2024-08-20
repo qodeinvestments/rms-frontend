@@ -218,9 +218,7 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'HoldingsCount',
   }),
-
 ]
-
 const combined_df_columns = [
   columnHelper.accessor(row => row.uid, {
     id: 'uid',
