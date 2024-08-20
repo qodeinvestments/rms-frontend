@@ -26,11 +26,8 @@ export default {
       this.toastMessage = message;
       this.toastType = type;
       this.showToast = true;
-
-      setTimeout(() => {
-        this.showToast = false;
-      }, 3000);
     }
+
   },
   created() {
     provide('triggerToast', this.triggerToast);
@@ -41,7 +38,7 @@ export default {
 <template>
   <div class="pageLayout">
     <SideBar @State="ChangeSideBarState($event)" class="sideBar" />
-    <Toast v-if="showToast" :message="toastMessage" :type="toastType" />
+    <Toast v-if="showToast" :message="toastMessage" :type="toastType" @close="showToast = false" />
     <RouterView :class="sideBarState ? 'content' : 'content2'" />
   </div>
 </template>

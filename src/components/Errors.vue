@@ -9,7 +9,7 @@ import {
     useVueTable,
     createColumnHelper,
 } from '@tanstack/vue-table'
-
+import { inject } from 'vue'
 import { MyEnum } from '../Enums/Prefix.js';
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router';
@@ -25,10 +25,22 @@ import EditButton from './EditButton.vue';
 const route = useRoute();
 const user_data = ref('')
 const name = ref('');
-
-
+const triggerToast = inject('triggerToast')
 
 const columnHelper = createColumnHelper()
+const columns_testing = [
+    columnHelper.accessor(row => row.time, {
+        id: 'Time',
+        cell: info => info.getValue(),
+        header: () => 'Time',
+    }),
+    columnHelper.accessor(row => row.message, {
+        id: 'message',
+        cell: info => info.getValue(),
+        header: () => 'message',
+    }),
+
+]
 
 const columns = [
 
@@ -67,7 +79,6 @@ const columns = [
         cell: info => info.getValue(),
         header: () => 'Time',
     }),
-
     columnHelper.accessor(row => row.edit, {
         id: 'edit',
         cell: info => h(EditButton, { id: info.row.original.id }),
@@ -93,7 +104,16 @@ const handleColumnClick = ({ item, index }) => {
 const handleMessage = (message) => {
     try {
         if (message === undefined) return;
-        book.value = message['Order_Errors']['PAPER TRADING 2']
+        if (showOnPage.value === 'Order_Errors') {
+            book.value = message['Order_Errors']['PAPER TRADING 2']
+        }
+        else if (showOnPage.value === 'Testing') {
+            if (book.value.length != message['Testing'].length && book.value.length != 0) {
+                triggerToast('New Error in Testing', 'error')
+            }
+            book.value = message['Testing']
+        }
+        console.log("book value is:", book.value)
     } catch (error) {
         console.error('Error parsing event data or updating data:', error);
     }
@@ -141,7 +161,7 @@ const connectToSSE = () => {
 
 
 
-const showOnPage = ref('Orders')
+const showOnPage = ref('Order_Errors')
 
 onMounted(() => {
     connectToSSE();
@@ -175,22 +195,22 @@ onUnmounted(() => {
         </div>
 
         <div class="navContainer">
-            <NavBar :navColumns="['Orders']" @column-clicked="handleColumnClick" />
+            <NavBar :navColumns="['Order_Errors', 'Testing']" @column-clicked="handleColumnClick" />
         </div>
 
-        <div class="my-8" v-if="book && showOnPage === 'Orders'">
+        <div class="my-8" v-if="book && showOnPage === 'Order_Errors'">
             <p class="table-heading">{{ showOnPage }}</p>
             <TanStackTestTable :data="book" :columns="columns" :hasColor="[]" :navigateTo="[]" :showPagination=true />
         </div>
-
+        <div class="my-8" v-else-if="book && showOnPage === 'Testing'">
+            <p class="table-heading">Testing Errors</p>
+            <TanStackTestTable :data="book" :columns="columns_testing" :hasColor="[]" :navigateTo="[]"
+                :showPagination=true />
+        </div>
 
         <!-- 
 
-        <div class="my-8" v-if="book && showOnPage === 'TradeBook'">
-            <p class="table-heading">Complete Trade Book</p>
-            <TanStackTestTable :data="book" :columns="live_trade_book_columns" :hasColor="[]" :navigateTo="[]"
-                :showPagination=true />
-        </div>
+     
 
 
         <div class="my-8" v-if="showOnPage === 'Order'">

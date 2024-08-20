@@ -488,16 +488,17 @@ onUnmounted(() => {
           <img v-if="getPercentageClass(key) === 'positive'" class="image_width" src="../assets/arrow-up-long-solid.svg"
             alt="">
           <img v-else class="image_width" src="../assets/arrow-down-long-solid.svg" alt="">
+          <span :class="['percentage', getPercentageClass(key)]">
+            <span class="opening-brac">(</span>{{ formatPercentage(getPercentage(key)) }}<span
+              class="closing-brac">)</span>
+          </span>
         </div>
 
 
 
 
 
-        <span :class="['percentage', getPercentageClass(key)]">
 
-          {{ formatPercentage(getPercentage(key)) }}
-        </span>
       </div>
     </div>
     <div class="time-container">
@@ -538,9 +539,19 @@ html {
   font-size: 14px;
 }
 
+.opening-brac {
+  padding-right: 5px;
+}
+
+.closing-brac {
+  padding-left: 5px;
+}
+
 .index-value-container {
   display: flex;
   gap: 10px;
+  justify-items: center;
+  align-items: center;
 
 }
 
@@ -576,9 +587,6 @@ html {
 
 .percentage {
   font-size: 1.0em;
-  position: absolute;
-  bottom: -20px;
-  right: 0;
 }
 
 .positive {
