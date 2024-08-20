@@ -5,7 +5,5 @@ const props = defineProps({
 </script>
 
 <template>
-  <a :href="`/users/${id}/edit`" class="text-indigo-600 hover:text-indigo-500"
-    >Edit</a
-  >
+  <a :href="`/users/${id}/edit`" class="text-indigo-600 hover:text-indigo-500">Edit</a>
 </template>

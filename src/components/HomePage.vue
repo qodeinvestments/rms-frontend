@@ -149,8 +149,14 @@ const client_BackendData = ref({})
 const connection_BackendData = ref({})
 const basket_BackendData = ref({})
 const strategy_mtm_chart_BackendData = ref({})
-
-const index_data = ref("hello")
+const index_data = ref({})
+const previous_day_close_index_data = {
+  BANKNIFTYSPOT: 50368.35,
+  FINNIFTYSPOT: 22922.70,
+  MIDCPNIFTYSPOT: 12728.60,
+  NIFTYSPOT: 24572.65,
+  SENSEXSPOT: 80424.68
+}
 const pulse_signal = ref([])
 const time = ref([])
 const user_infected = ref([])
@@ -172,6 +178,11 @@ const maxReconnectAttempts = 5
 const reconnectInterval = 5000 // 5 seconds
 const pingInterval = 30000 // 30 seconds
 
+const give_percentage_change = (a, b) => {
+  if (!a || !b) return 0;
+  const val = ((a - b) / a) * 100;
+  return val;
+}
 
 const handleMessage = (message) => {
 
@@ -402,6 +413,26 @@ const reconnect = () => {
   }
 }
 
+const formatIndexName = (name) => {
+  return name.replace('SPOT', '').toUpperCase()
+}
+const formatNumber = (value) => {
+  return value ? value.toLocaleString() : '0'
+}
+const getPercentage = (key) => {
+  const change = give_percentage_change(index_data.value[key], previous_day_close_index_data[key]);
+
+  // Ensure the result has exactly two decimal places
+  return change.toFixed(2);
+}
+const formatPercentage = (value) => {
+  return `${value}%`
+}
+const getPercentageClass = (key) => {
+  const percentage = getPercentage(key)
+  return percentage > 0 ? 'positive' : percentage < 0 ? 'negative' : 'neutral'
+}
+
 const selected_opt = ref("")
 let pingIntervalId = null
 
@@ -450,12 +481,25 @@ onUnmounted(() => {
       :Chartdata="strategy_mtm_chart_BackendData" />
     -->
 
-    <div v-if="index_data" class="nav_index_container font-semibold bg-white  drop-shadow-sm">
-      <p>BANKNIFTY : {{ index_data.BANKNIFTYSPOT ? index_data.BANKNIFTYSPOT : 0 }}</p>
-      <p>FINNIFTY : {{ index_data.FINNIFTYSPOT ? index_data.FINNIFTYSPOT : 0 }}</p>
-      <p>MIDCPNIFTY : {{ index_data.MIDCPNIFTYSPOT ? index_data.MIDCPNIFTYSPOT : 0 }}</p>
-      <p>NIFTY : {{ index_data.NIFTYSPOT ? index_data.NIFTYSPOT : 0 }}</p>
-      <p> SENSEX : {{ index_data.SENSEXSPOT ? index_data.SENSEXSPOT : 0 }}</p>
+    <div v-if="index_data" class="nav-index-container font-semibold bg-white drop-shadow-sm">
+      <div v-for="(value, key) in index_data" :key="key" class="index-item">
+        <span class="index-name">{{ formatIndexName(key) }}</span>
+        <div class="index-value-container">
+          <span :class="['index-value', getPercentageClass(key)]">{{ formatNumber(value) }}</span>
+          <img v-if="getPercentageClass(key) === 'positive'" class="image_width" src="../assets/arrow-up-long-solid.svg"
+            alt="">
+          <img v-else class="image_width" src="../assets/arrow-down-long-solid.svg" alt="">
+        </div>
+
+
+
+
+
+        <span :class="['percentage', getPercentageClass(key)]">
+
+          {{ formatPercentage(getPercentage(key)) }}
+        </span>
+      </div>
     </div>
     <div class="time-container">
       <p class="timeDiv"> Time:{{ time }}</p>
@@ -495,6 +539,62 @@ html {
   font-size: 14px;
 }
 
+.index-value-container {
+  display: flex;
+  gap: 10px;
+
+}
+
+.nav-index-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  padding: 10px;
+}
+
+.index-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 10px;
+  position: relative;
+  min-width: 150px;
+}
+
+.index-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.image_width {
+  width: 10px;
+  height: auto;
+}
+
+.index-value {
+  font-size: 1.2em;
+}
+
+.percentage {
+  font-size: 1.0em;
+  position: absolute;
+  bottom: -20px;
+  right: 0;
+}
+
+.positive {
+  color: #39a97c;
+}
+
+.negative {
+  color: #d95858;
+}
+
+.neutral {
+  color: #9e9e9e;
+}
+
+
 .table-heading {
   font-size: 22px;
   font-weight: 600;
@@ -526,6 +626,7 @@ html {
   display: flex;
   width: 100%;
 }
+
 
 .select-container {
   display: flex;

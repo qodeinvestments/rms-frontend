@@ -19,6 +19,7 @@ import NavBar from './NavBar.vue';
 import MultiLineChart from './HighCharts.vue'
 
 import LightWeightChart from './LightWeightChart.vue';
+import EditButton from './EditButton.vue';
 
 
 const route = useRoute();
@@ -30,8 +31,6 @@ const name = ref('');
 const columnHelper = createColumnHelper()
 
 const columns = [
-
-
 
     columnHelper.accessor(row => row.TradingSymbol, {
         id: 'TradingSymbol',
@@ -68,6 +67,14 @@ const columns = [
         cell: info => info.getValue(),
         header: () => 'Time',
     }),
+
+    columnHelper.accessor(row => row.edit, {
+        id: 'edit',
+        cell: info => h(EditButton, { id: info.row.original.id }),
+        header: () => ' ',
+        enableSorting: false,
+    })
+
 
 
 ]
