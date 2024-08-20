@@ -417,12 +417,11 @@ const formatIndexName = (name) => {
   return name.replace('SPOT', '').toUpperCase()
 }
 const formatNumber = (value) => {
-  return value ? value.toLocaleString() : '0'
+  const val = value.toFixed(2)
+  return val ? val.toLocaleString() : '0'
 }
 const getPercentage = (key) => {
   const change = give_percentage_change(index_data.value[key], previous_day_close_index_data[key]);
-
-  // Ensure the result has exactly two decimal places
   return change.toFixed(2);
 }
 const formatPercentage = (value) => {
