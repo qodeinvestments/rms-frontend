@@ -237,6 +237,11 @@ const combined_df_columns = [
     cell: info => info.getValue(),
     header: () => 'timestamp'
   }),
+  columnHelper.accessor(row => row.system_timestamp, {
+    id: 'system_timestamp',
+    cell: info => info.getValue(),
+    header: () => 'system_timestamp'
+  }),
   columnHelper.accessor(row => row.action, {
     id: 'action',
     cell: info => info.getValue(),
@@ -257,11 +262,7 @@ const combined_df_columns = [
     cell: info => info.getValue(),
     header: () => 'value'
   }),
-  columnHelper.accessor(row => row.system_timestamp, {
-    id: 'system_timestamp',
-    cell: info => info.getValue(),
-    header: () => 'system_timestamp'
-  }),
+
   columnHelper.accessor(row => row.note, {
     id: 'note',
     cell: info => info.getValue(),
