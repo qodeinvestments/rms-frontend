@@ -227,6 +227,11 @@ const combined_df_columns = [
     cell: info => info.getValue(),
     header: () => 'uid'
   }),
+  columnHelper.accessor(row => row.TradingSymbol, {
+    id: 'TradingSymbol',
+    cell: info => info.getValue(),
+    header: () => 'TradingSymbol'
+  }),
   columnHelper.accessor(row => row.timestamp, {
     id: 'timestamp',
     cell: info => info.getValue(),
@@ -241,11 +246,6 @@ const combined_df_columns = [
     id: 'qty',
     cell: info => info.getValue(),
     header: () => 'qty'
-  }),
-  columnHelper.accessor(row => row.symbol, {
-    id: 'symbol',
-    cell: info => info.getValue(),
-    header: () => 'symbol'
   }),
   columnHelper.accessor(row => row.price, {
     id: 'price',
@@ -302,11 +302,6 @@ const combined_df_columns = [
     cell: info => info.getValue(),
     header: () => 'ProductType'
   }),
-  columnHelper.accessor(row => row.OrderPrice, {
-    id: 'OrderPrice',
-    cell: info => info.getValue(),
-    header: () => 'OrderPrice'
-  }),
   columnHelper.accessor(row => row.OrderQuantity, {
     id: 'OrderQuantity',
     cell: info => info.getValue(),
@@ -332,11 +327,7 @@ const combined_df_columns = [
     cell: info => info.getValue(),
     header: () => 'ExchangeTransactTime'
   }),
-  columnHelper.accessor(row => row.TradingSymbol, {
-    id: 'TradingSymbol',
-    cell: info => info.getValue(),
-    header: () => 'TradingSymbol'
-  }),
+
   columnHelper.accessor(row => row.OrderUniqueIdentifier, {
     id: 'OrderUniqueIdentifier',
     cell: info => info.getValue(),
