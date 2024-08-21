@@ -50,7 +50,7 @@ export default defineComponent({
                 x: {
                     title: {
                         display: true,
-                        text: 'Value'
+                        text: 'Seconds'
                     }
                 }
             }
