@@ -54,6 +54,12 @@
                 <span class="text">KeyDBLogs</span>
               </a>
             </li>
+            <li :class="selected == 'DataVisualizer' ? 'active' : ''" @click="changeSelected('DataVisualizer')">
+              <a href="#">
+                <i class="icon ph-bold ph-calendar-blank"></i>
+                <span class="text">Data Visualizer</span>
+              </a>
+            </li>
             <li>
               <a href="#" :class="selected == 'Income' ? 'active' : ''" @click="changeSelected('Income')">
                 <i class="icon ph-bold ph-chart-bar"></i>
@@ -133,7 +139,8 @@ export default {
       navigateMap: {
         'Dashboard': '/',
         'Errors': '/errors',
-        "KeyDBLogs": '/keydblogs'
+        "KeyDBLogs": '/keydblogs',
+        'DataVisualizer': '/visualize'
       }
 
     }

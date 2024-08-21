@@ -127,7 +127,9 @@ onMounted(() => {
 
 onUnmounted(() => {
     const container = document.querySelector('.table-container');
-    container.removeEventListener('wheel', handleMouseWheel);
+    if (container) {
+        container.removeEventListener('wheel', handleMouseWheel);
+    }
 })
 
 </script>

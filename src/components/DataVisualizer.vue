@@ -25,6 +25,7 @@ const connectClientDetailsWebSocket = () => {
         const data = JSON.parse(event.data);
 
         WS3L.value = data.WS3L
+        WS4L.value = data.WS4L
 
 
 
@@ -74,13 +75,31 @@ onUnmounted(() => {
             <p> Latency :<span class="latencyvalue">{{ latency }}</span></p>
             <p> Max Client :<span class="latencyvalue">{{ max_latency }}</span></p>
         </div>
-        <Histogram :dataArray="WS3L" />
+        <div v-if="WS3L.length > 0" class="histogram-container">
+            <p class="heading">WebSocket 3 Lag</p>
+            <Histogram :dataArray="WS3L" />
+        </div>
+        <div v-if="WS4L.length > 0" class="histogram-container">
+            <p class="heading">WebSocket 4 Lag</p>
+            <Histogram :dataArray="WS4L" />
+        </div>
     </div>
 
 
 </template>
 
 <style scoped>
+.histogram-container {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 30px;
+}
+
+.heading {
+    font-size: 20px;
+    font-weight: bold;
+}
+
 .pageContainer {
     height: 100%;
     display: flex;
@@ -107,7 +126,7 @@ onUnmounted(() => {
 }
 
 html {
-    /* font-family: poppins; */
+    font-family: poppins;
     font-size: 14px;
 }
 </style>
