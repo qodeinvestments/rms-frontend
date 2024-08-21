@@ -151,11 +151,11 @@ const basket_BackendData = ref({})
 const strategy_mtm_chart_BackendData = ref({})
 const index_data = ref({})
 const previous_day_close_index_data = {
-  BANKNIFTYSPOT: 50368.35,
-  FINNIFTYSPOT: 22922.70,
-  MIDCPNIFTYSPOT: 12728.60,
-  NIFTYSPOT: 24572.65,
-  SENSEXSPOT: 80424.68
+  BANKNIFTYSPOT: 50803.15,
+  FINNIFTYSPOT: 23178.15,
+  MIDCPNIFTYSPOT: 12868.70,
+  NIFTYSPOT: 24698.85,
+  SENSEXSPOT: 80802.86
 }
 const pulse_signal = ref([])
 const time = ref([])
