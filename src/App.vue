@@ -27,8 +27,7 @@ const hideToast = () => {
   toastConfig.value.show = false
 }
 
-const book = ref([])
-const showOnPage = ref('') // Make sure to initialize this ref
+const book = ref({})
 const past_time_client = ref(0)
 const client_latency = ref(0)
 const max_client_latency = ref(0)
@@ -36,15 +35,16 @@ const max_client_latency = ref(0)
 const handleMessage = (message) => {
   try {
     if (message === undefined) return;
-    if (showOnPage.value === 'Order_Errors') {
-      book.value = message['Order_Errors']['PAPER TRADING 2']
-    }
-    else if (showOnPage.value === 'Testing') {
-      if (book.value.length != message['Testing'].length && book.value.length != 0) {
+    book.value['time'] = message["time"]
+    book.value['Order_Errors'] = message['Order_Errors']['PAPER TRADING 2']
+
+    if (book.value['Testing']) {
+      if (book.value['Testing'].length != message['Testing'].length && book.value['Testing'].length != 0) {
         triggerToast('New Error in Testing', 'error')
       }
-      book.value = message['Testing']
     }
+    book.value['Testing'] = message['Testing']
+
   } catch (error) {
     console.error('Error parsing event data or updating data:', error);
   }
@@ -90,6 +90,7 @@ onMounted(() => {
 })
 
 provide('triggerToast', triggerToast)
+provide('book', book.value)
 </script>
 
 <template>

@@ -26,6 +26,7 @@ const route = useRoute();
 const user_data = ref('')
 const name = ref('');
 const triggerToast = inject('triggerToast')
+const data = inject('book')
 
 const columnHelper = createColumnHelper()
 const columns_testing = [
@@ -94,68 +95,12 @@ let eventSource = null
 const client_latency = ref(0)
 const past_time_client = ref(0)
 const max_client_latency = ref(0)
-
-
 const book = ref([])
+
+
 const handleColumnClick = ({ item, index }) => {
     showOnPage.value = item;
 }
-
-const handleMessage = (message) => {
-    try {
-        if (message === undefined) return;
-        if (showOnPage.value === 'Order_Errors') {
-            book.value = message['Order_Errors']['PAPER TRADING 2']
-        }
-        else if (showOnPage.value === 'Testing') {
-            if (book.value.length != message['Testing'].length && book.value.length != 0) {
-                triggerToast('New Error in Testing', 'error')
-            }
-            book.value = message['Testing']
-        }
-        console.log("book value is:", book.value)
-    } catch (error) {
-        console.error('Error parsing event data or updating data:', error);
-    }
-}
-
-const connectToSSE = () => {
-    const socket = new WebSocket('wss://api.swancapital.in/errorLogs');
-
-    socket.onmessage = (event) => {
-        if (event.data === 'ping') {
-            socket.send('pong')
-        } else {
-            const message = JSON.parse(event.data);
-            let ar2 = message["time"];
-            if (past_time_client.value === 0) past_time_client.value = ar2;
-            if (past_time_client.value != 0) {
-                let date1 = new Date(past_time_client.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
-                let date2 = new Date(ar2.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
-                let diffInMs = date2 - date1;
-                let diffInSeconds = diffInMs / 1000;
-                client_latency.value = diffInSeconds;
-                max_client_latency.value = Math.max(max_client_latency.value, client_latency.value)
-                past_time_client.value = ar2;
-            }
-
-
-            handleMessage(message)
-        }
-    }
-    socket.onclose = (event) => {
-        console.log('WebSocket connection closed:', event.reason)
-    }
-
-    socket.onopen = () => {
-        console.log('WebSocket connection opened')
-    }
-    socket.onerror = (error) => {
-        console.error('WebSocket error:', error)
-    }
-};
-
-
 
 
 
@@ -163,8 +108,26 @@ const connectToSSE = () => {
 
 const showOnPage = ref('Order_Errors')
 
+watch(data, (newValue) => {
+    if (newValue['time']) {
+        let ar2 = newValue["time"];
+        if (past_time_client.value === 0) past_time_client.value = ar2;
+        if (past_time_client.value != 0) {
+            let date1 = new Date(past_time_client.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+            let date2 = new Date(ar2.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+            let diffInMs = date2 - date1;
+            let diffInSeconds = diffInMs / 1000;
+            client_latency.value = diffInSeconds;
+            max_client_latency.value = Math.max(max_client_latency.value, client_latency.value)
+            past_time_client.value = ar2;
+        }
+    }
+
+
+    book.value = newValue[showOnPage.value] || [];
+}, { immediate: true });
+
 onMounted(() => {
-    connectToSSE();
     name.value = route.params.username;
 })
 
