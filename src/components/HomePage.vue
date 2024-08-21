@@ -420,6 +420,9 @@ const formatNumber = (value) => {
   const val = value.toFixed(2)
   return val ? val.toLocaleString() : '0'
 }
+const getDifference = (key) => {
+  return (index_data.value[key].toFixed(2) - previous_day_close_index_data[key]).toFixed(2);
+}
 const getPercentage = (key) => {
   const change = give_percentage_change(index_data.value[key], previous_day_close_index_data[key]);
   return change.toFixed(2);
@@ -488,6 +491,7 @@ onUnmounted(() => {
           <img v-if="getPercentageClass(key) === 'positive'" class="image_width" src="../assets/arrow-up-long-solid.svg"
             alt="">
           <img v-else class="image_width" src="../assets/arrow-down-long-solid.svg" alt="">
+          <span :class="['percentage', getPercentageClass(key)]">{{ getDifference(key) }}</span>
           <span :class="['percentage', getPercentageClass(key)]">
             <span class="opening-brac">(</span>{{ formatPercentage(getPercentage(key)) }}<span
               class="closing-brac">)</span>
@@ -540,16 +544,16 @@ html {
 }
 
 .opening-brac {
-  padding-right: 5px;
+  padding-right: 3px;
 }
 
 .closing-brac {
-  padding-left: 5px;
+  padding-left: 3px;
 }
 
 .index-value-container {
   display: flex;
-  gap: 10px;
+  gap: 5px;
   justify-items: center;
   align-items: center;
 
@@ -582,7 +586,7 @@ html {
 }
 
 .index-value {
-  font-size: 1.2em;
+  font-size: 1.0em;
 }
 
 .percentage {
