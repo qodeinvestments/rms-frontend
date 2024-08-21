@@ -4,6 +4,7 @@ import HomePage from '../components/HomePage.vue'
 import SignalBook from '../components/SignalBook.vue'
 import Errors from '../components/Errors.vue'
 import Keydblogs from '../components/Keydblogs.vue'
+import DataVisualizer from '../components/DataVisualizer.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -32,6 +33,11 @@ const router = createRouter({
       path: '/keydblogs',
       name: 'Keydblogs',
       component: Keydblogs,
+    },
+    {
+      path: '/visualize',
+      name: 'Visualize',
+      component: DataVisualizer,
     },
     // {
     //   path: '/about',

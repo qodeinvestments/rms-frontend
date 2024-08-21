@@ -1,26 +1,37 @@
 <script setup>
-import { onMounted } from 'vue'
-import { ref, provide } from 'vue'
+import { onMounted, ref, provide, watch } from 'vue'
 import { RouterView } from 'vue-router'
 import SideBar from './components/SideBar.vue'
 import Toast from './components/Toast.vue'
 
 const sideBarState = ref(false)
-const showToast = ref(false)
-const toastMessage = ref('')
-const toastType = ref('info')
+const toastConfig = ref({
+  show: false,
+  message: '',
+  type: 'info'
+})
 
 const ChangeSideBarState = (data) => {
   sideBarState.value = data
 }
 
 const triggerToast = (message, type = 'info') => {
-  toastMessage.value = message
-  toastType.value = type
-  showToast.value = true
+  toastConfig.value = {
+    show: true,
+    message,
+    type
+  }
 }
-const book = ref([])
 
+const hideToast = () => {
+  toastConfig.value.show = false
+}
+
+const book = ref([])
+const showOnPage = ref('') // Make sure to initialize this ref
+const past_time_client = ref(0)
+const client_latency = ref(0)
+const max_client_latency = ref(0)
 
 const handleMessage = (message) => {
   try {
@@ -34,7 +45,6 @@ const handleMessage = (message) => {
       }
       book.value = message['Testing']
     }
-    console.log("book value is:", book.value)
   } catch (error) {
     console.error('Error parsing event data or updating data:', error);
   }
@@ -59,7 +69,6 @@ const connectToSSE = () => {
         max_client_latency.value = Math.max(max_client_latency.value, client_latency.value)
         past_time_client.value = ar2;
       }
-
 
       handleMessage(message)
     }
@@ -86,7 +95,7 @@ provide('triggerToast', triggerToast)
 <template>
   <div class="pageLayout">
     <SideBar @State="ChangeSideBarState" class="sideBar" />
-    <Toast v-if="showToast" :message="toastMessage" :type="toastType" @close="showToast = false" />
+    <Toast v-if="toastConfig.show" :message="toastConfig.message" :type="toastConfig.type" @close="hideToast" />
     <RouterView :class="sideBarState ? 'content' : 'content2'" />
   </div>
 </template>

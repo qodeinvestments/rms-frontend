@@ -14,6 +14,7 @@ import Chart from './Chart.vue'
 import MultiLineChart from './HighCharts.vue'
 import WarningSignal from './WarningSignal.vue'
 import { MyEnum } from '../Enums/Prefix.js'
+import Histogram from './Histogram.vue'
 
 
 import LightWeightChart from './LightWeightChart.vue';
@@ -497,14 +498,9 @@ onUnmounted(() => {
               class="closing-brac">)</span>
           </span>
         </div>
-
-
-
-
-
-
       </div>
     </div>
+
     <div class="time-container">
       <p class="timeDiv"> Time:{{ time }}</p>
       <WarningSignal :signals="pulse_signal" :latency="Latency" :max_latency="max_latency"

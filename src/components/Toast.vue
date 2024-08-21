@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineProps, watch } from 'vue'
+import { ref, defineProps, defineEmits, watch } from 'vue'
 
 const props = defineProps({
     message: {
@@ -22,6 +22,8 @@ const props = defineProps({
     }
 })
 
+const emit = defineEmits(['close'])
+
 const isVisible = ref(false)
 
 const show = () => {
@@ -30,16 +32,16 @@ const show = () => {
 
 const hide = () => {
     isVisible.value = false
+    emit('close')
 }
 
-onMounted(() => {
-    show()
-})
-
-// Reshow the toast if the message changes
+// Watch for changes in the message prop
 watch(() => props.message, () => {
     show()
 })
+
+// Show the toast initially when mounted
+show()
 </script>
 
 <style scoped>
