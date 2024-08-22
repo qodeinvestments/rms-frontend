@@ -101,6 +101,11 @@ const live_order_book_columns = [
     cell: info => info.getValue(),
     header: () => 'OrderQuantity',
   }),
+  columnHelper.accessor(row => row.LeavesQuantity, {
+    id: 'LeavesQuantity',
+    cell: info => info.getValue(),
+    header: () => 'LeavesQuantity',
+  }),
   columnHelper.accessor(row => row.OrderStatus, {
     id: 'OrderStatus',
     cell: info => info.getValue(),
