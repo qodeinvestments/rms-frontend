@@ -68,6 +68,12 @@ const live_order_book_columns = [
     cell: info => info.getValue(),
     header: () => 'OrderGeneratedDateTime',
   }),
+  columnHelper.accessor(row => row.OrderType, {
+    id: 'OrderType',
+    cell: info => info.getValue(),
+    header: () => 'OrderType',
+  }),
+
   columnHelper.accessor(row => row.ExchangeTransactTime, {
     id: 'ExchangeTransactTime',
     cell: info => info.getValue(),
