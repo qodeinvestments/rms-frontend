@@ -84,6 +84,7 @@ const live_order_book_columns = [
     cell: info => info.getValue(),
     header: () => 'TradingSymbol',
   }),
+
   columnHelper.accessor(row => row.OrderAverageTradedPrice, {
     id: 'OrderAverageTradedPrice',
     cell: info => info.getValue(),
@@ -230,6 +231,11 @@ const combined_df_columns = [
     id: 'uid',
     cell: info => info.getValue(),
     header: () => 'uid'
+  }),
+  columnHelper.accessor(row => row.place_order_lag, {
+    id: 'place_order_lag',
+    cell: info => info.getValue(),
+    header: () => 'place_order_lag'
   }),
   columnHelper.accessor(row => row.TradingSymbol, {
     id: 'TradingSymbol',
