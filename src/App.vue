@@ -36,7 +36,7 @@ const handleMessage = (message) => {
   try {
     if (message === undefined) return;
     book.value['time'] = message["time"]
-    book.value['Order_Errors'] = message['Order_Errors']['PAPER TRADING 2']
+    book.value['Order_Errors'] = message['Order_Errors']
 
     if (book.value['Testing']) {
       if (book.value['Testing'].length != message['Testing'].length && book.value['Testing'].length != 0) {

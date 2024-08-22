@@ -43,64 +43,82 @@ const columns_testing = [
 
 ]
 
-const columns = [
+const live_order_book_columns = [
 
+    columnHelper.accessor(row => row.OrderGeneratedDateTime, {
+        id: 'OrderGeneratedDateTime',
+        cell: info => info.getValue(),
+        header: () => 'OrderGeneratedDateTime',
+    }),
+    columnHelper.accessor(row => row.OrderType, {
+        id: 'OrderType',
+        cell: info => info.getValue(),
+        header: () => 'OrderType',
+    }),
+
+    columnHelper.accessor(row => row.ExchangeTransactTime, {
+        id: 'ExchangeTransactTime',
+        cell: info => info.getValue(),
+        header: () => 'ExchangeTransactTime',
+    }),
     columnHelper.accessor(row => row.TradingSymbol, {
         id: 'TradingSymbol',
         cell: info => info.getValue(),
         header: () => 'TradingSymbol',
-    }),
-    columnHelper.accessor(row => row.OrderAverageTradedPrice, {
-        id: 'OrderAverageTradedPrice',
-        cell: info => info.getValue(),
-        header: () => 'OrderAverageTradedPrice',
-    }),
-    columnHelper.accessor(row => row.OrderQuantity, {
-        id: 'OrderQuantity',
-        cell: info => info.getValue(),
-        header: () => 'OrderQuantity',
     }),
     columnHelper.accessor(row => row.OrderSide, {
         id: 'OrderSide',
         cell: info => info.getValue(),
         header: () => 'OrderSide',
     }),
-    columnHelper.accessor(row => row.order_id, {
-        id: 'order_id',
-        cell: info => info.getValue(),
-        header: () => 'order_id',
-    }),
-    columnHelper.accessor(row => row.message, {
-        id: 'message',
-        cell: info => info.getValue(),
-        header: () => 'Message',
-    }),
-    columnHelper.accessor(row => row.time, {
-        id: 'Time',
-        cell: info => info.getValue(),
-        header: () => 'Time',
-    }),
-    columnHelper.accessor(row => row.edit, {
-        id: 'edit',
-        cell: info => h(EditButton, { id: info.row.original.id }),
-        header: () => ' ',
-        enableSorting: false,
-    })
 
+    columnHelper.accessor(row => row.OrderQuantity, {
+        id: 'OrderQuantity',
+        cell: info => info.getValue(),
+        header: () => 'OrderQuantity',
+    }),
+    columnHelper.accessor(row => row.LeavesQuantity, {
+        id: 'LeavesQuantity',
+        cell: info => info.getValue(),
+        header: () => 'LeavesQuantity',
+    }),
+    columnHelper.accessor(row => row.OrderStatus, {
+        id: 'OrderStatus',
+        cell: info => info.getValue(),
+        header: () => 'OrderStatus',
+    }),
+    columnHelper.accessor(row => row.CancelRejectReason, {
+        id: 'CancelRejectReason',
+        cell: info => info.getValue(),
+        header: () => 'CancelRejectReason',
+    }),
+
+    // columnHelper.accessor(row => row.edit, {
+    //     id: 'edit',
+    //     cell: info => h(EditButton, { id: info.row.original.id }),
+    //     header: () => ' ',
+    //     enableSorting: false,
+    // })
 
 
 ]
+const options = ref([]);
 
 let eventSource = null
 const client_latency = ref(0)
 const past_time_client = ref(0)
 const max_client_latency = ref(0)
 const book = ref([])
-
+const selectedOption = ref("")
 
 const handleColumnClick = ({ item, index }) => {
     showOnPage.value = item;
 }
+
+// watch(selectedOption, (newValue) => {
+//     console.log(newValue, " is the new value")
+//     book.value = data['Order_Errors'][newValue]
+// })
 
 
 
@@ -122,9 +140,17 @@ watch(data, (newValue) => {
             past_time_client.value = ar2;
         }
     }
+    if ('Order_Errors' in data)
+        options.value = Object.keys(data['Order_Errors'])
+
+    if (showOnPage.value === 'Order_Errors') {
+        if (selectedOption.value != '')
+            book.value = data['Order_Errors'][selectedOption.value]
+
+    }
+    else book.value = newValue[showOnPage.value] || []
 
 
-    book.value = newValue[showOnPage.value] || [];
 }, { immediate: true });
 
 onMounted(() => {
@@ -146,11 +172,6 @@ onUnmounted(() => {
 
     <div class="px-8 py-8 pageContainer">
 
-
-
-
-
-
         <!--  <BarChart v-if="user_data['Live_Client_Positions']" :chartData='user_data["Live_Client_Positions"]' /> -->
         <div class="LatencyTable">
             <p> Client Latency :<span class="latencyvalue">{{ client_latency }}</span></p>
@@ -160,10 +181,21 @@ onUnmounted(() => {
         <div class="navContainer">
             <NavBar :navColumns="['Order_Errors', 'Testing']" @column-clicked="handleColumnClick" />
         </div>
+        <div v-if="book && showOnPage === 'Order_Errors'">
+            <label for="options">Select an option:</label>
+            <select id="options" v-model="selectedOption">
+                <option v-for="option in options" :key="option" :value="option">
+                    {{ option }}
+                </option>
+            </select>
+
+            <p>Selected: {{ selectedOption }}</p>
+        </div>
 
         <div class="my-8" v-if="book && showOnPage === 'Order_Errors'">
             <p class="table-heading">{{ showOnPage }}</p>
-            <TanStackTestTable :data="book" :columns="columns" :hasColor="[]" :navigateTo="[]" :showPagination=true />
+            <TanStackTestTable :data="book" :columns="live_order_book_columns" :hasColor="[]" :navigateTo="[]"
+                :showPagination=true />
         </div>
         <div class="my-8" v-else-if="book && showOnPage === 'Testing'">
             <p class="table-heading">Testing Errors</p>
