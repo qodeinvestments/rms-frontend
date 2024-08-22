@@ -79,10 +79,10 @@ const live_order_book_columns = [
     cell: info => info.getValue(),
     header: () => 'ExchangeTransactTime',
   }),
-  columnHelper.accessor(row => row.ExchangeInstrumentID, {
-    id: 'ExchangeInstrumentID',
+  columnHelper.accessor(row => row.TradingSymbol, {
+    id: 'TradingSymbol',
     cell: info => info.getValue(),
-    header: () => 'ExchangeInstrumentID',
+    header: () => 'TradingSymbol',
   }),
   columnHelper.accessor(row => row.OrderAverageTradedPrice, {
     id: 'OrderAverageTradedPrice',
