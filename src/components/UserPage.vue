@@ -645,6 +645,25 @@ onUnmounted(() => {
       <LightWeightChart v-if="user_data['rms_latency']" :Chartdata="{ 'hello': user_data['rms_latency'] }" />
     </div>
 
+    <div>
+      <p class="table-heading">MTM Margin LATENCY </p>
+      <LightWeightChart v-if="user_data['mtm_margin_latency']"
+        :Chartdata="{ 'hello': user_data['mtm_margin_latency'] }" />
+    </div>
+    <div>
+      <p class="table-heading">System Tag LATENCY </p>
+      <LightWeightChart v-if="user_data['sys_tag_lat']" :Chartdata="{ 'hello': user_data['sys_tag_lat'] }" />
+    </div>
+    <div>
+      <p class="table-heading">Xts Trader LATENCY </p>
+      <LightWeightChart v-if="user_data['xts_trader_lat']" :Chartdata="{ 'hello': user_data['xts_trader_lat'] }" />
+    </div>
+    <div>
+      <p class="table-heading">Pos Agg LATENCY </p>
+      <LightWeightChart v-if="user_data['pos_agg_latency']" :Chartdata="{ 'hello': user_data['pos_agg_latency'] }" />
+    </div>
+
+
 
 
 
