@@ -165,8 +165,8 @@ onUnmounted(() => {
                                         'sticky-column': index === 0,
                                         'red': cell.getValue() < 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
                                         'green': cell.getValue() > 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
-                                        'redbackground': hasRowcolor && hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]),
-                                        'greenbackground': hasRowcolor && !(hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]))
+                                        // 'redbackground': hasRowcolor && hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]),
+                                        // 'greenbackground': hasRowcolor && !(hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]))
                                     }" @click="checkNavigate(cell)">
                                     <template v-if="cell.getValue() !== undefined">
                                         <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />

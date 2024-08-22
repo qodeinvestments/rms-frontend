@@ -516,19 +516,10 @@ onUnmounted(() => {
           :navigateTo="NavigationMap" :showPagination=true
           :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': user_infected }" />
       </div>
-
-
-
-
-
       <div>
         {{ basketLatency }} {{ max_basket_latency }}
         {{ strategyLatency }} {{ max_strategy_latency }}
       </div>
-
-
-
-
     </div>
   </div>
 </template>

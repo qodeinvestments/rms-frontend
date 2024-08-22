@@ -629,7 +629,7 @@ onUnmounted(() => {
     <div class="my-8">
       <p class="table-heading">Account Details </p>
       <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL', 'Friction']" :navigateTo="[]"
-        :showPagination=false :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': user_infected }" />
+        :showPagination=false :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }" />
     </div>
 
     <!--  <input type="date" v-model="date" /> -->
