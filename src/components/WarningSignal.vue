@@ -1,17 +1,12 @@
 <template>
     <div class="warningsignal-container text-sm font-semibold">
-        {{ signals.position_mismatch }}
-        <div class="signal-container" @click="goToSignalBook()">
-            <p class="textContainer"> Strategy :</p>
-            <span :class="signals.pulse_run_strats ? 'greensignal' : 'redsignal'"></span>
+        <div class="signal-container" v-for="(value, key) in filteredSignals()" :key="key">
+            <div class="textContainer"> {{ key }} </div>
+            <span :class="value ? 'greensignal' : 'redsignal'"></span>
         </div>
         <div class="signal-container">
-            <p class="textContainer"> Web Socket 3 :</p>
-            <span :class="signals.pulse_web_socket3 ? 'greensignal' : 'redsignal'"></span>
-        </div>
-        <div class="signal-container">
-            <p class="textContainer"> Web Socket 4 :</p>
-            <span :class="signals.pulse_web_socket4 ? 'greensignal' : 'redsignal'"></span>
+            <p class="textContainer">User Error :</p>
+            <span :class="userAnd ? 'greensignal' : 'redsignal'"></span>
         </div>
         <div class="signal-container">
             <p class="textContainer">BackEnd Connection :</p>
@@ -30,7 +25,7 @@
             <p class="textContainer"> FrontToBack Max Latency :</p>
             <span>{{ max_latency }}</span>
         </div>
-
+        <!-- 
         <div class="signal-container">
             <p class="textContainer">basketLatency :</p>
             <span>{{ basketLatency }}</span>
@@ -47,11 +42,7 @@
         <div class="signal-container">
             <p class="textContainer"> max_strategy_latency :</p>
             <span>{{ max_strategy_latency }}</span>
-        </div>
-
-
-
-
+        </div> -->
     </div>
 </template>
 
@@ -61,8 +52,28 @@ import { watch } from 'vue';
 import { toRefs } from 'vue';
 import { ref } from 'vue'
 import { useRouter } from 'vue-router';
+const userAnd = ref(true)
 
 
+const filteredSignals = () => {
+    console.log(props.signals)
+    const val = Object.fromEntries(
+        Object.entries(props.signals).filter(([key, value]) => {
+            return !key.startsWith('pulse_trader_xts') && !key.startsWith('pulse_trader_zerodha') && !key.startsWith('position_mismatch');
+        })
+    );
+    const user = Object.fromEntries(
+        Object.entries(props.signals).filter(([key, value]) => {
+            return key.startsWith('pulse_trader_xts') || key.startsWith('pulse_trader_zerodha');
+        })
+    );
+    let and = true;
+    for (let key in user) {
+        and = and & user[key];
+    }
+    userAnd.value = and;
+    return val;
+}
 const props = defineProps({
     signals: {
         type: Object,
@@ -122,27 +133,27 @@ const goToSignalBook = () => {
 
 <style>
 .warningsignal-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-content: center;
-    width: 100%;
-    margin-top: 40px;
-    gap: 10px;
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    grid-column-gap: 30px;
+    grid-row-gap: 15px;
+    margin-right: 30px;
 }
 
 .signal-container {
     display: flex;
-    justify-content: flex-end;
-    align-content: flex-end;
-    margin-right: 20px;
-    gap: 20px;
+    justify-content: flex-start;
+    align-content: flex-start;
+
 }
 
 .textContainer {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+    white-space: nowrap;
 }
 
 .greensignal {

@@ -440,6 +440,7 @@ const past_time_clientDetails = ref(0)
 const max_client_details_latency = ref(0)
 const max_client_latency = ref(0)
 const mix_real_ideal_mtm_table = ref({})
+const rms_latency = ref({})
 
 const book = ref([])
 const handleColumnClick = ({ item, index }) => {
@@ -638,6 +639,11 @@ onUnmounted(() => {
 
 
     <LightWeightChart v-if="user_data['MTMTable']" :Chartdata="mix_real_ideal_mtm_table" />
+
+    <div>
+      <p class="table-heading">RMS LATENCY </p>
+      <LightWeightChart v-if="user_data['rms_latency']" :Chartdata="{ 'hello': user_data['rms_latency'] }" />
+    </div>
 
 
 

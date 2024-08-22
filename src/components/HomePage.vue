@@ -196,7 +196,6 @@ const handleMessage = (message) => {
   updateData()
 }
 
-
 const updateData = () => {
 
 
@@ -208,9 +207,7 @@ const updateData = () => {
     time.value = connection_BackendData.value.time
 
     if (connection_BackendData.value.pulse) {
-      user_infected.value = Object.keys(connection_BackendData.value.pulse)
-        .filter(key => (key.startsWith('pulse_trader_xts:') || key.startsWith('pulse_trader_zerodha:')) && connection_BackendData.value.pulse[key] === false)
-        .map(key => key.split(':')[1])
+
 
       pulse_signal.value = pulse_data
       pulse_signal.value.backendConnection = checkBackendConnection
@@ -319,7 +316,7 @@ const connectBasketChartWebSocket = () => {
     let diffInMs = date2 - date1;
     let diffInSeconds = diffInMs / 1000;
     basketLatency.value = diffInSeconds;
-    max_basket_latency.value = Math.max(max_basket_latency.value, basketLatency.value)
+    max_basket_latency.value = Math.max(max_basket_latency.value, basketLatency.value);
     past_time_basket.value = ar2;
 
   }
@@ -514,7 +511,7 @@ onUnmounted(() => {
         <p class="table-heading">Accounts</p>
         <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL', 'Friction']"
           :navigateTo="NavigationMap" :showPagination=true
-          :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': user_infected }" />
+          :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }" />
       </div>
       <div>
         {{ basketLatency }} {{ max_basket_latency }}
