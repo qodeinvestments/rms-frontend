@@ -113,6 +113,8 @@ const selectedOption = ref("")
 
 const handleColumnClick = ({ item, index }) => {
     showOnPage.value = item;
+    book.value = []
+
 }
 
 // watch(selectedOption, (newValue) => {

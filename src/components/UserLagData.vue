@@ -62,7 +62,7 @@ const connectClientLagsDataWebSocket = () => {
 
 
         if (data.table_data) {
-            userLagData.value = Object.values(data.table_data);
+            userLagData.value = data.table_data;
         } else {
             userLagData.value = [];
         }

@@ -60,6 +60,12 @@
                 <span class="text">Data Visualizer</span>
               </a>
             </li>
+            <li :class="selected == 'SignalBook' ? 'active' : ''" @click="changeSelected('SignalBook')">
+              <a href="#">
+                <i class="icon ph-bold ph-calendar-blank"></i>
+                <span class="text">SignalBook</span>
+              </a>
+            </li>
             <li>
               <a href="#" :class="selected == 'Income' ? 'active' : ''" @click="changeSelected('Income')">
                 <i class="icon ph-bold ph-chart-bar"></i>
@@ -140,7 +146,8 @@ export default {
         'Dashboard': '/',
         'Errors': '/errors',
         "KeyDBLogs": '/keydblogs',
-        'DataVisualizer': '/visualize'
+        'DataVisualizer': '/visualize',
+        'SignalBook': '/signalbook'
       }
 
     }

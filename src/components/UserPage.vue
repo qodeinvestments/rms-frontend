@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, onUnmounted } from 'vue'
 import BarChart from './Barchart.vue';
+import { useRouter } from 'vue-router';
 import {
   FlexRender,
   getCoreRowModel,
@@ -452,6 +453,13 @@ const handleMessage = (message) => {
     console.error('Error parsing event data or updating data:', error);
   }
 }
+const router = useRouter();
+const LagPageHandler = () => {
+  console.log("hello")
+  let str = '/user/lag/' + name.value;
+  router.push(str);
+
+}
 const connectToSSE = () => {
   const socket = new WebSocket('wss://api.swancapital.in/ws');
   socket.onmessage = (event) => {
@@ -560,6 +568,10 @@ onUnmounted(() => {
 <div class="my-8">
 <TableTanstack :data="cars" :columns="columnsCars" />
 </div> -->
+    <div class="heading-container">
+      <p class="table-heading LagButton" @click="LagPageHandler()">Lags </p>
+    </div>
+
     <div class="my-8">
       <p class="table-heading">Account Details </p>
       <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL', 'Friction']" :navigateTo="[]"
@@ -633,6 +645,20 @@ onUnmounted(() => {
   font-size: 22px;
   font-weight: 600;
   margin-left: 30px;
+}
+
+.heading-container {
+  align-self: flex-end;
+}
+
+.LagButton {
+  border: 1px solid white;
+
+  padding: 10px 20px;
+  border-radius: 5px;
+  background: rgb(231, 108, 108);
+  color: white;
+  cursor: pointer;
 }
 
 .profitContainer {

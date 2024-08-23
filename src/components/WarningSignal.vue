@@ -119,9 +119,6 @@ const calculate_position_mismatch = () => {
     return tell;
 }
 const route = useRouter();
-const goToSignalBook = () => {
-    route.push('/signalbook')
-}
 
 
 
