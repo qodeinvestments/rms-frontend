@@ -140,6 +140,12 @@ onUnmounted(() => {
                 :Chartdata="{ 'hello': userLagData['xts_trader_lat'] }" />
         </div>
         <div>
+            <p class="table-heading">Combined Df Latency </p>
+            <LightWeightChart v-if="userLagData['combined_df_latency']"
+                :Chartdata="{ 'hello': userLagData['combined_df_latency'] }" />
+        </div>
+
+        <div>
             <p class="table-heading">Pos Agg LATENCY </p>
             <LightWeightChart v-if="userLagData['pos_agg_latency']"
                 :Chartdata="{ 'hello': userLagData['pos_agg_latency'] }" />
