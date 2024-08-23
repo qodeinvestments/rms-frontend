@@ -46,7 +46,7 @@ const connectClientLagsDataWebSocket = () => {
     };
     clientLagDataDetailSocket.onmessage = function (event) {
         const data = JSON.parse(event.data);
-
+        console.log("data is:", data)
 
         let ar2 = data["time"];
         if (past_time_clientDetails.value === 0) past_time_clientDetails.value = ar2;
@@ -61,8 +61,8 @@ const connectClientLagsDataWebSocket = () => {
         }
 
 
-        if (data.table_data) {
-            userLagData.value = data.table_data;
+        if (data) {
+            userLagData.value = data;
         } else {
             userLagData.value = [];
         }
