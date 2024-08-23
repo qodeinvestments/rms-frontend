@@ -443,6 +443,7 @@ const mix_real_ideal_mtm_table = ref({})
 const rms_latency = ref({})
 
 const book = ref([])
+const userLagData = ref({})
 const handleColumnClick = ({ item, index }) => {
   showOnPage.value = item;
 }
@@ -597,12 +598,76 @@ const connectClientDetailsWebSocket = () => {
 
 
 
+const connectClientLagsDataWebSocket = () => {
+  const clientLagDataDetailSocket = new WebSocket('wss://api.swancapital.in/userLagData');
+
+  clientLagDataDetailSocket.onopen = function (e) {
+    console.log("ClientLagData details connection established");
+    // Send the initial set of client data
+    sendClientUserLagDataDetails();
+  };
+  clientLagDataDetailSocket.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+
+
+    let ar2 = data["time"];
+    if (past_time_clientDetails.value === 0) past_time_clientDetails.value = ar2;
+    if (past_time_clientDetails.value != 0) {
+      let date1 = new Date(past_time_clientDetails.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+      let date2 = new Date(ar2.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+      let diffInMs = date2 - date1;
+      let diffInSeconds = diffInMs / 1000;
+      client_details_Latency.value = diffInSeconds;
+      max_client_details_latency.value = Math.max(max_client_details_latency.value, client_details_Latency.value)
+      past_time_clientDetails.value = ar2;
+    }
+
+
+    if (data.table_data) {
+      userLagData.value = Object.values(data.table_data);
+    } else {
+      userLagData.value = [];
+    }
+  };
+
+  clientLagDataDetailSocket.onerror = function (error) {
+    console.log(`WebSocket error: ${error.message}`);
+  };
+
+  clientLagDataDetailSocket.onclose = function (event) {
+    console.log('ClientLagData Detail WebSocket connection closed:', event.reason);
+  };
+
+  function sendClientUserLagDataDetails() {
+    if (clientLagDataDetailSocket && clientLagDataDetailSocket.readyState === WebSocket.OPEN) {
+      let client_data = {
+        "name": name.value,
+      };
+      clientLagDataDetailSocket.send(JSON.stringify({ client_data: client_data }));
+    } else {
+      console.log("WebSocket is not open. Unable to send message.");
+    }
+  }
+
+  // Call sendClientDetails whenever name or type changes
+  watch([name, showOnPage], () => {
+    sendClientUserLagDataDetails();
+    // Reset userLagData when changing views
+    userLagData.value = {};
+  });
+
+  return clientLagDataDetailSocket;
+};
+
+
+
 
 const showOnPage = ref('Positions')
 
 onMounted(() => {
   connectToSSE();
   name.value = route.params.username;
+  connectClientLagsDataWebSocket();
   connectClientDetailsWebSocket();
 })
 
@@ -642,25 +707,26 @@ onUnmounted(() => {
 
     <div>
       <p class="table-heading">RMS LATENCY </p>
-      <LightWeightChart v-if="user_data['rms_latency']" :Chartdata="{ 'hello': user_data['rms_latency'] }" />
+      <LightWeightChart v-if="userLagData['rms_latency']" :Chartdata="{ 'hello': userLagData['rms_latency'] }" />
     </div>
 
     <div>
       <p class="table-heading">MTM Margin LATENCY </p>
-      <LightWeightChart v-if="user_data['mtm_margin_latency']"
-        :Chartdata="{ 'hello': user_data['mtm_margin_latency'] }" />
+      <LightWeightChart v-if="userLagData['mtm_margin_latency']"
+        :Chartdata="{ 'hello': userLagData['mtm_margin_latency'] }" />
     </div>
     <div>
       <p class="table-heading">System Tag LATENCY </p>
-      <LightWeightChart v-if="user_data['sys_tag_lat']" :Chartdata="{ 'hello': user_data['sys_tag_lat'] }" />
+      <LightWeightChart v-if="userLagData['sys_tag_lat']" :Chartdata="{ 'hello': userLagData['sys_tag_lat'] }" />
     </div>
     <div>
       <p class="table-heading">Xts Trader LATENCY </p>
-      <LightWeightChart v-if="user_data['xts_trader_lat']" :Chartdata="{ 'hello': user_data['xts_trader_lat'] }" />
+      <LightWeightChart v-if="userLagData['xts_trader_lat']" :Chartdata="{ 'hello': userLagData['xts_trader_lat'] }" />
     </div>
     <div>
       <p class="table-heading">Pos Agg LATENCY </p>
-      <LightWeightChart v-if="user_data['pos_agg_latency']" :Chartdata="{ 'hello': user_data['pos_agg_latency'] }" />
+      <LightWeightChart v-if="userLagData['pos_agg_latency']"
+        :Chartdata="{ 'hello': userLagData['pos_agg_latency'] }" />
     </div>
 
 
