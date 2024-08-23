@@ -56,7 +56,6 @@ const userAnd = ref(true)
 
 
 const filteredSignals = () => {
-    console.log(props.signals)
     const val = Object.fromEntries(
         Object.entries(props.signals).filter(([key, value]) => {
             return !key.startsWith('pulse_trader_xts') && !key.startsWith('pulse_trader_zerodha') && !key.startsWith('position_mismatch');
