@@ -1,6 +1,4 @@
 <script setup>
-
-
 import { onMounted, onUnmounted } from 'vue'
 import BarChart from './Barchart.vue';
 import {
@@ -9,7 +7,6 @@ import {
   useVueTable,
   createColumnHelper,
 } from '@tanstack/vue-table'
-
 import { MyEnum } from '../Enums/Prefix.js';
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router';
@@ -17,16 +14,10 @@ import TanStackTestTable from './TanStackTestTable.vue'
 import Chart from './Chart.vue';
 import NavBar from './NavBar.vue';
 import MultiLineChart from './HighCharts.vue'
-
 import LightWeightChart from './LightWeightChart.vue';
-
-
 const route = useRoute();
 const user_data = ref('')
 const name = ref('');
-
-
-
 const columnHelper = createColumnHelper()
 const live_trade_book_columns = [
   columnHelper.accessor(row => row.OrderGeneratedDateTime, {
@@ -54,7 +45,6 @@ const live_trade_book_columns = [
     cell: info => info.getValue(),
     header: () => 'OrderSide',
   }),
-
   columnHelper.accessor(row => row.OrderQuantity, {
     id: 'OrderQuantity',
     cell: info => info.getValue(),
@@ -62,7 +52,6 @@ const live_trade_book_columns = [
   }),
 ]
 const live_order_book_columns = [
-
   columnHelper.accessor(row => row.OrderGeneratedDateTime, {
     id: 'OrderGeneratedDateTime',
     cell: info => info.getValue(),
@@ -73,7 +62,6 @@ const live_order_book_columns = [
     cell: info => info.getValue(),
     header: () => 'OrderType',
   }),
-
   columnHelper.accessor(row => row.ExchangeTransactTime, {
     id: 'ExchangeTransactTime',
     cell: info => info.getValue(),
@@ -84,7 +72,6 @@ const live_order_book_columns = [
     cell: info => info.getValue(),
     header: () => 'TradingSymbol',
   }),
-
   columnHelper.accessor(row => row.OrderAverageTradedPrice, {
     id: 'OrderAverageTradedPrice',
     cell: info => info.getValue(),
@@ -95,7 +82,6 @@ const live_order_book_columns = [
     cell: info => info.getValue(),
     header: () => 'OrderSide',
   }),
-
   columnHelper.accessor(row => row.OrderQuantity, {
     id: 'OrderQuantity',
     cell: info => info.getValue(),
@@ -118,7 +104,6 @@ const live_order_book_columns = [
   }),
 ]
 const columns = [
-
   columnHelper.accessor(row => row.AccountName, {
     id: 'AccountName',
     cell: info => info.getValue(),
@@ -204,7 +189,6 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'HoldingsDayPL',
   }),
-
   columnHelper.accessor(row => row.TotalOrderCount, {
     id: 'TotalOrderCount',
     cell: info => info.getValue(),
@@ -277,7 +261,6 @@ const combined_df_columns = [
     cell: info => info.getValue(),
     header: () => 'value'
   }),
-
   columnHelper.accessor(row => row.note, {
     id: 'note',
     cell: info => info.getValue(),
@@ -343,14 +326,11 @@ const combined_df_columns = [
     cell: info => info.getValue(),
     header: () => 'ExchangeTransactTime'
   }),
-
   columnHelper.accessor(row => row.OrderUniqueIdentifier, {
     id: 'OrderUniqueIdentifier',
     cell: info => info.getValue(),
     header: () => 'OrderUniqueIdentifier'
   }),
-
-
 ]
 const rms_df_columns = [
   columnHelper.accessor(row => row.symbol, {
@@ -401,7 +381,6 @@ const rms_df_columns = [
     cell: info => info.getValue().toFixed(2),
     header: () => ' Net Qty',
   }),
-
   columnHelper.accessor(row => row.sell_price, {
     id: 'sell_price',
     cell: info => info.getValue().toFixed(2),
@@ -423,11 +402,7 @@ const rms_df_columns = [
     header: () => 'Turnover',
   }),
 ]
-
-
 let eventSource = null
-
-
 const client_BackendData = ref([])
 const connection_BackendData = ref([])
 const date = ref()
@@ -440,21 +415,14 @@ const past_time_clientDetails = ref(0)
 const max_client_details_latency = ref(0)
 const max_client_latency = ref(0)
 const mix_real_ideal_mtm_table = ref({})
-const rms_latency = ref({})
-
 const book = ref([])
-const userLagData = ref({})
 const handleColumnClick = ({ item, index }) => {
   showOnPage.value = item;
 }
-
 const handleMessage = (message) => {
-
   try {
-
     if (message.client_data === undefined) return;
     client_BackendData.value = message.client_data
-
     let result = client_BackendData.value.find(client => client.name === name.value);
     if (result) {
       user_data.value = result;
@@ -477,21 +445,15 @@ const handleMessage = (message) => {
         VAR_PERCENTAGE: result.Live_Client_Var !== undefined && (result.availableMargin > 0) ? ((Number(result.Live_Client_Var) / Number(result.availableMargin)) * 100).toPrecision(4) : 0,
       }];
       mix_real_ideal_mtm_table.value = { "real": result['MTMTable'], "ideal": result['ideal_MTMTable'] }
-
     } else {
       console.error('No client data found for the specified name:', name.value);
     }
   } catch (error) {
     console.error('Error parsing event data or updating data:', error);
   }
-
 }
-
-
-
 const connectToSSE = () => {
   const socket = new WebSocket('wss://api.swancapital.in/ws');
-
   socket.onmessage = (event) => {
     if (event.data === 'ping') {
       socket.send('pong')
@@ -508,15 +470,12 @@ const connectToSSE = () => {
         max_client_latency.value = Math.max(max_client_latency.value, client_latency.value)
         past_time_client.value = ar2;
       }
-
-
       handleMessage(message)
     }
   }
   socket.onclose = (event) => {
     console.log('WebSocket connection closed:', event.reason)
   }
-
   socket.onopen = () => {
     console.log('WebSocket connection opened')
   }
@@ -524,17 +483,13 @@ const connectToSSE = () => {
     console.error('WebSocket error:', error)
   }
 };
-
-
 const connectClientDetailsWebSocket = () => {
   const clientDetailSocket = new WebSocket('wss://api.swancapital.in/clientdetails');
-
   clientDetailSocket.onopen = function (e) {
     console.log("Client details connection established");
     // Send the initial set of client data
     sendClientDetails();
   };
-
   // clientDetailSocket.onmessage = function (event) {
   //   const data = JSON.parse(event.data);
   //   console.log("Received data:", data);
@@ -544,8 +499,6 @@ const connectClientDetailsWebSocket = () => {
   // };
   clientDetailSocket.onmessage = function (event) {
     const data = JSON.parse(event.data);
-
-
     let ar2 = data["time"];
     if (past_time_clientDetails.value === 0) past_time_clientDetails.value = ar2;
     if (past_time_clientDetails.value != 0) {
@@ -557,23 +510,18 @@ const connectClientDetailsWebSocket = () => {
       max_client_details_latency.value = Math.max(max_client_details_latency.value, client_details_Latency.value)
       past_time_clientDetails.value = ar2;
     }
-
-
     if (data.table_data) {
       book.value = Object.values(data.table_data);
     } else {
       book.value = [];
     }
   };
-
   clientDetailSocket.onerror = function (error) {
     console.log(`WebSocket error: ${error.message}`);
   };
-
   clientDetailSocket.onclose = function (event) {
     console.log('Client Detail WebSocket connection closed:', event.reason);
   };
-
   function sendClientDetails() {
     if (clientDetailSocket && clientDetailSocket.readyState === WebSocket.OPEN) {
       let client_data = {
@@ -585,110 +533,30 @@ const connectClientDetailsWebSocket = () => {
       console.log("WebSocket is not open. Unable to send message.");
     }
   }
-
   // Call sendClientDetails whenever name or type changes
   watch([name, showOnPage], () => {
     sendClientDetails();
     // Reset book when changing views
     book.value = [];
   });
-
   return clientDetailSocket;
 };
-
-
-
-const connectClientLagsDataWebSocket = () => {
-  const clientLagDataDetailSocket = new WebSocket('wss://api.swancapital.in/userLagData');
-
-  clientLagDataDetailSocket.onopen = function (e) {
-    console.log("ClientLagData details connection established");
-    // Send the initial set of client data
-    sendClientUserLagDataDetails();
-  };
-  clientLagDataDetailSocket.onmessage = function (event) {
-    const data = JSON.parse(event.data);
-
-
-    let ar2 = data["time"];
-    if (past_time_clientDetails.value === 0) past_time_clientDetails.value = ar2;
-    if (past_time_clientDetails.value != 0) {
-      let date1 = new Date(past_time_clientDetails.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
-      let date2 = new Date(ar2.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
-      let diffInMs = date2 - date1;
-      let diffInSeconds = diffInMs / 1000;
-      client_details_Latency.value = diffInSeconds;
-      max_client_details_latency.value = Math.max(max_client_details_latency.value, client_details_Latency.value)
-      past_time_clientDetails.value = ar2;
-    }
-
-
-    if (data.table_data) {
-      userLagData.value = Object.values(data.table_data);
-    } else {
-      userLagData.value = [];
-    }
-  };
-
-  clientLagDataDetailSocket.onerror = function (error) {
-    console.log(`WebSocket error: ${error.message}`);
-  };
-
-  clientLagDataDetailSocket.onclose = function (event) {
-    console.log('ClientLagData Detail WebSocket connection closed:', event.reason);
-  };
-
-  function sendClientUserLagDataDetails() {
-    if (clientLagDataDetailSocket && clientLagDataDetailSocket.readyState === WebSocket.OPEN) {
-      let client_data = {
-        "name": name.value,
-      };
-      clientLagDataDetailSocket.send(JSON.stringify({ client_data: client_data }));
-    } else {
-      console.log("WebSocket is not open. Unable to send message.");
-    }
-  }
-
-  // Call sendClientDetails whenever name or type changes
-  watch([name, showOnPage], () => {
-    sendClientUserLagDataDetails();
-    // Reset userLagData when changing views
-    userLagData.value = {};
-  });
-
-  return clientLagDataDetailSocket;
-};
-
-
-
-
 const showOnPage = ref('Positions')
-
 onMounted(() => {
   connectToSSE();
   name.value = route.params.username;
-  connectClientLagsDataWebSocket();
   connectClientDetailsWebSocket();
 })
-
 onUnmounted(() => {
   if (eventSource) {
     eventSource.close()
   }
 })
-
-
-
-
 </script>
-
 <template>
-
   <div class="px-8 py-8 pageContainer">
-
     <!-- <TableOriginal /> -->
     <!-- <TableTanstack :data="people" :columns="columnsPeople" />
-
 <div class="my-8">
 <TableTanstack :data="cars" :columns="columnsCars" />
 </div> -->
@@ -697,44 +565,9 @@ onUnmounted(() => {
       <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL', 'Friction']" :navigateTo="[]"
         :showPagination=false :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }" />
     </div>
-
     <!--  <input type="date" v-model="date" /> -->
 
-
-
-
     <LightWeightChart v-if="user_data['MTMTable']" :Chartdata="mix_real_ideal_mtm_table" />
-
-    <div>
-      <p class="table-heading">RMS LATENCY </p>
-      <LightWeightChart v-if="userLagData['rms_latency']" :Chartdata="{ 'hello': userLagData['rms_latency'] }" />
-    </div>
-
-    <div>
-      <p class="table-heading">MTM Margin LATENCY </p>
-      <LightWeightChart v-if="userLagData['mtm_margin_latency']"
-        :Chartdata="{ 'hello': userLagData['mtm_margin_latency'] }" />
-    </div>
-    <div>
-      <p class="table-heading">System Tag LATENCY </p>
-      <LightWeightChart v-if="userLagData['sys_tag_lat']" :Chartdata="{ 'hello': userLagData['sys_tag_lat'] }" />
-    </div>
-    <div>
-      <p class="table-heading">Xts Trader LATENCY </p>
-      <LightWeightChart v-if="userLagData['xts_trader_lat']" :Chartdata="{ 'hello': userLagData['xts_trader_lat'] }" />
-    </div>
-    <div>
-      <p class="table-heading">Pos Agg LATENCY </p>
-      <LightWeightChart v-if="userLagData['pos_agg_latency']"
-        :Chartdata="{ 'hello': userLagData['pos_agg_latency'] }" />
-    </div>
-
-
-
-
-
-
-
 
     <!--  <BarChart v-if="user_data['Live_Client_Positions']" :chartData='user_data["Live_Client_Positions"]' /> -->
     <div class="LatencyTable">
@@ -742,48 +575,33 @@ onUnmounted(() => {
       <p> Max Client :<span class="latencyvalue">{{ max_client_latency }}</span></p>
       <p> Client Detail Latency: <span class="latencyvalue">{{ client_details_Latency }}</span></p>
       <p> Max Client Detail Latency :<span class="latencyvalue"> {{ max_client_details_latency }}</span></p>
-
     </div>
-
     <div class="navContainer">
       <NavBar :navColumns="['Positions', 'Order', 'Holdings', 'TradeBook', 'Combined DF']"
         @column-clicked="handleColumnClick" />
     </div>
-
     <div class="my-8" v-if="book && showOnPage === 'Positions'">
       <p class="table-heading">Live Positions</p>
       <TanStackTestTable :data="book" :columns="rms_df_columns" :hasColor="['pnl']" :navigateTo="[]"
         :showPagination=true />
     </div>
-
-
-
-
     <div class="my-8" v-if="book && showOnPage === 'TradeBook'">
       <p class="table-heading">Complete Trade Book</p>
       <TanStackTestTable :data="book" :columns="live_trade_book_columns" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
-
-
     <div class="my-8" v-if="showOnPage === 'Order'">
       <p class="table-heading">Complete Order Book</p>
       <TanStackTestTable :data="book" :columns="live_order_book_columns" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
-
-
     <div class="my-8" v-if="showOnPage === 'Combined DF'">
       <p class="table-heading">Combined DF</p>
       <TanStackTestTable :data="book" :columns="combined_df_columns" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
-
   </div>
-
-
 </template>
-
 <style scoped>
 .pageContainer {
   height: 100%;
@@ -821,14 +639,12 @@ onUnmounted(() => {
   border: 1px solid black;
   height: auto;
   padding: 20px;
-
   width: fit-content;
   border-radius: 10px;
   display: flex;
   font-size: 30px;
   align-items: flex-start;
   flex-direction: column;
-
 }
 
 .priceContainer {
@@ -849,6 +665,5 @@ html {
 .headingContainer {
   font-size: 30px;
   font-weight: bold;
-
 }
 </style>

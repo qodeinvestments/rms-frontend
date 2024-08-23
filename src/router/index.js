@@ -5,6 +5,7 @@ import SignalBook from '../components/SignalBook.vue'
 import Errors from '../components/Errors.vue'
 import Keydblogs from '../components/Keydblogs.vue'
 import DataVisualizer from '../components/DataVisualizer.vue'
+import UserLagData from '../components/UserLagData.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -17,6 +18,11 @@ const router = createRouter({
       path: '/user/:username',
       name: 'userPage',
       component: UserPage,
+    },
+    {
+      path: '/user/lag/:username',
+      name: 'userLagData',
+      component: UserLagData,
     },
     ,
     {
