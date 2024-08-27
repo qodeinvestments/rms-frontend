@@ -10,10 +10,6 @@
             <span :class="userAnd ? 'greensignal' : 'redsignal'"></span>
         </div>
         <div class="signal-container">
-            <p class="textContainer">BackEnd Connection :</p>
-            <span :class="signals['backendConnection'] ? 'greensignal' : 'redsignal'"></span>
-        </div>
-        <div class="signal-container">
             <p class="textContainer">Position Mismatch :</p>
             <span :class="calculate_position_mismatch() ? 'greensignal' : 'redsignal'"></span>
 

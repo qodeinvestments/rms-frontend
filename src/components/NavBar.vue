@@ -2,6 +2,7 @@
     <div class="nav-container">
         <div v-for="(p, index) in navColumns" :key="index" :class="selectedValue === p ? 'selectedValue-color' : ''"
             class="nav-item" @click="handleClick(p, index)">
+            <div class="todayheading" v-if="colorPresent(p)">new</div>
             <p>{{ p }}</p>
         </div>
     </div>
@@ -15,8 +16,15 @@ const props = defineProps({
     navColumns: {
         type: Array,
         required: true
+    },
+    colorColumns: {
+        type: Array,
+        required: true
     }
 })
+const colorPresent = (val) => {
+    return props.colorColumns.includes(val)
+}
 
 const selectedValue = ref(props.navColumns[0]);
 // Define the emit function
@@ -43,7 +51,15 @@ const handleClick = (item, index) => {
     color: #007bff;
 }
 
+.todayheading {
+    position: absolute;
+    bottom: -30%;
+    font-size: 10px;
+    color: red
+}
+
 .nav-item {
+    position: relative;
     cursor: pointer;
     padding: 10px 20px;
     border-radius: 5px;

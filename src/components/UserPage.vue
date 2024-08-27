@@ -403,6 +403,305 @@ const rms_df_columns = [
     header: () => 'Turnover',
   }),
 ]
+const combined_order = [
+  columnHelper.accessor(row => row.LoginID, {
+    id: 'LoginID',
+    cell: info => info.getValue(),
+    header: () => 'LoginID',
+  }),
+  columnHelper.accessor(row => row.ClientID, {
+    id: 'ClientID',
+    cell: info => info.getValue(),
+    header: () => 'ClientID',
+  }),
+  columnHelper.accessor(row => row.AppOrderID, {
+    id: 'AppOrderID',
+    cell: info => info.getValue(),
+    header: () => 'AppOrderID',
+  }),
+  columnHelper.accessor(row => row.OrderReferenceID, {
+    id: 'OrderReferenceID',
+    cell: info => info.getValue(),
+    header: () => 'OrderReferenceID',
+  }),
+  columnHelper.accessor(row => row.GeneratedBy, {
+    id: 'GeneratedBy',
+    cell: info => info.getValue(),
+    header: () => 'GeneratedBy',
+  }),
+  columnHelper.accessor(row => row.ExchangeOrderID, {
+    id: 'ExchangeOrderID',
+    cell: info => info.getValue(),
+    header: () => 'ExchangeOrderID',
+  }),
+  columnHelper.accessor(row => row.OrderCategoryType, {
+    id: 'OrderCategoryType',
+    cell: info => info.getValue(),
+    header: () => 'OrderCategoryType',
+  }),
+  columnHelper.accessor(row => row.ExchangeSegment, {
+    id: 'ExchangeSegment',
+    cell: info => info.getValue(),
+    header: () => 'ExchangeSegment',
+  }),
+  columnHelper.accessor(row => row.OrderSide, {
+    id: 'OrderSide',
+    cell: info => info.getValue(),
+    header: () => 'OrderSide',
+  }),
+  columnHelper.accessor(row => row.OrderType, {
+    id: 'OrderType',
+    cell: info => info.getValue(),
+    header: () => 'OrderType',
+  }),
+  columnHelper.accessor(row => row.ProductType, {
+    id: 'ProductType',
+    cell: info => info.getValue(),
+    header: () => 'ProductType',
+  }),
+  columnHelper.accessor(row => row.TimeInForce, {
+    id: 'TimeInForce',
+    cell: info => info.getValue(),
+    header: () => 'TimeInForce',
+  }),
+  columnHelper.accessor(row => row.OrderPrice, {
+    id: 'OrderPrice',
+    cell: info => info.getValue(),
+    header: () => 'OrderPrice',
+  }),
+  columnHelper.accessor(row => row.OrderQuantity, {
+    id: 'OrderQuantity',
+    cell: info => info.getValue(),
+    header: () => 'OrderQuantity',
+  }),
+  columnHelper.accessor(row => row.OrderStopPrice, {
+    id: 'OrderStopPrice',
+    cell: info => info.getValue(),
+    header: () => 'OrderStopPrice',
+  }),
+  columnHelper.accessor(row => row.OrderStatus, {
+    id: 'OrderStatus',
+    cell: info => info.getValue(),
+    header: () => 'OrderStatus',
+  }),
+  columnHelper.accessor(row => row.OrderAverageTradedPrice, {
+    id: 'OrderAverageTradedPrice',
+    cell: info => info.getValue(),
+    header: () => 'OrderAverageTradedPrice',
+  }),
+  columnHelper.accessor(row => row.LeavesQuantity, {
+    id: 'LeavesQuantity',
+    cell: info => info.getValue(),
+    header: () => 'LeavesQuantity',
+  }),
+  columnHelper.accessor(row => row.CumulativeQuantity, {
+    id: 'CumulativeQuantity',
+    cell: info => info.getValue(),
+    header: () => 'CumulativeQuantity',
+  }),
+  columnHelper.accessor(row => row.OrderDisclosedQuantity, {
+    id: 'OrderDisclosedQuantity',
+    cell: info => info.getValue(),
+    header: () => 'OrderDisclosedQuantity',
+  }),
+  columnHelper.accessor(row => row.OrderGeneratedDateTime, {
+    id: 'OrderGeneratedDateTime',
+    cell: info => info.getValue(),
+    header: () => 'OrderGeneratedDateTime',
+  }),
+  columnHelper.accessor(row => row.ExchangeTransactTime, {
+    id: 'ExchangeTransactTime',
+    cell: info => info.getValue(),
+    header: () => 'ExchangeTransactTime',
+  }),
+  columnHelper.accessor(row => row.TradingSymbol, {
+    id: 'TradingSymbol',
+    cell: info => info.getValue(),
+    header: () => 'TradingSymbol',
+  }),
+  columnHelper.accessor(row => row.LastUpdateDateTime, {
+    id: 'LastUpdateDateTime',
+    cell: info => info.getValue(),
+    header: () => 'LastUpdateDateTime',
+  }),
+  columnHelper.accessor(row => row.OrderExpiryDate, {
+    id: 'OrderExpiryDate',
+    cell: info => info.getValue(),
+    header: () => 'OrderExpiryDate',
+  }),
+  columnHelper.accessor(row => row.CancelRejectReason, {
+    id: 'CancelRejectReason',
+    cell: info => info.getValue(),
+    header: () => 'CancelRejectReason',
+  }),
+  columnHelper.accessor(row => row.OrderUniqueIdentifier, {
+    id: 'OrderUniqueIdentifier',
+    cell: info => info.getValue(),
+    header: () => 'OrderUniqueIdentifier',
+  }),
+  columnHelper.accessor(row => row.OrderLegStatus, {
+    id: 'OrderLegStatus',
+    cell: info => info.getValue(),
+    header: () => 'OrderLegStatus',
+  }),
+  columnHelper.accessor(row => row.BoLegDetails, {
+    id: 'BoLegDetails',
+    cell: info => info.getValue(),
+    header: () => 'BoLegDetails',
+  }),
+  columnHelper.accessor(row => row.IsSpread, {
+    id: 'IsSpread',
+    cell: info => info.getValue(),
+    header: () => 'IsSpread',
+  }),
+  columnHelper.accessor(row => row.BoEntryOrderId, {
+    id: 'BoEntryOrderId',
+    cell: info => info.getValue(),
+    header: () => 'BoEntryOrderId',
+  }),
+  columnHelper.accessor(row => row.ApiOrderSource, {
+    id: 'ApiOrderSource',
+    cell: info => info.getValue(),
+    header: () => 'ApiOrderSource',
+  }),
+  columnHelper.accessor(row => row.MessageCode, {
+    id: 'MessageCode',
+    cell: info => info.getValue(),
+    header: () => 'MessageCode',
+  }),
+  columnHelper.accessor(row => row.MessageVersion, {
+    id: 'MessageVersion',
+    cell: info => info.getValue(),
+    header: () => 'MessageVersion',
+  }),
+  columnHelper.accessor(row => row.TokenID, {
+    id: 'TokenID',
+    cell: info => info.getValue(),
+    header: () => 'TokenID',
+  }),
+  columnHelper.accessor(row => row.ApplicationType, {
+    id: 'ApplicationType',
+    cell: info => info.getValue(),
+    header: () => 'ApplicationType',
+  }),
+  columnHelper.accessor(row => row.SequenceNumber, {
+    id: 'SequenceNumber',
+    cell: info => info.getValue(),
+    header: () => 'SequenceNumber',
+  }),
+  columnHelper.accessor(row => row.trade_ids, {
+    id: 'trade_ids',
+    cell: info => info.getValue(),
+    header: () => 'trade_ids',
+  }),
+  columnHelper.accessor(row => row.OrderQuantityDir, {
+    id: 'OrderQuantityDir',
+    cell: info => info.getValue(),
+    header: () => 'OrderQuantityDir',
+  }),
+
+]
+const combined_trades = [columnHelper.accessor(row => row.trade_id, {
+  id: 'trade_id',
+  cell: info => info.getValue(),
+  header: () => 'trade_id',
+}),
+columnHelper.accessor(row => row.uid, {
+  id: 'uid',
+  cell: info => info.getValue(),
+  header: () => 'uid',
+}),
+columnHelper.accessor(row => row.timestamp, {
+  id: 'timestamp',
+  cell: info => info.getValue(),
+  header: () => 'timestamp',
+}),
+columnHelper.accessor(row => row.action, {
+  id: 'action',
+  cell: info => info.getValue(),
+  header: () => 'action',
+}),
+columnHelper.accessor(row => row.action_int, {
+  id: 'action_int',
+  cell: info => info.getValue(),
+  header: () => 'action_int',
+}),
+columnHelper.accessor(row => row.qty, {
+  id: 'qty',
+  cell: info => info.getValue(),
+  header: () => 'qty',
+}),
+columnHelper.accessor(row => row.qty_dir, {
+  id: 'qty_dir',
+  cell: info => info.getValue(),
+  header: () => 'qty_dir',
+}),
+columnHelper.accessor(row => row.symbol, {
+  id: 'symbol',
+  cell: info => info.getValue(),
+  header: () => 'symbol',
+}),
+columnHelper.accessor(row => row.price, {
+  id: 'price',
+  cell: info => info.getValue(),
+  header: () => 'price',
+}),
+columnHelper.accessor(row => row.price_provided, {
+  id: 'price_provided',
+  cell: info => info.getValue(),
+  header: () => 'price_provided',
+}),
+columnHelper.accessor(row => row.value, {
+  id: 'value',
+  cell: info => info.getValue(),
+  header: () => 'value',
+}),
+columnHelper.accessor(row => row.buy_value, {
+  id: 'buy_value',
+  cell: info => info.getValue(),
+  header: () => 'buy_value',
+}),
+columnHelper.accessor(row => row.sell_value, {
+  id: 'sell_value',
+  cell: info => info.getValue(),
+  header: () => 'sell_value',
+}),
+columnHelper.accessor(row => row.system_timestamp, {
+  id: 'system_timestamp',
+  cell: info => info.getValue(),
+  header: () => 'system_timestamp',
+}),
+columnHelper.accessor(row => row.note, {
+  id: 'note',
+  cell: info => info.getValue(),
+  header: () => 'note',
+}),
+columnHelper.accessor(row => row.signal_number, {
+  id: 'signal_number',
+  cell: info => info.getValue(),
+  header: () => 'signal_number',
+}),
+columnHelper.accessor(row => row.quantity, {
+  id: 'quantity',
+  cell: info => info.getValue(),
+  header: () => 'quantity',
+}),
+columnHelper.accessor(row => row.basket, {
+  id: 'basket',
+  cell: info => info.getValue(),
+  header: () => 'basket',
+}),
+columnHelper.accessor(row => row.qty_multiplier, {
+  id: 'qty_multiplier',
+  cell: info => info.getValue(),
+  header: () => 'qty_multiplier',
+}),
+columnHelper.accessor(row => row.effective_qty, {
+  id: 'effective_qty',
+  cell: info => info.getValue(),
+  header: () => 'effective_qty',
+}),
+]
 let eventSource = null
 const client_BackendData = ref([])
 const connection_BackendData = ref([])
@@ -589,9 +888,11 @@ onUnmounted(() => {
       <p> Max Client Detail Latency :<span class="latencyvalue"> {{ max_client_details_latency }}</span></p>
     </div>
     <div class="navContainer">
-      <NavBar :navColumns="['Positions', 'Order', 'Holdings', 'TradeBook', 'Combined DF']"
-        @column-clicked="handleColumnClick" />
+      <NavBar
+        :navColumns="['Positions', 'Order', 'Holdings', 'TradeBook', 'Combined DF', 'Combined Orders', 'Combined Trades']"
+        @column-clicked="handleColumnClick" :colorColumns="[]" />
     </div>
+
     <div class="my-8" v-if="book && showOnPage === 'Positions'">
       <p class="table-heading">Live Positions</p>
       <TanStackTestTable :data="book" :columns="rms_df_columns" :hasColor="['pnl']" :navigateTo="[]"
@@ -611,6 +912,14 @@ onUnmounted(() => {
       <p class="table-heading">Combined DF</p>
       <TanStackTestTable :data="book" :columns="combined_df_columns" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
+    </div>
+    <div class="my-8" v-if="showOnPage === 'Combined Orders'">
+      <p class="table-heading">Combined Orders</p>
+      <TanStackTestTable :data="book" :columns="combined_order" :hasColor="[]" :navigateTo="[]" :showPagination=true />
+    </div>
+    <div class="my-8" v-if="showOnPage === 'Combined Trades'">
+      <p class="table-heading">Combined Trades</p>
+      <TanStackTestTable :data="book" :columns="combined_trades" :hasColor="[]" :navigateTo="[]" :showPagination=true />
     </div>
   </div>
 </template>

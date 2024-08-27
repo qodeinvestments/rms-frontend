@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted, onUnmounted, ref, watch } from 'vue'
-import NavBar from './NavBar.vue'
 import {
   FlexRender,
   getCoreRowModel,
@@ -504,7 +503,7 @@ onUnmounted(() => {
         :basketLatency="basketLatency" :max_basket_latency="max_basket_latency" :strategyLatency="strategyLatency"
         :max_strategy_latency="max_strategy_latency" />
     </div>
-    <button @click="showSuccessToast">Show Success Toast</button>
+    <!-- <button @click="showSuccessToast">Show Success Toast</button> -->
 
     <div class="mx-auto px-8 py-8">
       <div class="my-8">

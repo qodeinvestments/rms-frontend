@@ -102,6 +102,60 @@ const live_order_book_columns = [
 
 
 ]
+
+const colorColumns = ref([])
+const parseCustomDate = (dateString) => {
+    let [datePart, timePart] = dateString.split(' ');
+    let [day, month, year] = datePart.split('-');
+    // No need to parse time if we only care about the date
+    return new Date(year, month - 1, day);  // Create a Date object only with year, month, and day
+}
+
+const tell_time_match = (a1, a2) => {
+    let date1 = parseCustomDate(a1);
+    let date2 = parseCustomDate(a2);
+    let sameDate = date1.getTime() === date2.getTime();  // Compare the time value (in ms) of the date objects
+
+    return sameDate;
+}
+
+const updateColorColumns = (data, time) => {
+    const revmap = {
+        'my_program_shut_down': 'Testing',
+        'trader_xts_shut_down': 'XTS_Trader',
+        'trader_zerodha_shut_down': 'Zerodha_Trader',
+        'websocket_shut_down': 'Web_Sockets',
+        'shut_down_pulse_run_strats': 'Run_Strats',
+        'shut_down_pulse_check_net_positions': 'PosMis Generator'
+    }
+    const newColorColumns = []
+
+    // Check Order_Errors
+    let orderErrorsMatch = false
+    for (const key in data['Order_Errors']) {
+        for (const order of data['Order_Errors'][key]) {
+            if (tell_time_match(order['OrderGeneratedDateTime'], time)) {
+                orderErrorsMatch = true
+                break
+            }
+        }
+        if (orderErrorsMatch) break
+    }
+    if (orderErrorsMatch) newColorColumns.push('Order_Errors')
+
+    // Check Pulse_Errors
+    for (const key in data['Pulse_Errors']) {
+        const pulseErrors = data['Pulse_Errors'][key]
+        if (pulseErrors.some(error => tell_time_match(error.time, time))) {
+            newColorColumns.push(revmap[key])
+        }
+    }
+
+    // Update colorColumns
+    colorColumns.value = newColorColumns
+}
+
+
 const options = ref([]);
 
 let eventSource = null
@@ -136,6 +190,7 @@ const map = {
 const showOnPage = ref('Order_Errors')
 
 watch(data, (newValue) => {
+    updateColorColumns(newValue, newValue['time'])
     if (newValue['time']) {
         let ar2 = newValue["time"];
         if (past_time_client.value === 0) past_time_client.value = ar2;
@@ -197,7 +252,7 @@ onUnmounted(() => {
         <div class="navContainer">
             <NavBar
                 :navColumns="['Order_Errors', 'Testing', 'Run_Strats', 'Web_Sockets', 'XTS_Trader', 'Zerodha_Trader', 'PosMis Generator']"
-                @column-clicked="handleColumnClick" />
+                @column-clicked="handleColumnClick" :colorColumns="colorColumns" />
         </div>
         <div v-if="book && showOnPage === 'Order_Errors'">
             <label for="options">Select an option:</label>

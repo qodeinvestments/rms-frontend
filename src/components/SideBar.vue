@@ -22,7 +22,7 @@
                 <span class="text">Dashboard</span>
               </a>
             </li>
-            <li>
+            <!-- <li>
               <a href="#" :class="selected == 'Audience' ? 'active' : ''" @click="changeSelected('Audience')">
                 <i class="icon ph-bold ph-user"></i>
                 <span class="text">Audience</span>
@@ -41,7 +41,7 @@
                   </a>
                 </li>
               </ul>
-            </li>
+            </li> -->
             <li :class="selected == 'Errors' ? 'active' : ''" @click="changeSelected('Errors')">
               <a href="#">
                 <i class="icon ph-bold ph-file-text"></i>
@@ -66,7 +66,7 @@
                 <span class="text">SignalBook</span>
               </a>
             </li>
-            <li>
+            <!-- <li>
               <a href="#" :class="selected == 'Income' ? 'active' : ''" @click="changeSelected('Income')">
                 <i class="icon ph-bold ph-chart-bar"></i>
                 <span class="text">Income</span>
@@ -94,7 +94,7 @@
                   </a>
                 </li>
               </ul>
-            </li>
+            </li> -->
 
           </ul>
         </div>
