@@ -36,11 +36,20 @@ const handleMessage = (message) => {
   try {
     if (message === undefined) return;
     book.value['time'] = message["time"]
+
+    if (book.value['Order_Errors']) {
+      for (const key in book.value['Order_Errors']) {
+        if (book.value['Order_Errors'][key].length != message['Order_Errors'][key].length) {
+          triggerToast('New Error in Order', 'error')
+        }
+      }
+    }
+
     book.value['Order_Errors'] = message['Order_Errors']
 
     if (book.value['Pulse_Errors']) {
       for (const key in book.value['Pulse_Errors']) {
-        if (book.value['Pulse_Errors'][key].length != message['Pulse_Errors'][key].length && book.value['Pulse_Errors'][key].length != 0) {
+        if (book.value['Pulse_Errors'][key].length != message['Pulse_Errors'][key].length) {
           triggerToast('New Error in ' + key, 'error')
         }
       }
