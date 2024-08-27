@@ -39,9 +39,12 @@ const handleMessage = (message) => {
     book.value['Order_Errors'] = message['Order_Errors']
 
     if (book.value['Pulse_Errors']) {
-      if (book.value['Pulse_Errors'].length != message['Pulse_Errors'].length && book.value['Pulse_Errors'].length != 0) {
-        triggerToast('New Error in Pulse_Errors', 'error')
+      for (const key in book.value['Pulse_Errors']) {
+        if (book.value['Pulse_Errors'][key].length != message['Pulse_Errors'][key].length && book.value['Pulse_Errors'][key].length != 0) {
+          triggerToast('New Error in ' + key, 'error')
+        }
       }
+
     }
     book.value['Pulse_Errors'] = message['Pulse_Errors']
 

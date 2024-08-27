@@ -128,7 +128,8 @@ const map = {
     'XTS_Trader': 'trader_xts_shut_down',
     'Zerodha_Trader': 'trader_zerodha_shut_down',
     'Web_Sockets': 'websocket_shut_down',
-    'Run_Strats': 'pulse_run_strats_shut_down',
+    'Run_Strats': 'shut_down_pulse_run_strats',
+    'PosMis Generator': 'shut_down_pulse_check_net_positions'
 }
 
 
@@ -195,7 +196,7 @@ onUnmounted(() => {
 
         <div class="navContainer">
             <NavBar
-                :navColumns="['Order_Errors', 'Testing', 'Run_Strats', 'Web_Sockets', 'XTS_Trader', 'Zerodha_Trader']"
+                :navColumns="['Order_Errors', 'Testing', 'Run_Strats', 'Web_Sockets', 'XTS_Trader', 'Zerodha_Trader', 'PosMis Generator']"
                 @column-clicked="handleColumnClick" />
         </div>
         <div v-if="book && showOnPage === 'Order_Errors'">

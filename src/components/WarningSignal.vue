@@ -1,5 +1,6 @@
 <template>
     <div class="warningsignal-container text-sm font-semibold">
+
         <div class="signal-container" v-for="(value, key) in filteredSignals()" :key="key">
             <div class="textContainer"> {{ key }} </div>
             <span :class="value ? 'greensignal' : 'redsignal'"></span>
