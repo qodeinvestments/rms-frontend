@@ -50,7 +50,7 @@ const filter = ref('')
 
 // Custom pagination state
 const currentPage = ref(0)
-const pageSize = ref(5)
+const pageSize = ref(10)
 
 // Initialize the table using the useVueTable hook
 const table = useVueTable({

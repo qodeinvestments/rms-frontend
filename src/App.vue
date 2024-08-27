@@ -38,12 +38,12 @@ const handleMessage = (message) => {
     book.value['time'] = message["time"]
     book.value['Order_Errors'] = message['Order_Errors']
 
-    if (book.value['Testing']) {
-      if (book.value['Testing'].length != message['Testing'].length && book.value['Testing'].length != 0) {
-        triggerToast('New Error in Testing', 'error')
+    if (book.value['Pulse_Errors']) {
+      if (book.value['Pulse_Errors'].length != message['Pulse_Errors'].length && book.value['Pulse_Errors'].length != 0) {
+        triggerToast('New Error in Pulse_Errors', 'error')
       }
     }
-    book.value['Testing'] = message['Testing']
+    book.value['Pulse_Errors'] = message['Pulse_Errors']
 
   } catch (error) {
     console.error('Error parsing event data or updating data:', error);

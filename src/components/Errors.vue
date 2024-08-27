@@ -123,7 +123,13 @@ const handleColumnClick = ({ item, index }) => {
 // })
 
 
-
+const map = {
+    'Testing': 'my_program_shut_down',
+    'XTS_Trader': 'trader_xts_shut_down',
+    'Zerodha_Trader': 'trader_zerodha_shut_down',
+    'Web_Sockets': 'websocket_shut_down',
+    'Run_Strats': 'pulse_run_strats_shut_down',
+}
 
 
 const showOnPage = ref('Order_Errors')
@@ -145,12 +151,19 @@ watch(data, (newValue) => {
     if ('Order_Errors' in data)
         options.value = Object.keys(data['Order_Errors'])
 
+
     if (showOnPage.value === 'Order_Errors') {
         if (selectedOption.value != '')
             book.value = data['Order_Errors'][selectedOption.value]
-
     }
-    else book.value = newValue[showOnPage.value] || []
+    else {
+
+        if (map[showOnPage.value]) {
+            book.value = newValue['Pulse_Errors'][map[showOnPage.value]] || []
+        }
+
+        else book.value = []
+    }
 
 
 }, { immediate: true });
@@ -181,7 +194,9 @@ onUnmounted(() => {
         </div>
 
         <div class="navContainer">
-            <NavBar :navColumns="['Order_Errors', 'Testing']" @column-clicked="handleColumnClick" />
+            <NavBar
+                :navColumns="['Order_Errors', 'Testing', 'Run_Strats', 'Web_Sockets', 'XTS_Trader', 'Zerodha_Trader']"
+                @column-clicked="handleColumnClick" />
         </div>
         <div v-if="book && showOnPage === 'Order_Errors'">
             <label for="options">Select an option:</label>
@@ -199,8 +214,8 @@ onUnmounted(() => {
             <TanStackTestTable :data="book" :columns="live_order_book_columns" :hasColor="[]" :navigateTo="[]"
                 :showPagination=true />
         </div>
-        <div class="my-8" v-else-if="book && showOnPage === 'Testing'">
-            <p class="table-heading">Testing Errors</p>
+        <div class="my-8" v-else-if="book">
+            <p class="table-heading">{{ showOnPage }}</p>
             <TanStackTestTable :data="book" :columns="columns_testing" :hasColor="[]" :navigateTo="[]"
                 :showPagination=true />
         </div>
