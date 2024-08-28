@@ -111,25 +111,25 @@ const setPageSize = (size) => {
 }
 
 const handleMouseWheel = (event) => {
-    const container = document.querySelector('.table-container');
-    if (event.deltaY !== 0) {
+    const container = event.currentTarget;
+    if (container) {
         container.scrollLeft += event.deltaY;
-        container.scrollTop += event.deltaY;
         event.preventDefault();
     }
-
 }
 
 onMounted(() => {
-    const container = document.querySelector('.table-container');
-    container.addEventListener('wheel', handleMouseWheel, { passive: false });
+    const containers = document.querySelectorAll('.table-container');
+    containers.forEach(container => {
+        container.addEventListener('wheel', handleMouseWheel, { passive: false });
+    });
 })
 
 onUnmounted(() => {
-    const container = document.querySelector('.table-container');
-    if (container) {
+    const containers = document.querySelectorAll('.table-container');
+    containers.forEach(container => {
         container.removeEventListener('wheel', handleMouseWheel);
-    }
+    });
 })
 
 </script>
@@ -314,7 +314,15 @@ table {
 }
 
 .table-container {
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    width: 100%;
+}
+
+/* Add a min-width to the table to ensure horizontal scrolling when needed */
+table {
+    min-width: 100%;
 }
 </style>
