@@ -44,6 +44,11 @@ const columns_testing = [
 ]
 
 const live_order_book_columns = [
+    columnHelper.accessor(row => row.user, {
+        id: 'User',
+        cell: info => info.getValue(),
+        header: () => 'User',
+    }),
 
     columnHelper.accessor(row => row.OrderGeneratedDateTime, {
         id: 'OrderGeneratedDateTime',
@@ -163,7 +168,7 @@ const client_latency = ref(0)
 const past_time_client = ref(0)
 const max_client_latency = ref(0)
 const book = ref([])
-const selectedOption = ref("")
+const selectedOption = ref("ALL")
 
 const handleColumnClick = ({ item, index }) => {
     showOnPage.value = item;
@@ -204,13 +209,22 @@ watch(data, (newValue) => {
             past_time_client.value = ar2;
         }
     }
-    if ('Order_Errors' in data)
+    if ('Order_Errors' in data) {
         options.value = Object.keys(data['Order_Errors'])
+        options.value.push("ALL")
+    }
 
 
     if (showOnPage.value === 'Order_Errors') {
-        if (selectedOption.value != '')
+        if (selectedOption.value == 'ALL') {
+            if (data['Order_Errors']) {
+                const combinedArray = Object.values(data['Order_Errors']).flat();
+                book.value = combinedArray
+            }
+        }
+        else if (selectedOption.value != '')
             book.value = data['Order_Errors'][selectedOption.value]
+
     }
     else {
 
