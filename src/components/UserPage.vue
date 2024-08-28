@@ -716,6 +716,7 @@ const max_client_details_latency = ref(0)
 const max_client_latency = ref(0)
 const mix_real_ideal_mtm_table = ref({})
 const book = ref([])
+const position_sum = ref(0)
 const handleColumnClick = ({ item, index }) => {
   showOnPage.value = item;
 }
@@ -745,6 +746,8 @@ const handleMessage = (message) => {
         VAR_PERCENTAGE: result.Live_Client_Var !== undefined && (result.availableMargin > 0) ? ((Number(result.Live_Client_Var) / Number(result.availableMargin)) * 100).toPrecision(4) : 0,
       }];
       mix_real_ideal_mtm_table.value = { "real": result['MTMTable'], "ideal": result['ideal_MTMTable'] }
+      position_sum.value = result.MTM !== undefined ? Number(result.MTM) : 0
+
     } else {
       console.error('No client data found for the specified name:', name.value);
     }
@@ -894,7 +897,8 @@ onUnmounted(() => {
     </div>
 
     <div class="my-8" v-if="book && showOnPage === 'Positions'">
-      <p class="table-heading">Live Positions</p>
+
+      <p class="table-heading">Live Positions : <span class="sumHeading">{{ position_sum }}</span></p>
       <TanStackTestTable :data="book" :columns="rms_df_columns" :hasColor="['pnl']" :navigateTo="[]"
         :showPagination=true />
     </div>
@@ -939,6 +943,10 @@ onUnmounted(() => {
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
+}
+
+.sumHeading {
+  color: rgb(80, 185, 80);
 }
 
 .LatencyTable {
