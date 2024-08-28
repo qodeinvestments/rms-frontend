@@ -676,11 +676,6 @@ columnHelper.accessor(row => row.note, {
   cell: info => info.getValue(),
   header: () => 'note',
 }),
-columnHelper.accessor(row => row.signal_number, {
-  id: 'signal_number',
-  cell: info => info.getValue(),
-  header: () => 'signal_number',
-}),
 columnHelper.accessor(row => row.quantity, {
   id: 'quantity',
   cell: info => info.getValue(),
@@ -898,7 +893,8 @@ onUnmounted(() => {
 
     <div class="my-8" v-if="book && showOnPage === 'Positions'">
 
-      <p class="table-heading">Live MTM : <span :class="position_sum > 0 ? 'green' : 'red'">{{ position_sum }}</span></p>
+      <p class="table-heading">Live MTM : <span :class="position_sum > 0 ? 'green' : 'red'">{{ position_sum }}</span>
+      </p>
       <TanStackTestTable :data="book" :columns="rms_df_columns" :hasColor="['pnl']" :navigateTo="[]"
         :showPagination=true />
     </div>
