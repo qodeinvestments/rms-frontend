@@ -898,7 +898,7 @@ onUnmounted(() => {
 
     <div class="my-8" v-if="book && showOnPage === 'Positions'">
 
-      <p class="table-heading">Live Positions : <span class="sumHeading">{{ position_sum }}</span></p>
+      <p class="table-heading">Live MTM : <span :class="position_sum > 0 ? 'green' : 'red'">{{ position_sum }}</span></p>
       <TanStackTestTable :data="book" :columns="rms_df_columns" :hasColor="['pnl']" :navigateTo="[]"
         :showPagination=true />
     </div>
@@ -945,7 +945,11 @@ onUnmounted(() => {
   align-items: flex-end;
 }
 
-.sumHeading {
+.red {
+  color: red;
+}
+
+.green {
   color: rgb(80, 185, 80);
 }
 
