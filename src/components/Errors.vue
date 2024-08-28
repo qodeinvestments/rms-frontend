@@ -254,15 +254,14 @@ onUnmounted(() => {
                 :navColumns="['Order_Errors', 'Testing', 'Run_Strats', 'Web_Sockets', 'XTS_Trader', 'Zerodha_Trader', 'PosMis Generator']"
                 @column-clicked="handleColumnClick" :colorColumns="colorColumns" />
         </div>
-        <div v-if="book && showOnPage === 'Order_Errors'">
-            <label for="options">Select an option:</label>
-            <select id="options" v-model="selectedOption">
+        <div class="userSelectContainer" v-if="book && showOnPage === 'Order_Errors'">
+            <label class="table-heading" for="options">Select an User:</label>
+            <select class="table-heading" id="options" v-model="selectedOption">
                 <option v-for="option in options" :key="option" :value="option">
                     {{ option }}
                 </option>
             </select>
 
-            <p>Selected: {{ selectedOption }}</p>
         </div>
 
         <div class="my-8" v-if="book && showOnPage === 'Order_Errors'">
@@ -300,6 +299,10 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.userSelectContainer {
+    margin-top: 30px;
+}
+
 .pageContainer {
     height: 100%;
     display: flex;
