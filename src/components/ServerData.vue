@@ -96,6 +96,10 @@ onUnmounted(() => {
             <p class="table-heading">CPU USAGE </p>
             <LightWeightChart v-if="serverData['CPU']" :Chartdata="{ 'data': serverData['CPU'] }" />
         </div>
+        <div>
+            <p class="table-heading">RAM USAGE </p>
+            <LightWeightChart v-if="serverData['RAM']" :Chartdata="{ 'data': serverData['RAM'] }" />
+        </div>
 
 
 

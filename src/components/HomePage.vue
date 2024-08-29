@@ -545,7 +545,10 @@ onUnmounted(() => {
           Time:{{ time }}
         </span>
         <span v-if="serverData['CPU']">
-          Cpu : {{ serverData['CPU'][serverData['CPU'].length - 1].value }} %
+          CPU : {{ serverData['CPU'][serverData['CPU'].length - 1].value }} %
+        </span>
+        <span v-if="serverData['RAM']">
+          RAM : {{ serverData['RAM'][serverData['RAM'].length - 1].value }} %
         </span>
       </p>
       <WarningSignal :signals="pulse_signal" :latency="Latency" :max_latency="max_latency" />
@@ -559,10 +562,7 @@ onUnmounted(() => {
           :navigateTo="NavigationMap" :showPagination=true
           :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }" />
       </div>
-      <div>
-        {{ basketLatency }} {{ max_basket_latency }}
-        {{ strategyLatency }} {{ max_strategy_latency }}
-      </div>
+
     </div>
   </div>
 </template>
