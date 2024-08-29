@@ -160,7 +160,9 @@ const previous_day_close_index_data = {
 const pulse_signal = ref([])
 const time = ref([])
 const user_infected = ref([])
+const serverData = ref({})
 const checkBackendConnection = ref(false)
+const checkServerDataConnection = ref(false)
 const Latency = ref(0)
 const max_latency = ref(0);
 const basketLatency = ref(0)
@@ -185,13 +187,8 @@ const give_percentage_change = (a, b) => {
 }
 
 const handleMessage = (message) => {
-
-
   client_BackendData.value = message.client_data
   connection_BackendData.value = message.connection_data
-
-
-
   updateData()
 }
 
@@ -200,14 +197,9 @@ const updateData = () => {
 
   if (connection_BackendData.value != undefined) {
     index_data.value = connection_BackendData.value.live_index
-
-
     let pulse_data = connection_BackendData.value.pulse
     time.value = connection_BackendData.value.time
-
     if (connection_BackendData.value.pulse) {
-
-
       pulse_signal.value = pulse_data
       pulse_signal.value.backendConnection = checkBackendConnection
       pulse_signal.value.position_mismatch = connection_BackendData.value.position_mismatch
@@ -242,6 +234,52 @@ const updateData = () => {
 
 
 
+}
+
+
+const connectServerDataWebSocket = () => {
+  const socket = new WebSocket('wss://api.swancapital.in/serverData');
+
+  socket.onopen = () => {
+    console.log('ServerData WebSocket connection opened')
+    checkServerDataConnection.value = true;
+    // reconnectAttempts = 0
+    // startPingInterval()
+  }
+
+  socket.onmessage = (event) => {
+    if (event.data === 'ping') {
+      socket.send('pong')
+    } else {
+
+      const message = JSON.parse(event.data);
+      serverData.value = message
+
+      // let ar2 = message.time;
+      // if (past_time.value === 0) past_time.value = ar2;
+      // let date1 = new Date(past_time.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+      // let date2 = new Date(ar2.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+      // let diffInMs = date2 - date1;
+      // let diffInSeconds = diffInMs / 1000;
+      // Latency.value = diffInSeconds;
+      // max_latency.value = Math.max(max_latency.value, Latency.value)
+      // past_time.value = ar2;
+      // handleMessage(message)
+    }
+  }
+
+  socket.onclose = (event) => {
+    console.log('ServerData WebSocket connection closed:', event.reason)
+    checkServerDataConnection.value = false
+    // stopPingInterval()
+    // reconnect()
+  }
+
+
+  socket.onerror = (error) => {
+    console.error('ServerData WebSocket error:', error)
+    checkServerDataConnection.value = false
+  }
 }
 
 const connectWebSocket = () => {
@@ -455,6 +493,7 @@ onMounted(() => {
   connectWebSocket()
   // connectBasketChartWebSocket()
   // connectStrategyChartWebSocket()
+  connectServerDataWebSocket()
 })
 
 onUnmounted(() => {
@@ -469,6 +508,7 @@ onUnmounted(() => {
 
 <template>
   <div class="homePage_Container bg-[#efefef]/30">
+
     <!-- This is an HTML comment 
     <LightWeightChart v-if="Object.keys(basket_BackendData).length" :Chartdata="basket_BackendData" />
     <p>Lenght of Uid is:{{ get_uids_length() }}</p>
@@ -476,9 +516,10 @@ onUnmounted(() => {
       <CustomSelect :options="give_live_weights()" v-model="selected_opt" label="Choose an option:" />
     </div>
    
-    <LightWeightChart v-if="Object.keys(strategy_mtm_chart_BackendData).length"
-      :Chartdata="strategy_mtm_chart_BackendData" />
+
     -->
+
+    <!-- <LightWeightChart v-if="serverData['CPU']" :Chartdata="{ 'data': serverData['CPU'] }" /> -->
 
     <div v-if="index_data" class="nav-index-container font-semibold bg-white drop-shadow-sm">
       <div v-for="(value, key) in index_data" :key="key" class="index-item">
@@ -498,10 +539,16 @@ onUnmounted(() => {
     </div>
 
     <div class="time-container">
-      <p class="timeDiv"> Time:{{ time }}</p>
-      <WarningSignal :signals="pulse_signal" :latency="Latency" :max_latency="max_latency"
-        :basketLatency="basketLatency" :max_basket_latency="max_basket_latency" :strategyLatency="strategyLatency"
-        :max_strategy_latency="max_strategy_latency" />
+
+      <p class="timeDiv">
+        <span>
+          Time:{{ time }}
+        </span>
+        <span v-if="serverData['CPU']">
+          Cpu : {{ serverData['CPU'][serverData['CPU'].length - 1].value }} %
+        </span>
+      </p>
+      <WarningSignal :signals="pulse_signal" :latency="Latency" :max_latency="max_latency" />
     </div>
     <!-- <button @click="showSuccessToast">Show Success Toast</button> -->
 
@@ -618,7 +665,9 @@ html {
   justify-content: center;
   align-items: center;
   display: flex;
+  flex-direction: column;
   width: 100%;
+
 }
 
 

@@ -6,6 +6,7 @@ import Errors from '../components/Errors.vue'
 import Keydblogs from '../components/Keydblogs.vue'
 import DataVisualizer from '../components/DataVisualizer.vue'
 import UserLagData from '../components/UserLagData.vue'
+import ServerData from '../components/ServerData.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -44,6 +45,11 @@ const router = createRouter({
       path: '/visualize',
       name: 'Visualize',
       component: DataVisualizer,
+    },
+    {
+      path: '/serverData',
+      name: 'ServerData',
+      component: ServerData,
     },
     // {
     //   path: '/about',

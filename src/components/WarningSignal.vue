@@ -22,24 +22,6 @@
             <p class="textContainer"> FrontToBack Max Latency :</p>
             <span>{{ max_latency }}</span>
         </div>
-        <!-- 
-        <div class="signal-container">
-            <p class="textContainer">basketLatency :</p>
-            <span>{{ basketLatency }}</span>
-        </div>
-        <div class="signal-container">
-            <p class="textContainer"> max_basket_latency :</p>
-            <span>{{ max_basket_latency }}</span>
-        </div>
-
-        <div class="signal-container">
-            <p class="textContainer"> strategyLatency :</p>
-            <span>{{ strategyLatency }}</span>
-        </div>
-        <div class="signal-container">
-            <p class="textContainer"> max_strategy_latency :</p>
-            <span>{{ max_strategy_latency }}</span>
-        </div> -->
     </div>
 </template>
 
@@ -83,22 +65,6 @@ const props = defineProps({
         type: Number,
         required: true
     },
-    basketLatency: {
-        type: Number,
-        required: true
-    },
-    max_basket_latency: {
-        type: Number,
-        required: true
-    },
-    strategyLatency: {
-        type: Number,
-        required: true
-    },
-    max_strategy_latency: {
-        type: Number,
-        required: true
-    }
 });
 const { signals } = toRefs(props);
 const calculate_position_mismatch = () => {
