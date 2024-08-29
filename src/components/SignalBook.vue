@@ -10,6 +10,7 @@ import {
 import { MyEnum } from '../Enums/Prefix.js';
 import { ref, watch } from 'vue'
 import TanStackTestTable from './TanStackTestTable.vue'
+import Histogram from './Histogram.vue';
 
 const signal_book_data = ref([])
 
@@ -18,7 +19,7 @@ const columnHelper = createColumnHelper()
 const latency = ref(0)
 const max_latency = ref(0)
 const past_time = ref(0)
-
+const histogram = ref(0)
 
 const columns = [
     columnHelper.accessor(row => row.trade_id, {
@@ -114,6 +115,7 @@ const connectClientDetailsWebSocket = () => {
     };
     clientDetailSocket.onmessage = function (event) {
         const data = JSON.parse(event.data);
+        histogram.value = data['difference']
         signal_book_data.value = Object.values(data['table_data'])
         let ar2 = data["time"];
         if (past_time.value === 0) past_time.value = ar2;
@@ -171,6 +173,10 @@ onUnmounted(() => {
             <TanStackTestTable :data="signal_book_data" :columns="columns" :hasColor="[]" :navigateTo="[]"
                 :showPagination=true />
         </div>
+        <div v-if="histogram.length > 0" class="histogram-container">
+            <p class="heading">WebSocket 3 Lag</p>
+            <Histogram :dataArray="histogram" />
+        </div>
 
 
 
@@ -186,6 +192,13 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
 }
+
+.histogram-container {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 30px;
+}
+
 
 .latencyvalue {
     font-weight: bold;
