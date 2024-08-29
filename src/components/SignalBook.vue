@@ -115,7 +115,7 @@ const connectClientDetailsWebSocket = () => {
     };
     clientDetailSocket.onmessage = function (event) {
         const data = JSON.parse(event.data);
-        histogram.value = data['difference']
+        // histogram.value = data['difference']
         signal_book_data.value = Object.values(data['table_data'])
         let ar2 = data["time"];
         if (past_time.value === 0) past_time.value = ar2;
@@ -173,10 +173,10 @@ onUnmounted(() => {
             <TanStackTestTable :data="signal_book_data" :columns="columns" :hasColor="[]" :navigateTo="[]"
                 :showPagination=true />
         </div>
-        <div v-if="histogram.length > 0" class="histogram-container">
+        <!-- <div v-if="histogram.length > 0" class="histogram-container">
             <p class="heading">WebSocket 3 Lag</p>
             <Histogram :dataArray="histogram" />
-        </div>
+        </div> -->
 
 
 
