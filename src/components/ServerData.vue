@@ -35,17 +35,17 @@ const connectServerDataWebSocket = () => {
         const data = JSON.parse(event.data);
         console.log("data is:", data)
 
-        // let ar2 = data["time"];
-        // if (past_time_clientDetails.value === 0) past_time_clientDetails.value = ar2;
-        // if (past_time_clientDetails.value != 0) {
-        //     let date1 = new Date(past_time_clientDetails.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
-        //     let date2 = new Date(ar2.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
-        //     let diffInMs = date2 - date1;
-        //     let diffInSeconds = diffInMs / 1000;
-        //     client_details_Latency.value = diffInSeconds;
-        //     max_client_details_latency.value = Math.max(max_client_details_latency.value, client_details_Latency.value)
-        //     past_time_clientDetails.value = ar2;
-        // }
+        let ar2 = data["time"];
+        if (past_time_clientDetails.value === 0) past_time_clientDetails.value = ar2;
+        if (past_time_clientDetails.value != 0) {
+            let date1 = new Date(past_time_clientDetails.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+            let date2 = new Date(ar2.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+            let diffInMs = date2 - date1;
+            let diffInSeconds = diffInMs / 1000;
+            client_details_Latency.value = diffInSeconds;
+            max_client_details_latency.value = Math.max(max_client_details_latency.value, client_details_Latency.value)
+            past_time_clientDetails.value = ar2;
+        }
 
 
         if (data) {
@@ -91,7 +91,10 @@ onUnmounted(() => {
 <template>
 
     <div class="px-8 py-8 pageContainer">
-
+        <div>
+            {{ client_details_Latency }}
+            {{ max_client_details_latency }}
+        </div>
         <div>
             <p class="table-heading">CPU USAGE </p>
             <LightWeightChart v-if="serverData['CPU']" :Chartdata="{ 'data': serverData['CPU'] }" />

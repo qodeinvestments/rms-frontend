@@ -601,101 +601,102 @@ const combined_order = [
   }),
 
 ]
-const combined_trades = [columnHelper.accessor(row => row.trade_id, {
-  id: 'trade_id',
-  cell: info => info.getValue(),
-  header: () => 'trade_id',
-}),
-columnHelper.accessor(row => row.uid, {
-  id: 'uid',
-  cell: info => info.getValue(),
-  header: () => 'uid',
-}),
-columnHelper.accessor(row => row.timestamp, {
-  id: 'timestamp',
-  cell: info => info.getValue(),
-  header: () => 'timestamp',
-}),
-columnHelper.accessor(row => row.action, {
-  id: 'action',
-  cell: info => info.getValue(),
-  header: () => 'action',
-}),
-columnHelper.accessor(row => row.action_int, {
-  id: 'action_int',
-  cell: info => info.getValue(),
-  header: () => 'action_int',
-}),
-columnHelper.accessor(row => row.qty, {
-  id: 'qty',
-  cell: info => info.getValue(),
-  header: () => 'qty',
-}),
-columnHelper.accessor(row => row.qty_dir, {
-  id: 'qty_dir',
-  cell: info => info.getValue(),
-  header: () => 'qty_dir',
-}),
-columnHelper.accessor(row => row.symbol, {
-  id: 'symbol',
-  cell: info => info.getValue(),
-  header: () => 'symbol',
-}),
-columnHelper.accessor(row => row.price, {
-  id: 'price',
-  cell: info => info.getValue(),
-  header: () => 'price',
-}),
-columnHelper.accessor(row => row.price_provided, {
-  id: 'price_provided',
-  cell: info => info.getValue(),
-  header: () => 'price_provided',
-}),
-columnHelper.accessor(row => row.value, {
-  id: 'value',
-  cell: info => info.getValue(),
-  header: () => 'value',
-}),
-columnHelper.accessor(row => row.buy_value, {
-  id: 'buy_value',
-  cell: info => info.getValue(),
-  header: () => 'buy_value',
-}),
-columnHelper.accessor(row => row.sell_value, {
-  id: 'sell_value',
-  cell: info => info.getValue(),
-  header: () => 'sell_value',
-}),
-columnHelper.accessor(row => row.system_timestamp, {
-  id: 'system_timestamp',
-  cell: info => info.getValue(),
-  header: () => 'system_timestamp',
-}),
-columnHelper.accessor(row => row.note, {
-  id: 'note',
-  cell: info => info.getValue(),
-  header: () => 'note',
-}),
-columnHelper.accessor(row => row.quantity, {
-  id: 'quantity',
-  cell: info => info.getValue(),
-  header: () => 'quantity',
-}),
-columnHelper.accessor(row => row.basket, {
-  id: 'basket',
-  cell: info => info.getValue(),
-  header: () => 'basket',
-}),
-columnHelper.accessor(row => row.qty_multiplier, {
-  id: 'qty_multiplier',
-  cell: info => info.getValue(),
-  header: () => 'qty_multiplier',
-}),
-columnHelper.accessor(row => row.effective_qty, {
-  id: 'effective_qty',
-  cell: info => info.getValue(),
-  header: () => 'effective_qty',
-}),
+const combined_trades = [
+  columnHelper.accessor(row => row.trade_id, {
+    id: 'trade_id',
+    cell: info => info.getValue(),
+    header: () => 'trade_id',
+  }),
+  columnHelper.accessor(row => row.uid, {
+    id: 'uid',
+    cell: info => info.getValue(),
+    header: () => 'uid',
+  }),
+  columnHelper.accessor(row => row.timestamp, {
+    id: 'timestamp',
+    cell: info => info.getValue(),
+    header: () => 'timestamp',
+  }),
+  columnHelper.accessor(row => row.action, {
+    id: 'action',
+    cell: info => info.getValue(),
+    header: () => 'action',
+  }),
+  columnHelper.accessor(row => row.action_int, {
+    id: 'action_int',
+    cell: info => info.getValue(),
+    header: () => 'action_int',
+  }),
+  columnHelper.accessor(row => row.qty, {
+    id: 'qty',
+    cell: info => info.getValue(),
+    header: () => 'qty',
+  }),
+  columnHelper.accessor(row => row.qty_dir, {
+    id: 'qty_dir',
+    cell: info => info.getValue(),
+    header: () => 'qty_dir',
+  }),
+  columnHelper.accessor(row => row.symbol, {
+    id: 'symbol',
+    cell: info => info.getValue(),
+    header: () => 'symbol',
+  }),
+  columnHelper.accessor(row => row.price, {
+    id: 'price',
+    cell: info => info.getValue(),
+    header: () => 'price',
+  }),
+  columnHelper.accessor(row => row.price_provided, {
+    id: 'price_provided',
+    cell: info => info.getValue(),
+    header: () => 'price_provided',
+  }),
+  columnHelper.accessor(row => row.value, {
+    id: 'value',
+    cell: info => info.getValue(),
+    header: () => 'value',
+  }),
+  columnHelper.accessor(row => row.buy_value, {
+    id: 'buy_value',
+    cell: info => info.getValue(),
+    header: () => 'buy_value',
+  }),
+  columnHelper.accessor(row => row.sell_value, {
+    id: 'sell_value',
+    cell: info => info.getValue(),
+    header: () => 'sell_value',
+  }),
+  columnHelper.accessor(row => row.system_timestamp, {
+    id: 'system_timestamp',
+    cell: info => info.getValue(),
+    header: () => 'system_timestamp',
+  }),
+  columnHelper.accessor(row => row.note, {
+    id: 'note',
+    cell: info => info.getValue(),
+    header: () => 'note',
+  }),
+  // columnHelper.accessor(row => row.quantity, {
+  //   id: 'quantity',
+  //   cell: info => info.getValue(),
+  //   header: () => 'quantity',
+  // }),
+  columnHelper.accessor(row => row.basket, {
+    id: 'basket',
+    cell: info => info.getValue(),
+    header: () => 'basket',
+  }),
+  columnHelper.accessor(row => row.qty_multiplier, {
+    id: 'qty_multiplier',
+    cell: info => info.getValue(),
+    header: () => 'qty_multiplier',
+  }),
+  columnHelper.accessor(row => row.effective_qty, {
+    id: 'effective_qty',
+    cell: info => info.getValue(),
+    header: () => 'effective_qty',
+  }),
 ]
 let eventSource = null
 const client_BackendData = ref([])
@@ -903,21 +904,21 @@ onUnmounted(() => {
       <TanStackTestTable :data="book" :columns="live_trade_book_columns" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
-    <div class="my-8" v-if="showOnPage === 'Order'">
+    <div class="my-8" v-if="book && showOnPage === 'Order'">
       <p class="table-heading">Complete Order Book</p>
       <TanStackTestTable :data="book" :columns="live_order_book_columns" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
-    <div class="my-8" v-if="showOnPage === 'Combined DF'">
+    <div class="my-8" v-if="book && showOnPage === 'Combined DF'">
       <p class="table-heading">Combined DF</p>
       <TanStackTestTable :data="book" :columns="combined_df_columns" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
-    <div class="my-8" v-if="showOnPage === 'Combined Orders'">
+    <div class="my-8" v-if="book && showOnPage === 'Combined Orders'">
       <p class="table-heading">Combined Orders</p>
       <TanStackTestTable :data="book" :columns="combined_order" :hasColor="[]" :navigateTo="[]" :showPagination=true />
     </div>
-    <div class="my-8" v-if="showOnPage === 'Combined Trades'">
+    <div class="my-8" v-if="book && showOnPage === 'Combined Trades'">
       <p class="table-heading">Combined Trades</p>
       <TanStackTestTable :data="book" :columns="combined_trades" :hasColor="[]" :navigateTo="[]" :showPagination=true />
     </div>
