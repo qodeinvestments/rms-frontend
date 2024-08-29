@@ -38,7 +38,11 @@ const props = defineProps({
     }
 })
 
+const tellnav = (data) => {
+    return props.navigateTo[data.id.substring(2)];
+}
 const checkNavigate = (data) => {
+
     if (props.navigateTo[data.id.substring(2)]) {
         let link = props.navigateTo[data.id.substring(2)] + data.getValue()
         router.push(link);
@@ -165,6 +169,7 @@ onUnmounted(() => {
                                         'sticky-column': index === 0,
                                         'red': cell.getValue() < 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
                                         'green': cell.getValue() > 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
+                                        'cursorpointer': tellnav(cell)
                                         // 'redbackground': hasRowcolor && hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]),
                                         // 'greenbackground': hasRowcolor && !(hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]))
                                     }" @click="checkNavigate(cell)">
@@ -250,6 +255,10 @@ onUnmounted(() => {
 
 .greenbackground {
     background-color: rgb(217, 246, 217) !important;
+}
+
+.cursorpointer {
+    cursor: pointer;
 }
 
 table {
