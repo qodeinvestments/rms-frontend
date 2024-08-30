@@ -551,24 +551,24 @@ onUnmounted(() => {
           RAM : {{ serverData['RAM'][serverData['RAM'].length - 1].value }} %
         </span>
         <span v-if="serverData['Redis']">
-          Redis used_memory : {{ serverData['Redis'][serverData['Redis'].length - 1].used_memory_gb.toFixed(2) }} GB
+          Redis Used : {{ serverData['Redis'][serverData['Redis'].length - 1].used_memory_gb.toFixed(2) }} GB
         </span>
         <span v-if="serverData['Redis']">
-          Redis used_memory_peak : {{ serverData['Redis'][serverData['Redis'].length - 1].used_memory_peak_gb.toFixed(2)
+          Redis Used Peak : {{ serverData['Redis'][serverData['Redis'].length - 1].used_memory_peak_gb.toFixed(2)
           }} GB
         </span>
         <span v-if="serverData['Redis']">
-          Redis total_system_memory : {{ serverData['Redis'][serverData['Redis'].length -
+          System Memory : {{ serverData['Redis'][serverData['Redis'].length -
             1].total_system_memory_gb.toFixed(2)
           }} GB
         </span>
         <span v-if="serverData['Redis']">
-          Redis memory_percent : {{ serverData['Redis'][serverData['Redis'].length -
+          Redis Used Percentage : {{ serverData['Redis'][serverData['Redis'].length -
             1].memory_percent.toFixed(2)
           }} %
         </span>
         <span v-if="serverData['Redis']">
-          Redis memory_percent : {{ serverData['Redis'][serverData['Redis'].length -
+          Redis Allocated Memory : {{ serverData['Redis'][serverData['Redis'].length -
             1].available_memory_gb.toFixed(2)
           }} GB
         </span>
@@ -686,7 +686,7 @@ html {
 
 .timeDiv {
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   display: flex;
   flex-direction: column;
   width: 100%;
