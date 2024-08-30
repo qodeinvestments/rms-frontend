@@ -19,6 +19,7 @@ import LightWeightChart from './LightWeightChart.vue';
 const route = useRoute();
 const user_data = ref('')
 const name = ref('');
+const broker = ref('')
 const columnHelper = createColumnHelper()
 const live_trade_book_columns_zerodha = [
 
@@ -1346,6 +1347,7 @@ const handleMessage = (message) => {
     if (message.client_data === undefined) return;
     client_BackendData.value = message.client_data
     let result = client_BackendData.value.find(client => client.name === name.value);
+    broker.value = result.broker;
     if (result) {
       user_data.value = result;
       data.value = [{
@@ -1524,54 +1526,54 @@ onUnmounted(() => {
       <TanStackTestTable :data="book" :columns="rms_df_columns" :hasColor="['pnl']" :navigateTo="[]"
         :showPagination=true />
     </div>
-    <div class="my-8" v-if="book && showOnPage === 'TradeBook'">
+    <div class="my-8" v-if="book && showOnPage === 'TradeBook' && broker === 'xts'">
       <p class="table-heading">Complete Trade Book XTS</p>
       <TanStackTestTable :data="book" :columns="live_trade_book_columns_xts" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
-    <div class="my-8" v-if="book && showOnPage === 'TradeBook'">
+    <div class="my-8" v-if="book && showOnPage === 'TradeBook' && broker === 'zerodha'">
       <p class="table-heading">Complete Trade Book Zerodha</p>
       <TanStackTestTable :data="book" :columns="live_trade_book_columns_zerodha" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
 
-    <div class="my-8" v-if="book && showOnPage === 'Order'">
+    <div class="my-8" v-if="book && showOnPage === 'Order' && broker === 'xts'">
       <p class="table-heading">Complete Order Book XTS</p>
       <TanStackTestTable :data="book" :columns="live_order_book_columns_xts" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
-    <div class="my-8" v-if="book && showOnPage === 'Order'">
+    <div class="my-8" v-if="book && showOnPage === 'Order' && broker === 'zerodha'">
       <p class="table-heading">Complete Order Book Zerodha</p>
       <TanStackTestTable :data="book" :columns="live_order_book_columns_zerodha" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
-    <div class="my-8" v-if="book && showOnPage === 'Combined DF'">
+    <div class="my-8" v-if="book && showOnPage === 'Combined DF' && broker === 'xts'">
       <p class="table-heading">Combined DF XTS</p>
       <TanStackTestTable :data="book" :columns="combined_df_columns_xts" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
-    <div class="my-8" v-if="book && showOnPage === 'Combined DF'">
+    <div class="my-8" v-if="book && showOnPage === 'Combined DF' && broker === 'zerodha'">
       <p class="table-heading">Combined DF Zerodha</p>
       <TanStackTestTable :data="book" :columns="combined_df_columns_zerodha" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
-    <div class="my-8" v-if="book && showOnPage === 'Combined Orders'">
+    <div class="my-8" v-if="book && showOnPage === 'Combined Orders' && broker === 'xts'">
       <p class="table-heading">Combined Orders XTS</p>
       <TanStackTestTable :data="book" :columns="combined_order_xts" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
-    <div class="my-8" v-if="book && showOnPage === 'Combined Orders'">
+    <div class="my-8" v-if="book && showOnPage === 'Combined Orders' && broker === 'zerodha'">
       <p class="table-heading">Combined Orders Zerodha</p>
       <TanStackTestTable :data="book" :columns="combined_order_zerodha" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
 
-    <div class="my-8" v-if="book && showOnPage === 'Combined Trades'">
+    <div class="my-8" v-if="book && showOnPage === 'Combined Trades' && broker === 'xts'">
       <p class="table-heading">Combined Trades XTS</p>
       <TanStackTestTable :data="book" :columns="combined_trades_xts" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
-    <div class="my-8" v-if="book && showOnPage === 'Combined Trades'">
+    <div class="my-8" v-if="book && showOnPage === 'Combined Trades' && broker === 'zerodha'">
       <p class="table-heading">Combined Trades Zerodha</p>
       <TanStackTestTable :data="book" :columns="combined_trades_zerodha" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
