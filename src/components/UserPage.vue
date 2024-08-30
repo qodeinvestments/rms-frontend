@@ -271,6 +271,11 @@ const live_order_book_columns_xts = [
   }),
 ]
 const columns = [
+  columnHelper.accessor(row => row.system_tag, {
+    id: 'system_tag',
+    cell: info => info.getValue(),
+    header: () => 'system_tag',
+  }),
   columnHelper.accessor(row => row.AccountName, {
     id: 'AccountName',
     cell: info => info.getValue(),
@@ -383,6 +388,36 @@ const columns = [
   }),
 ]
 const combined_df_columns_zerodha = [
+  columnHelper.accessor(row => row.system_tag, {
+    id: 'system_tag',
+    cell: info => info.getValue(),
+    header: () => 'system_tag',
+  }),
+  columnHelper.accessor(row => row.place_order_lag, {
+    id: 'place_order_lag',
+    cell: info => info.getValue(),
+    header: () => 'place_order_lag',
+  }),
+  columnHelper.accessor(row => row.timestamp, {
+    id: 'timestamp',
+    cell: info => info.getValue(),
+    header: () => 'timestamp',
+  }),
+  columnHelper.accessor(row => row.system_timestamp, {
+    id: 'system_timestamp',
+    cell: info => info.getValue(),
+    header: () => 'system_timestamp',
+  }),
+  columnHelper.accessor(row => row.symbol, {
+    id: 'symbol',
+    cell: info => info.getValue(),
+    header: () => 'symbol',
+  }),
+  columnHelper.accessor(row => row.tradingsymbol, {
+    id: 'tradingsymbol',
+    cell: info => info.getValue(),
+    header: () => 'tradingsymbol',
+  }),
   columnHelper.accessor(row => row.trade_id, {
     id: 'trade_id',
     cell: info => info.getValue(),
@@ -393,11 +428,7 @@ const combined_df_columns_zerodha = [
     cell: info => info.getValue(),
     header: () => 'uid',
   }),
-  columnHelper.accessor(row => row.timestamp, {
-    id: 'timestamp',
-    cell: info => info.getValue(),
-    header: () => 'timestamp',
-  }),
+
   columnHelper.accessor(row => row.action, {
     id: 'action',
     cell: info => info.getValue(),
@@ -418,11 +449,7 @@ const combined_df_columns_zerodha = [
     cell: info => info.getValue(),
     header: () => 'qty_dir',
   }),
-  columnHelper.accessor(row => row.symbol, {
-    id: 'symbol',
-    cell: info => info.getValue(),
-    header: () => 'symbol',
-  }),
+
   columnHelper.accessor(row => row.price_x, {
     id: 'price_x',
     cell: info => info.getValue(),
@@ -443,11 +470,7 @@ const combined_df_columns_zerodha = [
     cell: info => info.getValue(),
     header: () => 'sell_value',
   }),
-  columnHelper.accessor(row => row.system_timestamp, {
-    id: 'system_timestamp',
-    cell: info => info.getValue(),
-    header: () => 'system_timestamp',
-  }),
+
   columnHelper.accessor(row => row.note, {
     id: 'note',
     cell: info => info.getValue(),
@@ -503,11 +526,7 @@ const combined_df_columns_zerodha = [
     cell: info => info.getValue(),
     header: () => 'exchange',
   }),
-  columnHelper.accessor(row => row.tradingsymbol, {
-    id: 'tradingsymbol',
-    cell: info => info.getValue(),
-    header: () => 'tradingsymbol',
-  }),
+
   columnHelper.accessor(row => row.order_type, {
     id: 'order_type',
     cell: info => info.getValue(),
@@ -588,16 +607,7 @@ const combined_df_columns_zerodha = [
     cell: info => info.getValue(),
     header: () => 'effective_cal_sum',
   }),
-  columnHelper.accessor(row => row.place_order_lag, {
-    id: 'place_order_lag',
-    cell: info => info.getValue(),
-    header: () => 'place_order_lag',
-  }),
-  columnHelper.accessor(row => row.system_tag, {
-    id: 'system_tag',
-    cell: info => info.getValue(),
-    header: () => 'system_tag',
-  }),
+
 ]
 
 const combined_df_columns_xts = [
