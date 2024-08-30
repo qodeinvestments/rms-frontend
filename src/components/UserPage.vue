@@ -271,11 +271,7 @@ const live_order_book_columns_xts = [
   }),
 ]
 const columns = [
-  columnHelper.accessor(row => row.system_tag, {
-    id: 'system_tag',
-    cell: info => info.getValue(),
-    header: () => 'system_tag',
-  }),
+
   columnHelper.accessor(row => row.AccountName, {
     id: 'AccountName',
     cell: info => info.getValue(),
