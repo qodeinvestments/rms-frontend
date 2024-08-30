@@ -389,6 +389,11 @@ const combined_df_columns_zerodha = [
     cell: info => info.getValue(),
     header: () => 'system_tag',
   }),
+  columnHelper.accessor(row => row.signal_lag, {
+    id: 'signal_lag',
+    cell: info => info.getValue(),
+    header: () => 'signal_lag',
+  }),
   columnHelper.accessor(row => row.place_order_lag, {
     id: 'place_order_lag',
     cell: info => info.getValue(),
@@ -612,6 +617,12 @@ const combined_df_columns_xts = [
     cell: info => info.getValue(),
     header: () => 'system_tag',
   }),
+  columnHelper.accessor(row => row.signal_lag, {
+    id: 'signal_lag',
+    cell: info => info.getValue(),
+    header: () => 'signal_lag',
+  }),
+
 
   columnHelper.accessor(row => row.place_order_lag, {
     id: 'place_order_lag',

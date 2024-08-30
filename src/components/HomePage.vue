@@ -550,6 +550,29 @@ onUnmounted(() => {
         <span v-if="serverData['RAM']">
           RAM : {{ serverData['RAM'][serverData['RAM'].length - 1].value }} %
         </span>
+        <span v-if="serverData['Redis']">
+          Redis used_memory : {{ serverData['Redis'][serverData['Redis'].length - 1].used_memory_gb.toFixed(2) }} GB
+        </span>
+        <span v-if="serverData['Redis']">
+          Redis used_memory_peak : {{ serverData['Redis'][serverData['Redis'].length - 1].used_memory_peak_gb.toFixed(2)
+          }} GB
+        </span>
+        <span v-if="serverData['Redis']">
+          Redis total_system_memory : {{ serverData['Redis'][serverData['Redis'].length -
+            1].total_system_memory_gb.toFixed(2)
+          }} GB
+        </span>
+        <span v-if="serverData['Redis']">
+          Redis memory_percent : {{ serverData['Redis'][serverData['Redis'].length -
+            1].memory_percent.toFixed(2)
+          }} %
+        </span>
+        <span v-if="serverData['Redis']">
+          Redis memory_percent : {{ serverData['Redis'][serverData['Redis'].length -
+            1].available_memory_gb.toFixed(2)
+          }} GB
+        </span>
+
       </p>
       <WarningSignal :signals="pulse_signal" :latency="Latency" :max_latency="max_latency" />
     </div>
