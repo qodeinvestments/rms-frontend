@@ -1524,8 +1524,7 @@ onUnmounted(() => {
       <p> Max Client Detail Latency :<span class="latencyvalue"> {{ max_client_details_latency }}</span></p>
     </div>
     <div class="navContainer">
-      <NavBar
-        :navColumns="['Positions', 'Order', 'Holdings', 'TradeBook', 'Combined DF', 'Combined Orders', 'Combined Trades']"
+      <NavBar :navColumns="['Positions', 'Order', 'TradeBook', 'Combined DF', 'Combined Orders', 'Combined Trades']"
         @column-clicked="handleColumnClick" :colorColumns="[]" />
     </div>
 
