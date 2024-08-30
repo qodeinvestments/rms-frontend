@@ -20,7 +20,56 @@ const route = useRoute();
 const user_data = ref('')
 const name = ref('');
 const columnHelper = createColumnHelper()
-const live_trade_book_columns = [
+const live_trade_book_columns_zerodha = [
+
+  columnHelper.accessor(row => row.exchange, {
+    id: 'exchange',
+    cell: info => info.getValue(),
+    header: () => 'exchange',
+  }),
+  columnHelper.accessor(row => row.tradingsymbol, {
+    id: 'tradingsymbol',
+    cell: info => info.getValue(),
+    header: () => 'tradingsymbol',
+  }),
+  columnHelper.accessor(row => row.product, {
+    id: 'product',
+    cell: info => info.getValue(),
+    header: () => 'product',
+  }),
+  columnHelper.accessor(row => row.average_price, {
+    id: 'average_price',
+    cell: info => info.getValue(),
+    header: () => 'average_price',
+  }),
+  columnHelper.accessor(row => row.quantity, {
+    id: 'quantity',
+    cell: info => info.getValue(),
+    header: () => 'quantity',
+  }),
+  columnHelper.accessor(row => row.transaction_type, {
+    id: 'transaction_type',
+    cell: info => info.getValue(),
+    header: () => 'transaction_type',
+  }),
+  columnHelper.accessor(row => row.fill_timestamp, {
+    id: 'fill_timestamp',
+    cell: info => info.getValue(),
+    header: () => 'fill_timestamp',
+  }),
+  columnHelper.accessor(row => row.order_timestamp, {
+    id: 'order_timestamp',
+    cell: info => info.getValue(),
+    header: () => 'order_timestamp',
+  }),
+  columnHelper.accessor(row => row.exchange_timestamp, {
+    id: 'exchange_timestamp',
+    cell: info => info.getValue(),
+    header: () => 'exchange_timestamp',
+  }),
+
+]
+const live_trade_book_columns_xts = [
   columnHelper.accessor(row => row.OrderGeneratedDateTime, {
     id: 'OrderGeneratedDateTime',
     cell: info => info.getValue(),
@@ -52,7 +101,123 @@ const live_trade_book_columns = [
     header: () => 'OrderQuantity',
   }),
 ]
-const live_order_book_columns = [
+const live_order_book_columns_zerodha = [columnHelper.accessor(row => row.status, {
+  id: 'status',
+  cell: info => info.getValue(),
+  header: () => 'status',
+}),
+columnHelper.accessor(row => row.order_timestamp, {
+  id: 'order_timestamp',
+  cell: info => info.getValue(),
+  header: () => 'order_timestamp',
+}),
+columnHelper.accessor(row => row.exchange_update_timestamp, {
+  id: 'exchange_update_timestamp',
+  cell: info => info.getValue(),
+  header: () => 'exchange_update_timestamp',
+}),
+columnHelper.accessor(row => row.exchange_timestamp, {
+  id: 'exchange_timestamp',
+  cell: info => info.getValue(),
+  header: () => 'exchange_timestamp',
+}),
+columnHelper.accessor(row => row.variety, {
+  id: 'variety',
+  cell: info => info.getValue(),
+  header: () => 'variety',
+}),
+columnHelper.accessor(row => row.modified, {
+  id: 'modified',
+  cell: info => info.getValue(),
+  header: () => 'modified',
+}),
+columnHelper.accessor(row => row.exchange, {
+  id: 'exchange',
+  cell: info => info.getValue(),
+  header: () => 'exchange',
+}),
+columnHelper.accessor(row => row.tradingsymbol, {
+  id: 'tradingsymbol',
+  cell: info => info.getValue(),
+  header: () => 'tradingsymbol',
+}),
+columnHelper.accessor(row => row.order_type, {
+  id: 'order_type',
+  cell: info => info.getValue(),
+  header: () => 'order_type',
+}),
+columnHelper.accessor(row => row.transaction_type, {
+  id: 'transaction_type',
+  cell: info => info.getValue(),
+  header: () => 'transaction_type',
+}),
+columnHelper.accessor(row => row.validity, {
+  id: 'validity',
+  cell: info => info.getValue(),
+  header: () => 'validity',
+}),
+columnHelper.accessor(row => row.validity_ttl, {
+  id: 'validity_ttl',
+  cell: info => info.getValue(),
+  header: () => 'validity_ttl',
+}),
+columnHelper.accessor(row => row.product, {
+  id: 'product',
+  cell: info => info.getValue(),
+  header: () => 'product',
+}),
+columnHelper.accessor(row => row.quantity, {
+  id: 'quantity',
+  cell: info => info.getValue(),
+  header: () => 'quantity',
+}),
+columnHelper.accessor(row => row.disclosed_quantity, {
+  id: 'disclosed_quantity',
+  cell: info => info.getValue(),
+  header: () => 'disclosed_quantity',
+}),
+columnHelper.accessor(row => row.price, {
+  id: 'price',
+  cell: info => info.getValue(),
+  header: () => 'price',
+}),
+columnHelper.accessor(row => row.trigger_price, {
+  id: 'trigger_price',
+  cell: info => info.getValue(),
+  header: () => 'trigger_price',
+}),
+columnHelper.accessor(row => row.average_price, {
+  id: 'average_price',
+  cell: info => info.getValue(),
+  header: () => 'average_price',
+}),
+columnHelper.accessor(row => row.filled_quantity, {
+  id: 'filled_quantity',
+  cell: info => info.getValue(),
+  header: () => 'filled_quantity',
+}),
+columnHelper.accessor(row => row.pending_quantity, {
+  id: 'pending_quantity',
+  cell: info => info.getValue(),
+  header: () => 'pending_quantity',
+}),
+columnHelper.accessor(row => row.cancelled_quantity, {
+  id: 'cancelled_quantity',
+  cell: info => info.getValue(),
+  header: () => 'cancelled_quantity',
+}),
+columnHelper.accessor(row => row.market_protection, {
+  id: 'market_protection',
+  cell: info => info.getValue(),
+  header: () => 'market_protection',
+}),
+columnHelper.accessor(row => row.status_message, {
+  id: 'status_message',
+  cell: info => info.getValue(),
+  header: () => 'status_message',
+}),
+]
+const live_order_book_columns_xts = [
   columnHelper.accessor(row => row.OrderGeneratedDateTime, {
     id: 'OrderGeneratedDateTime',
     cell: info => info.getValue(),
@@ -216,7 +381,225 @@ const columns = [
     header: () => 'HoldingsCount',
   }),
 ]
-const combined_df_columns = [
+const combined_df_columns_zerodha = [
+  columnHelper.accessor(row => row.trade_id, {
+    id: 'trade_id',
+    cell: info => info.getValue(),
+    header: () => 'trade_id',
+  }),
+  columnHelper.accessor(row => row.uid, {
+    id: 'uid',
+    cell: info => info.getValue(),
+    header: () => 'uid',
+  }),
+  columnHelper.accessor(row => row.timestamp, {
+    id: 'timestamp',
+    cell: info => info.getValue(),
+    header: () => 'timestamp',
+  }),
+  columnHelper.accessor(row => row.action, {
+    id: 'action',
+    cell: info => info.getValue(),
+    header: () => 'action',
+  }),
+  columnHelper.accessor(row => row.action_int, {
+    id: 'action_int',
+    cell: info => info.getValue(),
+    header: () => 'action_int',
+  }),
+  columnHelper.accessor(row => row.qty, {
+    id: 'qty',
+    cell: info => info.getValue(),
+    header: () => 'qty',
+  }),
+  columnHelper.accessor(row => row.qty_dir, {
+    id: 'qty_dir',
+    cell: info => info.getValue(),
+    header: () => 'qty_dir',
+  }),
+  columnHelper.accessor(row => row.symbol, {
+    id: 'symbol',
+    cell: info => info.getValue(),
+    header: () => 'symbol',
+  }),
+  columnHelper.accessor(row => row.price_x, {
+    id: 'price_x',
+    cell: info => info.getValue(),
+    header: () => 'price_x',
+  }),
+  columnHelper.accessor(row => row.value, {
+    id: 'value',
+    cell: info => info.getValue(),
+    header: () => 'value',
+  }),
+  columnHelper.accessor(row => row.buy_value, {
+    id: 'buy_value',
+    cell: info => info.getValue(),
+    header: () => 'buy_value',
+  }),
+  columnHelper.accessor(row => row.sell_value, {
+    id: 'sell_value',
+    cell: info => info.getValue(),
+    header: () => 'sell_value',
+  }),
+  columnHelper.accessor(row => row.system_timestamp, {
+    id: 'system_timestamp',
+    cell: info => info.getValue(),
+    header: () => 'system_timestamp',
+  }),
+  columnHelper.accessor(row => row.note, {
+    id: 'note',
+    cell: info => info.getValue(),
+    header: () => 'note',
+  }),
+  columnHelper.accessor(row => row.basket, {
+    id: 'basket',
+    cell: info => info.getValue(),
+    header: () => 'basket',
+  }),
+  columnHelper.accessor(row => row.qty_multiplier, {
+    id: 'qty_multiplier',
+    cell: info => info.getValue(),
+    header: () => 'qty_multiplier',
+  }),
+  columnHelper.accessor(row => row.effective_qty, {
+    id: 'effective_qty',
+    cell: info => info.getValue(),
+    header: () => 'effective_qty',
+  }),
+  columnHelper.accessor(row => row.status, {
+    id: 'status',
+    cell: info => info.getValue(),
+    header: () => 'status',
+  }),
+  columnHelper.accessor(row => row.order_timestamp, {
+    id: 'order_timestamp',
+    cell: info => info.getValue(),
+    header: () => 'order_timestamp',
+  }),
+  columnHelper.accessor(row => row.exchange_update_timestamp, {
+    id: 'exchange_update_timestamp',
+    cell: info => info.getValue(),
+    header: () => 'exchange_update_timestamp',
+  }),
+  columnHelper.accessor(row => row.exchange_timestamp, {
+    id: 'exchange_timestamp',
+    cell: info => info.getValue(),
+    header: () => 'exchange_timestamp',
+  }),
+  columnHelper.accessor(row => row.variety, {
+    id: 'variety',
+    cell: info => info.getValue(),
+    header: () => 'variety',
+  }),
+  columnHelper.accessor(row => row.modified, {
+    id: 'modified',
+    cell: info => info.getValue(),
+    header: () => 'modified',
+  }),
+  columnHelper.accessor(row => row.exchange, {
+    id: 'exchange',
+    cell: info => info.getValue(),
+    header: () => 'exchange',
+  }),
+  columnHelper.accessor(row => row.tradingsymbol, {
+    id: 'tradingsymbol',
+    cell: info => info.getValue(),
+    header: () => 'tradingsymbol',
+  }),
+  columnHelper.accessor(row => row.order_type, {
+    id: 'order_type',
+    cell: info => info.getValue(),
+    header: () => 'order_type',
+  }),
+  columnHelper.accessor(row => row.transaction_type, {
+    id: 'transaction_type',
+    cell: info => info.getValue(),
+    header: () => 'transaction_type',
+  }),
+  columnHelper.accessor(row => row.validity, {
+    id: 'validity',
+    cell: info => info.getValue(),
+    header: () => 'validity',
+  }),
+  columnHelper.accessor(row => row.validity_ttl, {
+    id: 'validity_ttl',
+    cell: info => info.getValue(),
+    header: () => 'validity_ttl',
+  }),
+  columnHelper.accessor(row => row.product, {
+    id: 'product',
+    cell: info => info.getValue(),
+    header: () => 'product',
+  }),
+  columnHelper.accessor(row => row.quantity_y, {
+    id: 'quantity_y',
+    cell: info => info.getValue(),
+    header: () => 'quantity_y',
+  }),
+  columnHelper.accessor(row => row.disclosed_quantity, {
+    id: 'disclosed_quantity',
+    cell: info => info.getValue(),
+    header: () => 'disclosed_quantity',
+  }),
+  columnHelper.accessor(row => row.price_y, {
+    id: 'price_y',
+    cell: info => info.getValue(),
+    header: () => 'price_y',
+  }),
+  columnHelper.accessor(row => row.trigger_price, {
+    id: 'trigger_price',
+    cell: info => info.getValue(),
+    header: () => 'trigger_price',
+  }),
+  columnHelper.accessor(row => row.average_price, {
+    id: 'average_price',
+    cell: info => info.getValue(),
+    header: () => 'average_price',
+  }),
+  columnHelper.accessor(row => row.filled_quantity, {
+    id: 'filled_quantity',
+    cell: info => info.getValue(),
+    header: () => 'filled_quantity',
+  }),
+  columnHelper.accessor(row => row.pending_quantity, {
+    id: 'pending_quantity',
+    cell: info => info.getValue(),
+    header: () => 'pending_quantity',
+  }),
+  columnHelper.accessor(row => row.cancelled_quantity, {
+    id: 'cancelled_quantity',
+    cell: info => info.getValue(),
+    header: () => 'cancelled_quantity',
+  }),
+  columnHelper.accessor(row => row.market_protection, {
+    id: 'market_protection',
+    cell: info => info.getValue(),
+    header: () => 'market_protection',
+  }),
+  columnHelper.accessor(row => row.OrderQuantityDir, {
+    id: 'OrderQuantityDir',
+    cell: info => info.getValue(),
+    header: () => 'OrderQuantityDir',
+  }),
+  columnHelper.accessor(row => row.effective_cal_sum, {
+    id: 'effective_cal_sum',
+    cell: info => info.getValue(),
+    header: () => 'effective_cal_sum',
+  }),
+  columnHelper.accessor(row => row.place_order_lag, {
+    id: 'place_order_lag',
+    cell: info => info.getValue(),
+    header: () => 'place_order_lag',
+  }),
+  columnHelper.accessor(row => row.system_tag, {
+    id: 'system_tag',
+    cell: info => info.getValue(),
+    header: () => 'system_tag',
+  }),
+]
+
+const combined_df_columns_xts = [
   columnHelper.accessor(row => row.uid, {
     id: 'uid',
     cell: info => info.getValue(),
@@ -403,7 +786,146 @@ const rms_df_columns = [
     header: () => 'Turnover',
   }),
 ]
-const combined_order = [
+const combined_order_zerodha = [
+  columnHelper.accessor(row => row.status, {
+    id: 'status',
+    cell: info => info.getValue(),
+    header: () => 'status',
+  }),
+  columnHelper.accessor(row => row.status_message, {
+    id: 'status_message',
+    cell: info => info.getValue(),
+    header: () => 'status_message',
+  }),
+  columnHelper.accessor(row => row.status_message_raw, {
+    id: 'status_message_raw',
+    cell: info => info.getValue(),
+    header: () => 'status_message_raw',
+  }),
+  columnHelper.accessor(row => row.order_timestamp, {
+    id: 'order_timestamp',
+    cell: info => info.getValue(),
+    header: () => 'order_timestamp',
+  }),
+  columnHelper.accessor(row => row.exchange_update_timestamp, {
+    id: 'exchange_update_timestamp',
+    cell: info => info.getValue(),
+    header: () => 'exchange_update_timestamp',
+  }),
+  columnHelper.accessor(row => row.exchange_timestamp, {
+    id: 'exchange_timestamp',
+    cell: info => info.getValue(),
+    header: () => 'exchange_timestamp',
+  }),
+  columnHelper.accessor(row => row.variety, {
+    id: 'variety',
+    cell: info => info.getValue(),
+    header: () => 'variety',
+  }),
+  columnHelper.accessor(row => row.modified, {
+    id: 'modified',
+    cell: info => info.getValue(),
+    header: () => 'modified',
+  }),
+  columnHelper.accessor(row => row.exchange, {
+    id: 'exchange',
+    cell: info => info.getValue(),
+    header: () => 'exchange',
+  }),
+  columnHelper.accessor(row => row.tradingsymbol, {
+    id: 'tradingsymbol',
+    cell: info => info.getValue(),
+    header: () => 'tradingsymbol',
+  }),
+  columnHelper.accessor(row => row.order_type, {
+    id: 'order_type',
+    cell: info => info.getValue(),
+    header: () => 'order_type',
+  }),
+  columnHelper.accessor(row => row.transaction_type, {
+    id: 'transaction_type',
+    cell: info => info.getValue(),
+    header: () => 'transaction_type',
+  }),
+  columnHelper.accessor(row => row.validity, {
+    id: 'validity',
+    cell: info => info.getValue(),
+    header: () => 'validity',
+  }),
+  columnHelper.accessor(row => row.validity_ttl, {
+    id: 'validity_ttl',
+    cell: info => info.getValue(),
+    header: () => 'validity_ttl',
+  }),
+  columnHelper.accessor(row => row.product, {
+    id: 'product',
+    cell: info => info.getValue(),
+    header: () => 'product',
+  }),
+  columnHelper.accessor(row => row.quantity, {
+    id: 'quantity',
+    cell: info => info.getValue(),
+    header: () => 'quantity',
+  }),
+  columnHelper.accessor(row => row.disclosed_quantity, {
+    id: 'disclosed_quantity',
+    cell: info => info.getValue(),
+    header: () => 'disclosed_quantity',
+  }),
+  columnHelper.accessor(row => row.price, {
+    id: 'price',
+    cell: info => info.getValue(),
+    header: () => 'price',
+  }),
+  columnHelper.accessor(row => row.trigger_price, {
+    id: 'trigger_price',
+    cell: info => info.getValue(),
+    header: () => 'trigger_price',
+  }),
+  columnHelper.accessor(row => row.average_price, {
+    id: 'average_price',
+    cell: info => info.getValue(),
+    header: () => 'average_price',
+  }),
+  columnHelper.accessor(row => row.filled_quantity, {
+    id: 'filled_quantity',
+    cell: info => info.getValue(),
+    header: () => 'filled_quantity',
+  }),
+  columnHelper.accessor(row => row.pending_quantity, {
+    id: 'pending_quantity',
+    cell: info => info.getValue(),
+    header: () => 'pending_quantity',
+  }),
+  columnHelper.accessor(row => row.cancelled_quantity, {
+    id: 'cancelled_quantity',
+    cell: info => info.getValue(),
+    header: () => 'cancelled_quantity',
+  }),
+  columnHelper.accessor(row => row.market_protection, {
+    id: 'market_protection',
+    cell: info => info.getValue(),
+    header: () => 'market_protection',
+  }),
+  columnHelper.accessor(row => row.tag, {
+    id: 'tag',
+    cell: info => info.getValue(),
+    header: () => 'tag',
+  }),
+  columnHelper.accessor(row => row.tags, {
+    id: 'tags',
+    cell: info => info.getValue(),
+    header: () => 'tags',
+  }),
+  columnHelper.accessor(row => row.OrderQuantityDir, {
+    id: 'OrderQuantityDir',
+    cell: info => info.getValue(),
+    header: () => 'OrderQuantityDir',
+  }),
+
+
+]
+const combined_order_xts = [
   columnHelper.accessor(row => row.LoginID, {
     id: 'LoginID',
     cell: info => info.getValue(),
@@ -601,7 +1123,110 @@ const combined_order = [
   }),
 
 ]
-const combined_trades = [
+const combined_trades_zerodha = [
+  columnHelper.accessor(row => row.trade_id, {
+    id: 'trade_id',
+    cell: info => info.getValue(),
+    header: () => 'trade_id',
+  }),
+  columnHelper.accessor(row => row.uid, {
+    id: 'uid',
+    cell: info => info.getValue(),
+    header: () => 'uid',
+  }),
+  columnHelper.accessor(row => row.timestamp, {
+    id: 'timestamp',
+    cell: info => info.getValue(),
+    header: () => 'timestamp',
+  }),
+  columnHelper.accessor(row => row.action, {
+    id: 'action',
+    cell: info => info.getValue(),
+    header: () => 'action',
+  }),
+  columnHelper.accessor(row => row.action_int, {
+    id: 'action_int',
+    cell: info => info.getValue(),
+    header: () => 'action_int',
+  }),
+  columnHelper.accessor(row => row.symbol, {
+    id: 'symbol',
+    cell: info => info.getValue(),
+    header: () => 'symbol',
+  }),
+  columnHelper.accessor(row => row.price, {
+    id: 'price',
+    cell: info => info.getValue(),
+    header: () => 'price',
+  }),
+  columnHelper.accessor(row => row.price_provided, {
+    id: 'price_provided',
+    cell: info => info.getValue(),
+    header: () => 'price_provided',
+  }),
+  columnHelper.accessor(row => row.buy_value, {
+    id: 'buy_value',
+    cell: info => info.getValue(),
+    header: () => 'buy_value',
+  }),
+  columnHelper.accessor(row => row.sell_value, {
+    id: 'sell_value',
+    cell: info => info.getValue(),
+    header: () => 'sell_value',
+  }),
+  columnHelper.accessor(row => row.system_timestamp, {
+    id: 'system_timestamp',
+    cell: info => info.getValue(),
+    header: () => 'system_timestamp',
+  }),
+  columnHelper.accessor(row => row.note, {
+    id: 'note',
+    cell: info => info.getValue(),
+    header: () => 'note',
+  }),
+  columnHelper.accessor(row => row.quantity, {
+    id: 'quantity',
+    cell: info => info.getValue(),
+    header: () => 'quantity',
+  }),
+  columnHelper.accessor(row => row.qty, {
+    id: 'qty',
+    cell: info => info.getValue(),
+    header: () => 'qty',
+  }),
+  columnHelper.accessor(row => row.qty_dir, {
+    id: 'qty_dir',
+    cell: info => info.getValue(),
+    header: () => 'qty_dir',
+  }),
+  columnHelper.accessor(row => row.value, {
+    id: 'value',
+    cell: info => info.getValue(),
+    header: () => 'value',
+  }),
+  columnHelper.accessor(row => row.signal_number, {
+    id: 'signal_number',
+    cell: info => info.getValue(),
+    header: () => 'signal_number',
+  }),
+  columnHelper.accessor(row => row.basket, {
+    id: 'basket',
+    cell: info => info.getValue(),
+    header: () => 'basket',
+  }),
+  columnHelper.accessor(row => row.qty_multiplier, {
+    id: 'qty_multiplier',
+    cell: info => info.getValue(),
+    header: () => 'qty_multiplier',
+  }),
+  columnHelper.accessor(row => row.effective_qty, {
+    id: 'effective_qty',
+    cell: info => info.getValue(),
+    header: () => 'effective_qty',
+  }),
+
+]
+const combined_trades_xts = [
   columnHelper.accessor(row => row.trade_id, {
     id: 'trade_id',
     cell: info => info.getValue(),
@@ -900,27 +1525,56 @@ onUnmounted(() => {
         :showPagination=true />
     </div>
     <div class="my-8" v-if="book && showOnPage === 'TradeBook'">
-      <p class="table-heading">Complete Trade Book</p>
-      <TanStackTestTable :data="book" :columns="live_trade_book_columns" :hasColor="[]" :navigateTo="[]"
+      <p class="table-heading">Complete Trade Book XTS</p>
+      <TanStackTestTable :data="book" :columns="live_trade_book_columns_xts" :hasColor="[]" :navigateTo="[]"
+        :showPagination=true />
+    </div>
+    <div class="my-8" v-if="book && showOnPage === 'TradeBook'">
+      <p class="table-heading">Complete Trade Book Zerodha</p>
+      <TanStackTestTable :data="book" :columns="live_trade_book_columns_zerodha" :hasColor="[]" :navigateTo="[]"
+        :showPagination=true />
+    </div>
+
+    <div class="my-8" v-if="book && showOnPage === 'Order'">
+      <p class="table-heading">Complete Order Book XTS</p>
+      <TanStackTestTable :data="book" :columns="live_order_book_columns_xts" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
     <div class="my-8" v-if="book && showOnPage === 'Order'">
-      <p class="table-heading">Complete Order Book</p>
-      <TanStackTestTable :data="book" :columns="live_order_book_columns" :hasColor="[]" :navigateTo="[]"
+      <p class="table-heading">Complete Order Book Zerodha</p>
+      <TanStackTestTable :data="book" :columns="live_order_book_columns_zerodha" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
     <div class="my-8" v-if="book && showOnPage === 'Combined DF'">
-      <p class="table-heading">Combined DF</p>
-      <TanStackTestTable :data="book" :columns="combined_df_columns" :hasColor="[]" :navigateTo="[]"
+      <p class="table-heading">Combined DF XTS</p>
+      <TanStackTestTable :data="book" :columns="combined_df_columns_xts" :hasColor="[]" :navigateTo="[]"
+        :showPagination=true />
+    </div>
+    <div class="my-8" v-if="book && showOnPage === 'Combined DF'">
+      <p class="table-heading">Combined DF Zerodha</p>
+      <TanStackTestTable :data="book" :columns="combined_df_columns_zerodha" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
     <div class="my-8" v-if="book && showOnPage === 'Combined Orders'">
-      <p class="table-heading">Combined Orders</p>
-      <TanStackTestTable :data="book" :columns="combined_order" :hasColor="[]" :navigateTo="[]" :showPagination=true />
+      <p class="table-heading">Combined Orders XTS</p>
+      <TanStackTestTable :data="book" :columns="combined_order_xts" :hasColor="[]" :navigateTo="[]"
+        :showPagination=true />
+    </div>
+    <div class="my-8" v-if="book && showOnPage === 'Combined Orders'">
+      <p class="table-heading">Combined Orders Zerodha</p>
+      <TanStackTestTable :data="book" :columns="combined_order_zerodha" :hasColor="[]" :navigateTo="[]"
+        :showPagination=true />
+    </div>
+
+    <div class="my-8" v-if="book && showOnPage === 'Combined Trades'">
+      <p class="table-heading">Combined Trades XTS</p>
+      <TanStackTestTable :data="book" :columns="combined_trades_xts" :hasColor="[]" :navigateTo="[]"
+        :showPagination=true />
     </div>
     <div class="my-8" v-if="book && showOnPage === 'Combined Trades'">
-      <p class="table-heading">Combined Trades</p>
-      <TanStackTestTable :data="book" :columns="combined_trades" :hasColor="[]" :navigateTo="[]" :showPagination=true />
+      <p class="table-heading">Combined Trades Zerodha</p>
+      <TanStackTestTable :data="book" :columns="combined_trades_zerodha" :hasColor="[]" :navigateTo="[]"
+        :showPagination=true />
     </div>
   </div>
 </template>
