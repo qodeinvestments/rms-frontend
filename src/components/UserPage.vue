@@ -607,11 +607,12 @@ const combined_df_columns_zerodha = [
 ]
 
 const combined_df_columns_xts = [
-  columnHelper.accessor(row => row.uid, {
-    id: 'uid',
+  columnHelper.accessor(row => row.system_tag, {
+    id: 'system_tag',
     cell: info => info.getValue(),
-    header: () => 'uid'
+    header: () => 'system_tag',
   }),
+
   columnHelper.accessor(row => row.place_order_lag, {
     id: 'place_order_lag',
     cell: info => info.getValue(),
@@ -631,6 +632,11 @@ const combined_df_columns_xts = [
     id: 'system_timestamp',
     cell: info => info.getValue(),
     header: () => 'system_timestamp'
+  }),
+  columnHelper.accessor(row => row.uid, {
+    id: 'uid',
+    cell: info => info.getValue(),
+    header: () => 'uid'
   }),
   columnHelper.accessor(row => row.action, {
     id: 'action',
