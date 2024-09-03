@@ -56,7 +56,8 @@ const maxReconnectAttempts = 5
 const reconnectInterval = 5000 // 5 seconds
 const pingInterval = 30000 // 30 seconds
 const users = ref([])
-const user = ref()
+const user = ref('')
+const fulldata = ref()
 
 
 // Add watch for user changes
@@ -71,6 +72,8 @@ watch(user, (newUser) => {
 const handleMessage = (message) => {
     client_BackendData.value = message.client_data
     connection_BackendData.value = message.connection_data
+    if (message.connection_data)
+        fulldata.value = message.connection_data.position_mismatch;
     if (connection_BackendData.value != undefined) {
         updateDataForUser(user.value)
     }
@@ -195,17 +198,22 @@ onUnmounted(() => {
         <div class="userSelectContainer" v-if="users">
             <label class="table-heading" for="options">Select an User:</label>
             <select class="table-heading" id="options" v-model="user">
-                <option v-for="option in users" :key="option" :value="option">
+                <option v-for="option in users" :key="option" :value="option"
+                    :class="fulldata[option].length > 0 ? 'negativecolor' : ''">
                     {{ option }}
+
                 </option>
             </select>
         </div>
-        <div v-if="Object.keys(data).length > 0" class="mx-auto px-8 py-8">
+        <div v-if="user === ''" class="mx-auto py-8 negative">
+            <p class="table-heading">Select User !</p>
+        </div>
+        <div v-else-if="Object.keys(data).length > 0" class="mx-auto px-8 py-8">
             <p class="table-heading">Position MisMatch : {{ user }}</p>
             <TanStackTestTable :data="data" :columns="columns" :hasColor="[]" :navigateTo="{}" :showPagination="true"
                 :hasRowcolor="{}" />
-
         </div>
+
         <div v-else class="mx-auto px-8 py-8">
             <p class="table-heading">No Data</p>
         </div>
@@ -227,5 +235,9 @@ html {
     font-size: 22px;
     font-weight: 600;
     margin-left: 30px;
+}
+
+.negativecolor {
+    color: #d95858 !important;
 }
 </style>
