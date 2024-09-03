@@ -16,15 +16,25 @@ const columnHelper = createColumnHelper()
 
 const columns = [
 
-    columnHelper.accessor(row => row.type, {
-        id: 'Type',
+    columnHelper.accessor(row => row.symbol, {
+        id: 'Symbol',
         cell: info => info.getValue(),
-        header: () => 'Type',
+        header: () => 'Symbol',
     }),
-    columnHelper.accessor(row => row.value, {
-        id: 'value',
+    columnHelper.accessor(row => row['Signal Net'], {
+        id: 'Signal Net',
         cell: info => info.getValue(),
-        header: () => 'Value',
+        header: () => 'Signal Net',
+    }),
+    columnHelper.accessor(row => row['Live Net Positions'], {
+        id: 'Live Net Positions',
+        cell: info => info.getValue(),
+        header: () => 'Live Net Positions',
+    }),
+    columnHelper.accessor(row => row.Difference, {
+        id: 'Difference',
+        cell: info => info.getValue(),
+        header: () => 'Difference',
     }),
 
 ]
@@ -61,7 +71,6 @@ watch(user, (newUser) => {
 const handleMessage = (message) => {
     client_BackendData.value = message.client_data
     connection_BackendData.value = message.connection_data
-
     if (connection_BackendData.value != undefined) {
         updateDataForUser(user.value)
     }
@@ -72,14 +81,7 @@ const handleMessage = (message) => {
 const updateDataForUser = (selectedUser) => {
     if (connection_BackendData.value.position_mismatch && connection_BackendData.value.position_mismatch[selectedUser]) {
         let val = connection_BackendData.value.position_mismatch[selectedUser]
-        const result = {};
-        for (const key in val) {
-            result[key] = Object.entries(val[key]).map(([type, value]) => ({
-                type: type,
-                value
-            }));
-        }
-        data.value = result;
+        data.value = val;
     }
 }
 const updateData = () => {
@@ -170,13 +172,7 @@ const stopPingInterval = () => {
         pingIntervalId = null
     }
 }
-const formatTableName = (key) => {
-    // Convert camelCase or snake_case to Title Case
-    return key
-        .replace(/([A-Z])/g, ' $1')
-        .replace(/_/g, ' ')
-        .replace(/^./, str => str.toUpperCase());
-}
+
 
 
 onMounted(() => {
@@ -195,6 +191,7 @@ onUnmounted(() => {
 
 <template>
     <div class="homePage_Container bg-[#efefef]/30">
+
         <div class="userSelectContainer" v-if="users">
             <label class="table-heading" for="options">Select an User:</label>
             <select class="table-heading" id="options" v-model="user">
@@ -204,11 +201,10 @@ onUnmounted(() => {
             </select>
         </div>
         <div v-if="Object.keys(data).length > 0" class="mx-auto px-8 py-8">
-            <div v-for="(tableData, key) in data" :key="key" class="my-8">
-                <p class="table-heading">{{ formatTableName(key) }}</p>
-                <TanStackTestTable :data="tableData" :columns="columns" :hasColor="[]" :navigateTo="{}"
-                    :showPagination="true" :hasRowcolor="{}" />
-            </div>
+            <p class="table-heading">Position MisMatch : {{ user }}</p>
+            <TanStackTestTable :data="data" :columns="columns" :hasColor="[]" :navigateTo="{}" :showPagination="true"
+                :hasRowcolor="{}" />
+
         </div>
         <div v-else class="mx-auto px-8 py-8">
             <p class="table-heading">No Data</p>
