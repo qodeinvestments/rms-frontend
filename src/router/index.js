@@ -7,6 +7,7 @@ import Keydblogs from '../components/Keydblogs.vue'
 import DataVisualizer from '../components/DataVisualizer.vue'
 import UserLagData from '../components/UserLagData.vue'
 import ServerData from '../components/ServerData.vue'
+import PositionMismatch from '../components/PositionMismatch.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -50,6 +51,11 @@ const router = createRouter({
       path: '/serverData',
       name: 'ServerData',
       component: ServerData,
+    },
+    {
+      path: '/posmismatch',
+      name: 'PositionMismatch',
+      component: PositionMismatch,
     },
     // {
     //   path: '/about',

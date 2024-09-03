@@ -1,6 +1,5 @@
 <template>
     <div class="warningsignal-container text-sm font-semibold">
-
         <div class="signal-container" v-for="(value, key) in filteredSignals()" :key="key">
             <div class="textContainer"> {{ key }} </div>
             <span :class="value ? 'greensignal' : 'redsignal'"></span>
@@ -9,7 +8,7 @@
             <p class="textContainer">User Error :</p>
             <span :class="userAnd ? 'greensignal' : 'redsignal'"></span>
         </div>
-        <div class="signal-container">
+        <div class="signal-container" @click="gotomispospage">
             <p class="textContainer">Position Mismatch :</p>
             <span :class="calculate_position_mismatch() ? 'greensignal' : 'redsignal'"></span>
 
@@ -32,7 +31,11 @@ import { toRefs } from 'vue';
 import { ref } from 'vue'
 import { useRouter } from 'vue-router';
 const userAnd = ref(true)
+const router = useRouter();
 
+const gotomispospage = () => {
+    router.push('/posmismatch'); // Use the router instance from useRouter
+};
 
 const filteredSignals = () => {
     const val = Object.fromEntries(
@@ -82,7 +85,6 @@ const calculate_position_mismatch = () => {
     return tell;
 }
 const route = useRouter();
-
 
 
 // watch(signals, (newSignals) => {
