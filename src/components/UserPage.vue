@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted } from 'vue'
 import BarChart from './Barchart.vue';
 import { useRouter } from 'vue-router';
+import Histogram from './Histogram.vue';
 import {
   FlexRender,
   getCoreRowModel,
@@ -21,6 +22,7 @@ const user_data = ref('')
 const name = ref('');
 const broker = ref('')
 const columnHelper = createColumnHelper()
+const histogram = ref([])
 const live_trade_book_columns_zerodha = [
 
   columnHelper.accessor(row => row.exchange, {
@@ -1468,6 +1470,8 @@ const connectClientDetailsWebSocket = () => {
     }
     if (data.table_data) {
       book.value = Object.values(data.table_data);
+      if (showOnPage.value === 'Combined DF')
+        histogram.value = book.value.map(item => item.signal_lag);
     } else {
       book.value = [];
     }
@@ -1600,6 +1604,10 @@ onUnmounted(() => {
       <TanStackTestTable :data="book" :columns="combined_trades_zerodha" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
+    <div v-if="histogram.length > 0 && showOnPage === 'Combined DF'" class="histogram-container">
+      <p class="table-heading">Histogram Of Combined DF</p>
+      <Histogram :dataArray="histogram" />
+    </div>
   </div>
 </template>
 <style scoped>
@@ -1623,6 +1631,13 @@ onUnmounted(() => {
 .red {
   color: red;
 }
+
+.histogram-container {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 30px;
+}
+
 
 .green {
   color: rgb(80, 185, 80);
