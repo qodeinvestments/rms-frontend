@@ -14,6 +14,7 @@ import Histogram from './Histogram.vue';
 
 const signal_book_data = ref([])
 const uids = ref([])
+const basket = ref([])
 
 const columnHelper = createColumnHelper()
 
@@ -113,17 +114,35 @@ const columns = [
     }),
 ]
 
-// New code for multi-select
-const selectedItems = ref([]);
-const filteredOptions = computed(() => uids.value.filter(o => !selectedItems.value.includes(o)));
+const selectedUids = ref([]);
+const selectedBasketItems = ref([]);
 
-// New computed property for filtered signal_book_data
+const filteredBasketOptions = computed(() => basket.value.filter(o => !selectedBasketItems.value.includes(o)));
+
+const filteredUids = computed(() => {
+    if (selectedBasketItems.value.length === 0) {
+        return uids.value;
+    }
+    return uids.value.filter(uid => selectedBasketItems.value.includes(uid.split('_')[0]));
+});
+
+const filteredOptions = computed(() => filteredUids.value.filter(o => !selectedUids.value.includes(o)));
+
+
+
+// Updated computed property for filtered signal_book_data
 const filteredSignalBookData = computed(() => {
-    if (selectedItems.value.length === 0) {
+    if (selectedUids.value.length === 0 && selectedBasketItems.value.length === 0) {
         return signal_book_data.value;
     }
-    return signal_book_data.value.filter(item => selectedItems.value.includes(item.uid));
+    return signal_book_data.value.filter(item => {
+        const basketMatch = selectedBasketItems.value.length === 0 || selectedBasketItems.value.includes(item.uid.split('_')[0]);
+        const uidMatch = selectedUids.value.length === 0 || selectedUids.value.includes(item.uid);
+        return basketMatch && uidMatch;
+    });
 });
+
+
 const connectClientDetailsWebSocket = () => {
     const clientDetailSocket = new WebSocket('wss://api.swancapital.in/signalbook');
 
@@ -134,7 +153,7 @@ const connectClientDetailsWebSocket = () => {
         const data = JSON.parse(event.data);
         signal_book_data.value = Object.values(data['table_data'])
         uids.value = [...new Set(signal_book_data.value.map(item => item.uid))];
-
+        basket.value = [...new Set(signal_book_data.value.map(item => item.uid.split('_')[0]))];
         histogram.value = signal_book_data.value.map(item => item.time_diff);
         let ar2 = data["time"];
         if (past_time.value === 0) past_time.value = ar2;
@@ -173,6 +192,13 @@ onUnmounted(() => {
 
 })
 
+// Watch for changes in selectedBasketItems
+watch(selectedBasketItems, (newSelectedBasketItems) => {
+    console.log('Selected Basket items changed:', newSelectedBasketItems);
+    // Reset UID selection when basket selection changes
+    selectedUids.value = [];
+});
+
 
 
 
@@ -186,9 +212,13 @@ onUnmounted(() => {
             <p> Max Client :<span class="latencyvalue">{{ max_latency }}</span></p>
         </div>
 
+        <!-- Basket multi-select component -->
+        <a-select v-model:value="selectedBasketItems" mode="multiple" placeholder="Select Basket Items"
+            style="width: 100%; margin-bottom: 10px;"
+            :options="filteredBasketOptions.map(item => ({ value: item }))"></a-select>
 
-        <!-- New multi-select component -->
-        <a-select v-model:value="selectedItems" mode="multiple" placeholder="Select UIDs" style="width: 100%"
+        <!-- UID multi-select component -->
+        <a-select v-model:value="selectedUids" mode="multiple" placeholder="Select UIDs" style="width: 100%"
             :options="filteredOptions.map(item => ({ value: item }))"></a-select>
 
         <div class="my-8" v-if="filteredSignalBookData.length">
