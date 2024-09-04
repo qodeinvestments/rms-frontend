@@ -24,7 +24,8 @@ const props = defineProps({
         type: Object,
     },
     seriesOptions: {
-        type: Object,
+        type: Array,
+        default: () => [],
     },
     timeScaleOptions: {
         type: Object,
@@ -38,13 +39,10 @@ const props = defineProps({
     },
 });
 
-// Function to get the correct series constructor name for current series type.
 function getChartSeriesConstructorName(type) {
     return `add${type.charAt(0).toUpperCase() + type.slice(1)}Series`;
 }
 
-// Lightweight Charts™ instances are stored as normal JS variables
-// If you need to use a ref then it is recommended that you use `shallowRef` instead
 let series = [];
 let chart;
 
@@ -61,38 +59,33 @@ const getChart = () => {
 
 defineExpose({ fitContent, getChart });
 
-// Auto resizes the chart when the browser window is resized.
 const resizeHandler = () => {
     if (!chart || !chartContainer.value) return;
     const dimensions = chartContainer.value.getBoundingClientRect();
     chart.resize(dimensions.width, dimensions.height);
 };
 
-// Function to generate a random color
-const getRandomColor = () => {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
+const removeTitles = () => {
+    series.forEach(s => {
+        s.applyOptions({ title: '' });
+    });
 };
 
-// Creates the chart series and sets the data.
-const addSeriesAndData = props => {
+const addSeriesAndData = (props) => {
     const seriesConstructor = getChartSeriesConstructorName(props.type);
-    series = Object.keys(props.data).map(key => {
+    series = Object.keys(props.data).map((key, index) => {
+        const options = props.seriesOptions[index] || {};
         const newSeries = chart[seriesConstructor]({
-            ...props.seriesOptions,
-            color: getRandomColor()
+            ...options,
+            title: '', // Set empty title initially
         });
         newSeries.setData(props.data[key]);
         return newSeries;
     });
+    removeTitles(); // Ensure titles are removed after creation
 };
 
 onMounted(() => {
-    // Create the Lightweight Charts Instance using the container ref.
     chart = createChart(chartContainer.value, props.chartOptions);
     addSeriesAndData(props);
 
@@ -122,17 +115,6 @@ onUnmounted(() => {
     window.removeEventListener('resize', resizeHandler);
 });
 
-/*
- * Watch for changes to any of the component properties.
-
- * If an options property is changed then we will apply those options
- * on top of any existing options previously set (since we are using the
- * `applyOptions` method).
- *
- * If there is a change to the chart type, then the existing series is removed
- * and the new series is created, and assigned the data.
- *
- */
 watch(
     () => props.autosize,
     enabled => {
@@ -146,7 +128,7 @@ watch(
 
 watch(
     () => props.type,
-    newType => {
+    () => {
         if (series.length && chart) {
             series.forEach(s => chart.removeSeries(s));
         }
@@ -158,12 +140,12 @@ watch(
     () => props.data,
     newData => {
         if (!series.length) return;
-        series.forEach((s, i) => {
-            const key = Object.keys(newData)[i];
-            if (key) {
-                s.setData(newData[key]);
+        Object.keys(newData).forEach((key, index) => {
+            if (series[index]) {
+                series[index].setData(newData[key]);
             }
         });
+        removeTitles(); // Ensure titles are removed after data update
     }
 );
 
@@ -179,7 +161,11 @@ watch(
     () => props.seriesOptions,
     newOptions => {
         if (!series.length) return;
-        series.forEach(s => s.applyOptions(newOptions));
+        series.forEach((s, index) => {
+            if (newOptions[index]) {
+                s.applyOptions({ ...newOptions[index], title: '' }); // Ensure title remains empty
+            }
+        });
     }
 );
 

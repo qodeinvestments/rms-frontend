@@ -1,10 +1,7 @@
 <script setup>
-import {
+import { ref, watch, computed } from 'vue';
+import LWChart from './LWChart.vue';
 
-    watch,
-} from 'vue';
-// This starter template is using Vue 3 <script setup> SFCs
-import { ref } from 'vue';
 const props = defineProps({
     Chartdata: {
         type: Object,
@@ -12,65 +9,94 @@ const props = defineProps({
     },
 });
 
-
-import LWChart from './LWChart.vue';
-
 const chartOptions = ref({});
-const data = ref(props.Chartdata); // Changed to reactive reference
-const seriesOptions = ref({
-    color: 'rgb(45, 77, 205)',
-});
-const get_data_keys = () => {
+const data = ref(props.Chartdata);
+const seriesOptions = ref([]);
+const chartType = ref('line');
+const lwChart = ref();
 
-    return Object.keys(data.value).length;
-}
+const getDataKeys = computed(() => Object.keys(data.value));
+
+// Create a map to store colors for each key
+const colorMap = ref(new Map());
 
 watch(
     () => props.Chartdata,
     newData => {
-        data.value = newData
+        data.value = newData;
+        updateSeriesOptions(false);
     }
 );
-const chartType = ref('line');
-const lwChart = ref();
 
-function randomShade() {
-    return Math.round(Math.random() * 255);
+function randomColor() {
+    return `rgb(${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)})`;
 }
 
-const randomColor = (alpha = 1) => {
-    return `rgba(${randomShade()}, ${randomShade()}, ${randomShade()}, ${alpha})`;
-};
-
-const colorsTypeMap = {
-    line: [['color', 1]],
-};
+function updateSeriesOptions(regenerateColors = false) {
+    seriesOptions.value = getDataKeys.value.map(key => {
+        if (regenerateColors || !colorMap.value.has(key)) {
+            colorMap.value.set(key, randomColor());
+        }
+        return {
+            color: colorMap.value.get(key),
+            title: key
+        };
+    });
+}
 
 const changeColors = () => {
-    const options = {};
-    const colorsToSet = colorsTypeMap[chartType.value];
-    colorsToSet.forEach(c => {
-        options[c[0]] = randomColor(c[1]);
-    });
-    seriesOptions.value = options;
+    updateSeriesOptions(true);
 };
 
-
-
-
+// Initial setup
+updateSeriesOptions(true);
 </script>
 
 <template>
-    {{ get_data_keys() }}
-    <div class="chart-container" style="height: 400px;">
-        <LWChart :type="chartType" :data="data" :autosize="true" :chart-options="chartOptions"
-            :series-options="seriesOptions" ref="lwChart" />
+    <div class="chart-wrapper">
+        <div class="chart-container">
+            <LWChart :type="chartType" :data="data" :autosize="true" :chart-options="chartOptions"
+                :series-options="seriesOptions" ref="lwChart" />
+        </div>
+        <div class="legend">
+            <div v-for="(option, index) in seriesOptions" :key="index" class="legend-item">
+                <div class="color-box" :style="{ backgroundColor: option.color }"></div>
+                <span>{{ option.title }}</span>
+            </div>
+        </div>
     </div>
     <button type="button" @click="changeColors">Set Random Colors</button>
 </template>
 
 <style scoped>
+.chart-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+}
+
 .chart-container {
-    height: calc(100% - 3.2em);
+    flex-grow: 1;
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 10px 0;
+    background-color: #f5f5f5;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
+    margin-bottom: 5px;
+}
+
+.color-box {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
 }
 </style>
