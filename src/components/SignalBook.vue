@@ -133,7 +133,7 @@ const connectClientDetailsWebSocket = () => {
     clientDetailSocket.onmessage = function (event) {
         const data = JSON.parse(event.data);
         signal_book_data.value = Object.values(data['table_data'])
-        uids.value = signal_book_data.value.map(item => item.uid);
+        uids.value = [...new Set(signal_book_data.value.map(item => item.uid))];
 
         histogram.value = signal_book_data.value.map(item => item.time_diff);
         let ar2 = data["time"];
