@@ -1442,7 +1442,7 @@ const LagPageHandler = () => {
 
 }
 const connectToSSE = () => {
-  const socket = new WebSocket('wss://api.swancapital.in/ws');
+  const socket = new WebSocket('wss://production.swancapital.in/ws');
   socket.onmessage = (event) => {
     if (event.data === 'ping') {
       socket.send('pong')
@@ -1473,7 +1473,7 @@ const connectToSSE = () => {
   }
 };
 const connectClientDetailsWebSocket = () => {
-  const clientDetailSocket = new WebSocket('wss://api.swancapital.in/clientdetails');
+  const clientDetailSocket = new WebSocket('wss://production.swancapital.in/clientdetails');
   clientDetailSocket.onopen = function (e) {
     console.log("Client details connection established");
     // Send the initial set of client data
