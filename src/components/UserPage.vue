@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, computed } from 'vue'
 import BarChart from './Barchart.vue';
 import { useRouter } from 'vue-router';
 import Histogram from './Histogram.vue';
@@ -23,6 +23,8 @@ const name = ref('');
 const broker = ref('')
 const columnHelper = createColumnHelper()
 const histogram = ref([])
+const uids = ref([])
+const basket = ref([])
 const live_trade_book_columns_zerodha = [
 
   columnHelper.accessor(row => row.exchange, {
@@ -1349,6 +1351,35 @@ const combined_trades_xts = [
     header: () => 'effective_qty',
   }),
 ]
+
+
+const selectedUids = ref([]);
+const selectedBasketItems = ref([]);
+
+const filteredBasketOptions = computed(() => basket.value.filter(o => !selectedBasketItems.value.includes(o)));
+
+const filteredUids = computed(() => {
+  if (selectedBasketItems.value.length === 0) {
+    return uids.value;
+  }
+  return uids.value.filter(uid => selectedBasketItems.value.includes(uid.split('_')[0]));
+});
+
+const filteredOptions = computed(() => filteredUids.value.filter(o => !selectedUids.value.includes(o)));
+
+
+
+// Updated computed property for filtered book data
+const filteredSignalBookData = computed(() => {
+  if (selectedUids.value.length === 0 && selectedBasketItems.value.length === 0) {
+    return book.value;
+  }
+  return book.value.filter(item => {
+    const basketMatch = selectedBasketItems.value.length === 0 || selectedBasketItems.value.includes(item.uid.split('_')[0]);
+    const uidMatch = selectedUids.value.length === 0 || selectedUids.value.includes(item.uid);
+    return basketMatch && uidMatch;
+  });
+});
 let eventSource = null
 const client_BackendData = ref([])
 const connection_BackendData = ref([])
@@ -1472,6 +1503,10 @@ const connectClientDetailsWebSocket = () => {
       book.value = Object.values(data.table_data);
       if (showOnPage.value === 'Combined DF')
         histogram.value = book.value.map(item => item.signal_lag);
+
+      uids.value = [...new Set(book.value.map(item => item.uid))];
+      basket.value = [...new Set(book.value.map(item => item.uid.split('_')[0]))];
+
     } else {
       book.value = [];
     }
@@ -1512,6 +1547,12 @@ onUnmounted(() => {
     eventSource.close()
   }
 })
+// Watch for changes in selectedBasketItems
+watch(selectedBasketItems, (newSelectedBasketItems) => {
+  console.log('Selected Basket items changed:', newSelectedBasketItems);
+  // Reset UID selection when basket selection changes
+  selectedUids.value = [];
+});
 </script>
 <template>
   <div class="px-8 py-8 pageContainer">
@@ -1544,6 +1585,15 @@ onUnmounted(() => {
       <NavBar :navColumns="['Positions', 'Order', 'TradeBook', 'Combined DF', 'Combined Orders', 'Combined Trades']"
         @column-clicked="handleColumnClick" :colorColumns="[]" />
     </div>
+    <div class="selectContainer" v-if="book && showOnPage === 'Combined DF' && filteredSignalBookData.length">
+
+      <a-select v-model:value="selectedBasketItems" mode="multiple" placeholder="Select Basket Items"
+        style="width: 100%; margin-bottom: 10px;"
+        :options="filteredBasketOptions.map(item => ({ value: item }))"></a-select>
+
+      <a-select v-model:value="selectedUids" mode="multiple" placeholder="Select UIDs" style="width: 100%"
+        :options="filteredOptions.map(item => ({ value: item }))"></a-select>
+    </div>
 
     <div class="my-8" v-if="book && showOnPage === 'Positions'">
 
@@ -1573,15 +1623,18 @@ onUnmounted(() => {
       <TanStackTestTable :data="book" :columns="live_order_book_columns_zerodha" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
-    <div class="my-8" v-if="book && showOnPage === 'Combined DF' && broker === 'xts'">
+    <div class="my-8" v-if="book && showOnPage === 'Combined DF' && broker === 'xts' && filteredSignalBookData.length">
+
       <p class="table-heading">Combined DF XTS</p>
-      <TanStackTestTable :data="book" :columns="combined_df_columns_xts" :hasColor="[]" :navigateTo="[]"
-        :showPagination=true />
+      <TanStackTestTable :data="filteredSignalBookData" :columns="combined_df_columns_xts" :hasColor="[]"
+        :navigateTo="[]" :showPagination=true />
+
     </div>
-    <div class="my-8" v-if="book && showOnPage === 'Combined DF' && broker === 'zerodha'">
+    <div class="my-8"
+      v-if="book && showOnPage === 'Combined DF' && broker === 'zerodha' && filteredSignalBookData.length">
       <p class="table-heading">Combined DF Zerodha</p>
-      <TanStackTestTable :data="book" :columns="combined_df_columns_zerodha" :hasColor="[]" :navigateTo="[]"
-        :showPagination=true />
+      <TanStackTestTable :data="filteredSignalBookData" :columns="combined_df_columns_zerodha" :hasColor="[]"
+        :navigateTo="[]" :showPagination=true />
     </div>
     <div class="my-8" v-if="book && showOnPage === 'Combined Orders' && broker === 'xts'">
       <p class="table-heading">Combined Orders XTS</p>
@@ -1630,6 +1683,13 @@ onUnmounted(() => {
 
 .red {
   color: red;
+}
+
+.selectContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 50px;
 }
 
 .histogram-container {
