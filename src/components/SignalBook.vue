@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, computed } from 'vue'
 import {
     FlexRender,
     getCoreRowModel,
@@ -13,6 +13,7 @@ import TanStackTestTable from './TanStackTestTable.vue'
 import Histogram from './Histogram.vue';
 
 const signal_book_data = ref([])
+const uids = ref([])
 
 const columnHelper = createColumnHelper()
 
@@ -20,6 +21,7 @@ const latency = ref(0)
 const max_latency = ref(0)
 const past_time = ref(0)
 const histogram = ref(0)
+const selected_uid = ref('')
 
 const columns = [
     columnHelper.accessor(row => row.trade_id, {
@@ -111,7 +113,17 @@ const columns = [
     }),
 ]
 
+// New code for multi-select
+const selectedItems = ref([]);
+const filteredOptions = computed(() => uids.value.filter(o => !selectedItems.value.includes(o)));
 
+// New computed property for filtered signal_book_data
+const filteredSignalBookData = computed(() => {
+    if (selectedItems.value.length === 0) {
+        return signal_book_data.value;
+    }
+    return signal_book_data.value.filter(item => selectedItems.value.includes(item.uid));
+});
 const connectClientDetailsWebSocket = () => {
     const clientDetailSocket = new WebSocket('wss://api.swancapital.in/signalbook');
 
@@ -121,6 +133,9 @@ const connectClientDetailsWebSocket = () => {
     clientDetailSocket.onmessage = function (event) {
         const data = JSON.parse(event.data);
         signal_book_data.value = Object.values(data['table_data'])
+        console.log("signal_book_data is:", signal_book_data)
+        uids.value = signal_book_data.value.map(item => item.uid);
+
         histogram.value = signal_book_data.value.map(item => item.time_diff);
         let ar2 = data["time"];
         if (past_time.value === 0) past_time.value = ar2;
@@ -164,34 +179,37 @@ onUnmounted(() => {
 
 </script>
 
+
 <template>
-
-
     <div class="px-8 py-8 pageContainer">
         <div class="LatencyTable">
             <p> Latency :<span class="latencyvalue">{{ latency }}</span></p>
             <p> Max Client :<span class="latencyvalue">{{ max_latency }}</span></p>
-
         </div>
-        <div class="my-8" v-if="signal_book_data">
+
+
+        <!-- New multi-select component -->
+        <a-select v-model:value="selectedItems" mode="multiple" placeholder="Select UIDs" style="width: 100%"
+            :options="filteredOptions.map(item => ({ value: item }))"></a-select>
+
+        <div class="my-8" v-if="filteredSignalBookData.length">
             <p class="table-heading">Signal Book</p>
-            <TanStackTestTable :data="signal_book_data" :columns="columns" :hasColor="[]" :navigateTo="[]"
+            <TanStackTestTable :data="filteredSignalBookData" :columns="columns" :hasColor="[]" :navigateTo="[]"
                 :showPagination=true />
         </div>
         <div v-if="histogram.length > 0" class="histogram-container">
             <p class="table-heading">Histogram Of Time Difference</p>
             <Histogram :dataArray="histogram" />
         </div>
-
-
-
-
     </div>
-
-
 </template>
 
 <style scoped>
+.a-select {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 .pageContainer {
     height: 100%;
     display: flex;
@@ -203,6 +221,7 @@ onUnmounted(() => {
     flex-direction: column;
     margin-bottom: 30px;
 }
+
 
 
 .latencyvalue {
