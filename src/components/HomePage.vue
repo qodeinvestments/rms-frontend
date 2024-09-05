@@ -216,7 +216,7 @@ const updateData = () => {
       IdealMTM: item.ideal_MTM !== undefined ? Number(item.ideal_MTM) : 0,
       Day_PL: item.MTM !== undefined ? Number(item.MTM) : 0,
       Friction: item.MTM !== undefined && item.ideal_MTM !== undefined
-        ? (Number(item.MTM) - Number(item.ideal_MTM))
+        ? (Number(item.MTM) - Number(item.ideal_MTM)).toFixed(2)
         : '0.00',
       RejectedOrderCount: item.Rejected_orders !== undefined ? Number(item.Rejected_orders) : 0,
       PendingOrderCount: item.Pending_orders !== undefined ? Number(item.Pending_orders) : 0,
@@ -452,15 +452,15 @@ const formatIndexName = (name) => {
   return name.replace('SPOT', '').toUpperCase()
 }
 const formatNumber = (value) => {
-  const val = value
+  const val = value.toFixed(2)
   return val ? val.toLocaleString() : '0'
 }
 const getDifference = (key) => {
-  return (index_data.value[key] - previous_day_close_index_data[key]);
+  return (index_data.value[key].toFixed(2) - previous_day_close_index_data[key]).toFixed(2);
 }
 const getPercentage = (key) => {
   const change = give_percentage_change(index_data.value[key], previous_day_close_index_data[key]);
-  return change;
+  return change.toFixed(2);
 }
 const formatPercentage = (value) => {
   return `${value}%`
@@ -488,10 +488,6 @@ const stopPingInterval = () => {
   }
 }
 
-const get_server_data = (type) => {
-  if (serverData.value[type].length == 0) return 0;
-  return serverData.value[type][serverData.value[type].length - 1].value
-}
 
 onMounted(() => {
   connectWebSocket()
@@ -549,29 +545,31 @@ onUnmounted(() => {
           Time:{{ time }}
         </span>
         <span v-if="serverData['CPU']">
-
-          CPU : {{ get_server_data('CPU') }} %
+          CPU : {{ serverData['CPU'][serverData['CPU'].length - 1].value }} %
         </span>
         <span v-if="serverData['RAM']">
-          RAM : {{ get_server_data('RAM') }} %
+          RAM : {{ serverData['RAM'][serverData['RAM'].length - 1].value }} %
         </span>
         <span v-if="serverData['Redis']">
-          Redis Used : {{ get_server_data('Redis').used_memory_gb }} GB
+          Redis Used : {{ serverData['Redis'][serverData['Redis'].length - 1].used_memory_gb.toFixed(2) }} GB
         </span>
         <span v-if="serverData['Redis']">
-          Redis Used Peak : {{ get_server_data('Redis').used_memory_peak_gb
+          Redis Used Peak : {{ serverData['Redis'][serverData['Redis'].length - 1].used_memory_peak_gb.toFixed(2)
           }} GB
         </span>
         <span v-if="serverData['Redis']">
-          System Memory : {{ get_server_data('Redis').total_system_memory_gb
+          System Memory : {{ serverData['Redis'][serverData['Redis'].length -
+            1].total_system_memory_gb.toFixed(2)
           }} GB
         </span>
         <span v-if="serverData['Redis']">
-          Redis Used Percentage : {{ get_server_data('Redis').memory_percent
+          Redis Used Percentage : {{ serverData['Redis'][serverData['Redis'].length -
+            1].memory_percent.toFixed(2)
           }} %
         </span>
         <span v-if="serverData['Redis']">
-          Redis Allocated Memory : {{ get_server_data('Redis').available_memory_gb
+          Redis Allocated Memory : {{ serverData['Redis'][serverData['Redis'].length -
+            1].available_memory_gb.toFixed(2)
           }} GB
         </span>
 
