@@ -1743,7 +1743,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
 
     <div class="my-8" v-if="Object.keys(basketData).length > 0">
       <p class="table-heading">Current Basket MTM</p>
-      <TanStackTestTable :data="basketData['curr']" :columns="curr_basket_mtm" :hasColor="[]" :navigateTo="[]"
+      <TanStackTestTable :data="basketData['curr']" :columns="curr_basket_mtm" :hasColor="['MTM']" :navigateTo="[]"
         :showPagination=true />
     </div>
   </div>
