@@ -1644,16 +1644,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
       <LightWeightChart v-if="user_data['MTMTable']" :Chartdata="mix_real_ideal_mtm_table" />
     </div>
 
-    <div class="chartContainer">
-      <p class="table-heading">BASKET WISE IDEAL MTM</p>
-      <LightWeightChart v-if="Object.keys(basketData).length > 0" :Chartdata="basketData['live']" />
-    </div>
 
-    <div class="my-8" v-if="Object.keys(basketData).length > 0">
-      <p class="table-heading">Current Basket MTM</p>
-      <TanStackTestTable :data="basketData['curr']" :columns="curr_basket_mtm" :hasColor="[]" :navigateTo="[]"
-        :showPagination=true />
-    </div>
 
     <!--  <BarChart v-if="user_data['Live_Client_Positions']" :chartData='user_data["Live_Client_Positions"]' /> -->
     <div class="LatencyTable">
@@ -1743,6 +1734,17 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     <div v-if="histogram.length > 0 && showOnPage === 'Combined DF'" class="histogram-container">
       <p class="table-heading">Histogram Of Combined DF</p>
       <Histogram :dataArray="histogram" />
+    </div>
+
+    <div class="chartContainer">
+      <p class="table-heading">BASKET WISE IDEAL MTM</p>
+      <LightWeightChart v-if="Object.keys(basketData).length > 0" :Chartdata="basketData['live']" />
+    </div>
+
+    <div class="my-8" v-if="Object.keys(basketData).length > 0">
+      <p class="table-heading">Current Basket MTM</p>
+      <TanStackTestTable :data="basketData['curr']" :columns="curr_basket_mtm" :hasColor="[]" :navigateTo="[]"
+        :showPagination=true />
     </div>
   </div>
 </template>
