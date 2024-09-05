@@ -147,8 +147,6 @@ const columns = [
 
 const client_BackendData = ref({})
 const connection_BackendData = ref({})
-const basket_BackendData = ref({})
-const strategy_mtm_chart_BackendData = ref({})
 const index_data = ref({})
 const previous_day_close_index_data = {
   BANKNIFTYSPOT: 51400.25,
@@ -159,26 +157,15 @@ const previous_day_close_index_data = {
 }
 const pulse_signal = ref([])
 const time = ref([])
-const user_infected = ref([])
 const serverData = ref({})
 const checkBackendConnection = ref(false)
 const checkServerDataConnection = ref(false)
 const Latency = ref(0)
 const max_latency = ref(0);
-const basketLatency = ref(0)
-const max_basket_latency = ref(0)
-const strategyLatency = ref(0)
-const max_strategy_latency = ref(0)
 const past_time = ref(0)
-const past_time_basket = ref(0);
-const past_time_strategy = ref(0);
 const live_weights = ref([]);
 
 let socket = null
-let reconnectAttempts = 0
-const maxReconnectAttempts = 5
-const reconnectInterval = 5000 // 5 seconds
-const pingInterval = 30000 // 30 seconds
 
 const give_percentage_change = (a, b) => {
   if (!a || !b) return 0;
@@ -243,8 +230,6 @@ const connectServerDataWebSocket = () => {
   socket.onopen = () => {
     console.log('ServerData WebSocket connection opened')
     checkServerDataConnection.value = true;
-    // reconnectAttempts = 0
-    // startPingInterval()
   }
 
   socket.onmessage = (event) => {
@@ -271,8 +256,6 @@ const connectServerDataWebSocket = () => {
   socket.onclose = (event) => {
     console.log('ServerData WebSocket connection closed:', event.reason)
     checkServerDataConnection.value = false
-    // stopPingInterval()
-    // reconnect()
   }
 
 
@@ -288,8 +271,6 @@ const connectWebSocket = () => {
   socket.onopen = () => {
     console.log('WebSocket connection opened')
     checkBackendConnection.value = true
-    reconnectAttempts = 0
-    startPingInterval()
   }
 
   socket.onmessage = (event) => {
@@ -317,8 +298,6 @@ const connectWebSocket = () => {
   socket.onclose = (event) => {
     console.log('WebSocket connection closed:', event.reason)
     checkBackendConnection.value = false
-    stopPingInterval()
-    reconnect()
   }
 
 
@@ -332,120 +311,6 @@ const triggerToast = inject('triggerToast')
 
 const showSuccessToast = () => {
   triggerToast('Operation successful!', 'success')
-}
-
-const connectBasketChartWebSocket = () => {
-  const basketSocket = new WebSocket('wss://production.swancapital.in/chart/basket');
-
-  basketSocket.onopen = () => {
-    console.log('Basket Chart WebSocket connection opened');
-  }
-
-  basketSocket.onmessage = (event) => {
-    const message = JSON.parse(event.data);
-    basket_BackendData.value = message.basket_data;
-
-
-    let ar2 = message.time;
-    if (past_time_basket.value === 0) past_time_basket.value = ar2;
-    let date1 = new Date(past_time_basket.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
-    let date2 = new Date(ar2.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
-    let diffInMs = date2 - date1;
-    let diffInSeconds = diffInMs / 1000;
-    basketLatency.value = diffInSeconds;
-    max_basket_latency.value = Math.max(max_basket_latency.value, basketLatency.value);
-    past_time_basket.value = ar2;
-
-  }
-
-  basketSocket.onclose = (event) => {
-    console.log('Basket Chart WebSocket connection closed:', event.reason);
-    // Implement reconnection logic if needed
-  }
-
-  basketSocket.onerror = (error) => {
-    console.error('Basket Chart WebSocket error:', error);
-  }
-
-  return basketSocket;
-}
-
-
-
-const connectStrategyChartWebSocket = () => {
-  const strategySocket = new WebSocket('wss://production.swancapital.in/chart/strategy');
-
-
-  strategySocket.onopen = function (e) {
-    console.log("strategysocket Connection established");
-    // Send the initial set of UIDs
-    sendStrategyUIDs(live_weights.value[selected_opt.value]);
-  };
-
-  strategySocket.onmessage = function (event) {
-    const data = JSON.parse(event.data);
-    // Handle the received chart data
-    strategy_mtm_chart_BackendData.value = data.strategy_mtm_chart_data;
-    let ar2 = data.time;
-    if (past_time_strategy.value === 0) past_time_strategy.value = ar2;
-    let date1 = new Date(past_time_strategy.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
-    let date2 = new Date(ar2.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
-    let diffInMs = date2 - date1;
-    let diffInSeconds = diffInMs / 1000;
-    strategyLatency.value = diffInSeconds;
-    max_strategy_latency.value = Math.max(max_strategy_latency.value, strategyLatency.value)
-    past_time_strategy.value = ar2;
-
-  };
-  strategySocket.onerror = function (error) {
-    console.log(`[error] ${error.message}`);
-  };
-
-
-  const sendStrategyUIDs = (uids) => {
-    if (strategySocket && strategySocket.readyState === WebSocket.OPEN) {
-      strategySocket.send(JSON.stringify({ strategy_uids: uids }));
-    } else {
-      console.log("Strategy WebSocket is not open. Unable to send message.");
-    }
-  }
-  watch(selected_opt, (newValue) => {
-    if (newValue && live_weights.value[newValue]) {
-      sendStrategyUIDs(live_weights.value[newValue]);
-    }
-  });
-
-
-  strategySocket.onclose = (event) => {
-    console.log('Strategy Chart WebSocket connection closed:', event.reason);
-    // Implement reconnection logic if needed
-  }
-
-  return strategySocket;
-}
-
-const get_uids_length = () => {
-  if (live_weights.value) {
-    if (live_weights.value[selected_opt.value]) {
-      return live_weights.value[selected_opt.value].length;
-    }
-  }
-  else return 0;
-
-}
-
-const give_live_weights = () => {
-  return Object.keys(live_weights.value);
-}
-
-const reconnect = () => {
-  if (reconnectAttempts < maxReconnectAttempts) {
-    reconnectAttempts++
-    console.log(`Attempting to reconnect (${reconnectAttempts}/${maxReconnectAttempts})...`)
-    setTimeout(connectWebSocket, reconnectInterval)
-  } else {
-    console.log('Max reconnection attempts reached. Please refresh the page.')
-  }
 }
 
 const formatIndexName = (name) => {
@@ -470,29 +335,8 @@ const getPercentageClass = (key) => {
   return percentage > 0 ? 'positive' : percentage < 0 ? 'negative' : 'neutral'
 }
 
-const selected_opt = ref("")
-let pingIntervalId = null
-
-const startPingInterval = () => {
-  pingIntervalId = setInterval(() => {
-    if (socket.readyState === WebSocket.OPEN) {
-      socket.send('ping')
-    }
-  }, pingInterval)
-}
-
-const stopPingInterval = () => {
-  if (pingIntervalId) {
-    clearInterval(pingIntervalId)
-    pingIntervalId = null
-  }
-}
-
-
 onMounted(() => {
   connectWebSocket()
-  // connectBasketChartWebSocket()
-  // connectStrategyChartWebSocket()
   connectServerDataWebSocket()
 })
 
@@ -500,7 +344,6 @@ onUnmounted(() => {
   if (socket) {
     socket.close()
   }
-  stopPingInterval()
 })
 </script>
 
@@ -508,18 +351,6 @@ onUnmounted(() => {
 
 <template>
   <div class="homePage_Container bg-[#efefef]/30">
-
-    <!-- This is an HTML comment 
-    <LightWeightChart v-if="Object.keys(basket_BackendData).length" :Chartdata="basket_BackendData" />
-    <p>Lenght of Uid is:{{ get_uids_length() }}</p>
-    <div class="select-container">
-      <CustomSelect :options="give_live_weights()" v-model="selected_opt" label="Choose an option:" />
-    </div>
-   
-
-    -->
-
-    <!-- <LightWeightChart v-if="serverData['CPU']" :Chartdata="{ 'data': serverData['CPU'] }" /> -->
 
     <div v-if="index_data" class="nav-index-container font-semibold bg-white drop-shadow-sm">
       <div v-for="(value, key) in index_data" :key="key" class="index-item">
