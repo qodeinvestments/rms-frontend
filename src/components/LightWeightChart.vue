@@ -84,7 +84,6 @@ updateSeriesOptions(true);
     flex-wrap: wrap;
     justify-content: center;
     padding: 10px 0;
-    background-color: #f5f5f5;
 }
 
 .legend-item {

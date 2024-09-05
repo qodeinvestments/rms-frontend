@@ -1254,6 +1254,18 @@ const combined_trades_zerodha = [
   }),
 
 ]
+const curr_basket_mtm = [
+  columnHelper.accessor(row => row.basket, {
+    id: 'Basket',
+    cell: info => info.getValue(),
+    header: () => 'Basket',
+  }),
+  columnHelper.accessor(row => row.MTM, {
+    id: 'MTM',
+    cell: info => info.getValue(),
+    header: () => 'MTM',
+  }),
+]
 const combined_trades_xts = [
   columnHelper.accessor(row => row.trade_id, {
     id: 'trade_id',
@@ -1352,7 +1364,7 @@ const combined_trades_xts = [
   }),
 ]
 
-
+const basketData = ref({})
 const selectedUids = ref([]);
 const selectedBasketItems = ref([]);
 
@@ -1385,7 +1397,9 @@ const client_BackendData = ref([])
 const connection_BackendData = ref([])
 const date = ref()
 const data = ref([])
-const user_infected = ref([])
+const basket_latency = ref([])
+const basket_max_latency = ref([])
+const past_time_basket = ref(0)
 const client_latency = ref(0)
 const client_details_Latency = ref(0)
 const past_time_client = ref(0)
@@ -1436,7 +1450,6 @@ const handleMessage = (message) => {
 }
 const router = useRouter();
 const LagPageHandler = () => {
-  console.log("hello")
   let str = '/user/lag/' + name.value;
   router.push(str);
 
@@ -1472,6 +1485,60 @@ const connectToSSE = () => {
     console.error('WebSocket error:', error)
   }
 };
+
+
+const connectBasketWebSocket = () => {
+  const clientBasketSocket = new WebSocket('wss://production.swancapital.in/chart/basket');
+  clientBasketSocket.onopen = function (e) {
+    console.log("Basket connection established");
+    // Send the initial set of client data
+    sendClientDetails();
+  };
+
+  clientBasketSocket.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+    let ar2 = data["time"];
+    if (past_time_basket.value === 0) past_time_basket.value = ar2;
+    if (past_time_basket.value != 0) {
+      let date1 = new Date(past_time_basket.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+      let date2 = new Date(ar2.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+      let diffInMs = date2 - date1;
+      let diffInSeconds = diffInMs / 1000;
+      basket_latency.value = diffInSeconds;
+      basket_max_latency.value = Math.max(basket_max_latency.value, basket_latency.value)
+      past_time_basket.value = ar2;
+    }
+    basketData.value = data
+
+  };
+  clientBasketSocket.onerror = function (error) {
+    console.log(`WebSocket error: ${error.message}`);
+  };
+  clientBasketSocket.onclose = function (event) {
+    console.log('Client Detail WebSocket connection closed:', event.reason);
+  };
+  function sendClientDetails() {
+    if (clientBasketSocket && clientBasketSocket.readyState === WebSocket.OPEN) {
+      let client_data = {
+        "name": name.value,
+        "basket": ['ALL']
+      };
+      clientBasketSocket.send(JSON.stringify(client_data));
+    } else {
+      console.log("WebSocket is not open. Unable to send message.");
+    }
+  }
+
+  return clientBasketSocket;
+};
+
+
+
+
+
+
+
+
 const connectClientDetailsWebSocket = () => {
   const clientDetailSocket = new WebSocket('wss://production.swancapital.in/clientdetails');
   clientDetailSocket.onopen = function (e) {
@@ -1541,6 +1608,7 @@ onMounted(() => {
   connectToSSE();
   name.value = route.params.username;
   connectClientDetailsWebSocket();
+  connectBasketWebSocket();
 })
 onUnmounted(() => {
   if (eventSource) {
@@ -1571,8 +1639,21 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
         :showPagination=false :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }" />
     </div>
     <!--  <input type="date" v-model="date" /> -->
+    <div class="chartContainer">
+      <p class="table-heading">MTM AND IDEAL MTM</p>
+      <LightWeightChart v-if="user_data['MTMTable']" :Chartdata="mix_real_ideal_mtm_table" />
+    </div>
 
-    <LightWeightChart v-if="user_data['MTMTable']" :Chartdata="mix_real_ideal_mtm_table" />
+    <div class="chartContainer">
+      <p class="table-heading">BASKET WISE IDEAL MTM</p>
+      <LightWeightChart v-if="Object.keys(basketData).length > 0" :Chartdata="basketData['live']" />
+    </div>
+
+    <div class="my-8" v-if="Object.keys(basketData).length > 0">
+      <p class="table-heading">Current Basket MTM</p>
+      <TanStackTestTable :data="basketData['curr']" :columns="curr_basket_mtm" :hasColor="[]" :navigateTo="[]"
+        :showPagination=true />
+    </div>
 
     <!--  <BarChart v-if="user_data['Live_Client_Positions']" :chartData='user_data["Live_Client_Positions"]' /> -->
     <div class="LatencyTable">
@@ -1580,6 +1661,8 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
       <p> Max Client :<span class="latencyvalue">{{ max_client_latency }}</span></p>
       <p> Client Detail Latency: <span class="latencyvalue">{{ client_details_Latency }}</span></p>
       <p> Max Client Detail Latency :<span class="latencyvalue"> {{ max_client_details_latency }}</span></p>
+      <p> Basket Detail Latency :<span class="latencyvalue"> {{ basket_latency }}</span></p>
+      <p> Max Basket Latency :<span class="latencyvalue"> {{ basket_max_latency }}</span></p>
     </div>
     <div class="navContainer">
       <NavBar :navColumns="['Positions', 'Order', 'TradeBook', 'Combined DF', 'Combined Orders', 'Combined Trades']"
@@ -1683,6 +1766,11 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
 
 .red {
   color: red;
+}
+
+.chartContainer {
+  width: 100%;
+  margin-bottom: 50px;
 }
 
 .selectContainer {
