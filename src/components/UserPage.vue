@@ -1365,6 +1365,7 @@ const combined_trades_xts = [
 ]
 
 const basketData = ref({})
+const strategyData = ref({})
 const selectedUids = ref([]);
 const selectedBasketItems = ref([]);
 
@@ -1399,6 +1400,9 @@ const date = ref()
 const data = ref([])
 const basket_latency = ref([])
 const basket_max_latency = ref([])
+const strategy_latency = ref([])
+const strategy_max_latency = ref([])
+const past_time_strategy = ref(0)
 const past_time_basket = ref(0)
 const client_latency = ref(0)
 const client_details_Latency = ref(0)
@@ -1484,6 +1488,50 @@ const connectToSSE = () => {
   socket.onerror = (error) => {
     console.error('WebSocket error:', error)
   }
+};
+
+
+const connectStrategyWebSocket = () => {
+  const clientStrategySocket = new WebSocket('wss://production.swancapital.in/chart/strategy');
+  clientStrategySocket.onopen = function (e) {
+    console.log("Strategy connection established");
+    // Send the initial set of client data
+    sendClientDetails();
+  };
+
+  clientStrategySocket.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+    let ar2 = data["time"];
+    if (past_time_strategy.value === 0) past_time_strategy.value = ar2;
+    if (past_time_strategy.value != 0) {
+      let date1 = new Date(past_time_strategy.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+      let date2 = new Date(ar2.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+      let diffInMs = date2 - date1;
+      let diffInSeconds = diffInMs / 1000;
+      strategy_latency.value = diffInSeconds;
+      strategy_max_latency.value = Math.max(strategy_max_latency.value, strategy_latency.value)
+      past_time_strategy.value = ar2;
+    }
+    strategyData.value = data
+  };
+  clientStrategySocket.onerror = function (error) {
+    console.log(`WebSocket error: ${error.message}`);
+  };
+  clientStrategySocket.onclose = function (event) {
+    console.log('Client Detail WebSocket connection closed:', event.reason);
+  };
+  function sendClientDetails() {
+    if (clientStrategySocket && clientStrategySocket.readyState === WebSocket.OPEN) {
+      let client_data = {
+        "name": name.value,
+        "basket": ['ALL']
+      };
+      clientStrategySocket.send(JSON.stringify(client_data));
+    } else {
+      console.log("WebSocket is not open. Unable to send message.");
+    }
+  }
+  return clientStrategySocket;
 };
 
 
@@ -1609,6 +1657,7 @@ onMounted(() => {
   name.value = route.params.username;
   connectClientDetailsWebSocket();
   connectBasketWebSocket();
+  connectStrategyWebSocket();
 })
 onUnmounted(() => {
   if (eventSource) {
@@ -1740,6 +1789,11 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
       <p class="table-heading">BASKET WISE IDEAL MTM</p>
       <LightWeightChart v-if="Object.keys(basketData).length > 0" :Chartdata="basketData['live']" />
     </div>
+    <div class="chartContainer">
+      <p class="table-heading">Strategy WISE IDEAL MTM</p>
+      <LightWeightChart v-if="Object.keys(strategyData).length > 0" :Chartdata="strategyData['live']" />
+    </div>
+
 
     <div class="my-8" v-if="Object.keys(basketData).length > 0">
       <p class="table-heading">Current Basket MTM</p>
