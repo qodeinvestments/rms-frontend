@@ -1258,7 +1258,7 @@ const curr_strategy_mtm = [
   columnHelper.accessor(row => row.UID, {
     id: 'UID',
     cell: info => info.getValue(),
-    header: () => 'Basket',
+    header: () => 'UID',
   }),
   columnHelper.accessor(row => row.MTM, {
     id: 'MTM',
