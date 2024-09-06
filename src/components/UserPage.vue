@@ -1254,6 +1254,18 @@ const combined_trades_zerodha = [
   }),
 
 ]
+const curr_strategy_mtm = [
+  columnHelper.accessor(row => row.UID, {
+    id: 'UID',
+    cell: info => info.getValue(),
+    header: () => 'Basket',
+  }),
+  columnHelper.accessor(row => row.MTM, {
+    id: 'MTM',
+    cell: info => info.getValue(),
+    header: () => 'MTM',
+  }),
+]
 const curr_basket_mtm = [
   columnHelper.accessor(row => row.basket, {
     id: 'Basket',
@@ -1802,6 +1814,12 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
       <TanStackTestTable :data="basketData['curr']" :columns="curr_basket_mtm" :hasColor="['MTM']" :navigateTo="[]"
         :showPagination=true />
     </div>
+    <div class="my-8" v-if="Object.keys(strategyData).length > 0">
+      <p class="table-heading">Current Strategy MTM</p>
+      <TanStackTestTable :data="strategyData['curr']" :columns="curr_strategy_mtm" :hasColor="['MTM']" :navigateTo="[]"
+        :showPagination=true />
+    </div>
+
   </div>
 </template>
 <style scoped>
