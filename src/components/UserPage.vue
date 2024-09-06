@@ -1703,6 +1703,8 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
       <p> Max Client Detail Latency :<span class="latencyvalue"> {{ max_client_details_latency }}</span></p>
       <p> Basket Detail Latency :<span class="latencyvalue"> {{ basket_latency }}</span></p>
       <p> Max Basket Latency :<span class="latencyvalue"> {{ basket_max_latency }}</span></p>
+      <p> Strategy Detail Latency :<span class="latencyvalue"> {{ strategy_latency }}</span></p>
+      <p> Max Strategy Latency :<span class="latencyvalue"> {{ strategy_max_latency }}</span></p>
     </div>
     <div class="navContainer">
       <NavBar :navColumns="['Positions', 'Order', 'TradeBook', 'Combined DF', 'Combined Orders', 'Combined Trades']"
