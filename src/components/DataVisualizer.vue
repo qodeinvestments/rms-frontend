@@ -4,6 +4,7 @@ import { MyEnum } from '../Enums/Prefix.js';
 import { ref, watch } from 'vue'
 import Histogram from './Histogram.vue';
 
+import LightWeightChart from './LightWeightChart.vue';
 
 
 const latency = ref(0)
@@ -12,6 +13,7 @@ const past_time = ref(0)
 
 const WS7L = ref([])
 const WS8L = ref([])
+const signal_delay = ref([])
 
 
 
@@ -27,6 +29,7 @@ const connectClientDetailsWebSocket = () => {
 
         WS7L.value = data.WS7L
         WS8L.value = data.WS8L
+        signal_delay.value = data.signal_delay
 
 
 
@@ -84,6 +87,10 @@ onUnmounted(() => {
             <p class="heading">WebSocket 8 Lag</p>
             <Histogram :dataArray="WS8L" />
         </div>
+        <div class="chartContainer">
+            <p class="table-heading">Signal Delay</p>
+            <LightWeightChart v-if="signal_delay.length > 0" :Chartdata="{ 'signal_delay': signal_delay }" />
+        </div>
     </div>
 
 
@@ -94,6 +101,11 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     margin-bottom: 30px;
+}
+
+.chartContainer {
+    width: 100%;
+    margin-bottom: 50px;
 }
 
 .heading {
