@@ -72,7 +72,7 @@ updateSeriesOptions(true);
 .chart-wrapper {
     display: flex;
     flex-direction: column;
-    height: 400px;
+
 }
 
 .chart-container {

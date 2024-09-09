@@ -192,6 +192,6 @@ watch(
 
 <style scoped>
 .lw-chart {
-    height: 100%;
+    height: 500px;
 }
 </style>
