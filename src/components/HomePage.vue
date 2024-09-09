@@ -149,11 +149,11 @@ const client_BackendData = ref({})
 const connection_BackendData = ref({})
 const index_data = ref({})
 const previous_day_close_index_data = {
-  BANKNIFTYSPOT: 51473.05,
-  FINNIFTYSPOT: 23859.50,
-  MIDCPNIFTYSPOT: 13277.40,
-  NIFTYSPOT: 25145.10,
-  SENSEXSPOT: 82201.16
+  BANKNIFTYSPOT: 50576.85,
+  FINNIFTYSPOT: 23529.75,
+  MIDCPNIFTYSPOT: 13066.05,
+  NIFTYSPOT: 24852.15,
+  SENSEXSPOT: 81183.93
 }
 const pulse_signal = ref([])
 const time = ref([])
