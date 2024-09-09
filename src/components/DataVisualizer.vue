@@ -10,8 +10,9 @@ const latency = ref(0)
 const max_latency = ref(0)
 const past_time = ref(0)
 
-const WS3L = ref([])
-const WS4L = ref([])
+const WS7L = ref([])
+const WS8L = ref([])
+
 
 
 
@@ -24,8 +25,8 @@ const connectClientDetailsWebSocket = () => {
     clientDetailSocket.onmessage = function (event) {
         const data = JSON.parse(event.data);
 
-        WS3L.value = data.WS3L
-        WS4L.value = data.WS4L
+        WS7L.value = data.WS7L
+        WS8L.value = data.WS8L
 
 
 
@@ -75,13 +76,13 @@ onUnmounted(() => {
             <p> Latency :<span class="latencyvalue">{{ latency }}</span></p>
             <p> Max Client :<span class="latencyvalue">{{ max_latency }}</span></p>
         </div>
-        <div v-if="WS3L.length > 0" class="histogram-container">
-            <p class="heading">WebSocket 3 Lag</p>
-            <Histogram :dataArray="WS3L" />
+        <div v-if="WS7L.length > 0" class="histogram-container">
+            <p class="heading">WebSocket 7 Lag</p>
+            <Histogram :dataArray="WS7L" />
         </div>
-        <div v-if="WS4L.length > 0" class="histogram-container">
-            <p class="heading">WebSocket 4 Lag</p>
-            <Histogram :dataArray="WS4L" />
+        <div v-if="WS8L.length > 0" class="histogram-container">
+            <p class="heading">WebSocket 8 Lag</p>
+            <Histogram :dataArray="WS8L" />
         </div>
     </div>
 
