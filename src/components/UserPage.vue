@@ -393,6 +393,11 @@ const combined_df_columns_zerodha = [
     cell: info => info.getValue(),
     header: () => 'system_tag',
   }),
+  columnHelper.accessor(row => order_fill_lag, {
+    id: 'order_fill_lag',
+    cell: info => info.getValue(),
+    header: () => 'order_fill_lag',
+  }),
   columnHelper.accessor(row => row.signal_lag, {
     id: 'signal_lag',
     cell: info => info.getValue(),
@@ -620,6 +625,12 @@ const combined_df_columns_xts = [
     id: 'system_tag',
     cell: info => info.getValue(),
     header: () => 'system_tag',
+  }),
+
+  columnHelper.accessor(row => order_fill_lag, {
+    id: 'order_fill_lag',
+    cell: info => info.getValue(),
+    header: () => 'order_fill_lag',
   }),
   columnHelper.accessor(row => row.signal_lag, {
     id: 'signal_lag',
@@ -1378,6 +1389,8 @@ const combined_trades_xts = [
 
 const basketData = ref({})
 const strategyData = ref({})
+const strategy_chart_data = ref({})
+const updated_strategy_data = ref({})
 const selectedUids = ref([]);
 const selectedBasketItems = ref([]);
 
@@ -1525,6 +1538,24 @@ const connectStrategyWebSocket = () => {
       past_time_strategy.value = ar2;
     }
     strategyData.value = data
+    if (data.live) {
+      strategy_chart_data.value = data.live;
+    }
+
+    else {
+      const gg = strategy_chart_data.value
+      updated_strategy_data.value = data;
+      for (const i in data.last) {
+        if (gg[i].length != 0) {
+          const last_data = gg[i][gg[i].length - 1].time;
+          if (last_data != data.last[i].time) {
+            gg[i].push(data.last[i])
+          }
+        }
+      }
+      strategy_chart_data.value = gg;
+    }
+
   };
   clientStrategySocket.onerror = function (error) {
     console.log(`WebSocket error: ${error.message}`);
@@ -1632,7 +1663,7 @@ const connectClientDetailsWebSocket = () => {
         histogram.value = book.value.map(item => item.signal_lag);
 
       uids.value = [...new Set(book.value.map(item => item.uid))];
-      basket.value = [...new Set(book.value.map(item => item.uid.split('_')[0]))];
+      // basket.value = [...new Set(book.value.map(item => item.uid.split('_')[0]))];
 
     } else {
       book.value = [];
@@ -1700,10 +1731,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
         :showPagination=false :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }" />
     </div>
     <!--  <input type="date" v-model="date" /> -->
-    <div class="chartContainer">
-      <p class="table-heading">MTM AND IDEAL MTM</p>
-      <LightWeightChart v-if="user_data['MTMTable']" :Chartdata="mix_real_ideal_mtm_table" />
-    </div>
+
 
 
 
@@ -1799,13 +1827,10 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
       <Histogram :dataArray="histogram" />
     </div>
 
-    <div class="chartContainer">
-      <p class="table-heading">BASKET WISE IDEAL MTM</p>
-      <LightWeightChart v-if="Object.keys(basketData).length > 0" :Chartdata="basketData['live']" />
-    </div>
+
     <div class="chartContainer">
       <p class="table-heading">Strategy WISE IDEAL MTM</p>
-      <LightWeightChart v-if="Object.keys(strategyData).length > 0" :Chartdata="strategyData['live']" />
+      <LightWeightChart v-if="Object.keys(strategy_chart_data).length > 0" :Chartdata="strategy_chart_data" />
     </div>
 
 
