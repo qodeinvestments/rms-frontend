@@ -23,6 +23,7 @@ const name = ref('');
 const broker = ref('')
 const columnHelper = createColumnHelper()
 const histogram = ref([])
+const histogram_order_fill_lag = ref([])
 const uids = ref([])
 const basket = ref([])
 const live_trade_book_columns_zerodha = [
@@ -1656,6 +1657,7 @@ const connectClientDetailsWebSocket = () => {
       book.value = Object.values(data.table_data);
       if (showOnPage.value === 'Combined DF') {
         histogram.value = book.value.map(item => item.signal_lag);
+        histogram_order_fill_lag.value = book.value.map(item => item.order_fill_lag)
         uids.value = [...new Set(book.value.map(item => item.uid))];
         basket.value = [...new Set(book.value.map(item => item.uid.split('_')[0]))];
       }
@@ -1821,6 +1823,12 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
       <TanStackTestTable :data="book" :columns="combined_trades_zerodha" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
+
+    <div v-if="histogram_order_fill_lag.length > 0 && showOnPage === 'Combined DF'" class="histogram-container">
+      <p class="table-heading">Histogram Of Order Fill Lag Combined DF</p>
+      <Histogram :dataArray="histogram_order_fill_lag" />
+    </div>
+
     <div v-if="histogram.length > 0 && showOnPage === 'Combined DF'" class="histogram-container">
       <p class="table-heading">Histogram Of Combined DF</p>
       <Histogram :dataArray="histogram" />
