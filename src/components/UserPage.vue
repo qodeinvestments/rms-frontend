@@ -1650,11 +1650,11 @@ const connectClientDetailsWebSocket = () => {
     }
     if (data.table_data) {
       book.value = Object.values(data.table_data);
-      if (showOnPage.value === 'Combined DF')
+      if (showOnPage.value === 'Combined DF') {
         histogram.value = book.value.map(item => item.signal_lag);
-
-      uids.value = [...new Set(book.value.map(item => item.uid))];
-      // basket.value = [...new Set(book.value.map(item => item.uid.split('_')[0]))];
+        uids.value = [...new Set(book.value.map(item => item.uid))];
+        basket.value = [...new Set(book.value.map(item => item.uid.split('_')[0]))];
+      }
 
     } else {
       book.value = [];
@@ -1691,7 +1691,7 @@ onMounted(() => {
   name.value = route.params.username;
   connectClientDetailsWebSocket();
   connectBasketWebSocket();
-  //connectStrategyWebSocket();
+  connectStrategyWebSocket();
 })
 onUnmounted(() => {
   if (eventSource) {
@@ -1723,6 +1723,10 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     </div>
     <!--  <input type="date" v-model="date" /> -->
 
+    <div class="chartContainer">
+      <p class="table-heading">MTM AND IDEAL MTM</p>
+      <LightWeightChart v-if="user_data['MTMTable']" :Chartdata="mix_real_ideal_mtm_table" />
+    </div>
 
 
 
@@ -1817,7 +1821,10 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
       <p class="table-heading">Histogram Of Combined DF</p>
       <Histogram :dataArray="histogram" />
     </div>
-
+    <div class="chartContainer">
+      <p class="table-heading">BASKET WISE IDEAL MTM</p>
+      <LightWeightChart v-if="Object.keys(basketData).length > 0" :Chartdata="basketData['live']" />
+    </div>
 
     <div class="chartContainer">
       <p class="table-heading">Strategy WISE IDEAL MTM</p>

@@ -57,7 +57,6 @@ const forceChartUpdate = () => {
 watch(
     () => props.Chartdata,
     newData => {
-        console.log("chart data changed ", newData);
         data.value = { ...newData }; // Create a new object reference
         updateSeriesOptions(false);
         debouncedUpdateChart();
