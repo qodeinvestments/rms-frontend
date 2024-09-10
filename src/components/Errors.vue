@@ -279,33 +279,16 @@ onUnmounted(() => {
         </div>
 
         <div class="my-8" v-if="book && showOnPage === 'Order_Errors'">
-            <p class="table-heading">{{ showOnPage }}</p>
-            <TanStackTestTable :data="book" :columns="live_order_book_columns" :hasColor="[]" :navigateTo="[]"
-                :showPagination=true />
+            <!-- <p class="table-heading">{{ showOnPage }}</p> -->
+            <TanStackTestTable :title="showOnPage" :data="book" :columns="live_order_book_columns" :hasColor="[]"
+                :navigateTo="[]" :showPagination=true />
         </div>
         <div class="my-8" v-else-if="book">
-            <p class="table-heading">{{ showOnPage }}</p>
-            <TanStackTestTable :data="book" :columns="columns_testing" :hasColor="[]" :navigateTo="[]"
-                :showPagination=true />
+            <!-- <p class="table-heading">{{ showOnPage }}</p> -->
+            <TanStackTestTable :title="showOnPage" :data="book" :columns="columns_testing" :hasColor="[]"
+                :navigateTo="[]" :showPagination=true />
         </div>
 
-        <!-- 
-
-     
-
-
-        <div class="my-8" v-if="showOnPage === 'Order'">
-            <p class="table-heading">Complete Order Book</p>
-            <TanStackTestTable :data="book" :columns="live_order_book_columns" :hasColor="[]" :navigateTo="[]"
-                :showPagination=true />
-        </div>
-
-
-        <div class="my-8" v-if="showOnPage === 'Combined DF'">
-            <p class="table-heading">Combined DF</p>
-            <TanStackTestTable :data="book" :columns="combined_df_columns" :hasColor="[]" :navigateTo="[]"
-                :showPagination=true />
-        </div> -->
 
     </div>
 

@@ -9,11 +9,25 @@ import {
     getSortedRowModel,
     getFilteredRowModel,
 } from '@tanstack/vue-table'
+import * as XLSX from 'xlsx';
+const download = (type) => {
+    const file_name = props.title + '.' + type
+    const data = props.data
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    XLSX.writeFile(wb, file_name);
+}
+
 
 // Define the props
 const props = defineProps({
     data: {
         type: Array,
+        required: true
+    },
+    title: {
+        type: String,
         required: true
     },
     columns: {
@@ -96,38 +110,7 @@ watchEffect(() => {
     rows.value = finalRows.slice(start, end)
 })
 
-const downloadCSV = () => {
-    // Use the original data passed as a prop
-    const data = props.data
 
-    // Get the headers from the first data object
-    const headers = Object.keys(data[0])
-
-    // Create CSV content
-    let csv = headers.join(',') + '\n'
-
-    data.forEach(row => {
-        csv += headers.map(header => {
-            let cellValue = row[header] ?? ''
-            // Convert to string and wrap in quotes if it contains a comma or is a string
-            cellValue = typeof cellValue === 'string' ? `"${cellValue}"` : cellValue.toString()
-            return cellValue
-        }).join(',') + '\n'
-    })
-
-    // Create a Blob with the CSV content
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-
-    // Create a link element and trigger download
-    const link = document.createElement('a')
-    link.setAttribute('href', url)
-    link.setAttribute('download', 'table_data.csv')
-    link.style.visibility = 'hidden'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-}
 // Pagination methods
 const nextPage = () => {
     if (currentPage.value < pageCount.value - 1) {
@@ -172,16 +155,22 @@ onUnmounted(() => {
 
 <template>
     <div class="px-4 sm:px-6 lg:px-8 pb-8 bg-white drop-shadow-sm">
+        <p class="table-heading">{{ title }}</p>
         <div class="mt-8 flow-root">
             <div class="my-4">
                 <input type="text" class="border border-gray-400 rounded px-2 py-2" placeholder="Search"
                     v-model="filter" v-if="showPagination" />
-                <button @click="downloadCSV"
+                <button @click="download('csv')"
                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     Download CSV
                 </button>
+                <button @click="download('xlsx')"
+                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                    Download Excel
+                </button>
 
             </div>
+
             <div class="table-container -mx-4 -my-2 overflow-x-auto overflow-y-auto sm:-mx-6 lg:-mx-8">
                 <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                     <table class="min-w-full divide-y divide-gray-300">
@@ -280,6 +269,12 @@ onUnmounted(() => {
 
 .red {
     color: red;
+}
+
+.table-heading {
+    font-size: 22px;
+    font-weight: 600;
+    margin-left: 30px;
 }
 
 .green {

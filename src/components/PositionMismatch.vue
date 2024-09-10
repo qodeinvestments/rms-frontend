@@ -209,9 +209,9 @@ onUnmounted(() => {
             <p class="table-heading">Select User !</p>
         </div>
         <div v-else-if="Object.keys(data).length > 0" class="mx-auto px-8 py-8">
-            <p class="table-heading">Position MisMatch : {{ user }}</p>
-            <TanStackTestTable :data="data" :columns="columns" :hasColor="[]" :navigateTo="{}" :showPagination="true"
-                :hasRowcolor="{}" />
+            <!-- <p class="table-heading">Position MisMatch : {{ user }}</p> -->
+            <TanStackTestTable title="Position MisMatch" :data="data" :columns="columns" :hasColor="[]" :navigateTo="{}"
+                :showPagination="true" :hasRowcolor="{}" />
         </div>
 
         <div v-else class="mx-auto px-8 py-8">

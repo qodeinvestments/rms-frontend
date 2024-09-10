@@ -411,9 +411,9 @@ onUnmounted(() => {
 
     <div class="mx-auto px-8 py-8">
       <div class="my-8">
-        <p class="table-heading">Accounts</p>
-        <TanStackTestTable :data="data" :columns="columns" :hasColor="['IdealMTM', 'Day_PL', 'Friction']"
-          :navigateTo="NavigationMap" :showPagination=true
+        <!-- <p class="table-heading">Accounts</p> -->
+        <TanStackTestTable title="Accounts" :data="data" :columns="columns"
+          :hasColor="['IdealMTM', 'Day_PL', 'Friction']" :navigateTo="NavigationMap" :showPagination=true
           :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }" />
       </div>
 

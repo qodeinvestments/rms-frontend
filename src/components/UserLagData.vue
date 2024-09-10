@@ -13,7 +13,6 @@ import {
 import { MyEnum } from '../Enums/Prefix.js';
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router';
-import TanStackTestTable from './TanStackTestTable.vue'
 import Chart from './Chart.vue';
 import MultiLineChart from './HighCharts.vue'
 

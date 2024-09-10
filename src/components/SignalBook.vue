@@ -222,9 +222,9 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
             :options="filteredOptions.map(item => ({ value: item }))"></a-select>
 
         <div class="my-8" v-if="filteredSignalBookData.length">
-            <p class="table-heading">Signal Book</p>
-            <TanStackTestTable :data="filteredSignalBookData" :columns="columns" :hasColor="[]" :navigateTo="[]"
-                :showPagination=true />
+            <!-- <p class="table-heading">Signal Book</p> -->
+            <TanStackTestTable title="Signal Book" :data="filteredSignalBookData" :columns="columns" :hasColor="[]"
+                :navigateTo="[]" :showPagination=true />
         </div>
         <div v-if="histogram.length > 0" class="histogram-container">
             <p class="table-heading">Histogram Of Time Difference</p>
