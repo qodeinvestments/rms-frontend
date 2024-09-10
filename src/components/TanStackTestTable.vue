@@ -154,112 +154,125 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="px-4 sm:px-6 lg:px-8 pb-8 bg-white drop-shadow-sm">
+    <div>
         <p class="table-heading">{{ title }}</p>
-        <div class="mt-8 flow-root">
-            <div class="my-4">
-                <input type="text" class="border border-gray-400 rounded px-2 py-2" placeholder="Search"
-                    v-model="filter" v-if="showPagination" />
-                <button @click="download('csv')"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Download CSV
-                </button>
-                <button @click="download('xlsx')"
-                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                    Download Excel
-                </button>
+        <div class="px-4 sm:px-6 lg:px-8 pb-8 bg-white drop-shadow-sm">
 
-            </div>
+            <div class="mt-8 flow-root">
+                <div class="my-4">
+                    <input type="text" class="border border-gray-400 rounded px-2 py-2" placeholder="Search"
+                        v-model="filter" v-if="showPagination" />
+                    <button @click="download('csv')"
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Download CSV
+                    </button>
+                    <button @click="download('xlsx')"
+                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                        Download Excel
+                    </button>
 
-            <div class="table-container -mx-4 -my-2 overflow-x-auto overflow-y-auto sm:-mx-6 lg:-mx-8">
-                <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                    <table class="min-w-full divide-y divide-gray-300">
-                        <thead>
-                            <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-                                <th v-for="header in headerGroup.headers" :key="header.id" scope="col"
-                                    class="whitespace-nowrap px-3 py-3.5 text-left text-sm font-semibold text-gray-900 borderright"
-                                    :class="{
-                                        'cursor-pointer select-none': header.column.getCanSort(),
-                                        'sticky-header': header.index === 0,
-                                    }" @click="header.column.getToggleSortingHandler()?.($event)">
-                                    <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
-                                    {{ { asc: ' ↑', desc: '↓' }[header.column.getIsSorted()] }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            <tr v-for="row in rows" :key="row.id">
-                                <td v-for="(cell, index) in row.getVisibleCells()" :key="cell.id"
-                                    class="maxwidth150 break-words whitespace-normal px-3 py-4 text-sm text-black-600"
-                                    :class="{
-                                        'sticky-column': index === 0,
-                                        'red': cell.getValue() < 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
-                                        'green': cell.getValue() > 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
-                                        'cursorpointer': tellnav(cell)
-                                        // 'redbackground': hasRowcolor && hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]),
-                                        // 'greenbackground': hasRowcolor && !(hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]))
-                                    }" @click="checkNavigate(cell)">
-                                    <template v-if="cell.getValue() !== undefined">
-                                        <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
-                                    </template>
-                                    <template v-else>
-                                        N/A
-                                    </template>
-                                </td>
-                                <!-- <td v-for="(cell, index) in row.getVisibleCells()" :key="cell.id"
-                                    class="maxwidth150 break-words whitespace-normal px-3 py-4 text-sm text-black-600"
-                                    :class="{
-                                        'sticky-column': index === 0,
-                                        'red': cell.getValue() < 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
-                                        'green': cell.getValue() > 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
-                                        'redbackground': hasRowcolor && hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]),
-                                        'greenbackground': hasRowcolor && !(hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]))
-                                    }" @click="checkNavigate(cell)">
-                                    <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
-                                </td> -->
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
-            </div>
-            <div class="mt-8" v-if="showPagination">
-                Page {{ currentPage + 1 }} of {{ pageCount }} -
-                {{ table.getFilteredRowModel().rows.length }} results
-            </div>
-            <div class="mt-8 space-x-4" v-if="showPagination">
-                <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    @click="setPageSize(5)">
-                    Page Size 5
-                </button>
-                <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    @click="setPageSize(10)">
-                    Page Size 10
-                </button>
-                <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    @click="setPageSize(20)">
-                    Page Size 20
-                </button>
-            </div>
-            <div class="space-x-4 mt-8" v-if="showPagination">
-                <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    @click="currentPage = 0">
-                    First page
-                </button>
-                <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    @click="currentPage = pageCount - 1">
-                    Last page
-                </button>
-                <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    :disabled="currentPage === 0" @click="previousPage">
-                    Prev page
-                </button>
-                <button class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    :disabled="currentPage === pageCount - 1" @click="nextPage">
-                    Next page
-                </button>
+
+                <div class="table-container -mx-4 -my-2 overflow-x-auto overflow-y-auto sm:-mx-6 lg:-mx-8">
+                    <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                        <table class="min-w-full divide-y divide-gray-300">
+                            <thead>
+                                <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+                                    <th v-for="header in headerGroup.headers" :key="header.id" scope="col"
+                                        class="whitespace-nowrap px-3 py-3.5 text-left text-sm font-semibold text-gray-900 borderright"
+                                        :class="{
+                                            'cursor-pointer select-none': header.column.getCanSort(),
+                                            'sticky-header': header.index === 0,
+                                        }" @click="header.column.getToggleSortingHandler()?.($event)">
+                                        <FlexRender :render="header.column.columnDef.header"
+                                            :props="header.getContext()" />
+                                        {{ { asc: ' ↑', desc: '↓' }[header.column.getIsSorted()] }}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr v-for="row in rows" :key="row.id">
+                                    <td v-for="(cell, index) in row.getVisibleCells()" :key="cell.id"
+                                        class="maxwidth150 break-words whitespace-normal px-3 py-4 text-sm text-black-600"
+                                        :class="{
+                                            'sticky-column': index === 0,
+                                            'red': cell.getValue() < 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
+                                            'green': cell.getValue() > 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
+                                            'cursorpointer': tellnav(cell)
+                                            // 'redbackground': hasRowcolor && hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]),
+                                            // 'greenbackground': hasRowcolor && !(hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]))
+                                        }" @click="checkNavigate(cell)">
+                                        <template v-if="cell.getValue() !== undefined">
+                                            <FlexRender :render="cell.column.columnDef.cell"
+                                                :props="cell.getContext()" />
+                                        </template>
+                                        <template v-else>
+                                            N/A
+                                        </template>
+                                    </td>
+                                    <!-- <td v-for="(cell, index) in row.getVisibleCells()" :key="cell.id"
+                            class="maxwidth150 break-words whitespace-normal px-3 py-4 text-sm text-black-600"
+                            :class="{
+                                'sticky-column': index === 0,
+                                'red': cell.getValue() < 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
+                                'green': cell.getValue() > 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
+                                'redbackground': hasRowcolor && hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]),
+                                'greenbackground': hasRowcolor && !(hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]))
+                            }" @click="checkNavigate(cell)">
+                            <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+                        </td> -->
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="mt-8" v-if="showPagination">
+                    Page {{ currentPage + 1 }} of {{ pageCount }} -
+                    {{ table.getFilteredRowModel().rows.length }} results
+                </div>
+                <div class="mt-8 space-x-4" v-if="showPagination">
+                    <button
+                        class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        @click="setPageSize(5)">
+                        Page Size 5
+                    </button>
+                    <button
+                        class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        @click="setPageSize(10)">
+                        Page Size 10
+                    </button>
+                    <button
+                        class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        @click="setPageSize(20)">
+                        Page Size 20
+                    </button>
+                </div>
+                <div class="space-x-4 mt-8" v-if="showPagination">
+                    <button
+                        class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        @click="currentPage = 0">
+                        First page
+                    </button>
+                    <button
+                        class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        @click="currentPage = pageCount - 1">
+                        Last page
+                    </button>
+                    <button
+                        class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        :disabled="currentPage === 0" @click="previousPage">
+                        Prev page
+                    </button>
+                    <button
+                        class="border border-gray-300 rounded px-2 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        :disabled="currentPage === pageCount - 1" @click="nextPage">
+                        Next page
+                    </button>
+                </div>
             </div>
         </div>
     </div>
+
 </template>
 
 <style scoped>
