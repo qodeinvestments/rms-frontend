@@ -393,11 +393,7 @@ const combined_df_columns_zerodha = [
     cell: info => info.getValue(),
     header: () => 'system_tag',
   }),
-  columnHelper.accessor(row => order_fill_lag, {
-    id: 'order_fill_lag',
-    cell: info => info.getValue(),
-    header: () => 'order_fill_lag',
-  }),
+
   columnHelper.accessor(row => row.signal_lag, {
     id: 'signal_lag',
     cell: info => info.getValue(),
@@ -627,11 +623,6 @@ const combined_df_columns_xts = [
     header: () => 'system_tag',
   }),
 
-  columnHelper.accessor(row => order_fill_lag, {
-    id: 'order_fill_lag',
-    cell: info => info.getValue(),
-    header: () => 'order_fill_lag',
-  }),
   columnHelper.accessor(row => row.signal_lag, {
     id: 'signal_lag',
     cell: info => info.getValue(),
@@ -1700,7 +1691,7 @@ onMounted(() => {
   name.value = route.params.username;
   connectClientDetailsWebSocket();
   connectBasketWebSocket();
-  connectStrategyWebSocket();
+  //connectStrategyWebSocket();
 })
 onUnmounted(() => {
   if (eventSource) {
