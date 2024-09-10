@@ -1387,10 +1387,10 @@ const combined_trades_xts = [
   }),
 ]
 
-const basketData = ref({})
 const strategyData = ref({})
 const strategy_chart_data = ref({})
-const updated_strategy_data = ref({})
+const basketData = ref({})
+const basket_chart_data = ref({})
 const selectedUids = ref([]);
 const selectedBasketItems = ref([]);
 
@@ -1484,7 +1484,7 @@ const LagPageHandler = () => {
 
 }
 const connectToSSE = () => {
-  const socket = new WebSocket('wss://production.swancapital.in/ws');
+  const socket = new WebSocket('ws://localhost:8000/ws');
   socket.onmessage = (event) => {
     if (event.data === 'ping') {
       socket.send('pong')
@@ -1517,7 +1517,7 @@ const connectToSSE = () => {
 
 
 const connectStrategyWebSocket = () => {
-  const clientStrategySocket = new WebSocket('wss://production.swancapital.in/chart/strategy');
+  const clientStrategySocket = new WebSocket('ws://localhost:8000/chart/strategy');
   clientStrategySocket.onopen = function (e) {
     console.log("Strategy connection established");
     // Send the initial set of client data
@@ -1544,7 +1544,6 @@ const connectStrategyWebSocket = () => {
 
     else {
       const gg = strategy_chart_data.value
-      updated_strategy_data.value = data;
       for (const i in data.last) {
         if (gg[i].length != 0) {
           const last_data = gg[i][gg[i].length - 1].time;
@@ -1579,7 +1578,7 @@ const connectStrategyWebSocket = () => {
 
 
 const connectBasketWebSocket = () => {
-  const clientBasketSocket = new WebSocket('wss://production.swancapital.in/chart/basket');
+  const clientBasketSocket = new WebSocket('ws://localhost:8000/chart/basket');
   clientBasketSocket.onopen = function (e) {
     console.log("Basket connection established");
     // Send the initial set of client data
@@ -1600,6 +1599,22 @@ const connectBasketWebSocket = () => {
       past_time_basket.value = ar2;
     }
     basketData.value = data
+    if (data.live) {
+      basket_chart_data.value = data.live;
+    }
+
+    else {
+      const gg = basket_chart_data.value
+      for (const i in data.last) {
+        if (gg[i].length != 0) {
+          const last_data = gg[i][gg[i].length - 1].time;
+          if (last_data != data.last[i].time) {
+            gg[i].push(data.last[i])
+          }
+        }
+      }
+      basket_chart_data.value = gg;
+    }
 
   };
   clientBasketSocket.onerror = function (error) {
@@ -1631,7 +1646,7 @@ const connectBasketWebSocket = () => {
 
 
 const connectClientDetailsWebSocket = () => {
-  const clientDetailSocket = new WebSocket('wss://production.swancapital.in/clientdetails');
+  const clientDetailSocket = new WebSocket('ws://localhost:8000/clientdetails');
   clientDetailSocket.onopen = function (e) {
     console.log("Client details connection established");
     // Send the initial set of client data
@@ -1800,7 +1815,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
 
     <div class="chartContainer">
       <p class="table-heading">BASKET WISE IDEAL MTM</p>
-      <LightWeightChart v-if="Object.keys(basketData).length > 0" :Chartdata="basketData['live']" />
+      <LightWeightChart v-if="Object.keys(basket_chart_data).length > 0" :Chartdata="basket_chart_data" />
     </div>
 
     <div class="chartContainer">
