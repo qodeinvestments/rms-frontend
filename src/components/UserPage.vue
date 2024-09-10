@@ -1717,17 +1717,12 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
 </script>
 <template>
   <div class="px-8 py-8 pageContainer">
-    <!-- <TableOriginal /> -->
-    <!-- <TableTanstack :data="people" :columns="columnsPeople" />
-<div class="my-8">
-<TableTanstack :data="cars" :columns="columnsCars" />
-</div> -->
+
     <div class="heading-container">
       <p class="table-heading LagButton" @click="LagPageHandler()">Lags </p>
     </div>
 
     <div class="my-8">
-      <!-- <p class="table-heading">Account Details </p> -->
       <TanStackTestTable title="Account Details" :data="data" :columns="columns"
         :hasColor="['IdealMTM', 'Day_PL', 'Friction']" :navigateTo="[]" :showPagination=false
         :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }" />
@@ -1772,35 +1767,30 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     </div>
 
     <div class="my-8" v-if="book && showOnPage === 'TradeBook'">
-      // <p class="table-heading">Complete Trade Book</p>
       <TanStackTestTable title="Complete Trade Book" :data="book"
         :columns="broker === 'xts' ? live_trade_book_columns_xts : live_trade_book_columns_zerodha" :hasColor="[]"
         :navigateTo="[]" :showPagination=true />
     </div>
 
     <div class="my-8" v-if="book && showOnPage === 'Order'">
-      // <p class="table-heading">Complete Order Book</p>
       <TanStackTestTable title="Complete Order Book" :data="book"
         :columns="broker === 'xts' ? live_order_book_columns_xts : live_order_book_columns_zerodha" :hasColor="[]"
         :navigateTo="[]" :showPagination=true />
     </div>
 
     <div class="my-8" v-if="book && showOnPage === 'Combined DF' && filteredSignalBookData.length">
-      // <p class="table-heading">Combined DF</p>
       <TanStackTestTable title="Combined DF" :data="filteredSignalBookData"
         :columns="broker === 'xts' ? combined_df_columns_xts : combined_df_columns_zerodha" :hasColor="[]"
         :navigateTo="[]" :showPagination=true />
     </div>
 
     <div class="my-8" v-if="book && showOnPage === 'Combined Orders'">
-      // <p class="table-heading">Combined Orders</p>
       <TanStackTestTable title="Combined Orders" :data="book"
         :columns="broker === 'xts' ? combined_order_xts : combined_order_zerodha" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
 
     <div class="my-8" v-if="book && showOnPage === 'Combined Trades'">
-      // <p class="table-heading">Combined Trades</p>
       <TanStackTestTable title="Combined Trades" :data="book"
         :columns="broker === 'xts' ? combined_trades_xts : combined_trades_zerodha" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
