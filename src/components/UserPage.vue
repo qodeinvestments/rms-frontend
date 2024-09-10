@@ -622,7 +622,11 @@ const combined_df_columns_xts = [
     cell: info => info.getValue(),
     header: () => 'system_tag',
   }),
-
+  columnHelper.accessor(row => row.order_fill_lag, {
+    id: 'order_fill_lag',
+    cell: info => info.getValue(),
+    header: () => 'order_fill_lag',
+  }),
   columnHelper.accessor(row => row.signal_lag, {
     id: 'signal_lag',
     cell: info => info.getValue(),
