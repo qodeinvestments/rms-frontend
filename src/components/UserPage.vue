@@ -394,7 +394,11 @@ const combined_df_columns_zerodha = [
     cell: info => info.getValue(),
     header: () => 'system_tag',
   }),
-
+  columnHelper.accessor(row => row.order_fill_lag, {
+    id: 'order_fill_lag',
+    cell: info => info.getValue(),
+    header: () => 'order_fill_lag',
+  }),
   columnHelper.accessor(row => row.signal_lag, {
     id: 'signal_lag',
     cell: info => info.getValue(),
@@ -1830,7 +1834,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     </div>
 
     <div v-if="histogram.length > 0 && showOnPage === 'Combined DF'" class="histogram-container">
-      <p class="table-heading">Histogram Of Combined DF</p>
+      <p class="table-heading">Histogram Of Signal Lag Combined DF</p>
       <Histogram :dataArray="histogram" />
     </div>
     <div class="chartContainer">
@@ -1845,12 +1849,12 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
 
 
     <div class="my-8" v-if="Object.keys(basketData).length > 0">
-      <p class="table-heading">Current Basket MTM</p>
+      <p class="table-heading">Current Basket Ideal MTM</p>
       <TanStackTestTable :data="basketData['curr']" :columns="curr_basket_mtm" :hasColor="['MTM']" :navigateTo="[]"
         :showPagination=true />
     </div>
     <div class="my-8" v-if="Object.keys(strategyData).length > 0">
-      <p class="table-heading">Current Strategy MTM</p>
+      <p class="table-heading">Current Strategy Ideal MTM</p>
       <TanStackTestTable :data="strategyData['curr']" :columns="curr_strategy_mtm" :hasColor="['MTM']" :navigateTo="[]"
         :showPagination=true />
     </div>
