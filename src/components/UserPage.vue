@@ -1828,15 +1828,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
         :showPagination=true />
     </div>
 
-    <div v-if="histogram_order_fill_lag.length > 0 && showOnPage === 'Combined DF'" class="histogram-container">
-      <p class="table-heading">Histogram Of Order Fill Lag Combined DF</p>
-      <Histogram :dataArray="histogram_order_fill_lag" />
-    </div>
 
-    <div v-if="histogram.length > 0 && showOnPage === 'Combined DF'" class="histogram-container">
-      <p class="table-heading">Histogram Of Signal Lag Combined DF</p>
-      <Histogram :dataArray="histogram" />
-    </div>
     <div class="chartContainer">
       <p class="table-heading">BASKET WISE IDEAL MTM</p>
       <LightWeightChart v-if="Object.keys(basketData).length > 0" :Chartdata="basketData['live']" />
@@ -1857,6 +1849,15 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
       <p class="table-heading">Current Strategy Ideal MTM</p>
       <TanStackTestTable :data="strategyData['curr']" :columns="curr_strategy_mtm" :hasColor="['MTM']" :navigateTo="[]"
         :showPagination=true />
+    </div>
+    <div v-if="histogram_order_fill_lag.length > 0 && showOnPage === 'Combined DF'" class="histogram-container">
+      <p class="table-heading">Histogram Of Order Fill Lag Combined DF</p>
+      <Histogram :dataArray="histogram_order_fill_lag" />
+    </div>
+
+    <div v-if="histogram.length > 0 && showOnPage === 'Combined DF'" class="histogram-container">
+      <p class="table-heading">Histogram Of Signal Lag Combined DF</p>
+      <Histogram :dataArray="histogram" />
     </div>
 
   </div>
