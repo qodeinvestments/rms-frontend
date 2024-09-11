@@ -1820,7 +1820,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     <div class="signalPosContainer">
       <div v-for="(basket, index) in signal_position_tables" :key="index">
         <div class="my-8" v-if="signal_position_tables">
-          <TanStackTestTable :title="index" :data="basket" :columns="signal_position" :hasColor="['value']"
+          <TanStackTestTable :title="index" :data="basket" :columns="signal_position" :hasColor="['IdealQuantity']"
             :navigateTo="[]" :showPagination=true />
         </div>
       </div>
