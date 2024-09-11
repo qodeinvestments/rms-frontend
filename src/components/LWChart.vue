@@ -129,21 +129,25 @@ onMounted(() => {
         ) {
             tooltip.value.style.display = 'none';
         } else {
-            const dateStr = new Date(param.time * 1000).toLocaleDateString();
+            // Format time directly from provided data
+            const adjustedTime = param.time - 19800;
+            const dateTimeStr = new Date(adjustedTime * 1000).toLocaleString(); // Format adjusted time
             tooltip.value.style.display = 'block';
-            let tooltipHtml = `<div class="tooltip-date">${dateStr}</div>`;
+            let tooltipHtml = `<div class="tooltip-date">${dateTimeStr}</div>`;
 
             Object.keys(props.data).forEach(key => {
-                const data = param.seriesData.get(series[Object.keys(props.data).indexOf(key)]);
+                const seriesIndex = Object.keys(props.data).indexOf(key);
+                const data = param.seriesData.get(series[seriesIndex]);
+
                 if (data) {
                     tooltipHtml += `
-                        <div class="tooltip-series">
-                            <span class="tooltip-series-name">${key}:</span>
-                            <span class="tooltip-series-value" style="color: ${data.value < 0 ? 'red' : 'green'};">
-                                ${data.value.toFixed(2)}
-                            </span>
-                        </div>
-                    `;
+                    <div class="tooltip-series">
+                        <span class="tooltip-series-name">${key}:</span>
+                        <span class="tooltip-series-value" style="color: ${data.value < 0 ? 'red' : 'green'};">
+                            ${data.value.toFixed(2)}
+                        </span>
+                    </div>
+                `;
                 }
             });
 
