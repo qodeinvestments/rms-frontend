@@ -5,7 +5,7 @@ import {
     onUnmounted,
     watch,
 } from 'vue';
-import { createChart } from 'lightweight-charts';
+import { createChart, ColorType } from 'lightweight-charts';
 
 const props = defineProps({
     type: {
@@ -47,6 +47,7 @@ let series = [];
 let chart;
 
 const chartContainer = ref();
+const tooltip = ref();
 
 const fitContent = () => {
     if (!chart) return;
@@ -86,7 +87,20 @@ const addSeriesAndData = (props) => {
 };
 
 onMounted(() => {
-    chart = createChart(chartContainer.value, props.chartOptions);
+    chart = createChart(chartContainer.value, {
+        ...props.chartOptions,
+        layout: {
+            textColor: 'black',
+            background: { type: ColorType.Solid, color: 'white' },
+        },
+        crosshair: {
+            horzLine: {
+                visible: false,
+                labelVisible: false,
+            },
+        },
+    });
+
     addSeriesAndData(props);
 
     if (props.priceScaleOptions) {
@@ -102,6 +116,54 @@ onMounted(() => {
     if (props.autosize) {
         window.addEventListener('resize', resizeHandler);
     }
+
+    // Add tooltip functionality
+    chart.subscribeCrosshairMove(param => {
+        if (
+            param.point === undefined ||
+            !param.time ||
+            param.point.x < 0 ||
+            param.point.x > chartContainer.value.clientWidth ||
+            param.point.y < 0 ||
+            param.point.y > chartContainer.value.clientHeight
+        ) {
+            tooltip.value.style.display = 'none';
+        } else {
+            const dateStr = new Date(param.time * 1000).toLocaleDateString();
+            tooltip.value.style.display = 'block';
+            let tooltipHtml = `<div class="tooltip-date">${dateStr}</div>`;
+
+            Object.keys(props.data).forEach(key => {
+                const data = param.seriesData.get(series[Object.keys(props.data).indexOf(key)]);
+                if (data) {
+                    tooltipHtml += `
+                        <div class="tooltip-series">
+                            <span class="tooltip-series-name">${key}:</span>
+                            <span class="tooltip-series-value">${data.value.toFixed(2)}</span>
+                        </div>
+                    `;
+                }
+            });
+
+            tooltip.value.innerHTML = tooltipHtml;
+
+            const toolTipWidth = 120;
+            const toolTipHeight = 80;
+            const toolTipMargin = 15;
+
+            let left = param.point.x + toolTipMargin;
+            if (left > chartContainer.value.clientWidth - toolTipWidth) {
+                left = param.point.x - toolTipMargin - toolTipWidth;
+            }
+
+            let top = param.point.y + toolTipMargin;
+            if (top > chartContainer.value.clientHeight - toolTipHeight) {
+                top = param.point.y - toolTipHeight - toolTipMargin;
+            }
+            tooltip.value.style.left = `${left}px`;
+            tooltip.value.style.top = `${top}px`;
+        }
+    });
 });
 
 onUnmounted(() => {
@@ -187,11 +249,59 @@ watch(
 </script>
 
 <template>
-    <div class="lw-chart" ref="chartContainer"></div>
+    <div class="chart-wrapper">
+        <div class="lw-chart" ref="chartContainer"></div>
+        <div ref="tooltip" class="tooltip"></div>
+    </div>
 </template>
 
 <style scoped>
-.lw-chart {
+.chart-wrapper {
+    position: relative;
+    width: 100%;
     height: 500px;
+}
+
+.lw-chart {
+    width: 100%;
+    height: 100%;
+}
+
+.tooltip {
+    position: absolute;
+    display: none;
+    padding: 8px;
+    box-sizing: border-box;
+    font-size: 12px;
+    text-align: left;
+    z-index: 1000;
+    top: 12px;
+    left: 12px;
+    pointer-events: none;
+    border: 1px solid #2196F3;
+    border-radius: 2px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Trebuchet MS', Roboto, Ubuntu, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: white;
+    color: black;
+    width: 120px;
+}
+
+.tooltip-date {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.tooltip-series {
+    margin-top: 3px;
+}
+
+.tooltip-series-name {
+    color: #2196F3;
+}
+
+.tooltip-series-value {
+    float: right;
 }
 </style>
