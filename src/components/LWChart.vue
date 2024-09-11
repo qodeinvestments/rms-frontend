@@ -139,7 +139,9 @@ onMounted(() => {
                     tooltipHtml += `
                         <div class="tooltip-series">
                             <span class="tooltip-series-name">${key}:</span>
-                            <span class="tooltip-series-value">${data.value.toFixed(2)}</span>
+                            <span class="tooltip-series-value" style="color: ${data.value < 0 ? 'red' : 'green'};">
+                                ${data.value.toFixed(2)}
+                            </span>
                         </div>
                     `;
                 }
@@ -285,7 +287,7 @@ watch(
     -moz-osx-font-smoothing: grayscale;
     background: white;
     color: black;
-    width: 120px;
+    width: fit-content;
 }
 
 .tooltip-date {
