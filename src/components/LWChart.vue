@@ -78,6 +78,7 @@ const addSeriesAndData = (props) => {
         const options = props.seriesOptions[index] || {};
         const newSeries = chart[seriesConstructor]({
             ...options,
+            crosshairMarkerVisible: false, // Disable crosshair marker on data points
             title: '', // Set empty title initially
         });
         newSeries.setData(props.data[key]);
@@ -94,9 +95,14 @@ onMounted(() => {
             background: { type: ColorType.Solid, color: 'white' },
         },
         crosshair: {
+            mode: 0, // Keep in Normal mode, or adjust as needed
+            vertLine: {
+                visible: true, // Disable the vertical line
+                labelVisible: true, // Disable labels on the x-axis
+            },
             horzLine: {
-                visible: false,
-                labelVisible: false,
+                visible: true, // Disable the vertical line
+                labelVisible: true, // Disable labels on the x-axis
             },
         },
     });

@@ -86,11 +86,6 @@ const live_trade_book_columns_xts = [
     cell: info => info.getValue(),
     header: () => 'ExchangeTransactTime',
   }),
-  columnHelper.accessor(row => row.ExchangeInstrumentID, {
-    id: 'ExchangeInstrumentID',
-    cell: info => info.getValue(),
-    header: () => 'ExchangeInstrumentID',
-  }),
   columnHelper.accessor(row => row.OrderAverageTradedPrice, {
     id: 'OrderAverageTradedPrice',
     cell: info => info.getValue(),
@@ -708,11 +703,6 @@ const combined_df_columns_xts = [
     id: 'ExchangeSegment',
     cell: info => info.getValue(),
     header: () => 'ExchangeSegment'
-  }),
-  columnHelper.accessor(row => row.ExchangeInstrumentID, {
-    id: 'ExchangeInstrumentID',
-    cell: info => info.getValue(),
-    header: () => 'ExchangeInstrumentID'
   }),
   columnHelper.accessor(row => row.OrderType, {
     id: 'OrderType',
