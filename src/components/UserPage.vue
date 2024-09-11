@@ -270,6 +270,19 @@ const live_order_book_columns_xts = [
     header: () => 'CancelRejectReason',
   }),
 ]
+const signal_position = [
+
+  columnHelper.accessor(row => row.Trade, {
+    id: 'Trade',
+    cell: info => info.getValue(),
+    header: () => 'Trade',
+  }),
+  columnHelper.accessor(row => row.value, {
+    id: 'value',
+    cell: info => info.getValue(),
+    header: () => 'value',
+  }),
+]
 const columns = [
 
   columnHelper.accessor(row => row.AccountName, {
@@ -1426,6 +1439,7 @@ const past_time_clientDetails = ref(0)
 const max_client_details_latency = ref(0)
 const max_client_latency = ref(0)
 const mix_real_ideal_mtm_table = ref({})
+const signal_position_tables = ref({})
 const book = ref([])
 const position_sum = ref(0)
 const handleColumnClick = ({ item, index }) => {
@@ -1436,6 +1450,7 @@ const handleMessage = (message) => {
     if (message.client_data === undefined) return;
     client_BackendData.value = message.client_data
     let result = client_BackendData.value.find(client => client.name === name.value);
+    signal_position_tables.value = result.signalPosition
     broker.value = result.broker;
     if (result) {
       user_data.value = result;
@@ -1802,7 +1817,14 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
         :columns="broker === 'xts' ? combined_trades_xts : combined_trades_zerodha" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
-
+    <div class="signalPosContainer">
+      <div v-for="(basket, index) in signal_position_tables" :key="index">
+        <div class="my-8" v-if="signal_position_tables">
+          <TanStackTestTable :title="index" :data="basket" :columns="signal_position" :hasColor="[]" :navigateTo="[]"
+            :showPagination=true />
+        </div>
+      </div>
+    </div>
 
 
     <div class="chartContainer">
@@ -1852,6 +1874,12 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
+}
+
+.signalPosContainer {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .red {
