@@ -272,15 +272,15 @@ const live_order_book_columns_xts = [
 ]
 const signal_position = [
 
-  columnHelper.accessor(row => row.Trade, {
-    id: 'Trade',
+  columnHelper.accessor(row => row.Symbol, {
+    id: 'Symbol',
     cell: info => info.getValue(),
-    header: () => 'Trade',
+    header: () => 'Symbol',
   }),
-  columnHelper.accessor(row => row.value, {
-    id: 'value',
+  columnHelper.accessor(row => row.IdealQuantity, {
+    id: 'IdealQuantity',
     cell: info => info.getValue(),
-    header: () => 'value',
+    header: () => 'IdealQuantity',
   }),
 ]
 const columns = [
