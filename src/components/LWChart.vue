@@ -124,58 +124,58 @@ onMounted(() => {
     }
 
     // Add tooltip functionality
-    chart.subscribeCrosshairMove(param => {
-        if (
-            param.point === undefined ||
-            !param.time ||
-            param.point.x < 0 ||
-            param.point.x > chartContainer.value.clientWidth ||
-            param.point.y < 0 ||
-            param.point.y > chartContainer.value.clientHeight
-        ) {
-            tooltip.value.style.display = 'none';
-        } else {
-            // Format time directly from provided data
-            const adjustedTime = param.time - 19800;
-            const dateTimeStr = new Date(adjustedTime * 1000).toLocaleString(); // Format adjusted time
-            tooltip.value.style.display = 'block';
-            let tooltipHtml = `<div class="tooltip-date">${dateTimeStr}</div>`;
+    // chart.subscribeCrosshairMove(param => {
+    //     if (
+    //         param.point === undefined ||
+    //         !param.time ||
+    //         param.point.x < 0 ||
+    //         param.point.x > chartContainer.value.clientWidth ||
+    //         param.point.y < 0 ||
+    //         param.point.y > chartContainer.value.clientHeight
+    //     ) {
+    //         tooltip.value.style.display = 'none';
+    //     } else {
+    //         // Format time directly from provided data
+    //         const adjustedTime = param.time - 19800;
+    //         const dateTimeStr = new Date(adjustedTime * 1000).toLocaleString(); // Format adjusted time
+    //         tooltip.value.style.display = 'block';
+    //         let tooltipHtml = `<div class="tooltip-date">${dateTimeStr}</div>`;
 
-            Object.keys(props.data).forEach(key => {
-                const seriesIndex = Object.keys(props.data).indexOf(key);
-                const data = param.seriesData.get(series[seriesIndex]);
+    //         Object.keys(props.data).forEach(key => {
+    //             const seriesIndex = Object.keys(props.data).indexOf(key);
+    //             const data = param.seriesData.get(series[seriesIndex]);
 
-                if (data) {
-                    tooltipHtml += `
-                    <div class="tooltip-series">
-                        <span class="tooltip-series-name">${key}:</span>
-                        <span class="tooltip-series-value" style="color: ${data.value < 0 ? 'red' : 'green'};">
-                            ${data.value.toFixed(2)}
-                        </span>
-                    </div>
-                `;
-                }
-            });
+    //             if (data) {
+    //                 tooltipHtml += `
+    //                 <div class="tooltip-series">
+    //                     <span class="tooltip-series-name">${key}:</span>
+    //                     <span class="tooltip-series-value" style="color: ${data.value < 0 ? 'red' : 'green'};">
+    //                         ${data.value.toFixed(2)}
+    //                     </span>
+    //                 </div>
+    //             `;
+    //             }
+    //         });
 
-            tooltip.value.innerHTML = tooltipHtml;
+    //         tooltip.value.innerHTML = tooltipHtml;
 
-            const toolTipWidth = 120;
-            const toolTipHeight = 80;
-            const toolTipMargin = 15;
+    //         const toolTipWidth = 120;
+    //         const toolTipHeight = 80;
+    //         const toolTipMargin = 15;
 
-            let left = param.point.x + toolTipMargin;
-            if (left > chartContainer.value.clientWidth - toolTipWidth) {
-                left = param.point.x - toolTipMargin - toolTipWidth;
-            }
+    //         let left = param.point.x + toolTipMargin;
+    //         if (left > chartContainer.value.clientWidth - toolTipWidth) {
+    //             left = param.point.x - toolTipMargin - toolTipWidth;
+    //         }
 
-            let top = param.point.y + toolTipMargin;
-            if (top > chartContainer.value.clientHeight - toolTipHeight) {
-                top = param.point.y - toolTipHeight - toolTipMargin;
-            }
-            tooltip.value.style.left = `${left}px`;
-            tooltip.value.style.top = `${top}px`;
-        }
-    });
+    //         let top = param.point.y + toolTipMargin;
+    //         if (top > chartContainer.value.clientHeight - toolTipHeight) {
+    //             top = param.point.y - toolTipHeight - toolTipMargin;
+    //         }
+    //         tooltip.value.style.left = `${left}px`;
+    //         tooltip.value.style.top = `${top}px`;
+    //     }
+    // });
 });
 
 onUnmounted(() => {
