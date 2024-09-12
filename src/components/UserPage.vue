@@ -1395,6 +1395,7 @@ const strategy_chart_data = ref({})
 const basketData = ref({})
 const basket_chart_data = ref({})
 const selectedUids = ref([]);
+const selectedSignalPositions = ref([])
 const selectedBasketItems = ref([]);
 
 const filteredBasketOptions = computed(() => basket.value.filter(o => !selectedBasketItems.value.includes(o)));
@@ -1421,6 +1422,11 @@ const filteredSignalBookData = computed(() => {
     return basketMatch && uidMatch;
   });
 });
+
+
+
+
+
 let eventSource = null
 const client_BackendData = ref([])
 const connection_BackendData = ref([])
@@ -1781,6 +1787,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
         :options="filteredOptions.map(item => ({ value: item }))"></a-select>
     </div>
 
+
     <div class="my-8" v-if="book && showOnPage === 'Positions'">
       <p class="table-heading">Live MTM : <span :class="position_sum > 0 ? 'green' : 'red'">{{ position_sum }}</span>
       </p>
@@ -1817,9 +1824,15 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
         :columns="broker === 'xts' ? combined_trades_xts : combined_trades_zerodha" :hasColor="[]" :navigateTo="[]"
         :showPagination=true />
     </div>
-    <div class="signalPosContainer">
-      <div v-for="(basket, index) in signal_position_tables" :key="index">
-        <div class="my-8" v-if="signal_position_tables">
+
+    <div class="signalPosContainer" v-if="signal_position_tables">
+      <p class="table-heading">Signal Positions</p>
+      <div class="multiselectContainer">
+        <a-select v-model:value="selectedSignalPositions" mode="multiple" placeholder="Select Baskets"
+          style="width: 100%" :options="Object.keys(signal_position_tables).map(item => ({ value: item }))"></a-select>
+      </div>
+      <div v-for=" (basket, index) in signal_position_tables" :key="index">
+        <div class="my-8" v-if="selectedSignalPositions.includes(index)">
           <TanStackTestTable :title="index" :data="basket" :columns="signal_position" :hasColor="['IdealQuantity']"
             :navigateTo="[]" :showPagination=true />
         </div>
@@ -1880,6 +1893,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
   display: flex;
   width: 100%;
   flex-wrap: wrap;
+  margin-bottom: 50px;
 }
 
 .red {
@@ -1888,13 +1902,24 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
 
 .chartContainer {
   width: 100%;
-  margin-bottom: 50px;
+  margin-top: 50px;
+}
+
+.multiselectContainer {
+  width: 100%;
+  margin-top: 50px;
+}
+
+p {
+  margin: 0;
+  padding: 0;
 }
 
 .selectContainer {
   display: flex;
   flex-direction: column;
   gap: 20px;
+
   margin-top: 50px;
 }
 
