@@ -148,13 +148,13 @@ const columns = [
 const client_BackendData = ref({})
 const connection_BackendData = ref({})
 const index_data = ref({})
-const previous_day_close_index_data = {
+const previous_day_close_index_data = ref({
   BANKNIFTYSPOT: 51117.80,
   FINNIFTYSPOT: 23722.15,
   MIDCPNIFTYSPOT: 13007.45,
   NIFTYSPOT: 24936.40,
   SENSEXSPOT: 81559.54
-}
+})
 const pulse_signal = ref([])
 const time = ref([])
 const serverData = ref({})
@@ -176,6 +176,9 @@ const give_percentage_change = (a, b) => {
 const handleMessage = (message) => {
   client_BackendData.value = message.client_data
   connection_BackendData.value = message.connection_data
+  if (message.connection_data)
+    previous_day_close_index_data.value = message.connection_data['history_live_index']
+  // console.log("previous_day_close_index_data is:", previous_day_close_index_data.value)
   updateData()
 }
 
@@ -321,10 +324,10 @@ const formatNumber = (value) => {
   return val ? val.toLocaleString() : '0'
 }
 const getDifference = (key) => {
-  return (index_data.value[key].toFixed(2) - previous_day_close_index_data[key]).toFixed(2);
+  return (index_data.value[key].toFixed(2) - previous_day_close_index_data.value[key]).toFixed(2);
 }
 const getPercentage = (key) => {
-  const change = give_percentage_change(index_data.value[key], previous_day_close_index_data[key]);
+  const change = give_percentage_change(index_data.value[key], previous_day_close_index_data.value[key]);
   return change.toFixed(2);
 }
 const formatPercentage = (value) => {
