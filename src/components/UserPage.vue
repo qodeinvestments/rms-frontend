@@ -345,6 +345,16 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'OpenQuantity',
   }),
+  columnHelper.accessor(row => row.openOrderCount, {
+    id: 'OpenOrderCount',
+    cell: info => info.getValue(),
+    header: () => 'OpenOrderCount',
+  }),
+  columnHelper.accessor(row => row.CompleteOrderCount, {
+    id: 'CompleteOrderCount',
+    cell: info => info.getValue(),
+    header: () => 'CompleteOrderCount',
+  }),
   columnHelper.accessor(row => row.RejectedOrderCount, {
     id: 'RejectedOrderCount',
     cell: info => info.getValue(),
@@ -370,21 +380,13 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'HoldingsDayPL',
   }),
+
   columnHelper.accessor(row => row.TotalOrderCount, {
     id: 'TotalOrderCount',
     cell: info => info.getValue(),
     header: () => 'TotalOrderCount',
   }),
-  columnHelper.accessor(row => row.OpenOrderCount, {
-    id: 'OpenOrderCount',
-    cell: info => info.getValue(),
-    header: () => 'OpenOrderCount',
-  }),
-  columnHelper.accessor(row => row.CompleteOrderCount, {
-    id: 'CompleteOrderCount',
-    cell: info => info.getValue(),
-    header: () => 'CompleteOrderCount',
-  }),
+
   columnHelper.accessor(row => row.PositionsCount, {
     id: 'PositionsCount',
     cell: info => info.getValue(),
@@ -395,6 +397,7 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'HoldingsCount',
   }),
+
 ]
 const combined_df_columns_zerodha = [
   columnHelper.accessor(row => row.system_tag, {
@@ -1467,6 +1470,8 @@ const handleMessage = (message) => {
         Friction: result.MTM !== undefined && result.ideal_MTM !== undefined
           ? (Number(result.MTM) - Number(result.ideal_MTM)).toFixed(2)
           : '0.00',
+        CompleteOrderCount: result.CompleteOrderCount !== undefined ? Number(result.CompleteOrderCount) : 0,
+        openOrderCount: result.openOrderCount !== undefined ? Number(result.openOrderCount) : 0,
         RejectedOrderCount: result.Rejected_orders !== undefined ? Number(result.Rejected_orders) : 0,
         PendingOrderCount: result.Pending_orders !== undefined ? Number(result.Pending_orders) : 0,
         OpenQuantity: result.OpenQuantity !== undefined ? Number(result.OpenQuantity) : 0,

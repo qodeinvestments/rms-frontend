@@ -89,6 +89,16 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'OpenQuantity',
   }),
+  columnHelper.accessor(row => row.openOrderCount, {
+    id: 'OpenOrderCount',
+    cell: info => info.getValue(),
+    header: () => 'OpenOrderCount',
+  }),
+  columnHelper.accessor(row => row.CompleteOrderCount, {
+    id: 'CompleteOrderCount',
+    cell: info => info.getValue(),
+    header: () => 'CompleteOrderCount',
+  }),
   columnHelper.accessor(row => row.RejectedOrderCount, {
     id: 'RejectedOrderCount',
     cell: info => info.getValue(),
@@ -120,16 +130,7 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'TotalOrderCount',
   }),
-  columnHelper.accessor(row => row.OpenOrderCount, {
-    id: 'OpenOrderCount',
-    cell: info => info.getValue(),
-    header: () => 'OpenOrderCount',
-  }),
-  columnHelper.accessor(row => row.CompleteOrderCount, {
-    id: 'CompleteOrderCount',
-    cell: info => info.getValue(),
-    header: () => 'CompleteOrderCount',
-  }),
+
   columnHelper.accessor(row => row.PositionsCount, {
     id: 'PositionsCount',
     cell: info => info.getValue(),
@@ -178,7 +179,6 @@ const handleMessage = (message) => {
   connection_BackendData.value = message.connection_data
   if (message.connection_data)
     previous_day_close_index_data.value = message.connection_data['history_live_index']
-  // console.log("previous_day_close_index_data is:", previous_day_close_index_data.value)
   updateData()
 }
 
@@ -208,6 +208,8 @@ const updateData = () => {
       Friction: item.MTM !== undefined && item.ideal_MTM !== undefined
         ? (Number(item.MTM) - Number(item.ideal_MTM)).toFixed(2)
         : '0.00',
+      CompleteOrderCount: item.CompleteOrderCount !== undefined ? Number(item.CompleteOrderCount) : 0,
+      openOrderCount: item.openOrderCount !== undefined ? Number(item.openOrderCount) : 0,
       RejectedOrderCount: item.Rejected_orders !== undefined ? Number(item.Rejected_orders) : 0,
       PendingOrderCount: item.Pending_orders !== undefined ? Number(item.Pending_orders) : 0,
       OpenQuantity: item.OpenQuantity !== undefined ? Number(item.OpenQuantity) : 0,
