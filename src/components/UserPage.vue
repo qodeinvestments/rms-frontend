@@ -312,12 +312,18 @@ const columns = [
   }),
   columnHelper.accessor(row => row.VAR, {
     id: 'VAR',
-    cell: info => info.getValue(),
+    cell: info => {
+      const value = info.getValue(); // Get the value
+      return (typeof value === 'number' ? value : Number(value)).toFixed(2); // Ensure it's a number and format
+    },
     header: () => 'VAR \u20B9',
   }),
   columnHelper.accessor(row => row.VAR_PERCENTAGE, {
     id: 'VAR %',
-    cell: info => info.getValue() + "%",
+    cell: info => {
+      const value = info.getValue(); // Get the value
+      return (typeof value === 'number' ? value : Number(value)).toFixed(2) + "%"; // Ensure it's a number and format
+    },
     header: () => 'VAR %',
   }),
   columnHelper.accessor(row => row.Used_Margin, {
