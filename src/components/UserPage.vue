@@ -1734,6 +1734,31 @@ const connectClientDetailsWebSocket = () => {
   });
   return clientDetailSocket;
 };
+
+
+
+// New refs for selected items
+const selectedStrategies = ref([]);
+const filteredData = computed(() => {
+  if (strategyData.value['curr'] === undefined) return []
+  if (selectedStrategies.value.length === 0) return strategyData.value['curr'];
+  return strategyData.value['curr'].filter(item => selectedStrategies.value.includes(item.UID));
+
+})
+// Computed properties for filtered options
+const filteredStrategyOptions = computed(() => {
+  if (strategyData.value['curr'] === undefined) return [];
+
+  // Get all UIDs from strategyData['curr']
+  const allUIDs = strategyData.value['curr'].map(item => item.UID);
+
+  // Filter out UIDs that are present in selectedStrategies
+  const filteredUIDs = allUIDs.filter(uid => !selectedStrategies.value.includes(uid));
+
+  return filteredUIDs;
+});
+
+
 const showOnPage = ref('Positions')
 onMounted(() => {
   connectToSSE();
@@ -1866,8 +1891,14 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
       <TanStackTestTable title="Current Basket Ideal MTM" :data="basketData['curr']" :columns="curr_basket_mtm"
         :hasColor="['MTM']" :navigateTo="[]" :showPagination=true />
     </div>
+
+    <div class="selectContainer">
+      <a-select v-model:value="selectedStrategies" mode="multiple" placeholder="Select Strategies"
+        style="width: 100%; margin-bottom: 10px;"
+        :options="filteredStrategyOptions.map(item => ({ value: item }))"></a-select>
+    </div>
     <div class="my-8" v-if="Object.keys(strategyData).length > 0">
-      <TanStackTestTable title="Current Strategy Ideal MTM" :data="strategyData['curr']" :columns="curr_strategy_mtm"
+      <TanStackTestTable title="Current Strategy Ideal MTM" :data="filteredData" :columns="curr_strategy_mtm"
         :hasColor="['MTM']" :navigateTo="[]" :showPagination=true />
     </div>
     <div v-if="histogram_order_fill_lag.length > 0 && showOnPage === 'Combined DF'" class="histogram-container">
