@@ -244,6 +244,16 @@ const live_order_book_columns_xts = [
     cell: info => info.getValue(),
     header: () => 'OrderAverageTradedPrice',
   }),
+  columnHelper.accessor(row => row.CumulativeQuantity, {
+    id: 'CumulativeQuantity',
+    cell: info => info.getValue(),
+    header: () => 'CumulativeQuantity',
+  }),
+  columnHelper.accessor(row => row.AppOrderID, {
+    id: 'AppOrderID',
+    cell: info => info.getValue(),
+    header: () => 'AppOrderID',
+  }),
   columnHelper.accessor(row => row.OrderSide, {
     id: 'OrderSide',
     cell: info => info.getValue(),
@@ -1487,7 +1497,7 @@ const handleMessage = (message) => {
         Cash: result.cashAvailable !== undefined ? Number(result.cashAvailable) : 0,
         AvailableMargin: result.availableMargin !== undefined ? Number(result.availableMargin) : 0,
         Used_Margin: result.marginUtilized !== undefined ? Number(result.marginUtilized) : 0,
-        VAR_PERCENTAGE: result.Live_Client_Var !== undefined && (20000000 > 0) ? ((Number(result.Live_Client_Var) / Number(20000000)) * 100).toPrecision(4) : 0,
+        VAR_PERCENTAGE: result.Live_Client_Var !== undefined && (95000000 > 0) ? ((Number(result.Live_Client_Var) / Number(95000000)) * 100).toPrecision(4) : 0,
       }];
       mix_real_ideal_mtm_table.value = { "real": result['MTMTable'], "ideal": result['ideal_MTMTable'] }
       position_sum.value = result.MTM !== undefined ? Number(result.MTM) : 0
