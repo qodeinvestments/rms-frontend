@@ -218,6 +218,23 @@ columnHelper.accessor(row => row.status_message, {
   header: () => 'status_message',
 }),
 ]
+const fund_summary_columns = [
+  columnHelper.accessor(row => row.Date, {
+    id: 'Date',
+    cell: info => info.getValue(),
+    header: () => 'Date',
+  }),
+  columnHelper.accessor(row => row['Actual MTM'], {
+    id: 'Actual MTM',
+    cell: info => info.getValue(),
+    header: () => 'Actual MTM',
+  }),
+  columnHelper.accessor(row => row['Peak Margin'], {
+    id: 'Peak Margin',
+    cell: info => info.getValue(),
+    header: () => 'Peak Margin',
+  })
+]
 const live_order_book_columns_xts = [
   columnHelper.accessor(row => row.OrderGeneratedDateTime, {
     id: 'OrderGeneratedDateTime',
@@ -1822,7 +1839,8 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
       <p> Max Strategy Latency :<span class="latencyvalue"> {{ strategy_max_latency }}</span></p>
     </div>
     <div class="navContainer">
-      <NavBar :navColumns="['Positions', 'Order', 'TradeBook', 'Combined DF', 'Combined Orders', 'Combined Trades']"
+      <NavBar
+        :navColumns="['Positions', 'Order', 'TradeBook', 'Combined DF', 'Combined Orders', 'Combined Trades', 'Fund Summary']"
         @column-clicked="handleColumnClick" :colorColumns="[]" />
     </div>
     <div class="selectContainer" v-if="book && showOnPage === 'Combined DF' && filteredSignalBookData.length">
@@ -1852,6 +1870,11 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
         :columns="broker === 'xts' ? live_order_book_columns_xts : live_order_book_columns_zerodha" :hasColor="[]"
         :navigateTo="[]" :showPagination=true />
     </div>
+    <div class="my-8" v-if="book && showOnPage === 'Fund Summary'">
+      <TanStackTestTable title="Fund Summary" :data="book" :columns="fund_summary_columns" :hasColor="[]"
+        :navigateTo="[]" :showPagination=true />
+    </div>
+
 
     <div class="my-8" v-if="book && showOnPage === 'Combined DF' && filteredSignalBookData.length">
       <TanStackTestTable title="Combined DF" :data="filteredSignalBookData"
