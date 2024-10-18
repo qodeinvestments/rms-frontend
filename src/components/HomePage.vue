@@ -50,7 +50,7 @@ const columns = [
       const value = info.getValue(); // Get the value
       return (typeof value === 'number' ? value : Number(value)).toFixed(2) + "%"; // Ensure it's a number and format
     },
-    header: () => 'PNL_PER_UM %',
+    header: () => 'PNL Overall %',
   }),
   columnHelper.accessor(row => row.PNL_PER_M, {
     id: 'PNL_PER_M',
@@ -58,13 +58,13 @@ const columns = [
       const value = info.getValue(); // Get the value
       return (typeof value === 'number' ? value : Number(value)).toFixed(2) + "%"; // Ensure it's a number and format
     },
-    header: () => 'PNL_PER_M %',
+    header: () => 'PNL Utilized %',
   }),
 
-  columnHelper.accessor(row => row.Friction, {
-    id: 'Friction',
+  columnHelper.accessor(row => row.Slippage, {
+    id: 'Slippage',
     cell: info => info.getValue(),
-    header: () => 'Friction',
+    header: () => 'Slippage',
   }),
   columnHelper.accessor(row => row.Ideal_Margin, {
     id: 'Ideal Margin',
@@ -87,14 +87,18 @@ const columns = [
     },
     header: () => 'VAR %',
   }),
+
+  columnHelper.accessor(row => row.Peak_Margin, {
+    id: 'Peak_Margin',
+    cell: info => info.getValue(),
+    header: () => 'Peak Margin',
+  }),
   columnHelper.accessor(row => row.Margin, {
     id: ' Margin',
-    cell: info => {
-      const value = info.getValue(); // Get the value
-      return (typeof value === 'number' ? value : Number(value)).toFixed(2); // Ensure it's a number and format
-    },
+    cell: info => info.getValue(),
     header: () => 'Margin',
   }),
+
 
   columnHelper.accessor(row => row.Used_Margin, {
     id: 'Used_Margin',
@@ -235,14 +239,12 @@ const updateData = () => {
 
 
       AccountName: item.name || '',
-      IdealMTM: item.ideal_MTM !== undefined ? Number(item.ideal_MTM) : 0,
-      Day_PL: item.MTM !== undefined ? Number(item.MTM) : 0,
-      Day_PL: item.MTM !== undefined ? Number(item.MTM) : 0,
-      PNL_PER_UM: item.MTM !== undefined ? Number((item.MTM / 110000000) * 100) : 0,
-      PNL_PER_M: item.marginUtilized !== undefined ? Number((item.MTM / item.marginUtilized) * 100) : 0,
-      Friction: item.MTM !== undefined && item.ideal_MTM !== undefined
-        ? (Number(item.MTM) - Number(item.ideal_MTM)).toFixed(2)
-        : '0.00',
+      IdealMTM: item.ideal_MTM !== undefined ? item.ideal_MTM : 0,
+      Day_PL: item.MTM !== undefined ? item.MTM : 0,
+      PNL_PER_UM: item['PNL Utilized %'] !== undefined ? Number(item['PNL Utilized %']) : 0,
+      PNL_PER_M: item['PNL Overall %'] !== undefined ? Number(item['PNL Overall %']) : 0,
+      Peak_Margin: item['Peak Margin'] !== undefined ? item['Peak Margin'] : 0,
+      Slippage: item.Slippage !== undefined ? item.Slippage : 0,
       CompleteOrderCount: item.CompleteOrderCount !== undefined ? Number(item.CompleteOrderCount) : 0,
       openOrderCount: item.openOrderCount !== undefined ? Number(item.openOrderCount) : 0,
       RejectedOrderCount: item.Rejected_orders !== undefined ? Number(item.Rejected_orders) : 0,
@@ -250,11 +252,11 @@ const updateData = () => {
       OpenQuantity: item.OpenQuantity !== undefined ? Number(item.OpenQuantity) : 0,
       NetQuantity: item.NetQuantity !== undefined ? Number(item.NetQuantity) : 0,
       Ideal_Margin: item.Live_Client_Margin !== undefined ? Number(item.Live_Client_Margin) : 0,
-      VAR: item.Live_Client_Var !== undefined ? Number(item.Live_Client_Var) : 0,
-      Margin: 110000000,
+      VAR: item.Live_Client_Var !== undefined ? item.Live_Client_Var : 0,
+      Margin: item['Total Margin'] !== undefined ? item['Total Margin'] : 0, //item.Total Margin',
       Cash: item.cashAvailable !== undefined ? Number(item.cashAvailable) : 0,
       AvailableMargin: item.availableMargin !== undefined ? Number(item.availableMargin) : 0,
-      Used_Margin: item.marginUtilized !== undefined ? Number(item.marginUtilized) : 0,
+      Used_Margin: item.marginUtilized !== undefined ? item.marginUtilized : 0,
       VAR_PERCENTAGE: item.Live_Client_Var !== undefined && (110000000 > 0) ? ((Number(item.Live_Client_Var) / Number(110000000)) * 100).toPrecision(4) : 0,
     }))
   }
@@ -453,7 +455,7 @@ onUnmounted(() => {
       <div class="my-8">
         <!-- <p class="table-heading">Accounts</p> -->
         <TanStackTestTable title="Accounts" :data="data" :columns="columns"
-          :hasColor="['IdealMTM', 'Day_PL', 'Friction', 'PNL_PER_UM', 'PNL_PER_M']" :navigateTo="NavigationMap"
+          :hasColor="['IdealMTM', 'Day_PL', 'Slippage', 'PNL_PER_UM', 'PNL_PER_M']" :navigateTo="NavigationMap"
           :showPagination=true :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }" />
 
 

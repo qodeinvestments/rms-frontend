@@ -227,17 +227,32 @@ export default {
 }
 
 .sidebar {
-  position: relative;
   width: 256px;
   height: 100vh;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background-color: #4E47E5;
+
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.05),
+      rgba(32, 32, 32, 0.1),
+      rgba(255, 255, 255, 0.05));
+  background-blend-mode: overlay;
+
   padding: 24px;
-  /* border-radius: 30px; */
-  transition: all 0.3s;
+  transition: all 0.3s ease-in-out;
+
+
+  backdrop-filter: blur(20px) saturate(250%);
+  -webkit-backdrop-filter: blur(20px) saturate(250%);
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  box-shadow:
+    inset 0 0 8px rgba(255, 255, 255, 0.2),
+    0 4px 10px rgba(0, 0, 0, 0.3);
 }
+
 
 .sidebar .head {
   display: flex;
@@ -264,7 +279,7 @@ export default {
 .menu .title {
   font-size: 10px;
   font-weight: 500;
-  color: #fff;
+  color: black;
   text-transform: uppercase;
   margin-bottom: 10px;
 }
@@ -296,7 +311,7 @@ export default {
   gap: 10px;
   font-size: 14px;
   font-weight: 500;
-  color: #fff;
+  color: black;
   text-decoration: none;
   padding: 12px 8px;
   border-radius: 8px;
@@ -357,13 +372,13 @@ export default {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #fff;
+  color: black;
   border: 2px solid #f6f6f6;
-  background-color: #4E47E5;
+  background-color: #fff;
 }
 
 .menu-btn:hover i {
-  color: #fff;
+  color: black;
 }
 
 .menu-btn i {
@@ -404,7 +419,7 @@ export default {
   transform: translateY(-50%);
   padding: 10px;
   border-radius: 4px;
-  color: #fff;
+  color: black;
   background-color: #000;
   opacity: 0;
   visibility: hidden;
