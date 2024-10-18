@@ -327,6 +327,23 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'Day_PL',
   }),
+  columnHelper.accessor(row => row.PNL_PER_UM, {
+    id: 'PNL_PER_UM',
+    cell: info => {
+      const value = info.getValue(); // Get the value
+      return (typeof value === 'number' ? value : Number(value)).toFixed(2) + "%"; // Ensure it's a number and format
+    },
+    header: () => 'PNL_PER_UM %',
+  }),
+  columnHelper.accessor(row => row.PNL_PER_M, {
+    id: 'PNL_PER_M',
+    cell: info => {
+      const value = info.getValue(); // Get the value
+      return (typeof value === 'number' ? value : Number(value)).toFixed(2) + "%"; // Ensure it's a number and format
+    },
+    header: () => 'PNL_PER_M %',
+  }),
+
   columnHelper.accessor(row => row.Friction, {
     id: 'Friction',
     cell: info => info.getValue(),
@@ -353,6 +370,15 @@ const columns = [
     },
     header: () => 'VAR %',
   }),
+  columnHelper.accessor(row => row.Margin, {
+    id: ' Margin',
+    cell: info => {
+      const value = info.getValue(); // Get the value
+      return (typeof value === 'number' ? value : Number(value)).toFixed(2); // Ensure it's a number and format
+    },
+    header: () => 'Margin',
+  }),
+
   columnHelper.accessor(row => row.Used_Margin, {
     id: 'Used_Margin',
     cell: info => info.getValue(),
@@ -1500,6 +1526,8 @@ const handleMessage = (message) => {
         AccountName: result.name || '',
         IdealMTM: result.ideal_MTM !== undefined ? Number(result.ideal_MTM) : 0,
         Day_PL: result.MTM !== undefined ? Number(result.MTM) : 0,
+        PNL_PER_UM: result.MTM !== undefined ? Number((result.MTM / 110000000) * 100) : 0,
+        PNL_PER_M: result.marginUtilized !== undefined ? Number((result.MTM / result.marginUtilized) * 100) : 0,
         Friction: result.MTM !== undefined && result.ideal_MTM !== undefined
           ? (Number(result.MTM) - Number(result.ideal_MTM)).toFixed(2)
           : '0.00',
@@ -1511,6 +1539,7 @@ const handleMessage = (message) => {
         NetQuantity: result.NetQuantity !== undefined ? Number(result.NetQuantity) : 0,
         Ideal_Margin: result.Live_Client_Margin !== undefined ? Number(result.Live_Client_Margin) : 0,
         VAR: result.Live_Client_Var !== undefined ? Number(result.Live_Client_Var) : 0,
+        Margin: 110000000,
         Cash: result.cashAvailable !== undefined ? Number(result.cashAvailable) : 0,
         AvailableMargin: result.availableMargin !== undefined ? Number(result.availableMargin) : 0,
         Used_Margin: result.marginUtilized !== undefined ? Number(result.marginUtilized) : 0,
@@ -1815,7 +1844,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
 
     <div class="my-8">
       <TanStackTestTable title="Account Details" :data="data" :columns="columns"
-        :hasColor="['IdealMTM', 'Day_PL', 'Friction']" :navigateTo="[]" :showPagination=false
+        :hasColor="['IdealMTM', 'Day_PL', 'Friction', 'PNL_PER_UM', 'PNL_PER_M']" :navigateTo="[]" :showPagination=false
         :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }" />
     </div>
     <!--  <input type="date" v-model="date" /> -->
