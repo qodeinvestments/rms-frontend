@@ -1902,7 +1902,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
         :navigateTo="[]" :showPagination=true />
     </div>
     <div class="my-8" v-if="book && showOnPage === 'Fund Summary'">
-      <TanStackTestTable title="Fund Summary" :data="book" :columns="fund_summary_columns" :hasColor="[]"
+      <TanStackTestTable title="Fund Summary" :data="book" :columns="fund_summary_columns" :hasColor="['Actual MTM']"
         :navigateTo="[]" :showPagination=true />
     </div>
 
