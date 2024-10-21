@@ -50,7 +50,7 @@ const columns = [
       const value = info.getValue(); // Get the value
       return (typeof value === 'number' ? value : Number(value)).toFixed(2) + "%"; // Ensure it's a number and format
     },
-    header: () => 'PNL Overall %',
+    header: () => 'PNL Utilized %',
   }),
   columnHelper.accessor(row => row.PNL_PER_M, {
     id: 'PNL_PER_M',
@@ -58,7 +58,7 @@ const columns = [
       const value = info.getValue(); // Get the value
       return (typeof value === 'number' ? value : Number(value)).toFixed(2) + "%"; // Ensure it's a number and format
     },
-    header: () => 'PNL Utilized %',
+    header: () => 'PNL Overall %',
   }),
 
   columnHelper.accessor(row => row.Slippage, {
