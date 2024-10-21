@@ -217,9 +217,10 @@ onUnmounted(() => {
                                             'cursorpointer': tellnav(cell)
                                         }" @click="checkNavigate(cell)">
                                         <template v-if="cell.getValue() !== undefined">
-                                            {{ !isNaN(cell.getValue()) ? formatIndianNumber(cell.getValue()) :
-                                                cell.getValue() }}
+                                            {{ typeof cell.getValue() === 'number' ? formatIndianNumber(cell.getValue())
+                                            : cell.getValue() }}
                                         </template>
+
                                         <template v-else>
                                             N/A
                                         </template>
