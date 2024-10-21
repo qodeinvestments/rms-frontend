@@ -99,6 +99,22 @@ const table = useVueTable({
 const pageCount = ref(0)
 const rows = ref([])
 
+// Add this after the existing imports
+// Add after imports
+const formatIndianNumber = (value) => {
+    if (value === null || value === undefined || value === '') return value;
+    const num = Number(value);
+    if (isNaN(num)) return value;
+
+    const [integerPart, decimalPart] = num.toString().split('.');
+    const lastThree = integerPart.slice(-3);
+    const remaining = integerPart.slice(0, -3);
+    const withCommas = remaining ?
+        remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree :
+        lastThree;
+
+    return decimalPart ? `${withCommas}.${decimalPart}` : withCommas;
+}
 watchEffect(() => {
     const filteredRows = table.getFilteredRowModel().rows
     const sortedRows = table.getSortedRowModel().rows
@@ -199,12 +215,10 @@ onUnmounted(() => {
                                             'red': cell.getValue() < 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
                                             'green': cell.getValue() > 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
                                             'cursorpointer': tellnav(cell)
-                                            // 'redbackground': hasRowcolor && hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]),
-                                            // 'greenbackground': hasRowcolor && !(hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]))
                                         }" @click="checkNavigate(cell)">
                                         <template v-if="cell.getValue() !== undefined">
-                                            <FlexRender :render="cell.column.columnDef.cell"
-                                                :props="cell.getContext()" />
+                                            {{ !isNaN(cell.getValue()) ? formatIndianNumber(cell.getValue()) :
+                                                cell.getValue() }}
                                         </template>
                                         <template v-else>
                                             N/A
