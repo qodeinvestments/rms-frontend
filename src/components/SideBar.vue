@@ -419,7 +419,7 @@ export default {
   transform: translateY(-50%);
   padding: 10px;
   border-radius: 4px;
-  color: black;
+  color: #fff;
   background-color: #000;
   opacity: 0;
   visibility: hidden;
