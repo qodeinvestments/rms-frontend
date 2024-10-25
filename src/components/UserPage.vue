@@ -229,6 +229,11 @@ const fund_summary_columns = [
     cell: info => info.getValue(),
     header: () => 'Actual MTM',
   }),
+  columnHelper.accessor(row => row['Ideal MTM'], {
+    id: 'Ideal MTM',
+    cell: info => info.getValue(),
+    header: () => 'Ideal MTM',
+  }),
   columnHelper.accessor(row => row['Peak Margin'], {
     id: 'Peak Margin',
     cell: info => info.getValue(),
@@ -1902,8 +1907,8 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
         :navigateTo="[]" :showPagination=true />
     </div>
     <div class="my-8" v-if="book && showOnPage === 'Fund Summary'">
-      <TanStackTestTable title="Fund Summary" :data="book" :columns="fund_summary_columns" :hasColor="['Actual MTM']"
-        :navigateTo="[]" :showPagination=true />
+      <TanStackTestTable title="Fund Summary" :data="book" :columns="fund_summary_columns"
+        :hasColor="['Actual MTM', 'Ideal MTM']" :navigateTo="[]" :showPagination=true />
     </div>
 
 
