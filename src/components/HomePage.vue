@@ -44,6 +44,7 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'Day_PL',
   }),
+
   columnHelper.accessor(row => row.PNL_PER_UM, {
     id: 'PNL_PER_UM',
     cell: info => {
@@ -110,6 +111,17 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'AvailableMargin',
   }),
+  columnHelper.accessor(row => row.Slippage1, {
+    id: 'Slippage1',
+    cell: info => info.getValue(),
+    header: () => 'Ideal Slippage 0.5 %',
+  }),
+  columnHelper.accessor(row => row.Slippage2 ,{
+    id: 'Slippage2',
+    cell: info => info.getValue(),
+    header: () => 'Ideal Slippage 1 %',
+  }),
+
   columnHelper.accessor(row => row.Cash, {
     id: 'Cash',
     cell: info => info.getValue(),
@@ -241,6 +253,8 @@ const updateData = () => {
       AccountName: item.name || '',
       IdealMTM: item.ideal_MTM !== undefined ? item.ideal_MTM : 0,
       Day_PL: item.MTM !== undefined ? item.MTM : 0,
+      Slippage1:item.Slippage1!==undefined?item.Slippage1:0,
+      Slippage2:item.Slippage2!==undefined?item.Slippage2:0,
       PNL_PER_UM: item['PNL Utilized %'] !== undefined ? Number(item['PNL Utilized %']) : 0,
       PNL_PER_M: item['PNL Overall %'] !== undefined ? Number(item['PNL Overall %']) : 0,
       Peak_Margin: item['Peak Margin'] !== undefined ? item['Peak Margin'] : 0,
@@ -455,7 +469,7 @@ onUnmounted(() => {
       <div class="my-8">
         <!-- <p class="table-heading">Accounts</p> -->
         <TanStackTestTable title="Accounts" :data="data" :columns="columns"
-          :hasColor="['IdealMTM', 'Day_PL', 'Slippage', 'PNL_PER_UM', 'PNL_PER_M']" :navigateTo="NavigationMap"
+          :hasColor="['IdealMTM', 'Day_PL', 'Slippage', 'PNL_PER_UM', 'PNL_PER_M','Slippage1','Slippage2']" :navigateTo="NavigationMap"
           :showPagination=true :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }" />
 
 
