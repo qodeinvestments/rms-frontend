@@ -271,7 +271,7 @@ const updateData = () => {
       Cash: item.cashAvailable !== undefined ? Number(item.cashAvailable) : 0,
       AvailableMargin: item.availableMargin !== undefined ? Number(item.availableMargin) : 0,
       Used_Margin: item.marginUtilized !== undefined ? item.marginUtilized : 0,
-      VAR_PERCENTAGE: item.Live_Client_Var !== undefined && (110000000 > 0) ? ((Number(item.Live_Client_Var) / Number(110000000)) * 100).toPrecision(4) : 0,
+      VAR_PERCENTAGE: item.Live_Client_Var !== undefined && ( item['Total Margin'] > 0) ? ((Number(item.Live_Client_Var) / Number( item['Total Margin'])) * 100).toPrecision(4) : 0,
     }))
   }
 

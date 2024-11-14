@@ -1562,7 +1562,7 @@ const handleMessage = (message) => {
         Slippage1: result.Slippage1!==undefined? result.Slippage1:0,
         Slippage2: result.Slippage2!==undefined? result.Slippage2:0,
         Used_Margin: result.marginUtilized !== undefined ? result.marginUtilized : 0,
-        VAR_PERCENTAGE: result.Live_Client_Var !== undefined && (110000000 > 0) ? ((Number(result.Live_Client_Var) / Number(110000000)) * 100).toPrecision(4) : 0,
+        VAR_PERCENTAGE: result.Live_Client_Var !== undefined && (result['Total Margin'] > 0) ? ((Number(result.Live_Client_Var) / result['Total Margin']) * 100).toPrecision(4) : 0,
       }];
       mix_real_ideal_mtm_table.value = { "real": result['MTMTable'], "ideal": result['ideal_MTMTable'] }
       position_sum.value = result.MTM !== undefined ? result.MTM : 0
