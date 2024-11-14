@@ -397,6 +397,16 @@ const columns = [
     cell: info => info.getValue(),
     header: () => 'AvailableMargin',
   }),
+  columnHelper.accessor(row => row.Slippage1, {
+    id: 'Slippage1',
+    cell: info => info.getValue(),
+    header: () => 'Ideal Slippage 0.5 MTM',
+  }),
+  columnHelper.accessor(row => row.Slippage2 ,{
+    id: 'Slippage2',
+    cell: info => info.getValue(),
+    header: () => 'Ideal Slippage 1 MTM',
+  }),
   columnHelper.accessor(row => row.Cash, {
     id: 'Cash',
     cell: info => info.getValue(),
@@ -1549,6 +1559,8 @@ const handleMessage = (message) => {
         VAR: result.Live_Client_Var !== undefined ? Number(result.Live_Client_Var) : 0,
         Cash: result.cashAvailable !== undefined ? Number(result.cashAvailable) : 0,
         AvailableMargin: result.availableMargin !== undefined ? Number(result.availableMargin) : 0,
+        Slippage1: result.Slippage1!==undefined? result.Slippage1:0,
+        Slippage2: result.Slippage2!==undefined? result.Slippage2:0,
         Used_Margin: result.marginUtilized !== undefined ? result.marginUtilized : 0,
         VAR_PERCENTAGE: result.Live_Client_Var !== undefined && (110000000 > 0) ? ((Number(result.Live_Client_Var) / Number(110000000)) * 100).toPrecision(4) : 0,
       }];

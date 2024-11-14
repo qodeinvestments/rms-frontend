@@ -114,12 +114,12 @@ const columns = [
   columnHelper.accessor(row => row.Slippage1, {
     id: 'Slippage1',
     cell: info => info.getValue(),
-    header: () => 'Ideal Slippage 0.5 %',
+    header: () => 'Ideal Slippage 0.5 MTM',
   }),
   columnHelper.accessor(row => row.Slippage2 ,{
     id: 'Slippage2',
     cell: info => info.getValue(),
-    header: () => 'Ideal Slippage 1 %',
+    header: () => 'Ideal Slippage 1 MTM',
   }),
 
   columnHelper.accessor(row => row.Cash, {
