@@ -103,18 +103,31 @@ const rows = ref([])
 // Add after imports
 const formatIndianNumber = (value) => {
     if (value === null || value === undefined || value === '') return value;
+
     const num = Number(value);
     if (isNaN(num)) return value;
 
-    const [integerPart, decimalPart] = num.toString().split('.');
+    // Handle the negative sign
+    const isNegative = num < 0;
+    const absoluteNum = Math.abs(num);
+
+    const [integerPart, decimalPart] = absoluteNum.toString().split('.');
     const lastThree = integerPart.slice(-3);
     const remaining = integerPart.slice(0, -3);
-    const withCommas = remaining ?
-        remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree :
-        lastThree;
 
-    return decimalPart ? `${withCommas}.${decimalPart}` : withCommas;
-}
+    const withCommas = remaining
+        ? remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree
+        : lastThree;
+
+    const formattedNumber = decimalPart
+        ? `${withCommas}.${decimalPart}`
+        : withCommas;
+
+    // Add back the negative sign if necessary
+    return isNegative ? `-${formattedNumber}` : formattedNumber;
+};
+
+
 watchEffect(() => {
     const filteredRows = table.getFilteredRowModel().rows
     const sortedRows = table.getSortedRowModel().rows
