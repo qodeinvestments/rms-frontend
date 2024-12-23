@@ -29,7 +29,7 @@ const basket = ref([])
 import { live_trade_book_columns_zerodha,live_trade_book_columns_xts,live_order_book_columns_zerodha
   ,fund_summary_columns,live_order_book_columns_xts,signal_position,columns,combined_df_columns_zerodha,
   combined_df_columns_xts,rms_df_columns,combined_order_zerodha,combined_order_xts,combined_trades_zerodha,
-  curr_strategy_mtm,curr_basket_mtm,combined_trades_xts
+  curr_strategy_mtm,curr_basket_mtm,combined_trades_xts,zerodha_order_book_columns,holding_book_columns
  } from '../components/TableVariables/UserPageTable.js'; 
 
 
@@ -452,7 +452,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     </div>
     <div class="navContainer">
       <NavBar
-        :navColumns="['Positions', 'Order', 'TradeBook', 'Combined DF', 'Combined Orders', 'Combined Trades', 'Fund Summary']"
+        :navColumns="['Positions', 'Order', 'TradeBook', 'Combined DF', 'Combined Orders', 'Combined Trades', 'Fund Summary','Zerodha Order Book','Holdings']"
         @column-clicked="handleColumnClick" :colorColumns="[]" />
     </div>
     <div class="selectContainer" v-if="book && showOnPage === 'Combined DF' && filteredSignalBookData.length">
@@ -484,9 +484,17 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     </div>
     <div class="my-8" v-if="book && showOnPage === 'Fund Summary'">
       <TanStackTestTable title="Fund Summary" :data="book" :columns="fund_summary_columns"
-        :hasColor="['Actual MTM', 'Ideal MTM']" :navigateTo="[]" :showPagination=true />
+        :hasColor="[]" :navigateTo="[]" :showPagination=true />
+    </div>
+    <div class="my-8" v-if="book && showOnPage === 'Zerodha Order Book'">
+      <TanStackTestTable title="Zerodha Order Book" :data="book" :columns="zerodha_order_book_columns"
+        :hasColor="[]" :navigateTo="[]" :showPagination=true />
     </div>
 
+    <div class="my-8" v-if="book && showOnPage === 'Holdings'">
+      <TanStackTestTable title="Holdings" :data="book" :columns="holding_book_columns"
+        :hasColor="[]" :navigateTo="[]" :showPagination=true />
+    </div>
 
     <div class="my-8" v-if="book && showOnPage === 'Combined DF' && filteredSignalBookData.length">
       <TanStackTestTable title="Combined DF" :data="filteredSignalBookData"

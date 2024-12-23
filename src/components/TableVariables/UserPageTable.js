@@ -8,6 +8,44 @@ import {
 
 const columnHelper = createColumnHelper()
   
+ 
+const zerodha_ob_columns = [
+  'account_id','placed_by', 'terminal_id', 'order_id', 'exchange_order_id', 'parent_order_id', 'status', 
+  'status_message', 'status_message_raw', 'order_timestamp', 'exchange_update_timestamp', 
+  'exchange_timestamp', 'variety', 'modified', 'exchange', 'tradingsymbol', 'instrument_token', 
+  'order_type', 'transaction_type', 'validity', 'validity_ttl', 'product', 'quantity', 
+  'disclosed_quantity', 'price', 'trigger_price', 'average_price', 'filled_quantity', 
+  'pending_quantity', 'cancelled_quantity', 'market_protection', 'meta',
+  'tag', 'tags', 'guid'
+];
+
+export const zerodha_order_book_columns  = zerodha_ob_columns.map(column => {
+  return columnHelper.accessor(row => row[column], {
+    id: column,
+    cell: info => info.getValue(),
+    header: () => column,
+  });
+});
+
+const client_holdings=['account_id', 'placed_by', 'terminal_id', 'order_id',
+  'exchange_order_id', 'parent_order_id', 'status', 'status_message',
+  'status_message_raw', 'order_timestamp', 'exchange_update_timestamp',
+  'exchange_timestamp', 'variety', 'modified', 'exchange',
+  'tradingsymbol', 'instrument_token', 'order_type', 'transaction_type',
+  'validity', 'validity_ttl', 'product', 'quantity', 'disclosed_quantity',
+  'price', 'trigger_price', 'average_price', 'filled_quantity',
+  'pending_quantity', 'cancelled_quantity', 'market_protection', 'meta', 'tag', 
+  'tags', 'guid']
+
+  export const holding_book_columns  = client_holdings.map(column => {
+    return columnHelper.accessor(row => row[column], {
+      id: column,
+      cell: info => info.getValue(),
+      header: () => column,
+    });
+  });
+
+
   
   export const live_trade_book_columns_zerodha = [
 
