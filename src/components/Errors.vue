@@ -21,6 +21,9 @@ import MultiLineChart from './HighCharts.vue'
 import LightWeightChart from './LightWeightChart.vue';
 import EditButton from './EditButton.vue';
 
+import { order_errors_columns } from '../components/TableVariables/ErrorPageTable.js'; 
+
+
 
 const route = useRoute();
 const user_data = ref('')
@@ -43,70 +46,7 @@ const columns_testing = [
 
 ]
 
-const live_order_book_columns = [
-    columnHelper.accessor(row => row.user, {
-        id: 'User',
-        cell: info => info.getValue(),
-        header: () => 'User',
-    }),
 
-    columnHelper.accessor(row => row.OrderGeneratedDateTime, {
-        id: 'OrderGeneratedDateTime',
-        cell: info => info.getValue(),
-        header: () => 'OrderGeneratedDateTime',
-    }),
-    columnHelper.accessor(row => row.OrderType, {
-        id: 'OrderType',
-        cell: info => info.getValue(),
-        header: () => 'OrderType',
-    }),
-
-    columnHelper.accessor(row => row.ExchangeTransactTime, {
-        id: 'ExchangeTransactTime',
-        cell: info => info.getValue(),
-        header: () => 'ExchangeTransactTime',
-    }),
-    columnHelper.accessor(row => row.TradingSymbol, {
-        id: 'TradingSymbol',
-        cell: info => info.getValue(),
-        header: () => 'TradingSymbol',
-    }),
-    columnHelper.accessor(row => row.OrderSide, {
-        id: 'OrderSide',
-        cell: info => info.getValue(),
-        header: () => 'OrderSide',
-    }),
-
-    columnHelper.accessor(row => row.OrderQuantity, {
-        id: 'OrderQuantity',
-        cell: info => info.getValue(),
-        header: () => 'OrderQuantity',
-    }),
-    columnHelper.accessor(row => row.LeavesQuantity, {
-        id: 'LeavesQuantity',
-        cell: info => info.getValue(),
-        header: () => 'LeavesQuantity',
-    }),
-    columnHelper.accessor(row => row.OrderStatus, {
-        id: 'OrderStatus',
-        cell: info => info.getValue(),
-        header: () => 'OrderStatus',
-    }),
-    columnHelper.accessor(row => row.CancelRejectReason, {
-        id: 'CancelRejectReason',
-        cell: info => info.getValue(),
-        header: () => 'CancelRejectReason',
-    }),
-
-    // columnHelper.accessor(row => row.edit, {
-    //     id: 'edit',
-    //     cell: info => h(EditButton, { id: info.row.original.id }),
-    //     header: () => ' ',
-    //     enableSorting: false,
-    // })
-
-
-]
 
 const colorColumns = ref([])
 const parseCustomDate = (dateString) => {
@@ -117,12 +57,18 @@ const parseCustomDate = (dateString) => {
 }
 
 const tell_time_match = (a1, a2) => {
+    if (a1 == null || a2 == null) return false;
+    
     let date1 = parseCustomDate(a1);
     let date2 = parseCustomDate(a2);
-    let sameDate = date1.getTime() === date2.getTime();  // Compare the time value (in ms) of the date objects
-
+    
+    if (!date1 || !date2 || isNaN(date1.getTime()) || isNaN(date2.getTime())) {
+        return false; // Ensure valid date objects
+    }
+    
+    let sameDate = date1.getTime() === date2.getTime(); // Compare the time value (in ms) of the date objects
     return sameDate;
-}
+};
 
 const updateColorColumns = (data, time) => {
     const revmap = {
@@ -280,7 +226,7 @@ onUnmounted(() => {
 
         <div class="my-8" v-if="book && showOnPage === 'Order_Errors'">
             <!-- <p class="table-heading">{{ showOnPage }}</p> -->
-            <TanStackTestTable :title="showOnPage" :data="book" :columns="live_order_book_columns" :hasColor="[]"
+            <TanStackTestTable :title="showOnPage" :data="book" :columns="order_errors_columns" :hasColor="[]"
                 :navigateTo="[]" :showPagination=true />
         </div>
         <div class="my-8" v-else-if="book">
