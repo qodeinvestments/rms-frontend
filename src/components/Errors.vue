@@ -85,7 +85,7 @@ const updateColorColumns = (data, time) => {
     let orderErrorsMatch = false
     for (const key in data['Order_Errors']) {
         for (const order of data['Order_Errors'][key]) {
-            if (tell_time_match(order['OrderGeneratedDateTime'], time)) {
+            if (tell_time_match(order['OrderGeneratedDateTime'], time) || tell_time_match(order['order_timestamp'], time)) {
                 orderErrorsMatch = true
                 break
             }
