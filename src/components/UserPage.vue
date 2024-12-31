@@ -452,7 +452,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     </div>
     <div class="navContainer">
       <NavBar
-        :navColumns="['Positions', 'Order', 'TradeBook', 'Combined DF', 'Combined Orders', 'Combined Trades', 'Fund Summary','Zerodha Order Book','Holdings']"
+        :navColumns="['Positions', 'Order', 'Combined DF', 'Combined Orders', 'Combined Trades', 'Fund Summary','Zerodha Order Book','Holdings']"
         @column-clicked="handleColumnClick" :colorColumns="[]" />
     </div>
     <div class="selectContainer" v-if="book && showOnPage === 'Combined DF' && filteredSignalBookData.length">
@@ -470,12 +470,12 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
       <TanStackTestTable title="Position" :data="book" :columns="rms_df_columns" :hasColor="['pnl']" :navigateTo="[]"
         :showPagination=true />
     </div>
-
+<!-- 
     <div class="my-8" v-if="book && showOnPage === 'TradeBook'">
       <TanStackTestTable title="Complete Trade Book" :data="book"
         :columns="broker === 'xts' ? live_trade_book_columns_xts : live_trade_book_columns_zerodha" :hasColor="[]"
         :navigateTo="[]" :showPagination=true />
-    </div>
+    </div> -->
 
     <div class="my-8" v-if="book && showOnPage === 'Order'">
       <TanStackTestTable title="Complete Order Book" :data="book"
