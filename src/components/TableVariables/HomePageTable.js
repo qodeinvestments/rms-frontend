@@ -23,6 +23,17 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'Day_PL',
     }),
+    columnHelper.accessor(row => row.API_DAY_PNL, {
+      id: 'API DAY PNL',
+      cell: info => info.getValue(),
+      header: () => 'API DAY PNL',
+    }),
+    columnHelper.accessor(row => row.API_NET_PNL, {
+      id: 'API NET PNL',
+      cell: info => info.getValue(),
+      header: () => 'API NET PNL',
+    }),
+  
   
     columnHelper.accessor(row => row.PNL_PER_UM, {
       id: 'PNL_PER_UM',
