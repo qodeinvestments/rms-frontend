@@ -1,36 +1,29 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
-import { MyEnum } from '../Enums/Prefix.js';
-import { ref, watch } from 'vue'
+import { onMounted, onUnmounted } from 'vue';
+import { ref } from 'vue';
 import Histogram from './Histogram.vue';
 
+const latency = ref(0);
+const max_latency = ref(0);
+const past_time = ref(0);
 
+const WS7L = ref([]);
+const WS8L = ref([]);
+const signal_delay = ref([]);
 
-const latency = ref(0)
-const max_latency = ref(0)
-const past_time = ref(0)
+let intervalId = null;
 
-const WS7L = ref([])
-const WS8L = ref([])
-const signal_delay = ref([])
+const fetchClientDetails = async () => {
+    try {
+        const response = await fetch('https://production.swancapital.in/lagsData');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
 
-
-
-
-const connectClientDetailsWebSocket = () => {
-    const clientDetailSocket = new WebSocket('wss://production.swancapital.in/lagsData');
-
-    clientDetailSocket.onopen = function (e) {
-        console.log("Client details connection established");
-    };
-    clientDetailSocket.onmessage = function (event) {
-        const data = JSON.parse(event.data);
-
-        WS7L.value = data.WS7L
-        WS8L.value = data.WS8L
-        signal_delay.value = data.signal_delay
-
-
+        WS7L.value = data.WS7L;
+        WS8L.value = data.WS8L;
+        signal_delay.value = data.signal_delay;
 
         let ar2 = data["time"];
         if (past_time.value === 0) past_time.value = ar2;
@@ -40,38 +33,27 @@ const connectClientDetailsWebSocket = () => {
             let diffInMs = date2 - date1;
             let diffInSeconds = diffInMs / 1000;
             latency.value = diffInSeconds;
-            max_latency.value = Math.max(max_latency.value, latency.value)
+            max_latency.value = Math.max(max_latency.value, latency.value);
             past_time.value = ar2;
         }
-    };
-
-
-    clientDetailSocket.onerror = function (error) {
-        console.log(`WebSocket error: ${error.message}`);
-    };
-
-    clientDetailSocket.onclose = function (event) {
-        console.log('Client Detail WebSocket connection closed:', event.reason);
-    };
-
-
-
-    return clientDetailSocket;
+    } catch (error) {
+        console.error('Error fetching client details:', error);
+    }
 };
 
-const showOnPage = ref('Positions')
-
 onMounted(() => {
-    connectClientDetailsWebSocket();
-})
+    // Fetch data periodically (e.g., every 5 seconds)
+    fetchClientDetails();
+    intervalId = setInterval(fetchClientDetails, 5000);
+});
 
 onUnmounted(() => {
-
-})
-
-
-
+    if (intervalId) {
+        clearInterval(intervalId);
+    }
+});
 </script>
+
 <template>
     <div class="px-8 py-8 pageContainer">
         <div class="LatencyTable">
@@ -90,10 +72,7 @@ onUnmounted(() => {
             <p class="heading">Signal Delay</p>
             <Histogram :dataArray="signal_delay" />
         </div>
-
     </div>
-
-
 </template>
 
 <style scoped>
