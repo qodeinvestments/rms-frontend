@@ -238,17 +238,6 @@ onUnmounted(() => {
                                             N/A
                                         </template>
                                     </td>
-                                    <!-- <td v-for="(cell, index) in row.getVisibleCells()" :key="cell.id"
-                            class="maxwidth150 break-words whitespace-normal px-3 py-4 text-sm text-black-600"
-                            :class="{
-                                'sticky-column': index === 0,
-                                'red': cell.getValue() < 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
-                                'green': cell.getValue() > 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
-                                'redbackground': hasRowcolor && hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]),
-                                'greenbackground': hasRowcolor && !(hasRowcolor.arrayValues.includes(cell.row.original[hasRowcolor.columnName]))
-                            }" @click="checkNavigate(cell)">
-                            <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
-                        </td> -->
                                 </tr>
                             </tbody>
                         </table>
@@ -373,6 +362,7 @@ table {
 }
 
 .maxwidth150 {
+    min-width: 100px;
     max-width: 150px;
 }
 
