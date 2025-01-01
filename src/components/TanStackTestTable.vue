@@ -364,7 +364,6 @@ table {
 .maxwidth150 {
     min-width: 100px;
     max-width: 150px;
-    background: pink;
 }
 
 .sticky-header {
