@@ -322,11 +322,14 @@ onUnmounted(() => {
 .greenbackground {
     background-color: rgb(217, 246, 217) !important;
 }
-
 .cursorpointer {
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
+.cursorpointer:hover {
+    text-decoration: underline;
+}
 table {
     border-right: none;
     border-left: none;

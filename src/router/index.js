@@ -8,6 +8,7 @@ import DataVisualizer from '../components/DataVisualizer.vue'
 import UserLagData from '../components/UserLagData.vue'
 import ServerData from '../components/ServerData.vue'
 import PositionMismatch from '../components/PositionMismatch.vue'
+import AdminPanel from '../components/AdminPanel.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -56,6 +57,11 @@ const router = createRouter({
       path: '/posmismatch',
       name: 'PositionMismatch',
       component: PositionMismatch,
+    },
+    {
+      path: '/adminPanel',
+      name: 'AdminPanel',
+      component:AdminPanel,
     },
     // {
     //   path: '/about',
