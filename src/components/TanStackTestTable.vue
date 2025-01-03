@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watchEffect, onMounted, onUnmounted } from 'vue'
+import { ref, watchEffect, onMounted, onUnmounted ,computed} from 'vue'
 import { useRouter } from 'vue-router';
 const router = useRouter();
 import {
@@ -25,6 +25,10 @@ const props = defineProps({
     data: {
         type: Array,
         required: true
+    },
+    showPin:{
+        type:Boolean,
+        required:false
     },
     title: {
         type: String,
@@ -65,34 +69,53 @@ const checkNavigate = (data) => {
 
 const sorting = ref([])
 const filter = ref('')
+const toggleAllColumns = (value) => {
+  table.toggleAllColumnsVisible(value)
+}
+
+const isAllColumnsVisible = computed(() => {
+  return table.getIsAllColumnsVisible()
+})
 
 // Custom pagination state
 const currentPage = ref(0)
 const pageSize = ref(5)
 
-// Initialize the table using the useVueTable hook
+// Add this after your existing refs
+const columnVisibility = ref({})
+
+// Modify your table initialization to include column visibility state
 const table = useVueTable({
-    get data() {
-        return props.data
+  get data() {
+    return props.data
+  },
+  columns: props.columns,
+  getCoreRowModel: getCoreRowModel(),
+  getSortedRowModel: getSortedRowModel(),
+  getFilteredRowModel: getFilteredRowModel(),
+  state: {
+    get sorting() {
+      return sorting.value
     },
-    columns: props.columns,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    state: {
-        get sorting() {
-            return sorting.value
-        },
-        get globalFilter() {
-            return filter.value
-        },
+    get globalFilter() {
+      return filter.value
     },
-    onSortingChange: updaterOrValue => {
-        sorting.value =
-            typeof updaterOrValue === 'function'
-                ? updaterOrValue(sorting.value)
-                : updaterOrValue
-    },
+    get columnVisibility() {
+      return columnVisibility.value
+    }
+  },
+  onSortingChange: updaterOrValue => {
+    sorting.value =
+      typeof updaterOrValue === 'function'
+        ? updaterOrValue(sorting.value)
+        : updaterOrValue
+  },
+  onColumnVisibilityChange: updaterOrValue => {
+    columnVisibility.value =
+      typeof updaterOrValue === 'function'
+        ? updaterOrValue(columnVisibility.value)
+        : updaterOrValue
+  },
 })
 
 // Computed properties for pagination
@@ -186,6 +209,32 @@ onUnmounted(() => {
     <div>
         <p class="table-heading">{{ title }}</p>
         <div class="px-4 sm:px-6 lg:px-8 pb-8 bg-white drop-shadow-sm">
+            <div v-if="showPin" class="column-visibility-controls mb-4 border rounded-md p-4">
+                <div class="mb-2 border-b pb-2">
+                    <label class="flex items-center">
+                        <input
+                        type="checkbox"
+                        :checked="isAllColumnsVisible"
+                        @change="e => toggleAllColumns(e.target.checked)"
+                        class="mr-2"
+                        />
+                        <span>Toggle All</span>
+                    </label>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                    <div v-for="column in table.getAllLeafColumns()" :key="column.id">
+                        <label class="flex items-center">
+                        <input
+                            type="checkbox"
+                            :checked="column.getIsVisible()"
+                            @change="column.toggleVisibility()"
+                            class="mr-2"
+                        />
+                        <span>{{ column.id }}</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
 
             <div class="mt-8 flow-root">
                 <div class="my-4 headingContainer">
@@ -296,7 +345,21 @@ onUnmounted(() => {
 .colorcontainer {
     background: pink;
 }
+/* Add these styles to your existing <style> section */
+.column-visibility-controls {
+  background-color: white;
+  border-color: #e5e7eb;
+}
 
+.column-visibility-controls label {
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.column-visibility-controls input[type="checkbox"] {
+  cursor: pointer;
+}
 .red {
     color: red;
 }

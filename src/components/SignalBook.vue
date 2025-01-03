@@ -137,7 +137,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
         <div class="my-8" v-if="filteredSignalBookData.length">
             <!-- <p class="table-heading">Signal Book</p> -->
             <TanStackTestTable title="Signal Book" :data="filteredSignalBookData" :columns="columns" :hasColor="[]"
-                :navigateTo="[]" :showPagination=true />
+                :navigateTo="[]" :showPagination=true  :showPin="true"/>
         </div>
         <div v-if="histogram.length > 0" class="histogram-container">
             <p class="table-heading">Histogram Of Time Difference</p>
