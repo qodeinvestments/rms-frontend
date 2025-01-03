@@ -8,10 +8,10 @@ import {
 const columnHelper = createColumnHelper()
 
  
-const columns_signal_book = ['trade_id', 'uid', 'timestamp',
+const columns_signal_book = ['trade_id', 'uid', 'timestamp', 'system_timestamp',
      'system_tag', 'action', 'action_int', 'qty', 
      'qty_dir', 'symbol', 'price', 'price_provided',
-      'value', 'buy_value', 'sell_value', 'system_timestamp'
+      'value', 'buy_value', 'sell_value'
 ];
 
 export const columns  = columns_signal_book.map(column => {
