@@ -9,9 +9,9 @@ const columnHelper = createColumnHelper()
 
  
 const columns_signal_book = [ 'timestamp', 'system_timestamp',
-     'system_tag', 'action',  'symbol',  'price','qty','quantity','trade_id', 'uid',
+     'system_tag', 'action',  'symbol',  'price','qty','quantity','note','trade_id', 'uid',
      'qty_dir', , 'price_provided',
-      'value', 'buy_value', 'sell_value','note', 'action_int'
+      'value', 'buy_value', 'sell_value', 'action_int'
 ];
 
 export const columns  = columns_signal_book.map(column => {
