@@ -57,9 +57,19 @@ const filteredSignalBookData = computed(() => {
 
 
 const connectClientDetailsWebSocket = () => {
+    const token = localStorage.getItem('access_token'); // Retrieve the access token
+    if (!token) {
+        alert('User not authenticated');
+        return;
+    }
+    
     const clientDetailSocket = new WebSocket('wss://production.swancapital.in/signalbook');
 
     clientDetailSocket.onopen = function (e) {
+            
+    // Send the token as the first message for authentication
+        const authMessage = JSON.stringify({ token });
+        clientDetailSocket.send(authMessage);
         console.log("Client details connection established");
     };
     clientDetailSocket.onmessage = function (event) {

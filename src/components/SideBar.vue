@@ -113,8 +113,15 @@
                 <span class="text">Settings</span>
               </a>
             </li>
+            <li :class="selected == 'AdminPanel' ? 'active' : ''" @click="changeSelected('AdminPanel')">
+              <a href="#">
+                <i class="icon ph-bold ph-gear"></i>
+                <span class="text">Admin Panel</span>
+              </a>
+            </li>
           </ul>
         </div>
+        
       </div>
       <div class="menu">
         <p class="title">Account</p>
@@ -126,7 +133,7 @@
             </a>
           </li>
           <li>
-            <a href="#">
+            <a href="#" @click="logout">
               <i class="icon ph-bold ph-sign-out"></i>
               <span class="text">Logout</span>
             </a>
@@ -155,11 +162,18 @@ export default {
         'DataVisualizer': '/visualize',
         'SignalBook': '/signalbook',
         'ServerData': '/serverData',
+        'AdminPanel': '/adminPanel'
       }
 
     }
   },
   methods: {
+    logout() {
+      // Clear the session or localStorage data
+      localStorage.removeItem('access_token');
+      alert('You have been logged out.');
+      window.location.reload(); // Refresh the page after login success
+    },
     toggleSideBar() {
       this.sidebarState = !this.sidebarState;
       this.showoptions = false;

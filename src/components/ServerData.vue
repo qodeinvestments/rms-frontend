@@ -25,9 +25,16 @@ const mix_real_ideal_mtm_table = ref({})
 const serverData = ref({})
 
 const connectServerDataWebSocket = () => {
+    const token = localStorage.getItem('access_token'); // Retrieve the access token
+    if (!token) {
+        alert('User not authenticated');
+        return;
+    }
     const ServerDataSocket = new WebSocket('wss://production.swancapital.in/serverData');
 
     ServerDataSocket.onopen = function (e) {
+        const authMessage = JSON.stringify({ token });
+        ServerDataSocket.send(authMessage);
         console.log("ServerDataSocket details connection established");
     };
     ServerDataSocket.onmessage = function (event) {

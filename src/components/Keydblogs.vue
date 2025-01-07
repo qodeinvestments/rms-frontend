@@ -68,6 +68,12 @@ const handleMessage = (message) => {
 }
 
 const connectToSSE = () => {
+    const token = localStorage.getItem('access_token'); // Retrieve the access token
+    if (!token) {
+        alert('User not authenticated');
+        return;
+    }
+    
     const socket = new WebSocket('wss://production.swancapital.in/keydblogs');
 
     socket.onmessage = (event) => {
@@ -96,6 +102,9 @@ const connectToSSE = () => {
     }
 
     socket.onopen = () => {
+         // Send the token as the first message for authentication
+        const authMessage = JSON.stringify({ token });
+        socket.send(authMessage);
         console.log('WebSocket connection opened')
     }
     socket.onerror = (error) => {

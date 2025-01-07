@@ -3,6 +3,9 @@ import { onMounted, ref, provide, watch } from 'vue'
 import { RouterView } from 'vue-router'
 import SideBar from './components/SideBar.vue'
 import Toast from './components/Toast.vue'
+import Login from './components/Login.vue'
+import Signup from './components/Signup.vue'
+
 
 const sideBarState = ref(false)
 const toastConfig = ref({
@@ -26,6 +29,19 @@ const triggerToast = (message, type = 'info') => {
 const hideToast = () => {
   toastConfig.value.show = false
 }
+
+
+const showloginorSignup = ref(false)
+const isLoggedIn = ref(false) // Add a ref to track login state
+
+const toggleForm = () => {
+  showloginorSignup.value = !showloginorSignup.value;
+}
+const checkLoginStatus = () => {
+  const token = localStorage.getItem('access_token'); // Check if the access token is stored
+  isLoggedIn.value = !!token; // Set isLoggedIn to true if token exists, false otherwise
+};
+
 
 const book = ref({})
 const past_time_client = ref(0)
@@ -63,6 +79,12 @@ const handleMessage = (message) => {
 }
 
 const connectToSSE = () => {
+  const token = localStorage.getItem('access_token'); // Retrieve the access token
+    if (!token ) {
+        if(isLoggedIn.value)alert('User not authenticated To Get Errors');
+        return;
+    }
+    
   const socket = new WebSocket('wss://production.swancapital.in/errorLogs');
 
   socket.onmessage = (event) => {
@@ -90,6 +112,9 @@ const connectToSSE = () => {
   }
 
   socket.onopen = () => {
+   
+    const authMessage = JSON.stringify({ token });
+    socket.send(authMessage);
     console.log('WebSocket connection opened')
   }
   socket.onerror = (error) => {
@@ -99,17 +124,26 @@ const connectToSSE = () => {
 
 onMounted(() => {
   connectToSSE();
+  checkLoginStatus();
 })
 
 provide('triggerToast', triggerToast)
 provide('book', book.value)
+
+
+
 </script>
 
 <template>
   <div class="pageLayout">
-    <SideBar @State="ChangeSideBarState" class="sideBar" />
-    <Toast v-if="toastConfig.show" :message="toastConfig.message" :type="toastConfig.type" @close="hideToast" />
-    <RouterView :class="sideBarState ? 'content' : 'content2'" />
+    <Signup v-if="!isLoggedIn && showloginorSignup" @toggleForm="toggleForm" />
+    <Login v-if="!isLoggedIn && !showloginorSignup" @toggleForm="toggleForm" />
+
+
+    <SideBar v-if="isLoggedIn" @State="ChangeSideBarState" class="sideBar" />
+    <Toast v-if="toastConfig.show && isLoggedIn" :message="toastConfig.message" :type="toastConfig.type" @close="hideToast" />
+    <RouterView v-if="isLoggedIn" :class="sideBarState ? 'content' : 'content2'" />
+
   </div>
 </template>
 

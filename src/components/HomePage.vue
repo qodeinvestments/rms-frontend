@@ -120,9 +120,18 @@ const updateData = () => {
 
 
 const connectServerDataWebSocket = () => {
+  const token = localStorage.getItem('access_token'); // Retrieve the access token
+  if (!token) {
+      alert('User not authenticated');
+      return;
+  }
+    
   const socket = new WebSocket('wss://production.swancapital.in/serverData');
 
   socket.onopen = () => {
+     // Send the token as the first message for authentication
+    const authMessage = JSON.stringify({ token });
+    socket.send(authMessage);
     console.log('ServerData WebSocket connection opened')
     checkServerDataConnection.value = true;
   }
@@ -150,12 +159,23 @@ const connectServerDataWebSocket = () => {
 }
 
 const connectWebSocket = () => {
+  const token = localStorage.getItem('access_token'); // Retrieve the access token
+  if (!token) {
+    alert('User not authenticated');
+    return;
+  }
+
   const socket = new WebSocket('wss://production.swancapital.in/ws');
 
   socket.onopen = () => {
-    console.log('WebSocket connection opened')
+    console.log('WebSocket connection opened');
+    
+    // Send the token as the first message for authentication
+    const authMessage = JSON.stringify({ token });
+    socket.send(authMessage);
     checkBackendConnection.value = true
-  }
+  };
+
 
   socket.onmessage = (event) => {
     if (event.data === 'ping') {
@@ -176,6 +196,7 @@ const connectWebSocket = () => {
       max_latency.value = Math.max(max_latency.value, Latency.value)
       past_time.value = ar2;
       handleMessage(message)
+
     }
   }
 
