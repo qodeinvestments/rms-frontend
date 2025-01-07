@@ -19,7 +19,6 @@ import NavBar from './NavBar.vue';
 import MultiLineChart from './HighCharts.vue'
 
 import LightWeightChart from './LightWeightChart.vue';
-import EditButton from './EditButton.vue';
 
 import { order_errors_columns } from '../components/TableVariables/ErrorPageTable.js'; 
 
