@@ -199,7 +199,7 @@ const connectStrategyWebSocket = () => {
   clientStrategySocket.onopen = function (e) {
      // Send the token as the first message for authentication
     const authMessage = JSON.stringify({ token });
-    socket.send(authMessage);
+    clientStrategySocket.send(authMessage);
     console.log("Strategy connection established");
     // Send the initial set of client data
     sendClientDetails();
@@ -269,7 +269,7 @@ const connectBasketWebSocket = () => {
   clientBasketSocket.onopen = function (e) {
      // Send the token as the first message for authentication
     const authMessage = JSON.stringify({ token });
-    socket.send(authMessage);
+    clientBasketSocket.send(authMessage);
     console.log("Basket connection established");
     // Send the initial set of client data
     sendClientDetails();
@@ -346,7 +346,7 @@ const connectClientDetailsWebSocket = () => {
   clientDetailSocket.onopen = function (e) {
      // Send the token as the first message for authentication
     const authMessage = JSON.stringify({ token });
-    socket.send(authMessage);
+    clientDetailSocket.send(authMessage);
     console.log("Client details connection established");
     // Send the initial set of client data
     sendClientDetails();
