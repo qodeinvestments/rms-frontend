@@ -198,8 +198,8 @@ const connectStrategyWebSocket = () => {
 
   clientStrategySocket.onopen = function (e) {
      // Send the token as the first message for authentication
-    const authMessage = JSON.stringify({ token });
-    clientStrategySocket.send(authMessage);
+    // const authMessage = JSON.stringify({ token });
+    // clientStrategySocket.send(authMessage);
     console.log("Strategy connection established");
     // Send the initial set of client data
     sendClientDetails();
@@ -268,8 +268,8 @@ const connectBasketWebSocket = () => {
   const clientBasketSocket = new WebSocket('wss://production.swancapital.in/chart/basket');
   clientBasketSocket.onopen = function (e) {
      // Send the token as the first message for authentication
-    const authMessage = JSON.stringify({ token });
-    clientBasketSocket.send(authMessage);
+    // const authMessage = JSON.stringify({ token });
+    // clientBasketSocket.send(authMessage);
     console.log("Basket connection established");
     // Send the initial set of client data
     sendClientDetails();
