@@ -78,32 +78,69 @@ const addSeriesAndData = (props) => {
         const options = props.seriesOptions[index] || {};
         const newSeries = chart[seriesConstructor]({
             ...options,
-            crosshairMarkerVisible: false, // Disable crosshair marker on data points
-            title: '', // Set empty title initially
+            crosshairMarkerVisible: true,
+            title: '',
+            lineWidth: 2,
+            priceLineVisible: false,
+            lastValueVisible: true,
         });
         newSeries.setData(props.data[key]);
         return newSeries;
     });
-    removeTitles(); // Ensure titles are removed after creation
+    removeTitles();
 };
 
 onMounted(() => {
     chart = createChart(chartContainer.value, {
         ...props.chartOptions,
         layout: {
-            textColor: 'black',
+            textColor: '#64748b',
             background: { type: ColorType.Solid, color: 'white' },
+            fontSize: 12,
+            fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        },
+        grid: {
+            vertLines: {
+                color: '#e2e8f0',
+                style: 1,
+            },
+            horzLines: {
+                color: '#e2e8f0',
+                style: 1,
+            },
         },
         crosshair: {
-            mode: 0, // Keep in Normal mode, or adjust as needed
+            mode: 1,
             vertLine: {
-                visible: true, // Disable the vertical line
-                labelVisible: true, // Disable labels on the x-axis
+                color: '#2563eb',
+                width: 1,
+                style: 3,
+                labelBackgroundColor: '#2563eb',
             },
             horzLine: {
-                visible: true, // Disable the vertical line
-                labelVisible: true, // Disable labels on the x-axis
+                color: '#2563eb',
+                width: 1,
+                style: 3,
+                labelBackgroundColor: '#2563eb',
             },
+        },
+        rightPriceScale: {
+            borderVisible: false,
+        },
+        timeScale: {
+            borderVisible: false,
+            timeVisible: true,
+            secondsVisible: false,
+        },
+        handleScroll: {
+            mouseWheel: true,
+            pressedMouseMove: true,
+            horzTouchDrag: true,
+            vertTouchDrag: true,
+        },
+        handleScale: {
+            mouseWheel: true,
+            pinch: true,
         },
     });
 
@@ -123,59 +160,61 @@ onMounted(() => {
         window.addEventListener('resize', resizeHandler);
     }
 
-    // Add tooltip functionality
-    // chart.subscribeCrosshairMove(param => {
-    //     if (
-    //         param.point === undefined ||
-    //         !param.time ||
-    //         param.point.x < 0 ||
-    //         param.point.x > chartContainer.value.clientWidth ||
-    //         param.point.y < 0 ||
-    //         param.point.y > chartContainer.value.clientHeight
-    //     ) {
-    //         tooltip.value.style.display = 'none';
-    //     } else {
-    //         // Format time directly from provided data
-    //         const adjustedTime = param.time - 19800;
-    //         const dateTimeStr = new Date(adjustedTime * 1000).toLocaleString(); // Format adjusted time
-    //         tooltip.value.style.display = 'block';
-    //         let tooltipHtml = `<div class="tooltip-date">${dateTimeStr}</div>`;
+    chart.subscribeCrosshairMove(param => {
+        if (
+            param.point === undefined ||
+            !param.time ||
+            param.point.x < 0 ||
+            param.point.x > chartContainer.value.clientWidth ||
+            param.point.y < 0 ||
+            param.point.y > chartContainer.value.clientHeight
+        ) {
+            tooltip.value.style.display = 'none';
+        } else {
+            const adjustedTime = param.time - 19800;
+            const dateTimeStr = new Date(adjustedTime * 1000).toLocaleString();
+            tooltip.value.style.display = 'block';
+            let tooltipHtml = `<div class="tooltip-date">${dateTimeStr}</div>`;
 
-    //         Object.keys(props.data).forEach(key => {
-    //             const seriesIndex = Object.keys(props.data).indexOf(key);
-    //             const data = param.seriesData.get(series[seriesIndex]);
+            Object.keys(props.data).forEach(key => {
+                const seriesIndex = Object.keys(props.data).indexOf(key);
+                const data = param.seriesData.get(series[seriesIndex]);
 
-    //             if (data) {
-    //                 tooltipHtml += `
-    //                 <div class="tooltip-series">
-    //                     <span class="tooltip-series-name">${key}:</span>
-    //                     <span class="tooltip-series-value" style="color: ${data.value < 0 ? 'red' : 'green'};">
-    //                         ${data.value.toFixed(2)}
-    //                     </span>
-    //                 </div>
-    //             `;
-    //             }
-    //         });
+                if (data) {
+                    const value = data.value.toFixed(2);
+                    const trend = data.value < 0 ? 'down' : 'up';
+                    tooltipHtml += `
+                        <div class="tooltip-series">
+                            <span class="tooltip-series-name">${key}</span>
+                            <span class="tooltip-series-value" data-trend="${trend}">
+                                ${value}
+                            </span>
+                        </div>
+                    `;
+                }
+            });
 
-    //         tooltip.value.innerHTML = tooltipHtml;
+            tooltip.value.innerHTML = tooltipHtml;
 
-    //         const toolTipWidth = 120;
-    //         const toolTipHeight = 80;
-    //         const toolTipMargin = 15;
+            const toolTipWidth = 200;
+            const toolTipHeight = 120;
+            const toolTipMargin = 15;
 
-    //         let left = param.point.x + toolTipMargin;
-    //         if (left > chartContainer.value.clientWidth - toolTipWidth) {
-    //             left = param.point.x - toolTipMargin - toolTipWidth;
-    //         }
+            // Improved positioning logic
+            let left = param.point.x + toolTipMargin;
+            if (left > chartContainer.value.clientWidth - toolTipWidth) {
+                left = param.point.x - toolTipMargin - toolTipWidth;
+            }
 
-    //         let top = param.point.y + toolTipMargin;
-    //         if (top > chartContainer.value.clientHeight - toolTipHeight) {
-    //             top = param.point.y - toolTipHeight - toolTipMargin;
-    //         }
-    //         tooltip.value.style.left = `${left}px`;
-    //         tooltip.value.style.top = `${top}px`;
-    //     }
-    // });
+            let top = param.point.y - toolTipHeight - toolTipMargin;
+            if (top < 0) {
+                top = param.point.y + toolTipMargin;
+            }
+
+            tooltip.value.style.left = `${left}px`;
+            tooltip.value.style.top = `${top}px`;
+        }
+    });
 });
 
 onUnmounted(() => {
@@ -189,131 +228,174 @@ onUnmounted(() => {
     window.removeEventListener('resize', resizeHandler);
 });
 
-watch(
-    () => props.autosize,
-    enabled => {
-        if (!enabled) {
-            window.removeEventListener('resize', resizeHandler);
-            return;
+// Keep all your existing watch functions
+watch(() => props.autosize, enabled => {
+    if (!enabled) {
+        window.removeEventListener('resize', resizeHandler);
+        return;
+    }
+    window.addEventListener('resize', resizeHandler);
+});
+
+watch(() => props.type, () => {
+    if (series.length && chart) {
+        series.forEach(s => chart.removeSeries(s));
+    }
+    addSeriesAndData(props);
+});
+
+watch(() => props.data, newData => {
+    if (!series.length) return;
+    Object.keys(newData).forEach((key, index) => {
+        if (series[index]) {
+            series[index].setData(newData[key]);
         }
-        window.addEventListener('resize', resizeHandler);
-    }
-);
+    });
+    removeTitles();
+});
 
-watch(
-    () => props.type,
-    () => {
-        if (series.length && chart) {
-            series.forEach(s => chart.removeSeries(s));
+watch(() => props.chartOptions, newOptions => {
+    if (!chart) return;
+    chart.applyOptions(newOptions);
+});
+
+watch(() => props.seriesOptions, newOptions => {
+    if (!series.length) return;
+    series.forEach((s, index) => {
+        if (newOptions[index]) {
+            s.applyOptions({ ...newOptions[index], title: '' });
         }
-        addSeriesAndData(props);
-    }
-);
+    });
+});
 
-watch(
-    () => props.data,
-    newData => {
-        if (!series.length) return;
-        Object.keys(newData).forEach((key, index) => {
-            if (series[index]) {
-                series[index].setData(newData[key]);
-            }
-        });
-        removeTitles(); // Ensure titles are removed after data update
-    }
-);
+watch(() => props.priceScaleOptions, newOptions => {
+    if (!chart) return;
+    chart.priceScale().applyOptions(newOptions);
+});
 
-watch(
-    () => props.chartOptions,
-    newOptions => {
-        if (!chart) return;
-        chart.applyOptions(newOptions);
-    }
-);
-
-watch(
-    () => props.seriesOptions,
-    newOptions => {
-        if (!series.length) return;
-        series.forEach((s, index) => {
-            if (newOptions[index]) {
-                s.applyOptions({ ...newOptions[index], title: '' }); // Ensure title remains empty
-            }
-        });
-    }
-);
-
-watch(
-    () => props.priceScaleOptions,
-    newOptions => {
-        if (!chart) return;
-        chart.priceScale().applyOptions(newOptions);
-    }
-);
-
-watch(
-    () => props.timeScaleOptions,
-    newOptions => {
-        if (!chart) return;
-        chart.timeScale().applyOptions(newOptions);
-    }
-);
+watch(() => props.timeScaleOptions, newOptions => {
+    if (!chart) return;
+    chart.timeScale().applyOptions(newOptions);
+});
 </script>
 
 <template>
-    <div class="chart-wrapper">
-        <div class="lw-chart" ref="chartContainer"></div>
-        <div ref="tooltip" class="tooltip"></div>
+    <div class="chart-container">
+        <div class="chart-wrapper">
+            <div class="chart-area" ref="chartContainer"></div>
+            <div ref="tooltip" class="tooltip"></div>
+        </div>
     </div>
 </template>
 
 <style scoped>
+.chart-container {
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(229, 231, 235, 0.5);
+    padding: 1.5rem;
+    margin: 1rem 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chart-container:hover {
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
 .chart-wrapper {
     position: relative;
     width: 100%;
     height: 500px;
+    border-radius: 10px;
+    overflow: hidden;
 }
 
-.lw-chart {
+.chart-area {
     width: 100%;
     height: 100%;
+    transition: opacity 0.2s ease;
 }
 
 .tooltip {
     position: absolute;
     display: none;
-    padding: 8px;
-    box-sizing: border-box;
-    font-size: 12px;
-    text-align: left;
+    padding: 1rem;
+    border-radius: 10px;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 0.875rem;
     z-index: 1000;
-    top: 12px;
-    left: 12px;
     pointer-events: none;
-    border: 1px solid #2196F3;
-    border-radius: 2px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Trebuchet MS', Roboto, Ubuntu, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    background: white;
-    color: black;
-    width: fit-content;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(229, 231, 235, 0.5);
+    min-width: 200px;
+    transform-origin: top left;
+    animation: tooltipFade 0.2s ease-out forwards;
 }
 
 .tooltip-date {
-    font-weight: bold;
-    margin-bottom: 4px;
+    font-weight: 600;
+    color: #1e293b;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.875rem;
 }
 
 .tooltip-series {
-    margin-top: 3px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
 }
 
 .tooltip-series-name {
-    color: #2196F3;
+    color: #64748b;
+    font-weight: 500;
 }
 
 .tooltip-series-value {
-    float: right;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.tooltip-series-value[data-trend="up"] {
+    color: #10b981;
+}
+
+.tooltip-series-value[data-trend="down"] {
+    color: #ef4444;
+}
+
+@keyframes tooltipFade {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        padding: 1rem;
+    }
+
+    .chart-wrapper {
+        height: 400px;
+    }
+
+    .tooltip {
+        font-size: 0.75rem;
+        padding: 0.75rem;
+        min-width: 180px;
+    }
 }
 </style>
