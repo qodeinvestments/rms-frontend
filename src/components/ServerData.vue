@@ -80,7 +80,7 @@ const connectServerDataWebSocket = () => {
 
 onMounted(() => {
 
-    connectServerDataWebSocket();
+    // connectServerDataWebSocket();
 })
 
 onUnmounted(() => {

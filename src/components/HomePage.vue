@@ -243,7 +243,7 @@ const getPercentageClass = (key) => {
 
 onMounted(() => {
   connectWebSocket()
-  connectServerDataWebSocket()
+  // connectServerDataWebSocket()
 })
 
 onUnmounted(() => {
