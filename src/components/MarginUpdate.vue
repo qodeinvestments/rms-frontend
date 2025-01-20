@@ -128,7 +128,8 @@ const filteredAccounts = computed(() => {
 
 
 
-// Submit handler with TOTP
+import * as XLSX from 'xlsx';
+
 const handleSubmitWithTotp = async () => {
   try {
     const token = localStorage.getItem('access_token');
@@ -147,21 +148,55 @@ const handleSubmitWithTotp = async () => {
       })
     });
 
-    const data = await response.json();
+    const jsonResponse = await response.json();
 
     if (!response.ok) {
-      if (response.status === 401) {
-        totpError.value = 'Invalid Password. Please try again.';
-        return;
-      }
-      throw new Error(data.detail || data.message || 'An error occurred');
+        if (response.status === 401) {
+            totpError.value = 'Invalid Password. Please try again.';
+            return;
+        }
+        throw new Error(jsonResponse.detail || jsonResponse.message || 'An error occurred');
     }
 
-    showTotpModal.value = false;
-    totpCode.value = '';
-    alert("All Accounts Margins Updated Successfully!");
-    return data;
+    // Download Excel file
+    const download = (data, title) => {
+      try {
+          if (!data || !Array.isArray(data.data)) {
+              throw new Error('Invalid data format received');
+          }
+          
+          const currentDate = new Date();
+          const formattedDate = currentDate.toLocaleString('en-US', {
+              year: 'numeric',
+              month: '2-digit', 
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false
+          }).replace(/[/:]/g, '_');
 
+          const file_name = `margin_update_${formattedDate}.xlsx`;
+          
+          const wb = XLSX.utils.book_new();
+          const ws = XLSX.utils.json_to_sheet(data.data);
+          XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+          XLSX.writeFile(wb, file_name);
+      } catch (error) {
+          console.error('Download error:', error);
+          throw error;
+      }
+    };
+
+    // Trigger download with error handling
+    if (jsonResponse.dataframe) {
+        download(jsonResponse.dataframe, "margin_update");
+        showTotpModal.value = false;
+        totpCode.value = '';
+        alert("All Accounts Margins Updated Successfully!");
+    } else {
+        throw new Error('No data received from server');
+    }
   } catch (error) {
     if (!totpError.value) {
       alert(`Error: ${error.message}`);
