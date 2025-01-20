@@ -9,6 +9,8 @@ import UserLagData from '../components/UserLagData.vue'
 import ServerData from '../components/ServerData.vue'
 import PositionMismatch from '../components/PositionMismatch.vue'
 import AdminPanel from '../components/AdminPanel.vue'
+import MarginUpdate from '../components/MarginUpdate.vue'
+import MarginUpdateUser from '../components/MarginUpdateUser.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -63,6 +65,16 @@ const router = createRouter({
       name: 'AdminPanel',
       component:AdminPanel,
     },
+    {
+      path: '/marginUpdate',
+      name: 'MarginUpdate',
+      component:MarginUpdate,
+    },
+    {
+      path: '/marginUpdate/:username',
+      name: 'MarginUpdateUser',
+      component:MarginUpdateUser,
+    }
     // {
     //   path: '/about',
     //   name: 'about',

@@ -119,6 +119,12 @@
                 <span class="text">Admin Panel</span>
               </a>
             </li>
+            <li :class="selected == 'MarginUpdate' ? 'active' : ''" @click="changeSelected('MarginUpdate')">
+              <a href="#">
+                <i class="icon ph-bold ph-gear"></i>
+                <span class="text">Margin Update</span>
+              </a>
+            </li>
           </ul>
         </div>
         
@@ -162,7 +168,8 @@ export default {
         'DataVisualizer': '/visualize',
         'SignalBook': '/signalbook',
         'ServerData': '/serverData',
-        'AdminPanel': '/adminPanel'
+        'AdminPanel': '/adminPanel',
+        'MarginUpdate':'/marginUpdate'
       }
 
     }
