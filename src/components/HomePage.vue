@@ -127,7 +127,7 @@ const connectServerDataWebSocket = () => {
       return;
   }
     
-  const socket = new WebSocket('wss://production.swancapital.in/serverData');
+  const socket = new WebSocket('wss://production2.swancapital.in/serverData');
 
   socket.onopen = () => {
      // Send the token as the first message for authentication
@@ -166,7 +166,7 @@ const connectWebSocket = () => {
     return;
   }
 
-  const socket = new WebSocket('wss://production.swancapital.in/ws');
+  const socket = new WebSocket('wss://production2.swancapital.in/ws');
 
   socket.onopen = () => {
     console.log('WebSocket connection opened');

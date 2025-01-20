@@ -152,7 +152,7 @@ const connectToSSE = () => {
   }
 
 
-  const socket = new WebSocket('wss://production.swancapital.in/ws');
+  const socket = new WebSocket('wss://production2.swancapital.in/ws');
 
   socket.onmessage = (event) => {
     if (event.data === 'ping') {
@@ -194,7 +194,7 @@ const connectStrategyWebSocket = () => {
       return;
   }
     
-  const clientStrategySocket = new WebSocket('wss://production.swancapital.in/chart/strategy');
+  const clientStrategySocket = new WebSocket('wss://production2.swancapital.in/chart/strategy');
 
   clientStrategySocket.onopen = function (e) {
      // Send the token as the first message for authentication
@@ -265,7 +265,7 @@ const connectBasketWebSocket = () => {
       return;
   }
     
-  const clientBasketSocket = new WebSocket('wss://production.swancapital.in/chart/basket');
+  const clientBasketSocket = new WebSocket('wss://production2.swancapital.in/chart/basket');
   clientBasketSocket.onopen = function (e) {
      // Send the token as the first message for authentication
     // const authMessage = JSON.stringify({ token });
@@ -342,7 +342,7 @@ const connectClientDetailsWebSocket = () => {
       return;
   }
     
-  const clientDetailSocket = new WebSocket('wss://production.swancapital.in/clientdetails');
+  const clientDetailSocket = new WebSocket('wss://production2.swancapital.in/clientdetails');
   clientDetailSocket.onopen = function (e) {
      // Send the token as the first message for authentication
     const authMessage = JSON.stringify({ token });

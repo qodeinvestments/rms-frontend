@@ -63,7 +63,7 @@ const connectClientDetailsWebSocket = () => {
         return;
     }
     
-    const clientDetailSocket = new WebSocket('wss://production.swancapital.in/signalbook');
+    const clientDetailSocket = new WebSocket('wss://production2.swancapital.in/signalbook');
 
     clientDetailSocket.onopen = function (e) {
             

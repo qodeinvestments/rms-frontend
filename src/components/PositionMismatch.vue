@@ -103,7 +103,7 @@ const connectWebSocket = () => {
         alert('User not authenticated');
         return;
     }
-    const socket = new WebSocket('wss://production.swancapital.in/ws');
+    const socket = new WebSocket('wss://production2.swancapital.in/ws');
 
     socket.onopen = () => {
         console.log('WebSocket connection opened')

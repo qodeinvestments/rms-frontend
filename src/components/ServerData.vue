@@ -30,7 +30,7 @@ const connectServerDataWebSocket = () => {
         alert('User not authenticated');
         return;
     }
-    const ServerDataSocket = new WebSocket('wss://production.swancapital.in/serverData');
+    const ServerDataSocket = new WebSocket('wss://production2.swancapital.in/serverData');
 
     ServerDataSocket.onopen = function (e) {
         const authMessage = JSON.stringify({ token });

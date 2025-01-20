@@ -72,7 +72,7 @@
 
   const SignUpUser = async () => {
   try {
-    const response = await fetch('https://production.swancapital.in/addUser', {
+    const response = await fetch('https://production2.swancapital.in/addUser', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

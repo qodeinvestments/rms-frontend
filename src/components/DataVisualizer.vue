@@ -12,7 +12,7 @@ const signal_delay = ref([]);
 
 const fetchClientDetails = async () => {
     try {
-        const response = await fetch('https://production.swancapital.in/lagsData');
+        const response = await fetch('https://production2.swancapital.in/lagsData');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

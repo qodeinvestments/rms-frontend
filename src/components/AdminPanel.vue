@@ -263,7 +263,7 @@ const fetchData = async (endpoint, stateRef) => {
     if (!access_token) throw new Error('User not authenticated');
     const token = access_token;
 
-    const response = await fetch(`https://production.swancapital.in/${endpoint}`, {
+    const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`, // Include the Bearer token
@@ -306,7 +306,7 @@ const saveChanges = async () => {
       'Features': selectedFeatures.value, // Add this line
     };
 
-    const response = await fetch('https://production.swancapital.in/editUser', {
+    const response = await fetch('https://production2.swancapital.in/editUser', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -348,7 +348,7 @@ const deleteUser = async (user) => {
     const token = localStorage.getItem('access_token');
     if (!token) throw new Error('User not authenticated');
 
-    const response = await fetch('https://production.swancapital.in/deleteUser', {
+    const response = await fetch('https://production2.swancapital.in/deleteUser', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
