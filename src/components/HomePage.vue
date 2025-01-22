@@ -257,21 +257,33 @@ onUnmounted(() => {
 
 
 <template>
-  <div class="homePage_Container bg-[#efefef]/30">
+  <div class="homepage-container  bg-[#efefef]/30">
 
-    <div v-if="index_data" class="nav-index-container font-semibold bg-white drop-shadow-sm">
-      <div v-for="(value, key) in index_data" :key="key" class="index-item">
-        <span class="index-name">{{ formatIndexName(key) }}</span>
-        <div class="index-value-container">
-          <span :class="['index-value', getPercentageClass(key)]">{{ formatNumber(value) }}</span>
-          <img v-if="getPercentageClass(key) === 'positive'" class="image_width" src="../assets/arrow-up-long-solid.svg"
-            alt="">
-          <img v-else class="image_width" src="../assets/arrow-down-long-solid.svg" alt="">
-          <span :class="['percentage', getPercentageClass(key)]">{{ getDifference(key) }}</span>
-          <span :class="['percentage', getPercentageClass(key)]">
-            <span class="opening-brac">(</span>{{ formatPercentage(getPercentage(key)) }}<span
-              class="closing-brac">)</span>
+       <!-- Index Data Cards -->
+    <div v-if="index_data" class="index-cards-container">
+      <div v-for="(value, key) in index_data" :key="key" 
+           class="index-card">
+        <div class="index-header">{{ formatIndexName(key) }}</div>
+        <div class="index-content">
+          <span :class="['index-value', getPercentageClass(key)]">
+            {{ formatNumber(value) }}
           </span>
+          <div class="index-change">
+            <img v-if="getPercentageClass(key) === 'positive'" 
+                 class="trend-icon" 
+                 src="../assets/arrow-up-long-solid.svg" 
+                 alt="Up">
+            <img v-else 
+                 class="trend-icon" 
+                 src="../assets/arrow-down-long-solid.svg" 
+                 alt="Down">
+            <span :class="['percentage', getPercentageClass(key)]">
+              {{ getDifference(key) }}
+              <span class="percentage-bracket">
+                ({{ formatPercentage(getPercentage(key)) }})
+              </span>
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -332,6 +344,65 @@ onUnmounted(() => {
 
 
 <style>
+
+.homepage-container {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  padding: 1.5rem;
+}
+/* Index Cards Styling */
+.index-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.index-card {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(229, 231, 235, 0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.index-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.index-header {
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.index-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.index-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.index-change {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.trend-icon {
+  width: 12px;
+  height: auto;
+}
+
 html {
   font-size: 14px;
 }
