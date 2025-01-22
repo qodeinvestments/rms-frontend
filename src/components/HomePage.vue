@@ -350,53 +350,61 @@ onUnmounted(() => {
   background-color: #f8fafc;
   padding: 1.5rem;
 }
-/* Index Cards Styling */
 .index-cards-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  padding: 1rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+ gap: 0.75rem;
+ padding: 0.75rem;
+ background: white;
+ border-radius: 12px;
+ box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .index-card {
-  background: white;
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid rgba(229, 231, 235, 0.5);
-  transition: transform 0.2s, box-shadow 0.2s;
+ background: white;
+ padding: 0.75rem;
+ border-radius: 6px;
+ border: 1px solid rgba(229, 231, 235, 0.5);
+ transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .index-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+ transform: translateY(-2px);
+ box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .index-header {
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+ font-weight: 600;
+ color: #1e293b;
+ margin-bottom: 0.5rem;
+ font-size: 0.9rem;
 }
 
 .index-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+ display: flex;
+ flex-direction: column;
+ gap: 0.5rem;
 }
 
 .index-value {
-  font-size: 1.25rem;
-  font-weight: 700;
+ font-size: 1.1rem;
+ font-weight: 700;
 }
 
 .index-change {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+ display: flex;
+ align-items: center;
+ gap: 0.5rem;
 }
+
+.trend-icon {
+ width: 12px;
+ height: auto;
+}
+
+.positive { color: #39a97c; }
+.negative { color: #d95858; }
+.neutral { color: #9e9e9e; }
 
 .trend-icon {
   width: 12px;
