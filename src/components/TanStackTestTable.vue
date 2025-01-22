@@ -79,7 +79,7 @@ const isAllColumnsVisible = computed(() => {
 
 // Custom pagination state
 const currentPage = ref(0)
-const pageSize = ref(5)
+const pageSize = ref(10)
 
 // Add this after your existing refs
 const columnVisibility = ref({})
