@@ -245,7 +245,8 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono&display=swap');
+/* First, import the fonts */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Roboto+Mono:wght@500;600&family=JetBrains+Mono:wght@600;700&display=swap');
 
 /* Base Container */
 .trading-positions-container {
@@ -470,14 +471,42 @@ onUnmounted(() => {
   background: linear-gradient(145deg, rgba(248, 250, 252, 0.5), rgba(241, 245, 249, 0.5));
   transform: scale(1.002);
 }
-
-.td-fixed, .td-user {
-  padding: 1rem;
-  border-bottom: 1px solid #e2e8f0;
-  font-size: 0.95rem;
+.type-cell, .systemtag-cell {
+  text-align: center !important;
+  padding: 0.75rem 1rem;
 }
 
-/* Cell Styles */
+/* Update td-fixed to ensure centering */
+.td-fixed {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+  position: sticky;
+  left: 0;
+  background-color: white;
+  text-align: center !important;
+  font-size: 1.05rem;
+  display: table-cell;
+  vertical-align: middle;
+}
+
+/* Update numeric value cells */
+.td-user {
+  font-family: 'IBM Plex Mono', monospace;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: center;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 1.1rem;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: 0.02em;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+
+/* Update strategy type badge styling */
 .strategy-type-badge {
   background: linear-gradient(135deg, #e0f2fe, #bae6fd);
   color: #0369a1;
@@ -487,13 +516,15 @@ onUnmounted(() => {
   font-size: 0.85rem;
   letter-spacing: 0.02em;
   box-shadow: 0 2px 4px rgba(3, 105, 161, 0.05);
+  display: inline-block; /* This helps with centering */
 }
 
+/* Update symbol cell styling */
 .symbol-cell {
-  font-family: 'Space Mono', monospace;
-  font-weight: 700;  /* Increased from 500 to 700 */
-  font-size: 1.1rem; /* Slightly larger */
-  color: #1e293b;    /* Darker color for better contrast */
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1e293b;
   letter-spacing: 0.02em;
   background: linear-gradient(135deg, #f1f5f9, #f8fafc);
   border-radius: 0.6rem;
@@ -502,6 +533,7 @@ onUnmounted(() => {
   border: 1px solid #e2e8f0;
   text-align: center;
   transition: all 0.2s ease;
+  font-feature-settings: "tnum" 1;  /* Enables tabular numbers */
 }
 
 /* Add hover effect for better interaction */
@@ -513,6 +545,7 @@ onUnmounted(() => {
 }
 
 
+/* Update system tag badge styling */
 .systemtag-badge {
   background: linear-gradient(135deg, #ede9fe, #ddd6fe);
   color: #5b21b6;
@@ -522,24 +555,28 @@ onUnmounted(() => {
   font-size: 0.85rem;
   letter-spacing: 0.02em;
   box-shadow: 0 2px 4px rgba(91, 33, 182, 0.05);
+  display: inline-block; /* This helps with centering */
 }
 
 .value-positive {
   color: #059669;
   font-weight: 600;
-  background: linear-gradient(135deg, #d1fae5, transparent);
+  background: linear-gradient(135deg, #d1fae5, #ecfdf5);
   border-radius: 0.4rem;
-  padding: 0.3rem 0.6rem;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.1);
+  font-feature-settings: "tnum" 1;
 }
 
 .value-negative {
   color: #dc2626;
   font-weight: 600;
-  background: linear-gradient(135deg, #fee2e2, transparent);
+  background: linear-gradient(135deg, #fee2e2, #fef2f2);
   border-radius: 0.4rem;
-  padding: 0.3rem 0.6rem;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
+  font-feature-settings: "tnum" 1;
 }
-
 /* Status Messages */
 .error-message {
   margin: 1.5rem;
@@ -563,6 +600,7 @@ onUnmounted(() => {
   gap: 1.5rem;
 }
 
+/* Update loading spinner for more modern look */
 .loading-spinner {
   width: 3.5rem;
   height: 3.5rem;
@@ -603,7 +641,7 @@ onUnmounted(() => {
   to { transform: rotate(360deg); }
 }
 
-/* Scrollbar Styling */
+/* Modern scrollbar for the table container */
 .table-container::-webkit-scrollbar {
   width: 8px;
   height: 8px;
