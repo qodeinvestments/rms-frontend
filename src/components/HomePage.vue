@@ -111,6 +111,7 @@ const updateData = () => {
       VAR_PERCENTAGE: item.Live_Client_Var !== undefined && ( item['Total Margin'] > 0) ? ((Number(item.Live_Client_Var) / Number( item['Total Margin'])) * 100).toPrecision(4) : 0,
       API_NET_PNL: item['API NET PNL'] !== undefined ? item['API NET PNL'] : 0,
       API_DAY_PNL: item['API DAY PNL'] !== undefined ? item['API DAY PNL'] : 0,
+      Portfolio_Value:item['Portfolio Value'] !== undefined ? item['Portfolio Value'] : 0,
 
     }))
   }

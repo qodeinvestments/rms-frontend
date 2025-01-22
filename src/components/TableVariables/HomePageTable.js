@@ -89,6 +89,12 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'Margin',
     }),
+    columnHelper.accessor(row => row.Portfolio_Value, {
+      id: 'Portfolio Value',
+      cell: info => info.getValue(),
+      header: () => 'Portfolio Value',
+    }),
+    
   
   
     columnHelper.accessor(row => row.Used_Margin, {

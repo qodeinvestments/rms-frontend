@@ -11,6 +11,7 @@ import PositionMismatch from '../components/PositionMismatch.vue'
 import AdminPanel from '../components/AdminPanel.vue'
 import MarginUpdate from '../components/MarginUpdate.vue'
 import MarginUpdateUser from '../components/MarginUpdateUser.vue'
+import TradingMonitor from '../components/TradingMonitor.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -74,6 +75,11 @@ const router = createRouter({
       path: '/marginUpdate/:username',
       name: 'MarginUpdateUser',
       component:MarginUpdateUser,
+    },
+    {
+      path: '/tradebook',
+      name: 'TradingMonitor',
+      component:TradingMonitor,
     }
     // {
     //   path: '/about',

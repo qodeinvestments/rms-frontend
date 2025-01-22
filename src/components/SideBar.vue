@@ -72,6 +72,13 @@
                 <span class="text">Server Data</span>
               </a>
             </li>
+            <li :class="selected == 'TradingMonitor' ? 'active' : ''" @click="changeSelected('TradingMonitor')">
+              <a href="#">
+                <i class="icon ph-bold ph-calendar-blank"></i>
+                <span class="text">TradeBook</span>
+              </a>
+            </li>
+            
             <!-- <li>
               <a href="#" :class="selected == 'Income' ? 'active' : ''" @click="changeSelected('Income')">
                 <i class="icon ph-bold ph-chart-bar"></i>
@@ -169,7 +176,8 @@ export default {
         'SignalBook': '/signalbook',
         'ServerData': '/serverData',
         'AdminPanel': '/adminPanel',
-        'MarginUpdate':'/marginUpdate'
+        'MarginUpdate':'/marginUpdate',
+        'TradingMonitor': '/tradebook'
       }
 
     }
