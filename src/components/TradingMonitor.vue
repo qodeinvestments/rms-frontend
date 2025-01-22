@@ -491,13 +491,27 @@ onUnmounted(() => {
 
 .symbol-cell {
   font-family: 'Space Mono', monospace;
-  font-weight: 500;
-  color: #334155;
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #f8fafc, transparent);
-  border-radius: 0.4rem;
-  padding: 0.5rem 1rem;
+  font-weight: 700;  /* Increased from 500 to 700 */
+  font-size: 1.1rem; /* Slightly larger */
+  color: #1e293b;    /* Darker color for better contrast */
+  letter-spacing: 0.02em;
+  background: linear-gradient(135deg, #f1f5f9, #f8fafc);
+  border-radius: 0.6rem;
+  padding: 0.6rem 1.2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  transition: all 0.2s ease;
 }
+
+/* Add hover effect for better interaction */
+.data-row:hover .symbol-cell {
+  background: linear-gradient(135deg, #e2e8f0, #f1f5f9);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  transform: scale(1.02);
+  border-color: #cbd5e1;
+}
+
 
 .systemtag-badge {
   background: linear-gradient(135deg, #ede9fe, #ddd6fe);
