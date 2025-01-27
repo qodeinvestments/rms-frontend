@@ -2,7 +2,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import Histogram from './Histogram.vue';
-import OHLCChart from './OHLCChart.vue';
+import OHLCChart from './OHLCCHART.vue';
 
 const WS7L = ref([]);
 const WS8L = ref([]);
