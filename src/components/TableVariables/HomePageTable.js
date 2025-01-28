@@ -13,6 +13,11 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'Account Name',
     }),
+    columnHelper.accessor(row => row.AccountId, {
+      id: 'AccountId',
+      cell: info => info.getValue(),
+      header: () => 'AccountId',
+    }),
     columnHelper.accessor(row => row.IdealMTM, {
       id: 'IdealMTM',
       cell: info => info.getValue(),
@@ -128,6 +133,7 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'Cash/PF',
     }),
+    
     
     columnHelper.accessor(row => row.NetQuantity, {
       id: 'NetQuantity',

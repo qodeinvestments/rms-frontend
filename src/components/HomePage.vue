@@ -86,8 +86,9 @@ const updateData = () => {
   if (clients_data && clients_data.length > 0) {
     data.value = clients_data.map(item => ({
 
-
+      
       AccountName: item.name || '',
+      AccountId : item.AccountId || '',
       IdealMTM: item.ideal_MTM !== undefined ? item.ideal_MTM : 0,
       Day_PL: item.MTM !== undefined ? item.MTM : 0,
       Slippage1:item.Slippage1!==undefined?item.Slippage1:0,
@@ -112,7 +113,7 @@ const updateData = () => {
       API_NET_PNL: item['API NET PNL'] !== undefined ? item['API NET PNL'] : 0,
       API_DAY_PNL: item['API DAY PNL'] !== undefined ? item['API DAY PNL'] : 0,
       Portfolio_Value:item['Portfolio Value'] !== undefined ? item['Portfolio Value'] : 0,
-      Cashperpf : Number((item.cashAvailable !== undefined ? Number(item.cashAvailable) : 0)/(item['Portfolio Value'] !== undefined ? item['Portfolio Value'] : 1))*100.00,
+      Cashperpf :Number(item['Cashperpf'] !== undefined ? item['Cashperpf'] : 0,  ['Cashperpf']) 
 
     }))
   }
