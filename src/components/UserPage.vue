@@ -528,7 +528,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     </div>
     <div class="my-8" v-if="book && showOnPage === 'Zerodha Position Book'">
       <TanStackTestTable title="Zerodha Position Book" :data="book" :columns="zerodha_position_book_columns"
-        :hasColor="[]" :navigateTo="[]" :showPagination=true />
+        :hasColor="['pnl','m2m','unrealised','realised']" :navigateTo="[]" :showPagination=true />
     </div>
 
     <div class="my-8" v-if="book && showOnPage === 'Holdings'">

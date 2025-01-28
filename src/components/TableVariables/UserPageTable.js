@@ -37,7 +37,7 @@ export const zerodha_order_book_columns = [
 
 
 const zerodha_pos_columns=[
-  'tradingsymbol', 'exchange', 'instrument_token', 'product', 'quantity', 'overnight_quantity', 'multiplier', 'average_price', 'close_price', 'last_price', 'value', 'pnl', 'm2m', 'unrealised', 'realised', 'buy_quantity', 'buy_price', 'buy_value', 'buy_m2m', 'sell_quantity', 'sell_price', 'sell_value', 'sell_m2m', 'day_buy_quantity', 'day_buy_price', 'day_buy_value', 'day_sell_quantity', 'day_sell_price', 'day_sell_value'
+   'product','tradingsymbol','quantity', 'average_price', 'last_price','pnl', 'm2m', 'unrealised', 'realised','exchange', 'instrument_token',  'overnight_quantity', 'multiplier', 'close_price', 'value',  'buy_quantity', 'buy_price', 'buy_value', 'buy_m2m', 'sell_quantity', 'sell_price', 'sell_value', 'sell_m2m', 'day_buy_quantity', 'day_buy_price', 'day_buy_value', 'day_sell_quantity', 'day_sell_price', 'day_sell_value'
 ]
 
 export const zerodha_position_book_columns = [
