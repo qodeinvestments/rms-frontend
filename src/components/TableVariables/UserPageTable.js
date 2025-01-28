@@ -15,8 +15,8 @@ const zerodha_ob_columns = [
   'pending_quantity', 'cancelled_quantity', 'average_price','status','order_type',
   
   'variety', 'modified', 'exchange', 'validity',  'price','trigger_price', 
-  'market_protection', 'meta',
-  'tag', 'tags', 'guid','status_message', 'status_message_raw','account_id', 'order_id', 'exchange_order_id','instrument_token','validity_ttl'
+  // 'market_protection', 'meta',
+  // 'tag', 'tags', 'guid','status_message', 'status_message_raw','account_id', 'order_id', 'exchange_order_id','instrument_token','validity_ttl'
 ];
 
 export const zerodha_order_book_columns = [
@@ -37,7 +37,7 @@ export const zerodha_order_book_columns = [
 
 
 const zerodha_pos_columns=[
-  'symbol', 'ltp', 'pnl', 'net_qty', 'net_price', 'net_value', 'buy_qty', 'buy_price', 'buy_value', 'sell_qty', 'sell_price', 'sell_value', 'turnover'
+  'tradingsymbol', 'exchange', 'instrument_token', 'product', 'quantity', 'overnight_quantity', 'multiplier', 'average_price', 'close_price', 'last_price', 'value', 'pnl', 'm2m', 'unrealised', 'realised', 'buy_quantity', 'buy_price', 'buy_value', 'buy_m2m', 'sell_quantity', 'sell_price', 'sell_value', 'sell_m2m', 'day_buy_quantity', 'day_buy_price', 'day_buy_value', 'day_sell_quantity', 'day_sell_price', 'day_sell_value'
 ]
 
 export const zerodha_position_book_columns = [
