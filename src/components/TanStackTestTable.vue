@@ -134,7 +134,10 @@ const formatIndianNumber = (value) => {
     const isNegative = num < 0;
     const absoluteNum = Math.abs(num);
 
-    const [integerPart, decimalPart] = absoluteNum.toString().split('.');
+    // Format to 2 decimal places first
+    const formattedDecimal = absoluteNum.toFixed(2);
+    const [integerPart, decimalPart] = formattedDecimal.split('.');
+    
     const lastThree = integerPart.slice(-3);
     const remaining = integerPart.slice(0, -3);
 
@@ -142,9 +145,8 @@ const formatIndianNumber = (value) => {
         ? remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree
         : lastThree;
 
-    const formattedNumber = decimalPart
-        ? `${withCommas}.${decimalPart}`
-        : withCommas;
+    // Decimal part is now always present due to toFixed(2)
+    const formattedNumber = `${withCommas}.${decimalPart}`;
 
     // Add back the negative sign if necessary
     return isNegative ? `-${formattedNumber}` : formattedNumber;

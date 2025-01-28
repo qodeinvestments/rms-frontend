@@ -123,6 +123,12 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'Cash',
     }),
+    columnHelper.accessor(row => row.Cashperpf, {
+      id: 'Cashperpf',
+      cell: info => info.getValue(),
+      header: () => 'Cashperpf',
+    }),
+    
     columnHelper.accessor(row => row.NetQuantity, {
       id: 'NetQuantity',
       cell: info => info.getValue(),
