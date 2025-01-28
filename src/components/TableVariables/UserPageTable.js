@@ -10,22 +10,46 @@ const columnHelper = createColumnHelper()
   
  
 const zerodha_ob_columns = [
-  'account_id','placed_by', 'terminal_id', 'order_id', 'exchange_order_id', 'parent_order_id', 'status', 
-  'status_message', 'status_message_raw', 'order_timestamp', 'exchange_update_timestamp', 
-  'exchange_timestamp', 'variety', 'modified', 'exchange', 'tradingsymbol', 'instrument_token', 
-  'order_type', 'transaction_type', 'validity', 'validity_ttl', 'product', 'quantity', 
-  'disclosed_quantity', 'price', 'trigger_price', 'average_price', 'filled_quantity', 
-  'pending_quantity', 'cancelled_quantity', 'market_protection', 'meta',
-  'tag', 'tags', 'guid'
+  'order_timestamp', 'exchange_update_timestamp', 
+  'exchange_timestamp', 'transaction_type','tradingsymbol','product', 'quantity',  'filled_quantity','disclosed_quantity', 
+  'pending_quantity', 'cancelled_quantity', 'average_price','status','order_type',
+  
+  'variety', 'modified', 'exchange', 'validity',  'price','trigger_price', 
+  'market_protection', 'meta',
+  'tag', 'tags', 'guid','status_message', 'status_message_raw','account_id', 'order_id', 'exchange_order_id','instrument_token','validity_ttl'
 ];
 
-export const zerodha_order_book_columns  = zerodha_ob_columns.map(column => {
-  return columnHelper.accessor(row => row[column], {
-    id: column,
+export const zerodha_order_book_columns = [
+  ...zerodha_ob_columns.map(column => {
+    return columnHelper.accessor(row => row[column], {
+      id: column,
+      cell: info => info.getValue(),
+      header: () => column,
+    });
+  }),
+  // Add the custom column
+  columnHelper.accessor(row => `${row['quantity']}/${row['filled_quantity']}`, {
+    id: 'quantity_ratio',
     cell: info => info.getValue(),
-    header: () => column,
-  });
-});
+    header: () => 'Quantity/Filled Quantity',
+  }),
+];
+
+
+const zerodha_pos_columns=[
+  'symbol', 'ltp', 'pnl', 'net_qty', 'net_price', 'net_value', 'buy_qty', 'buy_price', 'buy_value', 'sell_qty', 'sell_price', 'sell_value', 'turnover'
+]
+
+export const zerodha_position_book_columns = [
+  ...zerodha_pos_columns.map(column => {
+    return columnHelper.accessor(row => row[column], {
+      id: column,
+      cell: info => info.getValue(),
+      header: () => column,
+    });
+  }),
+
+];
 
 const client_holdings=['account_id', 'placed_by', 'terminal_id', 'order_id',
   'exchange_order_id', 'parent_order_id', 'status', 'status_message',
