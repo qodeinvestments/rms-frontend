@@ -124,9 +124,9 @@ export const columns = [
       header: () => 'Cash',
     }),
     columnHelper.accessor(row => row.Cashperpf, {
-      id: 'Cashperpf',
+      id: 'Cash/pf',
       cell: info => info.getValue(),
-      header: () => 'Cashperpf',
+      header: () => 'Cash/PF',
     }),
     
     columnHelper.accessor(row => row.NetQuantity, {
