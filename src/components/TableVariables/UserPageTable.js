@@ -9,31 +9,80 @@ import {
 const columnHelper = createColumnHelper()
   
  
-const zerodha_ob_columns = [
-  'order_timestamp', 'exchange_update_timestamp', 
-  'exchange_timestamp', 'transaction_type','tradingsymbol','product', 'quantity',  'filled_quantity','disclosed_quantity', 
-  'pending_quantity', 'cancelled_quantity', 'average_price','status','order_type',
+// const zerodha_ob_columns = [
+//   'order_timestamp',  'transaction_type','tradingsymbol','product',
+//   //  'quantity',  'filled_quantity','disclosed_quantity', 
+//   // 'pending_quantity', 'cancelled_quantity',
+//    'average_price','status','order_type',
   
-  'variety', 'modified', 'exchange', 'validity',  'price','trigger_price', 
-  // 'market_protection', 'meta',
-  // 'tag', 'tags', 'guid','status_message', 'status_message_raw','account_id', 'order_id', 'exchange_order_id','instrument_token','validity_ttl'
+//   'variety', 'modified', 'exchange', 'validity',  'price','trigger_price', 'exchange_update_timestamp', 
+//   'exchange_timestamp'
+//   // 'market_protection', 'meta',
+//   // 'tag', 'tags', 'guid','status_message', 'status_message_raw','account_id', 'order_id', 'exchange_order_id','instrument_token','validity_ttl'
+// ];
+
+// export const zerodha_order_book_columns = [
+//   ...zerodha_ob_columns.map(column => {
+//     return columnHelper.accessor(row => row[column], {
+//       id: column,
+//       cell: info => info.getValue(),
+//       header: () => column,
+//     });
+//   }),
+//   // Add the custom column
+//   columnHelper.accessor(row => `${row['quantity']}/${row['filled_quantity']}`, {
+//     id: 'quantity_ratio',
+//     cell: info => info.getValue(),
+//     header: () => 'Quantity/Filled Quantity',
+//   }),
+// ];
+
+
+const zerodha_ob_columns = [
+  'order_timestamp', 'transaction_type', 'tradingsymbol', 'product',
+  'average_price', 'status', 'order_type',
+  'variety', 'modified', 'exchange', 'validity', 'price', 'trigger_price', 
+  'exchange_update_timestamp', 'exchange_timestamp',  'quantity',  'filled_quantity','disclosed_quantity', 
+   'pending_quantity', 'cancelled_quantity',
 ];
 
-export const zerodha_order_book_columns = [
-  ...zerodha_ob_columns.map(column => {
+// Define custom columns with their desired positions
+const customColumns = [
+  {
+    id: 'quantity_ratio',
+    position: 3, // Position where you want to insert (1-based index)
+    accessor: row => `${row['quantity']}/${row['filled_quantity']}`,
+    header: 'Quantity/Filled Quantity'
+  },
+];
+
+export const zerodha_order_book_columns = (() => {
+  // First, create array of standard columns
+  let columns = zerodha_ob_columns.map(column => {
     return columnHelper.accessor(row => row[column], {
       id: column,
       cell: info => info.getValue(),
       header: () => column,
     });
-  }),
-  // Add the custom column
-  columnHelper.accessor(row => `${row['quantity']}/${row['filled_quantity']}`, {
-    id: 'quantity_ratio',
-    cell: info => info.getValue(),
-    header: () => 'Quantity/Filled Quantity',
-  }),
-];
+  });
+
+  // Sort custom columns by position to ensure correct insertion order
+  const sortedCustomColumns = [...customColumns].sort((a, b) => a.position - b.position);
+
+  // Insert each custom column at its specified position
+  sortedCustomColumns.forEach(customCol => {
+    const position = Math.min(Math.max(1, customCol.position), columns.length + 1) - 1;
+    const customColumn = columnHelper.accessor(customCol.accessor, {
+      id: customCol.id,
+      cell: info => info.getValue(),
+      header: () => customCol.header,
+    });
+    
+    columns.splice(position, 0, customColumn);
+  });
+
+  return columns;
+})();
 
 
 const zerodha_pos_columns=[

@@ -489,7 +489,7 @@ table {
 
 .maxwidth150 {
    
-    max-width: 160px;
+    max-width: 180px;
 }
 
 .sticky-header {
