@@ -21,39 +21,33 @@ const columnHelper = createColumnHelper()
 //   // 'tag', 'tags', 'guid','status_message', 'status_message_raw','account_id', 'order_id', 'exchange_order_id','instrument_token','validity_ttl'
 // ];
 
-// export const zerodha_order_book_columns = [
-//   ...zerodha_ob_columns.map(column => {
-//     return columnHelper.accessor(row => row[column], {
-//       id: column,
-//       cell: info => info.getValue(),
-//       header: () => column,
-//     });
-//   }),
-//   // Add the custom column
-//   columnHelper.accessor(row => `${row['quantity']}/${row['filled_quantity']}`, {
-//     id: 'quantity_ratio',
-//     cell: info => info.getValue(),
-//     header: () => 'Quantity/Filled Quantity',
-//   }),
-// ];
-
 
 const zerodha_ob_columns = [
   'order_timestamp', 'transaction_type', 'tradingsymbol', 'product',
-  'average_price', 'status', 'order_type',
-  'variety', 'modified', 'exchange', 'validity', 'price', 'trigger_price', 
-  'exchange_update_timestamp', 'exchange_timestamp',  'quantity',  'filled_quantity','disclosed_quantity', 
+  'average_price', 'status', 'order_type','price','filled_quantity','disclosed_quantity', 
    'pending_quantity', 'cancelled_quantity',
+  'variety', 'modified', 'exchange', 'validity',  'trigger_price', 
+  'exchange_update_timestamp', 'exchange_timestamp',  'quantity',  
 ];
 
 // Define custom columns with their desired positions
 const customColumns = [
   {
     id: 'quantity_ratio',
-    position: 3, // Position where you want to insert (1-based index)
+    position: 6, // Position where you want to insert (1-based index)
     accessor: row => `${row['quantity']}/${row['filled_quantity']}`,
     header: 'Quantity/Filled Quantity'
   },
+  {
+    id: 'ContractValue',
+    position: 7,
+    accessor: row => {
+        const quantity = parseInt(row['quantity']) || 0;
+        const avgPrice = parseFloat(row['average_price']) || 0;
+        return (quantity * avgPrice);
+    },
+    header: 'ContractValue'
+  }
 ];
 
 export const zerodha_order_book_columns = (() => {
