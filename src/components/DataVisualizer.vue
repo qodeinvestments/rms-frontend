@@ -7,7 +7,7 @@ import OHLCChart from './OHLCCHART.vue';
 const WS7L = ref([]);
 const WS8L = ref([]);
 const signal_delay = ref([]);
-const psar = ref([]);
+const chartData = ref([]);
 const isLoading = ref(false);
 const error = ref(null);
 
@@ -65,11 +65,15 @@ const postData = async (endpoint, payload, stateRef) => {
   }
 };
 
-const psarfetch = () => postData('Psar', {"name":"hello"}, psar);
+const chartDatafetch = (data) => postData('Psar', data, chartData);
+
+const fetchDiffData = (data) => {
+  chartDatafetch(data);
+}
 
 onMounted(() => {
   fetchClientDetails();
-  psarfetch();
+  chartDatafetch({symbol: 'NIFTY', timeframe: '5m', indicators: []});
 });
 </script>
 
@@ -96,7 +100,7 @@ onMounted(() => {
         </div>
   
         <div class="dashboard-card">
-          <OHLCChart :data="psar" />
+          <OHLCChart :data="chartData" @submit-config="fetchDiffData($event)" />
         </div>
       </div>
     </div>

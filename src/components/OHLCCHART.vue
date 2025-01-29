@@ -1,244 +1,304 @@
 <!-- OHLCChart.vue -->
 <template>
-    <div class="chart-wrapper">
-      <div class="chart-header">
-        <div class="chart-title-section">
-          <h2 class="chart-title">Market Data</h2>
-          <div class="indicator-selector">
-            <a-select
-              v-model:value="selectedIndicators"
-              mode="multiple"
-              placeholder="Select Indicators"
-              style="width: 250px"
-              :options="indicatorOptions"
-              :maxTagCount="3"
-              @change="handleIndicatorChange"
-            >
-            </a-select>
-            <a-button 
-              v-if="selectedIndicators.length > 0"
-              type="text"
-              @click="showSettingsModal"
-              class="settings-button"
-            >
-              <template #icon><setting-outlined /></template>
-            </a-button>
-          </div>
-        </div>
-        <div class="chart-controls">
-          <button 
-            v-for="period in timePeriods" 
-            :key="period"
-            @click="changePeriod(period)"
-            :class="['period-button', { active: selectedPeriod === period }]"
-          >
-            {{ period }}
-          </button>
-        </div>
-      </div>
-      
-      <div ref="chartContainer" class="chart-container">
-        <div v-if="!data || Object.keys(data).length === 0" class="loading-overlay">
-          <div class="loading-spinner"></div>
-          <span>Loading chart data...</span>
-        </div>
-      </div>
-  
-      <!-- Indicator Settings Modal -->
-      <a-modal
-        v-model:visible="isSettingsVisible"
-        title="Indicator Settings"
-        @ok="handleSettingsSave"
-        width="600px"
-      >
-        <div v-for="indicator in selectedIndicators" :key="indicator" class="indicator-settings">
-          <h3>{{ getIndicatorName(indicator) }}</h3>
-          <div class="settings-group">
-            <template v-if="indicator === 'psar'">
-              <a-form-item label="Acceleration Factor">
-                <a-input-number 
-                  v-model:value="indicatorSettings.psar.accelerationFactor" 
-                  :min="0.01" 
-                  :max="0.1" 
-                  :step="0.01"
-                />
-              </a-form-item>
-              <a-form-item label="Maximum AF">
-                <a-input-number 
-                  v-model:value="indicatorSettings.psar.maxAF" 
-                  :min="0.1" 
-                  :max="0.5" 
-                  :step="0.05"
-                />
-              </a-form-item>
-            </template>
-            <template v-if="indicator === 'ma'">
-              <a-form-item label="Period">
-                <a-input-number 
-                  v-model:value="indicatorSettings.ma.period" 
-                  :min="1" 
-                  :max="200"
-                />
-              </a-form-item>
-              <a-form-item label="Type">
-                <a-select v-model:value="indicatorSettings.ma.type">
-                  <a-select-option value="sma">Simple</a-select-option>
-                  <a-select-option value="ema">Exponential</a-select-option>
-                </a-select>
-              </a-form-item>
-            </template>
-            <!-- Add more indicator settings templates as needed -->
-          </div>
-        </div>
-      </a-modal>
+  <div v-if="isLoading" class="global-loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <span class="loading-text">Loading market data...</span>
     </div>
-  </template>
-  <script setup>
-  import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-  import { createChart } from 'lightweight-charts'
-  import { SettingOutlined } from '@ant-design/icons-vue'
-  
-  const props = defineProps({
-    data: {
-      type: Object,
-      required: true
-    }
-  })
-  
-  const chartContainer = ref(null)
-  const selectedPeriod = ref('1D')
-  const timePeriods = ['1H', '1D', '1W', '1M']
-  const isSettingsVisible = ref(false)
-  let chart = null
-  let candlestickSeries = null
-  let psarSeries = null
-  
-  // Indicator related data
-  const selectedIndicators = ref([])
-  const indicatorOptions = [
-    { value: 'psar', label: 'Parabolic SAR' },
-    { value: 'ma', label: 'Moving Average' },
-    { value: 'bollinger', label: 'Bollinger Bands' },
-    { value: 'rsi', label: 'RSI' }
-  ]
-  
-  const indicatorSettings = ref({
-    psar: {
-      accelerationFactor: 0.02,
-      maxAF: 0.2
-    },
-    ma: {
-      period: 20,
-      type: 'sma'
-    },
-    bollinger: {
-      period: 20,
-      stdDev: 2
-    },
-    rsi: {
-      period: 14
-    }
-  })
-  
-  const getIndicatorName = (indicator) => {
-    return indicatorOptions.find(opt => opt.value === indicator)?.label || indicator
-  }
-  
-  const showSettingsModal = () => {
-    isSettingsVisible.value = true
-  }
-  
-  const handleSettingsSave = () => {
-    isSettingsVisible.value = false
-    updateChartData() // Refresh chart with new settings
-  }
-  
-  const handleIndicatorChange = (values) => {
-    selectedIndicators.value = values
-    updateChartData()
-  }
+  </div>
+  <div class="chart-wrapper">
+    <div class="chart-header">
+      <h2 class="chart-title">Market Data</h2>
+      <div class="controls-container">
+        <!-- Symbol Dropdown -->
+        <div class="dropdown-container" @click="toggleSymbolDropdown">
+          <div class="selected-value">
+            {{ config.symbol || 'Select Symbol' }}
+            <span class="dropdown-arrow" :class="{ 'rotate': isSymbolDropdownOpen }">▼</span>
+          </div>
+          <div v-if="isSymbolDropdownOpen" class="dropdown-menu">
+            <div 
+              v-for="symbol in symbols" 
+              :key="symbol"
+              class="dropdown-item"
+              @click="selectSymbol(symbol)"
+            >
+              {{ symbol }}
+            </div>
+          </div>
+        </div>
 
+        <!-- Timeframe Dropdown -->
+        <div class="dropdown-container" @click="toggleTimeframeDropdown">
+          <div class="selected-value">
+            {{ config.timeframe || 'Select Timeframe' }}
+            <span class="dropdown-arrow" :class="{ 'rotate': isTimeframeDropdownOpen }">▼</span>
+          </div>
+          <div v-if="isTimeframeDropdownOpen" class="dropdown-menu">
+            <div 
+              v-for="tf in timeframes" 
+              :key="tf"
+              class="dropdown-item"
+              @click="selectTimeframe(tf)"
+            >
+              {{ tf }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Indicator Settings Button -->
+        <button 
+          @click="showIndicatorModal"
+          class="settings-button"
+        >
+          <span class="settings-icon">⚙</span>
+          Indicators
+        </button>
+
+        <button 
+          @click="submitConfig"
+          class="submit-button"
+        >
+          Apply
+        </button>
+      </div>
+    </div>
+    
+    <div ref="chartContainer" class="chart-container">
+      <div v-if="!data || Object.keys(data).length === 0" class="loading-overlay">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+
+    <!-- Indicator Settings Modal -->
+    <Transition name="modal">
+      <div v-if="isIndicatorModalOpen" class="modal-overlay" @click="closeIndicatorModal">
+        <div class="modal-content" @click.stop>
+          <div class="modal-header">
+            <h3>Indicator Settings</h3>
+            <button class="close-button" @click="closeIndicatorModal">×</button>
+          </div>
+          
+          <div class="modal-body">
+            <!-- PSAR Settings -->
+            <div class="indicator-group">
+              <label class="indicator-checkbox">
+                <input 
+                  type="checkbox"
+                  v-model="indicators.psar.enabled"
+                />
+                <span class="checkbox-label">Parabolic SAR</span>
+              </label>
+              
+              <div v-if="indicators.psar.enabled" class="indicator-settings">
+                <div class="setting-group">
+                  <label>Acceleration Factor</label>
+                  <input 
+                    type="number"
+                    v-model="indicators.psar.af"
+                    step="0.001"
+                    class="number-input"
+                  />
+                </div>
+                <div class="setting-group">
+                  <label>Maximum AF</label>
+                  <input 
+                    type="number"
+                    v-model="indicators.psar.maxAf"
+                    step="0.001"
+                    class="number-input"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- MA Settings -->
+            <div class="indicator-group">
+              <label class="indicator-checkbox">
+                <input 
+                  type="checkbox"
+                  v-model="indicators.ma.enabled"
+                />
+                <span class="checkbox-label">Moving Average</span>
+              </label>
+              
+              <div v-if="indicators.ma.enabled" class="indicator-settings">
+                <div class="setting-group">
+                  <label>Period</label>
+                  <input 
+                    type="number"
+                    v-model="indicators.ma.period"
+                    class="number-input"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button class="cancel-button" @click="closeIndicatorModal">Cancel</button>
+            <button class="save-button" @click="saveIndicatorSettings">Save</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { createChart } from 'lightweight-charts'
+
+const emit = defineEmits(['submit-config'])
+const props = defineProps({
+  data: {
+    type: Object,
+    required: true
+  }
+})
+
+// Chart refs and instances
+const chartContainer = ref(null)
+// Chart instance variables
+let chart = null
+let candlestickSeries = null
+let psarSeries = null
+let maSeries = null
+
+
+
+
+// Add this with other refs
+const isLoading = ref(false)
+
+// UI State
+const isSymbolDropdownOpen = ref(false)
+const isTimeframeDropdownOpen = ref(false)
+const isIndicatorModalOpen = ref(false)
+
+// Available options
+const symbols = ['NIFTY', 'SENSEX']
+const timeframes = ['1m', '5m', '15m', '1h', '1d']
+
+
+// Configuration state
+const config = ref({
+  symbol: 'NIFTY',
+  timeframe: '5m',
+  indicators: []
+})
+
+// Indicator state
+const indicators = ref({
+  psar: {
+    enabled: false,
+    af: 0.002,
+    maxAf: 0.02
+  },
+  ma: {
+    enabled: false,
+    period: 20
+  }
+})
+
+// Dropdown handlers
+const toggleSymbolDropdown = () => {
+  isSymbolDropdownOpen.value = !isSymbolDropdownOpen.value
+  isTimeframeDropdownOpen.value = false
+}
+
+const toggleTimeframeDropdown = () => {
+  isTimeframeDropdownOpen.value = !isTimeframeDropdownOpen.value
+  isSymbolDropdownOpen.value = false
+}
+
+const selectSymbol = (symbol) => {
+  config.value.symbol = symbol
+  isSymbolDropdownOpen.value = false
+}
+
+const selectTimeframe = (tf) => {
+  config.value.timeframe = tf
+  isTimeframeDropdownOpen.value = false
+}
+
+// Modal handlers
+const showIndicatorModal = () => {
+  isIndicatorModalOpen.value = true
+}
+
+const closeIndicatorModal = () => {
+  isIndicatorModalOpen.value = false
+}
+
+const saveIndicatorSettings = () => {
+  updateIndicators()
+  closeIndicatorModal()
+}
+
+// Update and submit config
+const updateIndicators = () => {
+  config.value.indicators = []
   
-  const createChartInstance = () => {
-    chart = createChart(chartContainer.value, {
-      width: chartContainer.value.clientWidth,
-      height: 500,
-      layout: {
-        background: { 
-          type: 'solid', 
-          color: '#ffffff' 
-        },
-        textColor: '#333333',
-        fontSize: 12,
-        fontFamily: 'Poppins, sans-serif',
-      },
-      grid: {
-        vertLines: { color: '#f0f0f0' },
-        horzLines: { color: '#f0f0f0' },
-      },
-      crosshair: {
-        mode: 1,
-        vertLine: {
-          width: 1,
-          color: '#2962FF',
-          style: 0,
-          labelBackgroundColor: '#2962FF',
-        },
-        horzLine: {
-          width: 1,
-          color: '#2962FF',
-          style: 0,
-          labelBackgroundColor: '#2962FF',
-        },
-      },
-      timeScale: {
-        timeVisible: true,
-        secondsVisible: false,
-        borderColor: '#f0f0f0',
-      },
-      rightPriceScale: {
-        borderColor: '#f0f0f0',
-      },
-      handleScroll: {
-        mouseWheel: true,
-        pressedMouseMove: true,
-        horzTouchDrag: true,
-        vertTouchDrag: true,
-      },
-      handleScale: {
-        axisPressedMouseMove: true,
-        mouseWheel: true,
-        pinch: true,
-      },
-    })
-  
-    candlestickSeries = chart.addCandlestickSeries({
-      upColor: '#26a69a',
-      downColor: '#ef5350',
-      borderVisible: false,
-      wickUpColor: '#26a69a',
-      wickDownColor: '#ef5350',
-      priceFormat: {
-        type: 'price',
-        precision: 2,
-      },
-    })
-  
-    psarSeries = chart.addLineSeries({
-      color: '#2962FF',
-      lineWidth: 2,
-      priceLineVisible: false,
-      crosshairMarkerVisible: true,
-      crosshairMarkerRadius: 4,
-      crosshairMarkerBorderColor: '#2962FF',
-      crosshairMarkerBackgroundColor: '#ffffff',
+  if (indicators.value.psar.enabled) {
+    config.value.indicators.push({
+      name: 'Psar',
+      setting: {
+        af: Number(indicators.value.psar.af),
+        'max-af': Number(indicators.value.psar.maxAf)
+      }
     })
   }
   
-// Update the updateChartData function to handle indicators
+  if (indicators.value.ma.enabled) {
+    config.value.indicators.push({
+      name: 'MA',
+      setting: {
+        period: Number(indicators.value.ma.period)
+      }
+    })
+  }
+}
+
+// Update submitConfig
+const submitConfig = () => {
+  updateIndicators()
+  isLoading.value = true  // Show loading when submitting new config
+  emit('submit-config', config.value)
+}
+
+const createChartInstance = () => {
+  chart = createChart(chartContainer.value, {
+    width: chartContainer.value.clientWidth,
+    height: 500,
+    layout: {
+      background: { type: 'solid', color: '#ffffff' },
+      textColor: '#333333',
+    },
+    grid: {
+      vertLines: { color: '#f0f0f0' },
+      horzLines: { color: '#f0f0f0' },
+    },
+    timeScale: {
+      timeVisible: true,
+      borderColor: '#f0f0f0',
+    },
+  })
+
+  // Main candlestick series is always created
+  candlestickSeries = chart.addCandlestickSeries({
+    upColor: '#26a69a',
+    downColor: '#ef5350',
+    borderVisible: false,
+    wickUpColor: '#26a69a',
+    wickDownColor: '#ef5350',
+  })
+}
+
 const updateChartData = () => {
   if (!props.data || !props.data.timestamp) return
 
+  // Transform and set candlestick data
   const transformedData = Object.keys(props.data.timestamp).map(index => ({
     time: new Date(props.data.timestamp[index]).getTime() / 1000,
     open: props.data.open[index],
@@ -246,175 +306,472 @@ const updateChartData = () => {
     low: props.data.low[index],
     close: props.data.close[index]
   }))
-
   candlestickSeries.setData(transformedData)
 
-  // Update indicators based on selection
-  if (selectedIndicators.value.includes('psar')) {
+  // Handle PSAR data if it exists
+  if (props.data.psar) {
+    // Create PSAR series if it doesn't exist
+    if (!psarSeries) {
+      psarSeries = chart.addLineSeries({
+        color: '#2962FF',
+        lineWidth: 2,
+        pointsVisible: true,
+        pointSize: 4,
+        title: 'PSAR'
+      })
+    }
+
     const psarData = Object.keys(props.data.timestamp).map(index => ({
       time: new Date(props.data.timestamp[index]).getTime() / 1000,
       value: props.data.psar[index]
     }))
     psarSeries.setData(psarData)
+  } else if (psarSeries) {
+    // Remove PSAR series if it exists but we don't have data
+    chart.removeSeries(psarSeries)
+    psarSeries = null
+  }
+
+  // Handle MA data if it exists
+  if (props.data.ma) {
+    // Create MA series if it doesn't exist
+    if (!maSeries) {
+      maSeries = chart.addLineSeries({
+        color: '#FF9800',
+        lineWidth: 2,
+        title: 'MA'
+      })
+    }
+
+    const maData = Object.keys(props.data.timestamp).map(index => ({
+      time: new Date(props.data.timestamp[index]).getTime() / 1000,
+      value: props.data.ma[index]
+    }))
+    maSeries.setData(maData)
+  } else if (maSeries) {
+    // Remove MA series if it exists but we don't have data
+    chart.removeSeries(maSeries)
+    maSeries = null
   }
 
   chart.timeScale().fitContent()
 }
-  const handleResize = () => {
-    if (chart && chartContainer.value) {
-      chart.applyOptions({
-        width: chartContainer.value.clientWidth,
-      })
-    }
+
+
+// Lifecycle hooks
+onMounted(() => {
+  if (chartContainer.value) {
+    isLoading.value = true
+    createChartInstance()
+    updateChartData()
+    window.addEventListener('resize', handleResize)
+    // Add a small delay to make the transition smoother
+    setTimeout(() => {
+      isLoading.value = false
+    }, 300)
   }
-  
-  const changePeriod = (period) => {
-    selectedPeriod.value = period
-    // Implement period change logic here
-  }
-  
-  // Watch for data changes
-  watch(() => props.data, () => {
-    if (chart) {
-      updateChartData()
-    }
-  }, { deep: true })
-  
-  onMounted(() => {
-    if (chartContainer.value) {
-      createChartInstance()
-      updateChartData()
-      window.addEventListener('resize', handleResize)
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.dropdown-container')) {
+      isSymbolDropdownOpen.value = false
+      isTimeframeDropdownOpen.value = false
     }
   })
-  
-  onBeforeUnmount(() => {
-    if (chart) {
-      chart.remove()
-      window.removeEventListener('resize', handleResize)
+})
+
+// Cleanup function
+onBeforeUnmount(() => {
+  if (chart) {
+    if (psarSeries) {
+      chart.removeSeries(psarSeries)
+      psarSeries = null
     }
-  })
-  </script>
-  
-  <style scoped>
+    if (maSeries) {
+      chart.removeSeries(maSeries)
+      maSeries = null
+    }
+    chart.remove()
+    window.removeEventListener('resize', handleResize)
+  }
+})
 
-
-.chart-title-section {
-  display: flex;
-  align-items: center;
-  gap: 20px;
+const handleResize = () => {
+  if (chart && chartContainer.value) {
+    chart.applyOptions({ width: chartContainer.value.clientWidth })
+  }
 }
 
-.indicator-selector {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 
-.settings-button {
-  padding: 4px 8px;
+
+// Update the watch function
+watch(() => props.data, (newData, oldData) => {
+  if (chart) {
+    isLoading.value = true
+    try {
+      updateChartData()
+    } finally {
+      // Add a small delay to make the transition smoother
+      setTimeout(() => {
+        isLoading.value = false
+      }, 300)
+    }
+  }
+}, { deep: true })
+
+
+
+
+</script>
+
+<style scoped>
+
+.global-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
 }
 
-.indicator-settings {
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.loading-text {
+  color: #2962FF;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+
+.chart-wrapper {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 24px;
+  margin: 20px 0;
+}
+
+.chart-header {
   margin-bottom: 24px;
 }
 
-.indicator-settings h3 {
-  margin-bottom: 16px;
+.chart-title {
+  font-size: 1.5rem;
+  font-weight: 600;
   color: #1a1a1a;
-  font-size: 1rem;
+  margin: 0 0 20px 0;
 }
 
-.settings-group {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+.controls-container {
+  display: flex;
   gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Dropdown Styles */
+.dropdown-container {
+  position: relative;
+  min-width: 160px;
+  cursor: pointer;
+}
+
+.selected-value {
+  padding: 10px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.selected-value:hover {
+  background: #f1f5f9;
+}
+
+.dropdown-arrow {
+  font-size: 0.8rem;
+  transition: transform 0.2s;
+}
+
+.dropdown-arrow.rotate {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.dropdown-item {
+  padding: 10px 16px;
+  transition: all 0.2s;
+}
+
+.dropdown-item:hover {
+  background: #f8fafc;
+}
+
+/* Button Styles */
+.settings-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.settings-button:hover {
+  background: #f1f5f9;
+}
+
+.settings-icon {
+  font-size: 1.1rem;
+}
+
+.submit-button {
+  padding: 10px 24px;
+  background: #2962FF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.submit-button:hover {
+  background: #1e4bd8;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 4px;
+  color: #64748b;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.indicator-group {
+  margin-bottom: 24px;
+}
+
+.indicator-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.checkbox-label {
+  font-weight: 500;
+}
+
+.indicator-settings {
+  margin-top: 12px;
   padding: 16px;
   background: #f8fafc;
   border-radius: 8px;
 }
-  .chart-wrapper {
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    padding: 20px;
-    margin: 20px 0;
-  }
-  
-  .chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .chart-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin: 0;
-  }
-  
-  .chart-controls {
-    display: flex;
-    gap: 8px;
-  }
-  
-  .period-button {
-    padding: 6px 12px;
-    border: 1px solid #e5e7eb;
-    background: #ffffff;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    color: #4b5563;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .period-button:hover {
-    background: #f9fafb;
-  }
-  
-  .period-button.active {
-    background: #2962FF;
-    color: #ffffff;
-    border-color: #2962FF;
-  }
-  
-  .chart-container {
-    position: relative;
-    height: 500px;
-    width: 100%;
-  }
-  
-  .loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.9);
-    gap: 12px;
-  }
-  
-  .loading-spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid #2962FF;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  </style>
+
+.setting-group {
+  margin-bottom: 12px;
+}
+
+.setting-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.number-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.number-input:focus {
+  outline: none;
+  border-color: #2962FF;
+  box-shadow: 0 0 0 2px rgba(41, 98, 255, 0.1);
+}
+
+.cancel-button {
+  padding: 8px 16px;
+  background: #f1f5f9;
+  border: none;
+  border-radius: 6px;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-button:hover {
+  background: #e2e8f0;
+}
+
+.save-button {
+  padding: 8px 24px;
+  background: #2962FF;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-button:hover {
+  background: #1e4bd8;
+}
+
+.chart-container {
+  position: relative;
+  height: 500px;
+  width: 100%;
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Update your existing loading spinner styles */
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #2962FF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+/* Add transition for the loading overlay */
+.global-loading-overlay {
+  transition: opacity 0.3s ease;
+}
+
+/* Optional: Add a pulse animation to the loading text */
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.loading-text {
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Modal Transitions */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-from .modal-content,
+.modal-leave-to .modal-content {
+  transform: scale(0.9);
+}
+
+.modal-enter-active .modal-content,
+.modal-leave-active .modal-content {
+  transition: transform 0.3s ease;
+}
+
+.modal-enter-to .modal-content,
+.modal-leave-from .modal-content {
+  transform: scale(1);
+}
+</style>
