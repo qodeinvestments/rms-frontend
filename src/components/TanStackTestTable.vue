@@ -10,6 +10,57 @@ import {
     getFilteredRowModel,
 } from '@tanstack/vue-table'
 import * as XLSX from 'xlsx';
+
+const copyToClipboard = () => {
+    // Get visible columns and clean up their headers
+    const visibleColumns = table.getVisibleLeafColumns()
+    
+    // Clean up header names by removing the '() =>' prefix and quotes
+    const headerRow = visibleColumns
+        .map(column => {
+            const headerText = column.columnDef.header
+            if (typeof headerText === 'function') {
+                // If header is a function that returns a string, execute it
+                return headerText().replace(/^'|'$/g, '') // Remove quotes if present
+            } else if (typeof headerText === 'string') {
+                // If it's already a string, just return it
+                return headerText
+            }
+            // Fallback
+            return column.id
+        })
+        .join('\t')
+    
+    // Create data rows
+    const dataRows = table.getFilteredRowModel().rows
+        .map(row => {
+            return visibleColumns
+                .map(column => {
+                    const value = row.getValue(column.id)
+                    // Format numbers using the existing formatIndianNumber function
+                    return typeof value === 'number' 
+                        ? formatIndianNumber(value)
+                        : value ?? 'N/A'
+                })
+                .join('\t')
+        })
+        .join('\n')
+    
+    // Combine headers and data
+    const clipboardText = `${headerRow}\n${dataRows}`
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(clipboardText)
+        .then(() => {
+            alert('Table copied to clipboard!')
+        })
+        .catch(err => {
+            console.error('Failed to copy table:', err)
+            alert('Failed to copy table to clipboard')
+        })
+}
+
+
 const download = (type) => {
     const file_name = props.title + '.' + type
     const data = props.data
@@ -250,7 +301,11 @@ onUnmounted(() => {
                         class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                         Download Excel
                     </button>
-
+                    <button 
+                        @click="copyToClipboard"
+                        class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+                        Copy to Clipboard
+                    </button>
                 </div>
 
                 <div class="table-container -mx-4 -my-2 overflow-x-auto overflow-y-auto sm:-mx-6 lg:-mx-8">
