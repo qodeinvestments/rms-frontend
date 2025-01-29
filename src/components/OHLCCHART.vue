@@ -65,6 +65,23 @@
     </div>
     
     <div ref="chartContainer" class="chart-container">
+      <!-- Price Display -->
+      <div class="price-display">
+        <span class="price-item">O: <span class="price-value">-</span></span>
+        <span class="price-item">H: <span class="price-value">-</span></span>
+        <span class="price-item">L: <span class="price-value">-</span></span>
+        <span class="price-item">C: <span class="price-value">-</span></span>
+        <span v-if="indicators.psar.enabled" class="price-item">
+          <span class="indicator-dot psar-dot"></span>
+          PSAR: <span class="price-value">-</span>
+        </span>
+        <span v-if="indicators.ma.enabled" class="price-item">
+          <span class="indicator-dot ma-dot"></span>
+          MA: <span class="price-value">-</span>
+        </span>
+      </div>
+
+      <!-- Loading State -->
       <div v-if="!data || Object.keys(data).length === 0" class="loading-overlay">
         <div class="loading-spinner"></div>
       </div>
@@ -164,6 +181,9 @@ let chart = null
 let candlestickSeries = null
 let psarSeries = null
 let maSeries = null
+let lastCandleData = null
+let lastPsarValue = null
+let lastMaValue = null
 
 
 
@@ -236,6 +256,33 @@ const saveIndicatorSettings = () => {
   closeIndicatorModal()
 }
 
+// Price display update function
+const updatePriceDisplay = (candleData, psarValue, maValue) => {
+  const priceDisplay = document.querySelector('.price-display')
+  if (!priceDisplay) return
+
+  const priceValues = priceDisplay.querySelectorAll('.price-value')
+  
+  if (!candleData) {
+    priceValues.forEach(value => value.textContent = '-')
+    return
+  }
+
+  // Update OHLC values
+  priceValues[0].textContent = candleData.open?.toFixed(2) || '-'
+  priceValues[1].textContent = candleData.high?.toFixed(2) || '-'
+  priceValues[2].textContent = candleData.low?.toFixed(2) || '-'
+  priceValues[3].textContent = candleData.close?.toFixed(2) || '-'
+
+  // Update indicator values if they exist
+  if (indicators.value.psar.enabled && priceValues[4]) {
+    priceValues[4].textContent = psarValue?.value?.toFixed(2) || '-'
+  }
+  if (indicators.value.ma.enabled && priceValues[5]) {
+    priceValues[5].textContent = maValue?.value?.toFixed(2) || '-'
+  }
+}
+
 // Update and submit config
 const updateIndicators = () => {
   config.value.indicators = []
@@ -263,7 +310,7 @@ const updateIndicators = () => {
 // Update submitConfig
 const submitConfig = () => {
   updateIndicators()
-  isLoading.value = true  // Show loading when submitting new config
+  isLoading.value = true
   emit('submit-config', config.value)
 }
 
@@ -279,6 +326,17 @@ const createChartInstance = () => {
       vertLines: { color: '#f0f0f0' },
       horzLines: { color: '#f0f0f0' },
     },
+    crosshair: {
+      mode: 1,
+      vertLine: {
+        labelVisible: true,
+        labelBackgroundColor: '#2962FF',
+      },
+      horzLine: {
+        labelVisible: true,
+        labelBackgroundColor: '#2962FF',
+      },
+    },
     timeScale: {
       timeVisible: true,
       borderColor: '#f0f0f0',
@@ -292,6 +350,24 @@ const createChartInstance = () => {
     borderVisible: false,
     wickUpColor: '#26a69a',
     wickDownColor: '#ef5350',
+  })
+
+  // Subscribe to crosshair movement
+  chart.subscribeCrosshairMove((param) => {
+    if (!param || param.time === undefined) {
+      updatePriceDisplay(lastCandleData, lastPsarValue, lastMaValue)
+      return
+    }
+
+    const candleData = param.seriesData.get(candlestickSeries)
+    const psarValue = psarSeries ? param.seriesData.get(psarSeries) : null
+    const maValue = maSeries ? param.seriesData.get(maSeries) : null
+
+    if (candleData) lastCandleData = candleData
+    if (psarValue) lastPsarValue = psarValue
+    if (maValue) lastMaValue = maValue
+
+    updatePriceDisplay(candleData, psarValue, maValue)
   })
 }
 
@@ -357,31 +433,30 @@ const updateChartData = () => {
   chart.timeScale().fitContent()
 }
 
+const handleClickOutside = (e) => {
+  if (!e.target.closest('.dropdown-container')) {
+    isSymbolDropdownOpen.value = false
+    isTimeframeDropdownOpen.value = false
+  }
+}
 
-// Lifecycle hooks
 onMounted(() => {
   if (chartContainer.value) {
     isLoading.value = true
     createChartInstance()
     updateChartData()
     window.addEventListener('resize', handleResize)
-    // Add a small delay to make the transition smoother
+    document.addEventListener('click', handleClickOutside)
     setTimeout(() => {
       isLoading.value = false
     }, 300)
   }
-  // Close dropdowns when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.dropdown-container')) {
-      isSymbolDropdownOpen.value = false
-      isTimeframeDropdownOpen.value = false
-    }
-  })
 })
 
 // Cleanup function
 onBeforeUnmount(() => {
   if (chart) {
+    chart.unsubscribeCrosshairMove()
     if (psarSeries) {
       chart.removeSeries(psarSeries)
       psarSeries = null
@@ -392,6 +467,7 @@ onBeforeUnmount(() => {
     }
     chart.remove()
     window.removeEventListener('resize', handleResize)
+    document.removeEventListener('click', handleClickOutside)
   }
 })
 
@@ -401,10 +477,7 @@ const handleResize = () => {
   }
 }
 
-
-
-// Update the watch function
-watch(() => props.data, (newData, oldData) => {
+watch(() => props.data, () => {
   if (chart) {
     isLoading.value = true
     try {
@@ -451,6 +524,7 @@ watch(() => props.data, (newData, oldData) => {
   color: #2962FF;
   font-weight: 500;
   font-size: 1.1rem;
+  animation: pulse 1.5s infinite ease-in-out;
 }
 
 
@@ -485,6 +559,7 @@ watch(() => props.data, (newData, oldData) => {
   position: relative;
   min-width: 160px;
   cursor: pointer;
+  z-index: 20;
 }
 
 .selected-value {
@@ -501,6 +576,7 @@ watch(() => props.data, (newData, oldData) => {
 
 .selected-value:hover {
   background: #f1f5f9;
+  border-color: #cbd5e1;
 }
 
 .dropdown-arrow {
@@ -522,7 +598,7 @@ watch(() => props.data, (newData, oldData) => {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  z-index: 10;
+  z-index: 30;
 }
 
 .dropdown-item {
@@ -532,6 +608,61 @@ watch(() => props.data, (newData, oldData) => {
 
 .dropdown-item:hover {
   background: #f8fafc;
+}
+
+/* Price Display */
+.price-display {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  z-index: 5;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 13px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(4px);
+}
+
+.price-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #64748b;
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.price-value {
+  color: #1a1a1a;
+  font-weight: 600;
+  min-width: 70px;
+  display: inline-block;
+}
+
+.indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 2px;
+}
+
+.psar-dot {
+  background: #2962FF;
+}
+
+.ma-dot {
+  background: #FF9800;
 }
 
 /* Button Styles */
@@ -549,6 +680,7 @@ watch(() => props.data, (newData, oldData) => {
 
 .settings-button:hover {
   background: #f1f5f9;
+  border-color: #cbd5e1;
 }
 
 .settings-icon {
@@ -582,6 +714,7 @@ watch(() => props.data, (newData, oldData) => {
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(4px);
 }
 
 .modal-content {
@@ -614,6 +747,11 @@ watch(() => props.data, (newData, oldData) => {
   cursor: pointer;
   padding: 4px;
   color: #64748b;
+  transition: color 0.2s;
+}
+
+.close-button:hover {
+  color: #1a1a1a;
 }
 
 .modal-body {
@@ -667,6 +805,7 @@ watch(() => props.data, (newData, oldData) => {
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   font-size: 0.9rem;
+  transition: all 0.2s;
 }
 
 .number-input:focus {
@@ -717,36 +856,27 @@ watch(() => props.data, (newData, oldData) => {
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
 }
 
-/* Update your existing loading spinner styles */
 .loading-spinner {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border: 4px solid #f3f3f3;
   border-top: 4px solid #2962FF;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
-/* Add transition for the loading overlay */
-.global-loading-overlay {
-  transition: opacity 0.3s ease;
-}
-
-/* Optional: Add a pulse animation to the loading text */
-@keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
-}
-
-.loading-text {
-  animation: pulse 1.5s infinite ease-in-out;
-}
 
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
 }
 
 /* Modal Transitions */
@@ -773,5 +903,25 @@ watch(() => props.data, (newData, oldData) => {
 .modal-enter-to .modal-content,
 .modal-leave-from .modal-content {
   transform: scale(1);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .price-display {
+    font-size: 11px;
+  }
+
+  .price-value {
+    min-width: 60px;
+  }
+
+  .controls-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dropdown-container {
+    width: 100%;
+  }
 }
 </style>
