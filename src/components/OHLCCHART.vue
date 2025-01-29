@@ -610,11 +610,11 @@ watch(() => props.data, () => {
   background: #f8fafc;
 }
 
-/* Price Display */
+/* Update the price-display class */
 .price-display {
   position: absolute;
   top: 10px;
-  left: 10px;
+  left: 0px;
   right: 10px;
   background: rgba(255, 255, 255, 0.95);
   padding: 8px 12px;
@@ -629,6 +629,7 @@ watch(() => props.data, () => {
   font-size: 13px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(4px);
+  max-width: calc(100% - 100px); /* Account for y-axis space */
 }
 
 .price-item {
@@ -908,7 +909,16 @@ watch(() => props.data, () => {
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .price-display {
-    font-size: 11px;
+    overflow-x: auto;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    /* Hide scrollbar but keep functionality */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  .price-display::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
   }
 
   .price-value {
@@ -924,4 +934,6 @@ watch(() => props.data, () => {
     width: 100%;
   }
 }
+
+
 </style>
