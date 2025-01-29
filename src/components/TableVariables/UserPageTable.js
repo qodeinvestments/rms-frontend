@@ -51,15 +51,9 @@ export const zerodha_position_book_columns = [
 
 ];
 
-const client_holdings=['account_id', 'placed_by', 'terminal_id', 'order_id',
-  'exchange_order_id', 'parent_order_id', 'status', 'status_message',
-  'status_message_raw', 'order_timestamp', 'exchange_update_timestamp',
-  'exchange_timestamp', 'variety', 'modified', 'exchange',
-  'tradingsymbol', 'instrument_token', 'order_type', 'transaction_type',
-  'validity', 'validity_ttl', 'product', 'quantity', 'disclosed_quantity',
-  'price', 'trigger_price', 'average_price', 'filled_quantity',
-  'pending_quantity', 'cancelled_quantity', 'market_protection', 'meta', 'tag', 
-  'tags', 'guid']
+const client_holdings=[
+  'tradingsymbol', 'quantity', 
+  'price', 'average_price','product', 'exchange','instrument_token']
 
   export const holding_book_columns  = client_holdings.map(column => {
     return columnHelper.accessor(row => row[column], {
