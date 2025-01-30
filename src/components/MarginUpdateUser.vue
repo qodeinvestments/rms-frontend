@@ -390,7 +390,7 @@ const fetchMarginData = async () => {
     if (!data.value) throw new Error("Failed to fetch margin data");
     console.log("data is:",data.value)
     
-    filteredData.value = data.value["params"][account.value];
+    filteredData.value = data.value?.params?.[account.value] ?? [];
     portfolioValue.value = data.value["pf"][account.value];
     live_clients.value = data.value["live_clients"];
     
