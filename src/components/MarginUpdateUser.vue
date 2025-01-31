@@ -72,7 +72,7 @@
 
 
     <!-- Main Data Table -->
-    <div v-if="filteredData && !loading && !error" class="content-wrapper">
+    <div v-if="filteredData && filteredData.length > 0 && !loading && !error" class="content-wrapper">
       <!-- Existing content structure -->
       <div class="stats-selector">
         <label for="stat-option" class="stat-label">Choose a Statistic:</label>
