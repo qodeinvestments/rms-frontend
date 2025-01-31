@@ -88,77 +88,82 @@
     </div>
 
     <!-- Indicator Settings Modal -->
-    <Transition name="modal">
-      <div v-if="isIndicatorModalOpen" class="modal-overlay" @click="closeIndicatorModal">
-        <div class="modal-content" @click.stop>
-          <div class="modal-header">
-            <h3>Indicator Settings</h3>
-            <button class="close-button" @click="closeIndicatorModal">×</button>
-          </div>
-          
-          <div class="modal-body">
-            <!-- PSAR Settings -->
-            <div class="indicator-group">
-              <label class="indicator-checkbox">
-                <input 
-                  type="checkbox"
-                  v-model="indicators.psar.enabled"
-                />
-                <span class="checkbox-label">Parabolic SAR</span>
-              </label>
+    <Teleport to="body">
+      <Transition name="fade">
+        <div v-if="isIndicatorModalOpen" class="modal-wrapper">
+          <div class="modal-backdrop" @click="closeIndicatorModal"></div>
+          <div class="modal-container">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h3>Indicator Settings</h3>
+                <button class="close-button" @click="closeIndicatorModal">×</button>
+              </div>
               
-              <div v-if="indicators.psar.enabled" class="indicator-settings">
-                <div class="setting-group">
-                  <label>Acceleration Factor</label>
-                  <input 
-                    type="number"
-                    v-model="indicators.psar.af"
-                    step="0.001"
-                    class="number-input"
-                  />
+              <div class="modal-body">
+                <!-- PSAR Settings -->
+                <div class="indicator-group">
+                  <label class="indicator-checkbox">
+                    <input 
+                      type="checkbox"
+                      v-model="indicators.psar.enabled"
+                    />
+                    <span class="checkbox-label">Parabolic SAR</span>
+                  </label>
+                  
+                  <div v-if="indicators.psar.enabled" class="indicator-settings">
+                    <div class="setting-group">
+                      <label>Acceleration Factor</label>
+                      <input 
+                        type="number"
+                        v-model="indicators.psar.af"
+                        step="0.001"
+                        class="number-input"
+                      />
+                    </div>
+                    <div class="setting-group">
+                      <label>Maximum AF</label>
+                      <input 
+                        type="number"
+                        v-model="indicators.psar.maxAf"
+                        step="0.001"
+                        class="number-input"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div class="setting-group">
-                  <label>Maximum AF</label>
-                  <input 
-                    type="number"
-                    v-model="indicators.psar.maxAf"
-                    step="0.001"
-                    class="number-input"
-                  />
+
+                <!-- MA Settings -->
+                <div class="indicator-group">
+                  <label class="indicator-checkbox">
+                    <input 
+                      type="checkbox"
+                      v-model="indicators.ma.enabled"
+                    />
+                    <span class="checkbox-label">Moving Average</span>
+                  </label>
+                  
+                  <div v-if="indicators.ma.enabled" class="indicator-settings">
+                    <div class="setting-group">
+                      <label>Period</label>
+                      <input 
+                        type="number"
+                        v-model="indicators.ma.period"
+                        class="number-input"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- MA Settings -->
-            <div class="indicator-group">
-              <label class="indicator-checkbox">
-                <input 
-                  type="checkbox"
-                  v-model="indicators.ma.enabled"
-                />
-                <span class="checkbox-label">Moving Average</span>
-              </label>
-              
-              <div v-if="indicators.ma.enabled" class="indicator-settings">
-                <div class="setting-group">
-                  <label>Period</label>
-                  <input 
-                    type="number"
-                    v-model="indicators.ma.period"
-                    class="number-input"
-                  />
-                </div>
+              <div class="modal-footer">
+                <button class="cancel-button" @click="closeIndicatorModal">Cancel</button>
+                <button class="save-button" @click="saveIndicatorSettings">Save</button>
               </div>
             </div>
-          </div>
-
-          <div class="modal-footer">
-            <button class="cancel-button" @click="closeIndicatorModal">Cancel</button>
-            <button class="save-button" @click="saveIndicatorSettings">Save</button>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -212,8 +217,8 @@ const config = ref({
 const indicators = ref({
   psar: {
     enabled: false,
-    af: 0.002,
-    maxAf: 0.02
+    af: 0.001,
+    maxAf: 0.001
   },
   ma: {
     enabled: false,
@@ -610,7 +615,7 @@ watch(() => props.data, () => {
   background: #f8fafc;
 }
 
-/* Update the price-display class */
+/* Price Display */
 .price-display {
   position: absolute;
   top: 10px;
@@ -629,7 +634,7 @@ watch(() => props.data, () => {
   font-size: 13px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(4px);
-  max-width: calc(100% - 100px); /* Account for y-axis space */
+  max-width: calc(100% - 100px);
 }
 
 .price-item {
@@ -704,27 +709,41 @@ watch(() => props.data, () => {
 }
 
 /* Modal Styles */
-.modal-overlay {
+.modal-wrapper {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  width: 100vw;
+  height: 100vh;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 1000;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
+}
+
+.modal-container {
+  position: relative;
+  z-index: 1001;
+  width: 90%;
+  max-width: 600px;
 }
 
 .modal-content {
   background: white;
   border-radius: 16px;
-  width: 90%;
-  max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .modal-header {
@@ -880,30 +899,15 @@ watch(() => props.data, () => {
   100% { opacity: 0.6; }
 }
 
-/* Modal Transitions */
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.3s ease;
+/* Fade Transition */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
 }
 
-.modal-enter-from,
-.modal-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
-}
-
-.modal-enter-from .modal-content,
-.modal-leave-to .modal-content {
-  transform: scale(0.9);
-}
-
-.modal-enter-active .modal-content,
-.modal-leave-active .modal-content {
-  transition: transform 0.3s ease;
-}
-
-.modal-enter-to .modal-content,
-.modal-leave-from .modal-content {
-  transform: scale(1);
 }
 
 /* Responsive Adjustments */
@@ -912,13 +916,12 @@ watch(() => props.data, () => {
     overflow-x: auto;
     white-space: nowrap;
     flex-wrap: nowrap;
-    /* Hide scrollbar but keep functionality */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
   
   .price-display::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
+    display: none;
   }
 
   .price-value {
