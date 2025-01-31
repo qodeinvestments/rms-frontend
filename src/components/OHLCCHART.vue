@@ -1,12 +1,13 @@
 <!-- OHLCChart.vue -->
 <template>
-  <div v-if="isLoading" class="global-loading-overlay">
-    <div class="loading-content">
-      <div class="loading-spinner"></div>
-      <span class="loading-text">Loading market data...</span>
-    </div>
-  </div>
   <div class="chart-wrapper">
+    <div v-if="isLoading" class="chart-loading-overlay">
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <span class="loading-text">Loading market data...</span>
+      </div>
+    </div>
+
     <div class="chart-header">
       <h2 class="chart-title">Market Data</h2>
       <div class="controls-container">
@@ -500,23 +501,31 @@ watch(() => props.data, () => {
 
 
 </script>
-
+<!-- OHLCChart.vue styles -->
 <style scoped>
+.chart-wrapper {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 24px;
+  margin: 20px 0;
+  position: relative;
+  overflow: hidden;
+}
 
-.global-loading-overlay {
-  position: fixed;
+.chart-loading-overlay {
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 50;
   backdrop-filter: blur(4px);
 }
-
 
 .loading-content {
   display: flex;
@@ -530,15 +539,6 @@ watch(() => props.data, () => {
   font-weight: 500;
   font-size: 1.1rem;
   animation: pulse 1.5s infinite ease-in-out;
-}
-
-
-.chart-wrapper {
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  padding: 24px;
-  margin: 20px 0;
 }
 
 .chart-header {
