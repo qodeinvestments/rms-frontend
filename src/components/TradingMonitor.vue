@@ -50,15 +50,17 @@ const uniqueUsers = computed(() => {
   return Array.from(users);
 });
 
-// Transform data for table display
+// Transform data for table display with timing information
 const tableData = computed(() => {
   return Object.entries(tradingData.value).map(([uid, data]) => {
     const positions = Object.entries(data.positions).map(([symbol, userPositions]) => {
+      const timing = data.timing[symbol] ?? "";
       return {
         uid,
         systemtag: data.systemtag, // Add systemtag here
         symbol,
         strategyType: data.strategyType,
+        timing: timing,
         ...Object.fromEntries(uniqueUsers.value.map(user => [user, userPositions[user] || 0]))
       };
     });
@@ -205,6 +207,7 @@ onUnmounted(() => {
               <th class="th-fixed">System Tag</th>
               <th class="th-fixed">Symbol</th>
               <th class="th-fixed">Strategy Type</th>
+              <th class="th-fixed">Time</th>
               <th v-for="user in uniqueUsers" 
                   :key="user" 
                   class="th-user">
@@ -221,6 +224,9 @@ onUnmounted(() => {
               <td class="td-fixed symbol-cell">{{ row.symbol }}</td>
               <td class="td-fixed type-cell">
                 <span class="strategy-type-badge">{{ row.strategyType }}</span>
+              </td>
+              <td class="td-fixed time-cell">
+                <span class="time-badge">{{ row.timing }}</span>
               </td>
               <td v-for="user in uniqueUsers" 
                   :key="user" 
