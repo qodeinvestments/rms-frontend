@@ -105,14 +105,24 @@ const uniqueUsers = computed(() => {
   return Array.from(users);
 });
 
-// Transform data for table display with timing information
+// Extract trailing number from any string
+const extractTrailingNumber = (str) => {
+  if (!str) return null;
+  
+  // Match any numbers at the end of the string
+  const match = str.match(/(\d+)$/);
+  return match ? match[1] : null;
+};
+
+// Modified tableData computed
 const tableData = computed(() => {
   return Object.entries(tradingData.value).map(([uid, data]) => {
     const positions = Object.entries(data.positions).map(([symbol, userPositions]) => {
       const timing = data.timing[symbol] ?? "";
       return {
         uid,
-        systemtag: data.systemtag, // Add systemtag here
+        systemtag: data.systemtag,
+        type: extractTrailingNumber(data.systemtag), // Will work with any string ending in numbers
         symbol,
         strategyType: data.strategyType,
         timing: timing,
@@ -320,6 +330,12 @@ onUnmounted(() => {
                 System Tag
                 <span class="sort-icon">{{ getSortIcon('systemtag') }}</span>
               </th>
+              <th @click="toggleSort('type')" 
+                  class="th-fixed sortable"
+                  :class="{ 'active-sort': sortConfig.key === 'type' }">
+                      Type
+                  <span class="sort-icon">{{ getSortIcon('type') }}</span>
+              </th>
               <th @click="toggleSort('symbol')" 
                   class="th-fixed sortable"
                   :class="{ 'active-sort': sortConfig.key === 'symbol' }">
@@ -353,6 +369,9 @@ onUnmounted(() => {
                 :key="index"
                 class="data-row">
               <td class="td-fixed uid-cell">{{ row.systemtag }}</td>
+              <td class="td-fixed type-cell">
+                <span class="type-badge">{{ row.type }}</span>
+              </td>
               <td class="td-fixed symbol-cell">{{ row.symbol }}</td>
               <td class="td-fixed type-cell">
                 <span class="strategy-type-badge">{{ row.strategyType }}</span>
@@ -536,6 +555,18 @@ onUnmounted(() => {
   position: relative;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.type-badge {
+  background: linear-gradient(135deg, #ddd6fe, #ede9fe);
+  color: #5b21b6;
+  font-weight: 600;
+  padding: 0.4rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 4px rgba(91, 33, 182, 0.05);
+  display: inline-block;
 }
 
 .excel-button {
