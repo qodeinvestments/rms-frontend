@@ -122,6 +122,29 @@ const updateData = () => {
 
 }
 
+const formatDate = (timestamp) => {
+  try {
+    if (!timestamp) return '--';
+    // Convert to string if it's not already
+    const timeStr = String(timestamp);
+    const [date] = timeStr.split(' ');
+    return date || '--';
+  } catch (error) {
+    return '--';
+  }
+};
+
+const formatTime = (timestamp) => {
+  try {
+    if (!timestamp) return '--';
+    // Convert to string if it's not already
+    const timeStr = String(timestamp);
+    const [, time] = timeStr.split(' ');
+    return time ? time.split('.')[0] : '--';
+  } catch (error) {
+    return '--';
+  }
+};
 
 const connectServerDataWebSocket = () => {
   const token = localStorage.getItem('access_token'); // Retrieve the access token
@@ -291,43 +314,15 @@ onUnmounted(() => {
     </div>
 
     <div class="time-container">
-
-      <p class="timeDiv">
-        <span>
-          Time:{{ time }}
-        </span>
-        <span v-if="serverData['CPU']">
-          CPU : {{ serverData['CPU'][serverData['CPU'].length - 1].value }} %
-        </span>
-        <span v-if="serverData['RAM']">
-          RAM : {{ serverData['RAM'][serverData['RAM'].length - 1].value }} %
-        </span>
-        <span v-if="serverData['Redis']">
-          Redis Used : {{ serverData['Redis'][serverData['Redis'].length - 1].used_memory_gb.toFixed(2) }} GB
-        </span>
-        <span v-if="serverData['Redis']">
-          Redis Used Peak : {{ serverData['Redis'][serverData['Redis'].length - 1].used_memory_peak_gb.toFixed(2)
-          }} GB
-        </span>
-        <span v-if="serverData['Redis']">
-          System Memory : {{ serverData['Redis'][serverData['Redis'].length -
-            1].total_system_memory_gb.toFixed(2)
-          }} GB
-        </span>
-        <span v-if="serverData['Redis']">
-          Redis Used Percentage : {{ serverData['Redis'][serverData['Redis'].length -
-            1].memory_percent.toFixed(2)
-          }} %
-        </span>
-        <span v-if="serverData['Redis']">
-          Redis Allocated Memory : {{ serverData['Redis'][serverData['Redis'].length -
-            1].available_memory_gb.toFixed(2)
-          }} GB
-        </span>
-
-      </p>
-      <WarningSignal :signals="pulse_signal" :latency="Latency" :max_latency="max_latency" />
-    </div>
+    <p class="timeDiv flex gap-4 items-center flex-wrap">
+      <!-- Time Display -->
+      <span class="time-block">
+        <span class="font-medium">Date:</span> {{ formatDate(time) }}
+        <span class="font-medium ml-4">Time:</span> {{ formatTime(time) }}
+      </span>
+    </p>
+    <WarningSignal :signals="pulse_signal" :latency="Latency" :max_latency="max_latency" />
+  </div>
     <!-- <button @click="showSuccessToast">Show Success Toast</button> -->
 
     <div class="mx-auto px-8 py-8">
@@ -514,6 +509,35 @@ html {
 
 }
 
+
+
+/* Time Block Styling */
+.time-block {
+  padding: 0.5rem 1rem;
+  background-color: #ebf5ff;
+  border-radius: 0.375rem;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  font-weight: 500;
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+.time-block .font-medium {
+  color: #1e3a8a;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .time-container {
+    margin: 0.5rem;
+    padding: 0.75rem;
+  }
+  .time-block {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
 
 .select-container {
   display: flex;
