@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watchEffect, onMounted, onUnmounted ,computed} from 'vue'
+import { ref, watch, watchEffect, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router';
 const router = useRouter();
 import {
@@ -10,6 +10,29 @@ import {
     getFilteredRowModel,
 } from '@tanstack/vue-table'
 import * as XLSX from 'xlsx';
+
+
+// Add this new ref for prefix search
+const prefixSearch = ref('')
+
+// Add this function to handle prefix searching across all columns
+const prefixFilterFn = (row) => {
+    if (!prefixSearch.value) return true
+    
+    // Convert search term to lowercase for case-insensitive comparison
+    const searchStr = String(prefixSearch.value).toLowerCase()
+    
+    // Check all visible columns
+    return table.getVisibleLeafColumns().some(column => {
+        const value = row.getValue(column.id)
+        // Handle null/undefined values
+        if (value == null) return false
+        
+        // Convert cell value to string and lowercase
+        const cellStr = String(value).toLowerCase()
+        return cellStr.startsWith(searchStr)
+    })
+}
 
 const copyToClipboard = () => {
     // Get visible columns and clean up their headers
@@ -135,38 +158,51 @@ const pageSize = ref(10)
 // Add this after your existing refs
 const columnVisibility = ref({})
 
-// Modify your table initialization to include column visibility state
+// Modify your table initialization
 const table = useVueTable({
-  get data() {
-    return props.data
-  },
-  columns: props.columns,
-  getCoreRowModel: getCoreRowModel(),
-  getSortedRowModel: getSortedRowModel(),
-  getFilteredRowModel: getFilteredRowModel(),
-  state: {
-    get sorting() {
-      return sorting.value
+    get data() {
+        return props.data
     },
-    get globalFilter() {
-      return filter.value
+    columns: props.columns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    state: {
+        get sorting() {
+            return sorting.value
+        },
+        get globalFilter() {
+            return filter.value || prefixSearch.value
+        },
+        get columnVisibility() {
+            return columnVisibility.value
+        }
     },
-    get columnVisibility() {
-      return columnVisibility.value
-    }
-  },
-  onSortingChange: updaterOrValue => {
-    sorting.value =
-      typeof updaterOrValue === 'function'
-        ? updaterOrValue(sorting.value)
-        : updaterOrValue
-  },
-  onColumnVisibilityChange: updaterOrValue => {
-    columnVisibility.value =
-      typeof updaterOrValue === 'function'
-        ? updaterOrValue(columnVisibility.value)
-        : updaterOrValue
-  },
+    globalFilterFn: (row, columnId, filterValue) => {
+        // Use prefix search if prefixSearch has a value, otherwise use default filter
+        if (prefixSearch.value) {
+            return prefixFilterFn(row)
+        }
+        
+        // Default global filter behavior
+        const value = row.getValue(columnId)
+        if (value == null) return false
+        return String(value)
+            .toLowerCase()
+            .includes(String(filterValue).toLowerCase())
+    },
+    onSortingChange: updaterOrValue => {
+        sorting.value =
+            typeof updaterOrValue === 'function'
+                ? updaterOrValue(sorting.value)
+                : updaterOrValue
+    },
+    onColumnVisibilityChange: updaterOrValue => {
+        columnVisibility.value =
+            typeof updaterOrValue === 'function'
+                ? updaterOrValue(columnVisibility.value)
+                : updaterOrValue
+    },
 })
 
 // Computed properties for pagination
@@ -215,6 +251,18 @@ watchEffect(() => {
     rows.value = finalRows.slice(start, end)
 })
 
+// Add watchers to handle the interaction between normal filter and prefix search
+watch(filter, (newValue) => {
+    if (newValue) {
+        prefixSearch.value = '' // Clear prefix search when using normal filter
+    }
+})
+
+watch(prefixSearch, (newValue) => {
+    if (newValue) {
+        filter.value = '' // Clear normal filter when using prefix search
+    }
+})
 
 // Pagination methods
 const nextPage = () => {
@@ -291,8 +339,20 @@ onUnmounted(() => {
 
             <div class="mt-8 flow-root">
                 <div class="my-4 headingContainer">
-                    <input type="text" class="border border-gray-400 rounded px-2 py-2" placeholder="Search"
-                        v-model="filter" v-if="showPagination" />
+                    <div class="flex items-center gap-4">
+                        <input 
+                            type="text" 
+                            class="border border-gray-400 rounded px-2 py-2" 
+                            placeholder="Global Search" 
+                            v-model="filter"
+                        />
+                        <input 
+                            type="text" 
+                            class="border border-gray-400 rounded px-2 py-2" 
+                            placeholder="Prefix Search..." 
+                            v-model="prefixSearch"
+                        />
+                    </div>
                     <button @click="download('csv')"
                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                         Download CSV
