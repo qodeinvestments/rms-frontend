@@ -7,6 +7,7 @@ const tradingData = ref({});
 const loading = ref(true);
 const error = ref(null);
 const searchQuery = ref('');
+const prefixQuery = ref(''); // New prefix search query
 const sortConfig = ref({ key: '', direction: '' });
 
 // Sorting function
@@ -106,15 +107,30 @@ const filteredAndSortedData = computed(() => {
 });
 
 const filteredTableData = computed(() => {
-  if (!searchQuery.value) return tableData.value;
+  let data = tableData.value;
   
-  const query = searchQuery.value.toLowerCase();
-  return tableData.value.filter(row => 
-    row.uid.toLowerCase().includes(query) ||
-    row.symbol.toLowerCase().includes(query) ||
-    row.systemtag.toLowerCase().includes(query) ||
-    row.strategyType.toLowerCase().includes(query)
-  );
+  // Apply prefix search first if exists
+  if (prefixQuery.value) {
+    const prefix = prefixQuery.value.toLowerCase();
+    data = data.filter(row =>
+      row.symbol.toLowerCase().startsWith(prefix) ||
+      row.systemtag.toLowerCase().startsWith(prefix) ||
+      row.strategyType.toLowerCase().startsWith(prefix)
+    );
+  }
+  
+  // Then apply regular search if exists
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
+    data = data.filter(row => 
+      row.uid.toLowerCase().includes(query) ||
+      row.symbol.toLowerCase().includes(query) ||
+      row.systemtag.toLowerCase().includes(query) ||
+      row.strategyType.toLowerCase().includes(query)
+    );
+  }
+  
+  return data;
 });
 
 const getSortIcon = (key) => {
@@ -179,15 +195,26 @@ onUnmounted(() => {
         
         <!-- Controls Section -->
         <div class="controls-section">
-          <!-- Search Box -->
-          <div class="search-wrapper">
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search by Strategy UID, Symbol, or Type..."
-              class="search-input"
-            />
-            <span class="search-icon">🔍</span>
+        <!-- Search Boxes -->
+          <div class="search-container">
+            <div class="search-wrapper">
+              <input
+                v-model="prefixQuery"
+                type="text"
+                placeholder="Prefix search..."
+                class="search-input prefix-search"
+              />
+              <span class="search-icon">🔍P</span>
+            </div>
+            <div class="search-wrapper">
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Contains search..."
+                class="search-input"
+              />
+              <span class="search-icon">🔍C</span>
+            </div>
           </div>
 
           <!-- Action Buttons -->
@@ -311,6 +338,14 @@ onUnmounted(() => {
 /* Base styles */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Roboto+Mono:wght@500;600&family=JetBrains+Mono:wght@600;700&display=swap');
 
+.search-container {
+  display: flex;
+  gap: 1rem;
+  flex-grow: 1;
+  max-width: 64rem;
+}
+
+
 .trading-positions-container {
   padding: 1.5rem;
   min-height: 100vh;
@@ -355,10 +390,36 @@ onUnmounted(() => {
 
 /* Search Bar Styles */
 .search-wrapper {
-  position: relative;
-  flex-grow: 1;
-  max-width: 32rem;
+  flex: 1;
 }
+
+
+.prefix-search {
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.prefix-search:hover {
+  border-color: rgba(99, 102, 241, 0.6);
+}
+
+.prefix-search:focus {
+  border-color: rgb(99, 102, 241);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+/* Update responsive design for search container */
+@media (max-width: 768px) {
+  .search-container {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .search-wrapper {
+    width: 100%;
+  }
+}
+
+
 
 .search-input {
   width: 100%;
