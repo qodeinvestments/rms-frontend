@@ -92,7 +92,7 @@ const zerodha_pos_columns = [
 const custompositionsColumns = [
   {
     id: 'Entry Contract Value',
-    position: 6,
+    position: 7,
     accessor: row => {
       const quantity = parseFloat(row['quantity']) || 0;
       const avgPrice = parseFloat(row['average_price']) || 0;
@@ -102,7 +102,7 @@ const custompositionsColumns = [
   },
   {
     id: 'Exit Contract Value',
-    position: 7,
+    position: 8,
     accessor: row => {
       const quantity = parseFloat(row['quantity']) || 0;
       const lastPrice = parseFloat(row['last_price']) || 0;
