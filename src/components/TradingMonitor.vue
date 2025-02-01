@@ -9,7 +9,7 @@ const error = ref(null);
 const searchQuery = ref('');
 const prefixQuery = ref(''); // New prefix search query
 const sortConfig = ref({ key: '', direction: '' });
-
+const showCopiedNotification = ref(false);
 // Sorting function
 const toggleSort = (key) => {
   if (sortConfig.value.key === key) {
@@ -55,7 +55,10 @@ const copyToClipboard = () => {
   // Copy to clipboard
   navigator.clipboard.writeText(clipboardText)
     .then(() => {
-      
+      showCopiedNotification.value = true;
+      setTimeout(() => {
+        showCopiedNotification.value = false;
+      }, 2000);
     })
     .catch(err => {
       console.error('Failed to copy table:', err);
@@ -295,14 +298,19 @@ onUnmounted(() => {
               <span class="button-icon">🔄</span>
               {{ loading ? 'Refreshing...' : 'Refresh' }}
             </button>
-            <button 
-              @click="copyToClipboard"
-              class="action-button csv-button"
-              :disabled="loading || !filteredAndSortedData.length"
-            >
-              <span class="button-icon">📋</span>
-              Copy
-            </button>
+            <div class="relative">
+              <button 
+                @click="copyToClipboard"
+                class="action-button csv-button"
+                :disabled="loading || !filteredAndSortedData.length"
+              >
+                <span class="button-icon">📋</span>
+                Copy
+              </button>
+              <div v-if="showCopiedNotification" class="copied-notification">
+                Copied!
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -688,6 +696,35 @@ onUnmounted(() => {
   border-radius: 0.4rem;
   padding: 0.5rem 1rem;
   box-shadow: 0 2px 4px rgba(5, 150, 105, 0.1);
+}
+
+/* Add to your existing styles */
+.copied-notification {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #1e293b, #334155);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  animation: fadeInOut 2s ease-in-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translate(-50%, 10px); }
+  15% { opacity: 1; transform: translate(-50%, 0); }
+  85% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -10px); }
+}
+
+.relative {
+  position: relative;
 }
 
 .value-negative {

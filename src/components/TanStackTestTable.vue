@@ -34,6 +34,8 @@ const prefixFilterFn = (row) => {
     })
 }
 
+
+// Modify the copyToClipboard function
 const copyToClipboard = () => {
     // Get visible columns and clean up their headers
     const visibleColumns = table.getVisibleLeafColumns()
@@ -75,7 +77,10 @@ const copyToClipboard = () => {
     // Copy to clipboard
     navigator.clipboard.writeText(clipboardText)
         .then(() => {
-            
+            showCopiedNotification.value = true
+            setTimeout(() => {
+                showCopiedNotification.value = false
+            }, 2000) // Hide after 2 seconds
         })
         .catch(err => {
             console.error('Failed to copy table:', err)
@@ -208,6 +213,7 @@ const table = useVueTable({
 // Computed properties for pagination
 const pageCount = ref(0)
 const rows = ref([])
+const showCopiedNotification = ref(false)
 
 // Add this after the existing imports
 // Add after imports
@@ -361,11 +367,18 @@ onUnmounted(() => {
                         class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                         Download Excel
                     </button>
+                    <div class="relative">
                     <button 
                         @click="copyToClipboard"
                         class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
                         Copy to Clipboard
                     </button>
+                    <!-- Notification popup -->
+                    <div v-if="showCopiedNotification" 
+                        class="copied-notification">
+                        Copied!
+                    </div>
+                </div>
                 </div>
 
                 <div class="table-container -mx-4 -my-2 overflow-x-auto overflow-y-auto sm:-mx-6 lg:-mx-8">
@@ -459,6 +472,29 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+
+.copied-notification {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #4a5568;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    animation: fadeInOut 2s ease-in-out;
+    white-space: nowrap;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translate(-50%, 10px); }
+    15% { opacity: 1; transform: translate(-50%, 0); }
+    85% { opacity: 1; transform: translate(-50%, 0); }
+    100% { opacity: 0; transform: translate(-50%, -10px); }
+}
+
+
 .colorcontainer {
     background: pink;
 }
