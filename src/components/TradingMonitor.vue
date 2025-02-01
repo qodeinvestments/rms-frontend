@@ -22,6 +22,47 @@ const toggleSort = (key) => {
   }
 };
 
+const copyToClipboard = () => {
+  // Get visible columns and transform them for the trading positions table
+  const headerRow = [
+    'System Tag',
+    'Symbol',
+    'Strategy Type',
+    'Time',
+    ...uniqueUsers.value
+  ].join('\t');
+  
+  // Create data rows
+  const dataRows = filteredAndSortedData.value
+    .map(row => {
+      const values = [
+        row.systemtag,
+        row.symbol,
+        row.strategyType,
+        row.timing,
+        ...uniqueUsers.value.map(user => {
+          const value = row[user];
+          return value ? value.toLocaleString() : '-';
+        })
+      ];
+      return values.join('\t');
+    })
+    .join('\n');
+  
+  // Combine headers and data
+  const clipboardText = `${headerRow}\n${dataRows}`;
+  
+  // Copy to clipboard
+  navigator.clipboard.writeText(clipboardText)
+    .then(() => {
+      
+    })
+    .catch(err => {
+      console.error('Failed to copy table:', err);
+      alert('Failed to copy table to clipboard');
+    });
+};
+
 const fetchTradingData = async () => {
   loading.value = true;
   error.value = null;
@@ -174,7 +215,7 @@ const exportToCSV = () => {
 onMounted(() => {
   fetchTradingData();
 });
-
+let refreshInterval;
 onUnmounted(() => {
   if (refreshInterval) {
     clearInterval(refreshInterval);
@@ -243,6 +284,14 @@ onUnmounted(() => {
             >
               <span class="button-icon">🔄</span>
               {{ loading ? 'Refreshing...' : 'Refresh' }}
+            </button>
+            <button 
+              @click="copyToClipboard"
+              class="action-button csv-button"
+              :disabled="loading || !filteredAndSortedData.length"
+            >
+              <span class="button-icon">📋</span>
+              Copy
             </button>
           </div>
         </div>

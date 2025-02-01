@@ -52,7 +52,7 @@ const copyToClipboard = () => {
     // Copy to clipboard
     navigator.clipboard.writeText(clipboardText)
         .then(() => {
-            alert('Table copied to clipboard!')
+            
         })
         .catch(err => {
             console.error('Failed to copy table:', err)
