@@ -7,6 +7,19 @@ const tradingData = ref({});
 const loading = ref(true);
 const error = ref(null);
 const searchQuery = ref('');
+const sortConfig = ref({ key: '', direction: '' });
+
+// Sorting function
+const toggleSort = (key) => {
+  if (sortConfig.value.key === key) {
+    // Toggle direction if same key
+    sortConfig.value.direction = sortConfig.value.direction === 'asc' ? 'desc' : 'asc';
+  } else {
+    // New key, default to ascending
+    sortConfig.value.key = key;
+    sortConfig.value.direction = 'asc';
+  }
+};
 
 const fetchTradingData = async () => {
   loading.value = true;
@@ -68,7 +81,30 @@ const tableData = computed(() => {
   }).flat();
 });
 
-// Filtered table data based on search
+const filteredAndSortedData = computed(() => {
+  let data = filteredTableData.value;
+  
+  if (sortConfig.value.key && sortConfig.value.direction) {
+    data = [...data].sort((a, b) => {
+      let aVal = a[sortConfig.value.key];
+      let bVal = b[sortConfig.value.key];
+      
+      // Handle numeric sorting for user positions
+      if (uniqueUsers.value.includes(sortConfig.value.key)) {
+        aVal = Number(aVal) || 0;
+        bVal = Number(bVal) || 0;
+      }
+      
+      if (aVal === bVal) return 0;
+      
+      const direction = sortConfig.value.direction === 'asc' ? 1 : -1;
+      return aVal > bVal ? direction : -direction;
+    });
+  }
+  
+  return data;
+});
+
 const filteredTableData = computed(() => {
   if (!searchQuery.value) return tableData.value;
   
@@ -81,7 +117,12 @@ const filteredTableData = computed(() => {
   );
 });
 
-// Export functions
+const getSortIcon = (key) => {
+  if (sortConfig.value.key !== key) return '↕️';
+  return sortConfig.value.direction === 'asc' ? '↑' : '↓';
+};
+
+// Export functions remain the same
 const exportToExcel = () => {
   // Create worksheet from the filtered data
   const ws = XLSX.utils.json_to_sheet(filteredTableData.value);
@@ -114,12 +155,8 @@ const exportToCSV = () => {
   XLSX.writeFile(wb, fileName, { bookType: 'csv' });
 };
 
-// Auto-refresh every 30 seconds
-let refreshInterval;
-
 onMounted(() => {
   fetchTradingData();
- 
 });
 
 onUnmounted(() => {
@@ -129,9 +166,7 @@ onUnmounted(() => {
 });
 </script>
 
-
-
-
+<!-- Template Section -->
 <template>
   <div class="trading-positions-container">
     <div class="panel">
@@ -160,7 +195,7 @@ onUnmounted(() => {
             <button 
               @click="exportToExcel"
               class="action-button excel-button"
-              :disabled="loading || !filteredTableData.length"
+              :disabled="loading || !filteredAndSortedData.length"
             >
               <span class="button-icon">📊</span>
               XLSX
@@ -168,7 +203,7 @@ onUnmounted(() => {
             <button 
               @click="exportToCSV"
               class="action-button csv-button"
-              :disabled="loading || !filteredTableData.length"
+              :disabled="loading || !filteredAndSortedData.length"
             >
               <span class="button-icon">📄</span>
               CSV
@@ -199,27 +234,48 @@ onUnmounted(() => {
       </div>
 
       <!-- Data Table -->
-      <div v-else-if="filteredTableData.length" class="table-container">
+      <div v-else-if="filteredAndSortedData.length" class="table-container">
         <table class="data-table">
           <thead>
             <tr>
-             
-              <th class="th-fixed">System Tag</th>
-              <th class="th-fixed">Symbol</th>
-              <th class="th-fixed">Strategy Type</th>
-              <th class="th-fixed">Time</th>
+              <th @click="toggleSort('systemtag')" 
+                  class="th-fixed sortable"
+                  :class="{ 'active-sort': sortConfig.key === 'systemtag' }">
+                System Tag
+                <span class="sort-icon">{{ getSortIcon('systemtag') }}</span>
+              </th>
+              <th @click="toggleSort('symbol')" 
+                  class="th-fixed sortable"
+                  :class="{ 'active-sort': sortConfig.key === 'symbol' }">
+                Symbol
+                <span class="sort-icon">{{ getSortIcon('symbol') }}</span>
+              </th>
+              <th @click="toggleSort('strategyType')" 
+                  class="th-fixed sortable"
+                  :class="{ 'active-sort': sortConfig.key === 'strategyType' }">
+                Strategy Type
+                <span class="sort-icon">{{ getSortIcon('strategyType') }}</span>
+              </th>
+              <th @click="toggleSort('timing')" 
+                  class="th-fixed sortable"
+                  :class="{ 'active-sort': sortConfig.key === 'timing' }">
+                Time
+                <span class="sort-icon">{{ getSortIcon('timing') }}</span>
+              </th>
               <th v-for="user in uniqueUsers" 
                   :key="user" 
-                  class="th-user">
+                  @click="toggleSort(user)"
+                  class="th-user sortable"
+                  :class="{ 'active-sort': sortConfig.key === user }">
                 {{ user }}
+                <span class="sort-icon">{{ getSortIcon(user) }}</span>
               </th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(row, index) in filteredTableData" 
+            <tr v-for="(row, index) in filteredAndSortedData" 
                 :key="index"
                 class="data-row">
-              
               <td class="td-fixed uid-cell">{{ row.systemtag }}</td>
               <td class="td-fixed symbol-cell">{{ row.symbol }}</td>
               <td class="td-fixed type-cell">
@@ -250,11 +306,11 @@ onUnmounted(() => {
   </div>
 </template>
 
+
 <style scoped>
-/* First, import the fonts */
+/* Base styles */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Roboto+Mono:wght@500;600&family=JetBrains+Mono:wght@600;700&display=swap');
 
-/* Base Container */
 .trading-positions-container {
   padding: 1.5rem;
   min-height: 100vh;
@@ -262,7 +318,7 @@ onUnmounted(() => {
   font-family: 'Inter', sans-serif;
 }
 
-/* Panel */
+/* Panel Styles */
 .panel {
   background: linear-gradient(145deg, #ffffff, #f8fafc);
   border-radius: 1rem;
@@ -271,7 +327,7 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-/* Header Section */
+/* Header Styles */
 .panel-header {
   padding: 2rem;
   border-bottom: 1px solid rgba(229, 231, 235, 0.5);
@@ -297,7 +353,7 @@ onUnmounted(() => {
   color: #64748b;
 }
 
-/* Search Bar */
+/* Search Bar Styles */
 .search-wrapper {
   position: relative;
   flex-grow: 1;
@@ -340,11 +396,7 @@ onUnmounted(() => {
   transition: all 0.3s ease;
 }
 
-.search-input:focus + .search-icon {
-  color: #3b82f6;
-}
-
-/* Action Buttons */
+/* Controls Section Styles */
 .controls-section {
   display: flex;
   gap: 1.5rem;
@@ -359,6 +411,7 @@ onUnmounted(() => {
   gap: 0.75rem;
 }
 
+/* Action Button Styles */
 .action-button {
   padding: 0.875rem 1.5rem;
   border-radius: 1rem;
@@ -375,35 +428,9 @@ onUnmounted(() => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.action-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
-  transition: all 0.3s ease;
-}
-
-.action-button:hover:not(:disabled)::before {
-  opacity: 0.8;
-}
-
-.action-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none !important;
-}
-
 .excel-button {
   background: linear-gradient(135deg, #10b981, #059669);
   color: white;
-}
-
-.excel-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(16, 185, 129, 0.2);
 }
 
 .csv-button {
@@ -411,25 +438,9 @@ onUnmounted(() => {
   color: white;
 }
 
-.csv-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(34, 197, 94, 0.2);
-}
-
 .refresh-button {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: white;
-}
-
-.refresh-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(59, 130, 246, 0.2);
-}
-
-.button-icon {
-  font-size: 1.25rem;
-  display: inline-flex;
-  transition: all 0.3s ease;
 }
 
 /* Table Styles */
@@ -448,6 +459,44 @@ onUnmounted(() => {
   background: transparent;
 }
 
+/* Sorting Styles */
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding-right: 2.5rem !important;
+  transition: all 0.2s ease;
+}
+
+.sortable:hover {
+  background: linear-gradient(145deg, #e2e8f0, #f1f5f9);
+}
+
+.sort-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.sortable:hover .sort-icon {
+  opacity: 1;
+}
+
+.active-sort {
+  background: linear-gradient(145deg, #e2e8f0, #f1f5f9) !important;
+  color: #2563eb !important;
+}
+
+.active-sort .sort-icon {
+  opacity: 1;
+  color: #2563eb;
+}
+
+/* Table Header Styles */
 .data-table th {
   background: linear-gradient(145deg, #f8fafc, #f1f5f9);
   padding: 1.2rem 1rem;
@@ -459,30 +508,10 @@ onUnmounted(() => {
   position: sticky;
   top: 0;
   z-index: 10;
-}
-
-.data-table th:first-child {
-  border-top-left-radius: 0.8rem;
-}
-
-.data-table th:last-child {
-  border-top-right-radius: 0.8rem;
-}
-
-.data-row {
   transition: all 0.2s ease;
 }
 
-.data-row:hover {
-  background: linear-gradient(145deg, rgba(248, 250, 252, 0.5), rgba(241, 245, 249, 0.5));
-  transform: scale(1.002);
-}
-.type-cell, .systemtag-cell {
-  text-align: center !important;
-  padding: 0.75rem 1rem;
-}
-
-/* Update td-fixed to ensure centering */
+/* Table Cell Styles */
 .td-fixed {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #e2e8f0;
@@ -496,7 +525,6 @@ onUnmounted(() => {
   vertical-align: middle;
 }
 
-/* Update numeric value cells */
 .td-user {
   font-family: 'IBM Plex Mono', monospace;
   padding: 0.75rem 1rem;
@@ -511,8 +539,26 @@ onUnmounted(() => {
   transition: all 0.2s ease;
 }
 
+/* Value Styling */
+.value-positive {
+  color: #059669;
+  font-weight: 600;
+  background: linear-gradient(135deg, #d1fae5, #ecfdf5);
+  border-radius: 0.4rem;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.1);
+}
 
-/* Update strategy type badge styling */
+.value-negative {
+  color: #dc2626;
+  font-weight: 600;
+  background: linear-gradient(135deg, #fee2e2, #fef2f2);
+  border-radius: 0.4rem;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
+}
+
+/* Badge Styles */
 .strategy-type-badge {
   background: linear-gradient(135deg, #e0f2fe, #bae6fd);
   color: #0369a1;
@@ -522,10 +568,22 @@ onUnmounted(() => {
   font-size: 0.85rem;
   letter-spacing: 0.02em;
   box-shadow: 0 2px 4px rgba(3, 105, 161, 0.05);
-  display: inline-block; /* This helps with centering */
+  display: inline-block;
 }
 
-/* Update symbol cell styling */
+.time-badge {
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  color: #475569;
+  font-weight: 600;
+  padding: 0.4rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 4px rgba(71, 85, 105, 0.05);
+  display: inline-block;
+}
+
+/* Symbol Cell Styles */
 .symbol-cell {
   font-family: 'JetBrains Mono', monospace;
   font-weight: 700;
@@ -539,10 +597,9 @@ onUnmounted(() => {
   border: 1px solid #e2e8f0;
   text-align: center;
   transition: all 0.2s ease;
-  font-feature-settings: "tnum" 1;  /* Enables tabular numbers */
+  font-feature-settings: "tnum" 1;
 }
 
-/* Add hover effect for better interaction */
 .data-row:hover .symbol-cell {
   background: linear-gradient(135deg, #e2e8f0, #f1f5f9);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
@@ -550,40 +607,7 @@ onUnmounted(() => {
   border-color: #cbd5e1;
 }
 
-
-/* Update system tag badge styling */
-.systemtag-badge {
-  background: linear-gradient(135deg, #ede9fe, #ddd6fe);
-  color: #5b21b6;
-  font-weight: 600;
-  padding: 0.4rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.85rem;
-  letter-spacing: 0.02em;
-  box-shadow: 0 2px 4px rgba(91, 33, 182, 0.05);
-  display: inline-block; /* This helps with centering */
-}
-
-.value-positive {
-  color: #059669;
-  font-weight: 600;
-  background: linear-gradient(135deg, #d1fae5, #ecfdf5);
-  border-radius: 0.4rem;
-  padding: 0.5rem 1rem;
-  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.1);
-  font-feature-settings: "tnum" 1;
-}
-
-.value-negative {
-  color: #dc2626;
-  font-weight: 600;
-  background: linear-gradient(135deg, #fee2e2, #fef2f2);
-  border-radius: 0.4rem;
-  padding: 0.5rem 1rem;
-  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
-  font-feature-settings: "tnum" 1;
-}
-/* Status Messages */
+/* Status Message Styles */
 .error-message {
   margin: 1.5rem;
   padding: 1rem;
@@ -606,7 +630,6 @@ onUnmounted(() => {
   gap: 1.5rem;
 }
 
-/* Update loading spinner for more modern look */
 .loading-spinner {
   width: 3.5rem;
   height: 3.5rem;
@@ -623,6 +646,7 @@ onUnmounted(() => {
   font-size: 1.1rem;
 }
 
+/* No Data State Styles */
 .no-data {
   display: flex;
   flex-direction: column;
@@ -647,7 +671,7 @@ onUnmounted(() => {
   to { transform: rotate(360deg); }
 }
 
-/* Modern scrollbar for the table container */
+/* Scrollbar Styles */
 .table-container::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -665,6 +689,36 @@ onUnmounted(() => {
 
 .table-container::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Row Hover Effects */
+.data-row {
+  transition: all 0.3s ease;
+}
+
+.data-row:hover {
+  background: linear-gradient(145deg, rgba(248, 250, 252, 0.5), rgba(241, 245, 249, 0.5));
+  transform: scale(1.002);
+}
+
+/* Button Hover Effects */
+.action-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(59, 130, 246, 0.2);
+}
+
+.excel-button:hover:not(:disabled) {
+  box-shadow: 0 6px 15px rgba(16, 185, 129, 0.2);
+}
+
+.csv-button:hover:not(:disabled) {
+  box-shadow: 0 6px 15px rgba(34, 197, 94, 0.2);
+}
+
+.action-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
 }
 
 /* Responsive Design */
@@ -695,6 +749,43 @@ onUnmounted(() => {
 
   .refresh-button {
     grid-column: span 2;
+  }
+
+  .sortable {
+    padding-right: 2rem !important;
+  }
+
+  .sort-icon {
+    right: 0.5rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .trading-positions-container {
+    padding: 0;
+    background: none;
+  }
+
+  .panel {
+    box-shadow: none;
+    border: none;
+  }
+
+  .controls-section,
+  .action-buttons,
+  .search-wrapper {
+    display: none;
+  }
+
+  .data-table {
+    font-size: 10pt;
+  }
+
+  .value-positive,
+  .value-negative {
+    background: none;
+    box-shadow: none;
   }
 }
 </style>
