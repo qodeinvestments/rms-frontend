@@ -114,7 +114,9 @@ const extractTrailingNumber = (str) => {
   
   // Match any numbers at the end of the string
   const match = str.match(/(\d+)$/);
-  return match ? match[1] : null;
+  
+  // Convert to number and return, otherwise return null
+  return match ? parseInt(match[1], 10) : null;
 };
 
 // Modified tableData computed
