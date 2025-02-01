@@ -79,20 +79,67 @@ export const zerodha_order_book_columns = (() => {
 })();
 
 
-const zerodha_pos_columns=[
-   'product','tradingsymbol','quantity', 'average_price', 'last_price','pnl', 'm2m', 'unrealised', 'realised','exchange', 'instrument_token',  'overnight_quantity', 'multiplier', 'close_price', 'value',  'buy_quantity', 'buy_price', 'buy_value', 'buy_m2m', 'sell_quantity', 'sell_price', 'sell_value', 'sell_m2m', 'day_buy_quantity', 'day_buy_price', 'day_buy_value', 'day_sell_quantity', 'day_sell_price', 'day_sell_value'
-]
+const zerodha_pos_columns = [
+  'product', 'tradingsymbol', 'quantity', 'average_price', 'last_price', 'pnl', 
+  'm2m', 'unrealised', 'realised', 'exchange', 'instrument_token', 
+  'overnight_quantity', 'multiplier', 'close_price', 'value', 'buy_quantity', 
+  'buy_price', 'buy_value', 'buy_m2m', 'sell_quantity', 'sell_price', 
+  'sell_value', 'sell_m2m', 'day_buy_quantity', 'day_buy_price', 
+  'day_buy_value', 'day_sell_quantity', 'day_sell_price', 'day_sell_value'
+];
 
-export const zerodha_position_book_columns = [
-  ...zerodha_pos_columns.map(column => {
+
+const custompositionsColumns = [
+  {
+    id: 'Entry Contract Value',
+    position: 6,
+    accessor: row => {
+      const quantity = parseFloat(row['quantity']) || 0;
+      const avgPrice = parseFloat(row['average_price']) || 0;
+      return quantity * avgPrice;
+    },
+    header: 'Entry Contract Value'
+  },
+  {
+    id: 'Exit Contract Value',
+    position: 7,
+    accessor: row => {
+      const quantity = parseFloat(row['quantity']) || 0;
+      const lastPrice = parseFloat(row['last_price']) || 0;
+      return quantity * lastPrice;
+    },
+    header: 'Exit Contract Value'
+  }
+];
+
+export const zerodha_position_book_columns = (() => {
+  let columns = zerodha_pos_columns.map(column => {
     return columnHelper.accessor(row => row[column], {
       id: column,
       cell: info => info.getValue(),
       header: () => column,
     });
-  }),
+  });
 
-];
+  const sortedCustomColumns = [...custompositionsColumns].sort((a, b) => a.position - b.position);
+  sortedCustomColumns.forEach(customCol => {
+    const position = Math.min(Math.max(1, customCol.position), columns.length + 1) - 1;
+    const custompositionsColumn = columnHelper.accessor(customCol.accessor, {
+      id: customCol.id,
+      cell: customCol.cell || (info => info.getValue()),
+      header: () => customCol.header,
+    });
+    
+    columns.splice(position, 0, custompositionsColumn);
+  });
+
+  return columns;
+})();
+
+
+
+
+
 
 const client_holdings=[
   'tradingsymbol', 'quantity', 
