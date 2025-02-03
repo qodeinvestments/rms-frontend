@@ -12,15 +12,6 @@ const props = defineProps({
   }
 });
 
-const handleScroll = (event) => {
-  if (!event.shiftKey) {
-    event.preventDefault();
-    if (tableContainerRef.value) {
-      const scrollSpeed = 1.5; // Adjust this value to control scroll speed
-      tableContainerRef.value.scrollLeft += event.deltaY * scrollSpeed;
-    }
-  }
-};
 
 const tableContainerRef = ref(null);
 const tradingData = ref({});
@@ -353,7 +344,6 @@ onMounted(() => {
         <div 
           ref="tableContainerRef"
           class="table-container"
-         @wheel="handleScroll"
         >
           <table class="data-table">
             <thead>
