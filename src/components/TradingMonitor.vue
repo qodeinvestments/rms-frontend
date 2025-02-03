@@ -258,7 +258,7 @@ onUnmounted(() => {
       <!-- Header Section -->
       <div class="panel-header">
         <div class="title-section">
-          <h2 class="title">Trading Positions</h2>
+          <h2 class="title">Live Positions</h2>
           <span class="subtitle">Live market positions tracker</span>
         </div>
         
