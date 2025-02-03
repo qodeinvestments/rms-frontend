@@ -3,13 +3,26 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import * as XLSX from 'xlsx';
 
+// Add prop for number of sticky columns
+const props = defineProps({
+  stickyColumns: {
+    type: Number,
+    default: 1,
+    validator: (value) => value >= 0
+  }
+});
+
 const tradingData = ref({});
 const loading = ref(true);
 const error = ref(null);
 const searchQuery = ref('');
-const prefixQuery = ref(''); // New prefix search query
+const prefixQuery = ref('');
 const sortConfig = ref({ key: '', direction: '' });
 const showCopiedNotification = ref(false);
+
+// Helper function to determine if a column should be sticky
+const isColumnSticky = (index) => index < props.stickyColumns;
+
 // Sorting function
 const toggleSort = (key) => {
   if (sortConfig.value.key === key) {
@@ -251,7 +264,7 @@ onUnmounted(() => {
         
         <!-- Controls Section -->
         <div class="controls-section">
-        <!-- Search Boxes -->
+          <!-- Search Boxes -->
           <div class="search-container">
             <div class="search-wrapper">
               <input
@@ -260,7 +273,7 @@ onUnmounted(() => {
                 placeholder="Prefix search..."
                 class="search-input prefix-search"
               />
-              <span class="search-icon">🔍P</span>
+              <span class="search-icon">🔍</span>
             </div>
             <div class="search-wrapper">
               <input
@@ -269,7 +282,7 @@ onUnmounted(() => {
                 placeholder="Contains search..."
                 class="search-input"
               />
-              <span class="search-icon">🔍C</span>
+              <span class="search-icon">🔍</span>
             </div>
           </div>
 
@@ -303,7 +316,7 @@ onUnmounted(() => {
             <div class="relative">
               <button 
                 @click="copyToClipboard"
-                class="action-button csv-button"
+                class="action-button copy-button"
                 :disabled="loading || !filteredAndSortedData.length"
               >
                 <span class="button-icon">📋</span>
@@ -330,74 +343,115 @@ onUnmounted(() => {
       </div>
 
       <!-- Data Table -->
-      <div v-else-if="filteredAndSortedData.length" class="table-container">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th @click="toggleSort('systemtag')" 
-                  class="th-fixed sortable"
-                  :class="{ 'active-sort': sortConfig.key === 'systemtag' }">
-                System Tag
-                <span class="sort-icon">{{ getSortIcon('systemtag') }}</span>
-              </th>
-              <th @click="toggleSort('type')" 
-                  class="th-fixed sortable"
-                  :class="{ 'active-sort': sortConfig.key === 'type' }">
-                      Type
+      <div v-else-if="filteredAndSortedData.length" class="table-wrapper">
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <!-- System Tag -->
+                <th @click="toggleSort('systemtag')" 
+                    :class="[
+                      'sortable',
+                      { 'th-sticky': isColumnSticky(0) },
+                      { 'active-sort': sortConfig.key === 'systemtag' }
+                    ]"
+                    :style="isColumnSticky(0) ? `left: 0px` : ''">
+                  System Tag
+                  <span class="sort-icon">{{ getSortIcon('systemtag') }}</span>
+                </th>
+                
+                <!-- Type -->
+                <th @click="toggleSort('type')" 
+                    :class="[
+                      'sortable',
+                      { 'th-sticky': isColumnSticky(1) },
+                      { 'active-sort': sortConfig.key === 'type' }
+                    ]"
+                    :style="isColumnSticky(1) ? `left: 200px` : ''">
+                  Type
                   <span class="sort-icon">{{ getSortIcon('type') }}</span>
-              </th>
-              <th @click="toggleSort('symbol')" 
-                  class="th-fixed sortable"
-                  :class="{ 'active-sort': sortConfig.key === 'symbol' }">
-                Symbol
-                <span class="sort-icon">{{ getSortIcon('symbol') }}</span>
-              </th>
-              <th @click="toggleSort('strategyType')" 
-                  class="th-fixed sortable"
-                  :class="{ 'active-sort': sortConfig.key === 'strategyType' }">
-                Strategy Type
-                <span class="sort-icon">{{ getSortIcon('strategyType') }}</span>
-              </th>
-              <th @click="toggleSort('timing')" 
-                  class="th-fixed sortable"
-                  :class="{ 'active-sort': sortConfig.key === 'timing' }">
-                Time
-                <span class="sort-icon">{{ getSortIcon('timing') }}</span>
-              </th>
-              <th v-for="user in uniqueUsers" 
-                  :key="user" 
-                  @click="toggleSort(user)"
-                  class="th-user sortable"
-                  :class="{ 'active-sort': sortConfig.key === user }">
-                {{ user }}
-                <span class="sort-icon">{{ getSortIcon(user) }}</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(row, index) in filteredAndSortedData" 
-                :key="index"
-                class="data-row">
-              <td class="td-fixed uid-cell">{{ row.systemtag }}</td>
-              <td class="td-fixed type-cell">
-                <span class="type-badge">{{ row.type }}</span>
-              </td>
-              <td class="td-fixed symbol-cell">{{ row.symbol }}</td>
-              <td class="td-fixed type-cell">
-                <span class="strategy-type-badge">{{ row.strategyType }}</span>
-              </td>
-              <td class="td-fixed time-cell">
-                <span class="time-badge">{{ row.timing }}</span>
-              </td>
-              <td v-for="user in uniqueUsers" 
-                  :key="user" 
-                  class="td-user"
-                  :class="{'value-negative': row[user] < 0, 'value-positive': row[user] > 0}">
-                {{ row[user] ? row[user].toLocaleString() : '-' }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </th>
+                
+                <!-- Symbol -->
+                <th @click="toggleSort('symbol')" 
+                    :class="[
+                      'sortable',
+                      { 'th-sticky': isColumnSticky(2) },
+                      { 'active-sort': sortConfig.key === 'symbol' }
+                    ]"
+                    :style="isColumnSticky(2) ? `left: 400px` : ''">
+                  Symbol
+                  <span class="sort-icon">{{ getSortIcon('symbol') }}</span>
+                </th>
+
+                <!-- Rest of the columns -->
+                <th @click="toggleSort('strategyType')" 
+                    class="sortable"
+                    :class="{ 'active-sort': sortConfig.key === 'strategyType' }">
+                  Strategy Type
+                  <span class="sort-icon">{{ getSortIcon('strategyType') }}</span>
+                </th>
+                <th @click="toggleSort('timing')" 
+                    class="sortable"
+                    :class="{ 'active-sort': sortConfig.key === 'timing' }">
+                  Time
+                  <span class="sort-icon">{{ getSortIcon('timing') }}</span>
+                </th>
+                <th v-for="user in uniqueUsers" 
+                    :key="user"
+                    @click="toggleSort(user)"
+                    class="sortable"
+                    :class="{ 'active-sort': sortConfig.key === user }">
+                  {{ user }}
+                  <span class="sort-icon">{{ getSortIcon(user) }}</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, index) in filteredAndSortedData" 
+                  :key="index"
+                  class="data-row">
+                <!-- System Tag -->
+                <td :class="{ 'td-sticky': isColumnSticky(0) }"
+                    :style="isColumnSticky(0) ? `left: 0px` : ''">
+                  {{ row.systemtag }}
+                </td>
+                
+                <!-- Type -->
+                <td :class="[
+                      'type-cell',
+                      { 'td-sticky': isColumnSticky(1) }
+                    ]"
+                    :style="isColumnSticky(1) ? `left: 200px` : ''">
+                  <span class="type-badge">{{ row.type }}</span>
+                </td>
+                
+                <!-- Symbol -->
+                <td :class="[
+                      'symbol-cell',
+                      { 'td-sticky': isColumnSticky(2) }
+                    ]"
+                    :style="isColumnSticky(2) ? `left: 400px` : ''">
+                  {{ row.symbol }}
+                </td>
+
+                <!-- Rest of the cells -->
+                <td class="type-cell">
+                  <span class="strategy-type-badge">{{ row.strategyType }}</span>
+                </td>
+                <td class="time-cell">
+                  <span class="time-badge">{{ row.timing }}</span>
+                </td>
+                <td v-for="user in uniqueUsers" 
+                    :key="user"
+                    class="td-user"
+                    :class="{'value-negative': row[user] < 0, 'value-positive': row[user] > 0}">
+                  {{ row[user] ? row[user].toLocaleString() : '-' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- No Data State -->
@@ -411,18 +465,9 @@ onUnmounted(() => {
   </div>
 </template>
 
-
 <style scoped>
 /* Base styles */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Roboto+Mono:wght@500;600&family=JetBrains+Mono:wght@600;700&display=swap');
-
-.search-container {
-  display: flex;
-  gap: 1rem;
-  flex-grow: 1;
-  max-width: 64rem;
-}
-
 
 .trading-positions-container {
   padding: 1.5rem;
@@ -438,6 +483,42 @@ onUnmounted(() => {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.18);
   overflow: hidden;
+}
+
+/* Table wrapper and container styles */
+.table-wrapper {
+  margin: 1rem;
+  border-radius: 0.8rem;
+  background: white;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+  position: relative;
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  position: relative;
+  border-radius: 0.8rem;
+}
+
+
+/* Remove fixed widths from sticky columns */
+.th-sticky {
+  position: sticky !important;
+  z-index: 20;
+  background: linear-gradient(145deg, #f8fafc, #f1f5f9) !important;
+  border-right: 1px solid #e2e8f0;
+  white-space: nowrap;
+  padding: 1rem 1.5rem;
+}
+
+.td-sticky {
+  position: sticky !important;
+  z-index: 10;
+  background: white !important;
+  border-right: 1px solid #e2e8f0;
+  white-space: nowrap;
+  padding: 1rem 1.5rem;
 }
 
 /* Header Styles */
@@ -466,38 +547,18 @@ onUnmounted(() => {
   color: #64748b;
 }
 
-/* Search Bar Styles */
+/* Search Container Styles */
+.search-container {
+  display: flex;
+  gap: 1rem;
+  flex-grow: 1;
+  max-width: 64rem;
+}
+
 .search-wrapper {
   flex: 1;
+  position: relative;
 }
-
-
-.prefix-search {
-  border-color: rgba(99, 102, 241, 0.4);
-}
-
-.prefix-search:hover {
-  border-color: rgba(99, 102, 241, 0.6);
-}
-
-.prefix-search:focus {
-  border-color: rgb(99, 102, 241);
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
-}
-
-/* Update responsive design for search container */
-@media (max-width: 768px) {
-  .search-container {
-    flex-direction: column;
-    width: 100%;
-  }
-  
-  .search-wrapper {
-    width: 100%;
-  }
-}
-
-
 
 .search-input {
   width: 100%;
@@ -509,19 +570,6 @@ onUnmounted(() => {
   font-size: 1rem;
   color: #1e293b;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.search-input:hover {
-  border-color: rgba(59, 130, 246, 0.3);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-  background: white;
 }
 
 .search-icon {
@@ -532,17 +580,15 @@ onUnmounted(() => {
   color: #94a3b8;
   font-size: 1.2rem;
   pointer-events: none;
-  transition: all 0.3s ease;
 }
 
-/* Controls Section Styles */
+/* Controls Section */
 .controls-section {
   display: flex;
   gap: 1.5rem;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   margin-top: 2rem;
-  padding: 0 1rem;
 }
 
 .action-buttons {
@@ -550,255 +596,79 @@ onUnmounted(() => {
   gap: 0.75rem;
 }
 
-/* Action Button Styles */
-.action-button {
-  padding: 0.875rem 1.5rem;
-  border-radius: 1rem;
+/* Table Styles */
+.data-table {
+  width: max-content; /* Allow table to grow based on content */
+  min-width: 100%;    /* Ensure table fills container */
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* Regular column styles */
+th, td {
+  padding: 0.50rem 1.00rem;
+  white-space: nowrap;
+  text-align: center;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* User value cells - allow content to determine width */
+.td-user {
+  font-family: 'IBM Plex Mono', monospace;
   font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  transition: all 0.3s ease;
-  border: none;
-  cursor: pointer;
-  font-size: 0.95rem;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 1rem 1.5rem;
+}
+
+
+.value-positive {
+  color: #059669;
+  background: linear-gradient(135deg, #d1fae5, #ecfdf5);
+  border-radius: 0.4rem;
+}
+
+.value-negative {
+  color: #dc2626;
+  background: linear-gradient(135deg, #fee2e2, #fef2f2);
+  border-radius: 0.4rem;
+}
+
+/* Badge styles - allow them to grow */
+.type-badge,
+.strategy-type-badge,
+.time-badge {
+  padding: 0.4rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .type-badge {
   background: linear-gradient(135deg, #ddd6fe, #ede9fe);
   color: #5b21b6;
-  font-weight: 600;
-  padding: 0.4rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.85rem;
-  letter-spacing: 0.02em;
-  box-shadow: 0 2px 4px rgba(91, 33, 182, 0.05);
-  display: inline-block;
 }
 
-.excel-button {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-}
-
-.csv-button {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: white;
-}
-
-.refresh-button {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: white;
-}
-
-/* Table Styles */
-.table-container {
-  margin: 1rem;
-  border-radius: 0.8rem;
-  background: white;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
-  overflow: auto;
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: transparent;
-}
-
-/* Sorting Styles */
-.sortable {
-  cursor: pointer;
-  user-select: none;
-  position: relative;
-  padding-right: 2.5rem !important;
-  transition: all 0.2s ease;
-}
-
-.sortable:hover {
-  background: linear-gradient(145deg, #e2e8f0, #f1f5f9);
-}
-
-.sort-icon {
-  position: absolute;
-  right: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.8rem;
-  opacity: 0.6;
-  transition: opacity 0.2s ease;
-}
-
-.sortable:hover .sort-icon {
-  opacity: 1;
-}
-
-.active-sort {
-  background: linear-gradient(145deg, #e2e8f0, #f1f5f9) !important;
-  color: #2563eb !important;
-}
-
-.active-sort .sort-icon {
-  opacity: 1;
-  color: #2563eb;
-}
-
-/* Table Header Styles */
-.data-table th {
-  background: linear-gradient(145deg, #f8fafc, #f1f5f9);
-  padding: 1.2rem 1rem;
-  font-weight: 600;
-  color: #1e293b;
-  text-transform: uppercase;
-  font-size: 0.9rem;
-  letter-spacing: 0.05em;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  transition: all 0.2s ease;
-}
-
-/* Table Cell Styles */
-.td-fixed {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #e2e8f0;
-  white-space: nowrap;
-  position: sticky;
-  left: 0;
-  background-color: white;
-  text-align: center !important;
-  font-size: 1.05rem;
-  display: table-cell;
-  vertical-align: middle;
-}
-
-.td-user {
-  font-family: 'IBM Plex Mono', monospace;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #e2e8f0;
-  text-align: center;
-  white-space: nowrap;
-  font-weight: 600;
-  font-size: 1.1rem;
-  font-feature-settings: "tnum" 1;
-  letter-spacing: 0.02em;
-  background: white;
-  transition: all 0.2s ease;
-}
-
-/* Value Styling */
-.value-positive {
-  color: #059669;
-  font-weight: 600;
-  background: linear-gradient(135deg, #d1fae5, #ecfdf5);
-  border-radius: 0.4rem;
-  padding: 0.5rem 1rem;
-  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.1);
-}
-
-/* Add to your existing styles */
-.copied-notification {
-  position: absolute;
-  top: -40px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(135deg, #1e293b, #334155);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  white-space: nowrap;
-  animation: fadeInOut 2s ease-in-out;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 50;
-}
-
-@keyframes fadeInOut {
-  0% { opacity: 0; transform: translate(-50%, 10px); }
-  15% { opacity: 1; transform: translate(-50%, 0); }
-  85% { opacity: 1; transform: translate(-50%, 0); }
-  100% { opacity: 0; transform: translate(-50%, -10px); }
-}
-
-.relative {
-  position: relative;
-}
-
-.value-negative {
-  color: #dc2626;
-  font-weight: 600;
-  background: linear-gradient(135deg, #fee2e2, #fef2f2);
-  border-radius: 0.4rem;
-  padding: 0.5rem 1rem;
-  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
-}
-
-/* Badge Styles */
 .strategy-type-badge {
   background: linear-gradient(135deg, #e0f2fe, #bae6fd);
   color: #0369a1;
-  font-weight: 600;
-  padding: 0.4rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.85rem;
-  letter-spacing: 0.02em;
-  box-shadow: 0 2px 4px rgba(3, 105, 161, 0.05);
-  display: inline-block;
 }
 
 .time-badge {
   background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
   color: #475569;
-  font-weight: 600;
-  padding: 0.4rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.85rem;
-  letter-spacing: 0.02em;
-  box-shadow: 0 2px 4px rgba(71, 85, 105, 0.05);
-  display: inline-block;
 }
 
-/* Symbol Cell Styles */
-.symbol-cell {
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: #1e293b;
-  letter-spacing: 0.02em;
-  background: linear-gradient(135deg, #f1f5f9, #f8fafc);
-  border-radius: 0.6rem;
-  padding: 0.6rem 1.2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
-  text-align: center;
-  transition: all 0.2s ease;
-  font-feature-settings: "tnum" 1;
-}
-
-.data-row:hover .symbol-cell {
-  background: linear-gradient(135deg, #e2e8f0, #f1f5f9);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-  transform: scale(1.02);
-  border-color: #cbd5e1;
-}
-
-/* Status Message Styles */
+/* Error and Loading States */
 .error-message {
   margin: 1.5rem;
   padding: 1rem;
   background: linear-gradient(135deg, #fef2f2, #fee2e2);
-  border: 1px solid #fecaca;
   border-radius: 0.75rem;
   color: #b91c1c;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-weight: 500;
 }
 
 .loading-container {
@@ -817,38 +687,97 @@ onUnmounted(() => {
   border-top: 3px solid #3b82f6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  box-shadow: 0 0 16px rgba(59, 130, 246, 0.1);
 }
 
-.loading-text {
-  color: #64748b;
-  font-weight: 500;
-  font-size: 1.1rem;
-}
-
-/* No Data State Styles */
-.no-data {
+/* Action Buttons */
+.action-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  color: #94a3b8;
-  gap: 1.5rem;
+  gap: 0.5rem;
 }
 
-.no-data-icon {
-  font-size: 3rem;
+.excel-button {
+  background: #10b981;
+  color: white;
 }
 
-.no-data-text {
-  font-size: 1.2rem;
-  font-weight: 500;
+.csv-button {
+  background: #22c55e;
+  color: white;
+}
+
+.refresh-button {
+  background: #3b82f6;
+  color: white;
+}
+
+.copy-button {
+  background: #6366f1;
+  color: white;
+}
+
+/* Hover effects */
+.action-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Sort icons */
+.sort-icon {
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
+}
+
+/* Copied notification */
+.copied-notification {
+  position: absolute;
+  top: -2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  animation: fadeInOut 2s ease-in-out;
 }
 
 /* Animations */
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  10%, 90% { opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .controls-section {
+    flex-direction: column;
+  }
+  
+  .search-container {
+    flex-direction: column;
+  }
+  
+  .action-buttons {
+    width: 100%;
+    grid-template-columns: repeat(2, 1fr);
+    display: grid;
+    gap: 0.75rem;
+  }
+  
+  .refresh-button {
+    grid-column: span 2;
+  }
 }
 
 /* Scrollbar Styles */
@@ -870,102 +799,13 @@ onUnmounted(() => {
 .table-container::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
-
-/* Row Hover Effects */
-.data-row {
-  transition: all 0.3s ease;
-}
-
-.data-row:hover {
-  background: linear-gradient(145deg, rgba(248, 250, 252, 0.5), rgba(241, 245, 249, 0.5));
-  transform: scale(1.002);
-}
-
-/* Button Hover Effects */
-.action-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(59, 130, 246, 0.2);
-}
-
-.excel-button:hover:not(:disabled) {
-  box-shadow: 0 6px 15px rgba(16, 185, 129, 0.2);
-}
-
-.csv-button:hover:not(:disabled) {
-  box-shadow: 0 6px 15px rgba(34, 197, 94, 0.2);
-}
-
-.action-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none !important;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .panel-header {
-    padding: 1.5rem;
-  }
-
-  .title {
-    font-size: 1.75rem;
-  }
-
-  .controls-section {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .search-wrapper {
-    width: 100%;
-  }
-
-  .action-buttons {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-  }
-
-  .refresh-button {
-    grid-column: span 2;
-  }
-
-  .sortable {
-    padding-right: 2rem !important;
-  }
-
-  .sort-icon {
-    right: 0.5rem;
-  }
-}
-
-/* Print Styles */
-@media print {
-  .trading-positions-container {
-    padding: 0;
-    background: none;
-  }
-
-  .panel {
-    box-shadow: none;
-    border: none;
-  }
-
-  .controls-section,
-  .action-buttons,
-  .search-wrapper {
-    display: none;
-  }
-
-  .data-table {
-    font-size: 10pt;
-  }
-
-  .value-positive,
-  .value-negative {
-    background: none;
-    box-shadow: none;
-  }
+/* Symbol cell - allow natural width */
+.symbol-cell {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1e293b;
+  padding: 0.6rem 1.2rem;
+  white-space: nowrap;
 }
 </style>
