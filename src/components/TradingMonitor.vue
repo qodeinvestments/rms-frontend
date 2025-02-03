@@ -1,6 +1,6 @@
 <!-- TradingPositions.vue -->
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted , nextTick } from 'vue';
 import * as XLSX from 'xlsx';
 
 // Add prop for number of sticky columns
@@ -240,15 +240,29 @@ const exportToCSV = () => {
   XLSX.writeFile(wb, fileName, { bookType: 'csv' });
 };
 
+
 onMounted(() => {
   fetchTradingData();
+
+  nextTick(() => {
+    setTimeout(() => {
+      const tableContainer = document.querySelector(".table-container");
+
+      if (tableContainer) {
+        tableContainer.addEventListener("wheel", (event) => {
+          if (!event.shiftKey) {
+            event.preventDefault();
+            tableContainer.scrollLeft += event.deltaY; 
+          } else {
+            tableContainer.scrollTop += event.deltaY;
+          }
+        }, { passive: false });
+      }
+    }, 500); // Small delay to allow Vue to finish rendering
+  });
+
 });
-let refreshInterval;
-onUnmounted(() => {
-  if (refreshInterval) {
-    clearInterval(refreshInterval);
-  }
-});
+
 </script>
 
 <!-- Template Section -->
