@@ -72,10 +72,10 @@
                 <span class="text">Server Data</span>
               </a>
             </li>
-            <li :class="selected == 'TradingMonitor' ? 'active' : ''" @click="changeSelected('TradingMonitor')">
+            <li :class="selected == 'LivePositions' ? 'active' : ''" @click="changeSelected('LivePositions')">
               <a href="#">
                 <i class="icon ph-bold ph-calendar-blank"></i>
-                <span class="text">TradeBook</span>
+                <span class="text">Live Positions </span>
               </a>
             </li>
             
@@ -177,7 +177,7 @@ export default {
         'ServerData': '/serverData',
         'AdminPanel': '/adminPanel',
         'MarginUpdate':'/marginUpdate',
-        'TradingMonitor': '/tradebook'
+        'LivePositions': '/livepositions'
       }
 
     }
