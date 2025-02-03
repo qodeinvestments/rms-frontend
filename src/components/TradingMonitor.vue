@@ -471,9 +471,12 @@ onUnmounted(() => {
 
 .trading-positions-container {
   padding: 1.5rem;
-  min-height: 100vh;
+  height: 100vh;
   background: linear-gradient(145deg, #f9fafb, #f3f4f6);
   font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Panel Styles */
@@ -483,6 +486,9 @@ onUnmounted(() => {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.18);
   overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Table wrapper and container styles */
@@ -492,17 +498,22 @@ onUnmounted(() => {
   background: white;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
   position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .table-container {
   width: 100%;
-  overflow-x: auto;
+  overflow: auto;
   position: relative;
   border-radius: 0.8rem;
+  flex: 1;
+  min-height: 0;
 }
 
-
-/* Remove fixed widths from sticky columns */
+/* Sticky column styles */
 .th-sticky {
   position: sticky !important;
   z-index: 20;
@@ -526,6 +537,7 @@ onUnmounted(() => {
   padding: 2rem;
   border-bottom: 1px solid rgba(229, 231, 235, 0.5);
   background: linear-gradient(to bottom, white, #f8fafc);
+  flex-shrink: 0;
 }
 
 .title-section {
@@ -598,8 +610,8 @@ onUnmounted(() => {
 
 /* Table Styles */
 .data-table {
-  width: max-content; /* Allow table to grow based on content */
-  min-width: 100%;    /* Ensure table fills container */
+  width: max-content;
+  min-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
 }
@@ -612,13 +624,22 @@ th, td {
   border-bottom: 1px solid #e2e8f0;
 }
 
-/* User value cells - allow content to determine width */
+/* Header row styles */
+th {
+  background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+  font-weight: 600;
+  color: #1e293b;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* User value cells */
 .td-user {
   font-family: 'IBM Plex Mono', monospace;
   font-weight: 600;
   padding: 1rem 1.5rem;
 }
-
 
 .value-positive {
   color: #059669;
@@ -632,7 +653,7 @@ th, td {
   border-radius: 0.4rem;
 }
 
-/* Badge styles - allow them to grow */
+/* Badge styles */
 .type-badge,
 .strategy-type-badge,
 .time-badge {
@@ -722,7 +743,12 @@ th, td {
   color: white;
 }
 
-/* Hover effects */
+/* Button states */
+.action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .action-button:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -748,6 +774,36 @@ th, td {
   animation: fadeInOut 2s ease-in-out;
 }
 
+/* No Data State */
+.no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  gap: 1.5rem;
+}
+
+.no-data-icon {
+  font-size: 3rem;
+  color: #94a3b8;
+}
+
+.no-data-text {
+  color: #64748b;
+  font-size: 1.1rem;
+}
+
+/* Symbol cell */
+.symbol-cell {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1e293b;
+  padding: 0.6rem 1.2rem;
+  white-space: nowrap;
+}
+
 /* Animations */
 @keyframes spin {
   to { transform: rotate(360deg); }
@@ -756,6 +812,26 @@ th, td {
 @keyframes fadeInOut {
   0%, 100% { opacity: 0; }
   10%, 90% { opacity: 1; }
+}
+
+/* Scrollbar Styles */
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* Responsive Design */
@@ -778,34 +854,5 @@ th, td {
   .refresh-button {
     grid-column: span 2;
   }
-}
-
-/* Scrollbar Styles */
-.table-container::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.table-container::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-/* Symbol cell - allow natural width */
-.symbol-cell {
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: #1e293b;
-  padding: 0.6rem 1.2rem;
-  white-space: nowrap;
 }
 </style>
