@@ -54,6 +54,7 @@ const copyToClipboard = () => {
         row.symbol,
         row.strategyType,
         row.timing,
+        row.price,
         ...uniqueUsers.value.map(user => {
           const value = row[user];
           return value ? value.toLocaleString() : '-';
@@ -138,6 +139,7 @@ const tableData = computed(() => {
   return Object.entries(tradingData.value).map(([uid, data]) => {
     const positions = Object.entries(data.positions).map(([symbol, userPositions]) => {
       const timing = data.timing[symbol] ?? "";
+      const price=data.price[symbol]??-1;
       return {
         uid,
         systemtag: data.systemtag,
@@ -145,6 +147,7 @@ const tableData = computed(() => {
         symbol,
         strategyType: data.strategyType,
         timing: timing,
+        price:price,
         ...Object.fromEntries(uniqueUsers.value.map(user => [user, userPositions[user] || 0]))
       };
     });
@@ -397,6 +400,12 @@ onMounted(() => {
                   Time
                   <span class="sort-icon">{{ getSortIcon('timing') }}</span>
                 </th>
+                <th @click="toggleSort('price')" 
+                    class="sortable"
+                    :class="{ 'active-sort': sortConfig.key === 'price' }">
+                  Price
+                  <span class="sort-icon">{{ getSortIcon('price') }}</span>
+                </th>
                 <th v-for="user in uniqueUsers" 
                     :key="user"
                     @click="toggleSort(user)"
@@ -441,6 +450,9 @@ onMounted(() => {
                 </td>
                 <td class="time-cell">
                   <span class="time-badge">{{ row.timing }}</span>
+                </td>
+                <td class="time-cell">
+                  <span class="type-badge">{{ row.price}}</span>
                 </td>
                 <td v-for="user in uniqueUsers" 
                     :key="user"
