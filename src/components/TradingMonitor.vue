@@ -1,6 +1,6 @@
 <!-- TradingPositions.vue -->
 <script setup>
-import { ref, computed, onMounted, onUnmounted , nextTick } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import * as XLSX from 'xlsx';
 
 // Add prop for number of sticky columns
@@ -12,6 +12,17 @@ const props = defineProps({
   }
 });
 
+const handleScroll = (event) => {
+  if (!event.shiftKey) {
+    event.preventDefault();
+    if (tableContainerRef.value) {
+      const scrollSpeed = 1.5; // Adjust this value to control scroll speed
+      tableContainerRef.value.scrollLeft += event.deltaY * scrollSpeed;
+    }
+  }
+};
+
+const tableContainerRef = ref(null);
 const tradingData = ref({});
 const loading = ref(true);
 const error = ref(null);
@@ -23,7 +34,6 @@ const showCopiedNotification = ref(false);
 // Helper function to determine if a column should be sticky
 const isColumnSticky = (index) => index < props.stickyColumns;
 
-// Sorting function
 const toggleSort = (key) => {
   if (sortConfig.value.key === key) {
     // Toggle direction if same key
@@ -243,24 +253,6 @@ const exportToCSV = () => {
 
 onMounted(() => {
   fetchTradingData();
-
-  nextTick(() => {
-    setTimeout(() => {
-      const tableContainer = document.querySelector(".table-container");
-
-      if (tableContainer) {
-        tableContainer.addEventListener("wheel", (event) => {
-          if (!event.shiftKey) {
-            event.preventDefault();
-            tableContainer.scrollLeft += event.deltaY; 
-          } else {
-            tableContainer.scrollTop += event.deltaY;
-          }
-        }, { passive: false });
-      }
-    }, 500); // Small delay to allow Vue to finish rendering
-  });
-
 });
 
 </script>
@@ -358,7 +350,11 @@ onMounted(() => {
 
       <!-- Data Table -->
       <div v-else-if="filteredAndSortedData.length" class="table-wrapper">
-        <div class="table-container">
+        <div 
+          ref="tableContainerRef"
+          class="table-container"
+         @wheel="handleScroll"
+        >
           <table class="data-table">
             <thead>
               <tr>
