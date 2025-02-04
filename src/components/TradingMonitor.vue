@@ -36,17 +36,18 @@ const toggleSort = (key) => {
   }
 };
 
+// Modified copyToClipboard to include PNL
 const copyToClipboard = () => {
-  // Get visible columns and transform them for the trading positions table
   const headerRow = [
     'System Tag',
     'Symbol',
     'Strategy Type',
     'Time',
-    ...uniqueUsers.value
+    'Price',
+    'LTP',
+    ...uniqueUsers.value.flatMap(user => [user, `${user} PNL`])
   ].join('\t');
   
-  // Create data rows
   const dataRows = filteredAndSortedData.value
     .map(row => {
       const values = [
@@ -55,19 +56,18 @@ const copyToClipboard = () => {
         row.strategyType,
         row.timing,
         row.price,
-        ...uniqueUsers.value.map(user => {
-          const value = row[user];
-          return value ? value.toLocaleString() : '-';
-        })
+        row.ltp,
+        ...uniqueUsers.value.flatMap(user => [
+          row[user] ? row[user].toLocaleString() : '-',
+          row[`${user}_pnl`] ? row[`${user}_pnl`].toLocaleString() : '-'
+        ])
       ];
       return values.join('\t');
     })
     .join('\n');
   
-  // Combine headers and data
   const clipboardText = `${headerRow}\n${dataRows}`;
   
-  // Copy to clipboard
   navigator.clipboard.writeText(clipboardText)
     .then(() => {
       showCopiedNotification.value = true;
@@ -123,6 +123,8 @@ const uniqueUsers = computed(() => {
   return Array.from(users);
 });
 
+
+
 // Extract trailing number from any string
 const extractTrailingNumber = (str) => {
   if (!str) return null;
@@ -139,16 +141,21 @@ const tableData = computed(() => {
   return Object.entries(tradingData.value).map(([uid, data]) => {
     const positions = Object.entries(data.positions).map(([symbol, userPositions]) => {
       const timing = data.timing[symbol] ?? "";
-      const price=data.price[symbol]??-1;
+      const price = data.price[symbol] ?? -1;
+      const ltp = data.ltp[symbol] ?? -1;
+      const pnlData = data.pnl[symbol] ?? {};
+      
       return {
         uid,
         systemtag: data.systemtag,
-        type: extractTrailingNumber(data.systemtag), // Will work with any string ending in numbers
+        type: extractTrailingNumber(data.systemtag),
         symbol,
         strategyType: data.strategyType,
         timing: timing,
-        price:price,
-        ...Object.fromEntries(uniqueUsers.value.map(user => [user, userPositions[user] || 0]))
+        price: price,
+        ltp: ltp,
+        ...Object.fromEntries(uniqueUsers.value.map(user => [user, userPositions[user] || 0])),
+        ...Object.fromEntries(uniqueUsers.value.map(user => [`${user}_pnl`, pnlData[user] || 0]))
       };
     });
     return positions;
@@ -348,121 +355,112 @@ onMounted(() => {
           ref="tableContainerRef"
           class="table-container"
         >
-          <table class="data-table">
-            <thead>
-              <tr>
-                <!-- System Tag -->
-                <th @click="toggleSort('systemtag')" 
-                    :class="[
-                      'sortable',
-                      { 'th-sticky': isColumnSticky(0) },
-                      { 'active-sort': sortConfig.key === 'systemtag' }
-                    ]"
-                    :style="isColumnSticky(0) ? `left: 0px` : ''">
-                  System Tag
-                  <span class="sort-icon">{{ getSortIcon('systemtag') }}</span>
-                </th>
-                
-                <!-- Type -->
-                <th @click="toggleSort('type')" 
-                    :class="[
-                      'sortable',
-                      { 'th-sticky': isColumnSticky(1) },
-                      { 'active-sort': sortConfig.key === 'type' }
-                    ]"
-                    :style="isColumnSticky(1) ? `left: 200px` : ''">
-                  Type
-                  <span class="sort-icon">{{ getSortIcon('type') }}</span>
-                </th>
-                
-                <!-- Symbol -->
-                <th @click="toggleSort('symbol')" 
-                    :class="[
-                      'sortable',
-                      { 'th-sticky': isColumnSticky(2) },
-                      { 'active-sort': sortConfig.key === 'symbol' }
-                    ]"
-                    :style="isColumnSticky(2) ? `left: 400px` : ''">
-                  Symbol
-                  <span class="sort-icon">{{ getSortIcon('symbol') }}</span>
-                </th>
+        <table class="data-table">
+      <thead>
+        <tr>
+          <!-- Previous headers remain the same until user columns -->
+          <th @click="toggleSort('systemtag')" 
+              :class="['sortable', { 'th-sticky': isColumnSticky(0) }]"
+              :style="isColumnSticky(0) ? 'left: 0px' : ''">
+            System Tag
+            <span class="sort-icon">{{ getSortIcon('systemtag') }}</span>
+          </th>
+          
+          <th @click="toggleSort('type')" 
+              :class="['sortable', { 'th-sticky': isColumnSticky(1) }]"
+              :style="isColumnSticky(1) ? 'left: 200px' : ''">
+            Type
+            <span class="sort-icon">{{ getSortIcon('type') }}</span>
+          </th>
+          
+          <th @click="toggleSort('symbol')" 
+              :class="['sortable', { 'th-sticky': isColumnSticky(2) }]"
+              :style="isColumnSticky(2) ? 'left: 400px' : ''">
+            Symbol
+            <span class="sort-icon">{{ getSortIcon('symbol') }}</span>
+          </th>
 
-                <!-- Rest of the columns -->
-                <th @click="toggleSort('strategyType')" 
-                    class="sortable"
-                    :class="{ 'active-sort': sortConfig.key === 'strategyType' }">
-                  Strategy Type
-                  <span class="sort-icon">{{ getSortIcon('strategyType') }}</span>
-                </th>
-                <th @click="toggleSort('timing')" 
-                    class="sortable"
-                    :class="{ 'active-sort': sortConfig.key === 'timing' }">
-                  Time
-                  <span class="sort-icon">{{ getSortIcon('timing') }}</span>
-                </th>
-                <th @click="toggleSort('price')" 
-                    class="sortable"
-                    :class="{ 'active-sort': sortConfig.key === 'price' }">
-                  Price
-                  <span class="sort-icon">{{ getSortIcon('price') }}</span>
-                </th>
-                <th v-for="user in uniqueUsers" 
-                    :key="user"
-                    @click="toggleSort(user)"
-                    class="sortable"
-                    :class="{ 'active-sort': sortConfig.key === user }">
-                  {{ user }}
-                  <span class="sort-icon">{{ getSortIcon(user) }}</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(row, index) in filteredAndSortedData" 
-                  :key="index"
-                  class="data-row">
-                <!-- System Tag -->
-                <td :class="{ 'td-sticky': isColumnSticky(0) }"
-                    :style="isColumnSticky(0) ? `left: 0px` : ''">
-                  {{ row.systemtag }}
-                </td>
-                
-                <!-- Type -->
-                <td :class="[
-                      'type-cell',
-                      { 'td-sticky': isColumnSticky(1) }
-                    ]"
-                    :style="isColumnSticky(1) ? `left: 200px` : ''">
-                  <span class="type-badge">{{ row.type }}</span>
-                </td>
-                
-                <!-- Symbol -->
-                <td :class="[
-                      'symbol-cell',
-                      { 'td-sticky': isColumnSticky(2) }
-                    ]"
-                    :style="isColumnSticky(2) ? `left: 400px` : ''">
-                  {{ row.symbol }}
-                </td>
+          <th @click="toggleSort('strategyType')" class="sortable">
+            Strategy Type
+            <span class="sort-icon">{{ getSortIcon('strategyType') }}</span>
+          </th>
+          
+          <th @click="toggleSort('timing')" class="sortable">
+            Time
+            <span class="sort-icon">{{ getSortIcon('timing') }}</span>
+          </th>
+          
+          <th @click="toggleSort('price')" class="sortable">
+            Price
+            <span class="sort-icon">{{ getSortIcon('price') }}</span>
+          </th>
+          
+          <th @click="toggleSort('ltp')" class="sortable">
+            LTP
+            <span class="sort-icon">{{ getSortIcon('ltp') }}</span>
+          </th>
+          
+          <!-- User columns with PNL -->
+          <template v-for="user in uniqueUsers" :key="user">
+            <th @click="toggleSort(user)" class="sortable user-column">
+              {{ user }}
+              <span class="sort-icon">{{ getSortIcon(user) }}</span>
+            </th>
+            <th @click="toggleSort(`${user}_pnl`)" class="sortable pnl-column">
+              {{ user }} PNL
+              <span class="sort-icon">{{ getSortIcon(`${user}_pnl`) }}</span>
+            </th>
+          </template>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(row, index) in filteredAndSortedData" :key="index" class="data-row">
+          <!-- Previous cells remain the same until user columns -->
+          <td :class="{ 'td-sticky': isColumnSticky(0) }"
+              :style="isColumnSticky(0) ? 'left: 0px' : ''">
+            {{ row.systemtag }}
+          </td>
+          
+          <td :class="['type-cell', { 'td-sticky': isColumnSticky(1) }]"
+              :style="isColumnSticky(1) ? 'left: 200px' : ''">
+            <span class="type-badge">{{ row.type }}</span>
+          </td>
+          
+          <td :class="['symbol-cell', { 'td-sticky': isColumnSticky(2) }]"
+              :style="isColumnSticky(2) ? 'left: 400px' : ''">
+            {{ row.symbol }}
+          </td>
 
-                <!-- Rest of the cells -->
-                <td class="type-cell">
-                  <span class="strategy-type-badge">{{ row.strategyType }}</span>
-                </td>
-                <td class="time-cell">
-                  <span class="time-badge">{{ row.timing }}</span>
-                </td>
-                <td class="time-cell">
-                  <span class="type-badge">{{ row.price}}</span>
-                </td>
-                <td v-for="user in uniqueUsers" 
-                    :key="user"
-                    class="td-user"
-                    :class="{'value-negative': row[user] < 0, 'value-positive': row[user] > 0}">
-                  {{ row[user] ? row[user].toLocaleString() : '-' }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <td class="type-cell">
+            <span class="strategy-type-badge">{{ row.strategyType }}</span>
+          </td>
+          
+          <td class="time-cell">
+            <span class="time-badge">{{ row.timing }}</span>
+          </td>
+          
+          <td class="price-cell">
+            <span class="type-badge">{{ row.price }}</span>
+          </td>
+          
+          <td class="ltp-cell">
+            <span class="type-badge">{{ row.ltp }}</span>
+          </td>
+
+          <!-- User and PNL columns -->
+          <template v-for="user in uniqueUsers" :key="user">
+            <td class="td-user"
+                :class="{'value-negative': row[user] < 0, 'value-positive': row[user] > 0}">
+              {{ row[user] ? row[user].toLocaleString() : '-' }}
+            </td>
+            <td class="td-pnl"
+                :class="{'value-negative': row[`${user}_pnl`] < 0, 'value-positive': row[`${user}_pnl`] > 0}">
+              {{ row[`${user}_pnl`] ? row[`${user}_pnl`].toLocaleString() : '-' }}
+            </td>
+          </template>
+        </tr>
+      </tbody>
+  </table>
         </div>
       </div>
 
@@ -867,4 +865,23 @@ th {
     grid-column: span 2;
   }
 }
+
+/* Additional styles for PNL columns */
+.pnl-column {
+  background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+  font-weight: 600;
+}
+
+.td-pnl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  padding: 1rem 1.5rem;
+}
+
+/* Modified spacing for user and PNL columns */
+.user-column,
+.pnl-column {
+  padding: 0.75rem 1.25rem;
+}
+
 </style>
