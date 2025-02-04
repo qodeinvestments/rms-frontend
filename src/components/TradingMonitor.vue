@@ -1,6 +1,6 @@
 <!-- TradingPositions.vue -->
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted ,watch} from 'vue';
 import * as XLSX from 'xlsx';
 
 // Add prop for number of sticky columns
@@ -21,6 +21,13 @@ const searchQuery = ref('');
 const prefixQuery = ref('');
 const sortConfig = ref({ key: '', direction: '' });
 const showCopiedNotification = ref(false);
+const selectedUsers = ref([]);  // Will hold selected users
+
+
+const filteredUsers = computed(() => {
+  return uniqueUsers.value.map(user => ({ label: user, value: user }));
+});
+
 
 // Helper function to determine if a column should be sticky
 const isColumnSticky = (index) => index < props.stickyColumns;
@@ -45,7 +52,7 @@ const copyToClipboard = () => {
     'Time',
     'Price',
     'LTP',
-    ...uniqueUsers.value.flatMap(user => [user, `${user} PNL`])
+    ...selectedUsers.value.flatMap(user => [user, `${user} PNL`])
   ].join('\t');
   
   const dataRows = filteredAndSortedData.value
@@ -57,7 +64,7 @@ const copyToClipboard = () => {
         row.timing,
         row.price,
         row.ltp,
-        ...uniqueUsers.value.flatMap(user => [
+        ...selectedUsers.value.flatMap(user => [
           row[user] ? row[user].toLocaleString() : '-',
           row[`${user}_pnl`] ? row[`${user}_pnl`].toLocaleString() : '-'
         ])
@@ -252,10 +259,27 @@ const exportToCSV = () => {
 };
 
 
-onMounted(() => {
-  fetchTradingData();
+watch(uniqueUsers, (newUsers) => {
+  // Add any new users to selection
+  const newUsersSet = new Set(newUsers);
+  const selectedUsersSet = new Set(selectedUsers.value);
+  
+  newUsers.forEach(user => {
+    if (!selectedUsersSet.has(user)) {
+      selectedUsers.value.push(user);
+    }
+  });
+  
+  // Remove any selected users that no longer exist
+  selectedUsers.value = selectedUsers.value.filter(user => newUsersSet.has(user));
 });
 
+
+onMounted(() => {
+  fetchTradingData();
+  // Initialize with all users selected by default
+  selectedUsers.value = uniqueUsers.value;
+});
 </script>
 
 <!-- Template Section -->
@@ -271,6 +295,17 @@ onMounted(() => {
         
         <!-- Controls Section -->
         <div class="controls-section">
+          <div class="user-select-container">
+            <a-select
+              v-model:value="selectedUsers"
+              mode="multiple"
+              style="width: 100%"
+              placeholder="Select Users"
+              :options="filteredUsers"
+              :defaultValue="uniqueUsers"
+            >
+            </a-select>
+          </div>
           <!-- Search Boxes -->
           <div class="search-container">
             <div class="search-wrapper">
@@ -401,7 +436,7 @@ onMounted(() => {
           </th>
           
           <!-- User columns with PNL -->
-          <template v-for="user in uniqueUsers" :key="user">
+          <template v-for="user in selectedUsers" :key="user">
             <th @click="toggleSort(user)" class="sortable user-column">
               {{ user }}
               <span class="sort-icon">{{ getSortIcon(user) }}</span>
@@ -448,7 +483,7 @@ onMounted(() => {
           </td>
 
           <!-- User and PNL columns -->
-          <template v-for="user in uniqueUsers" :key="user">
+          <template v-for="user in selectedUsers" :key="user">
             <td class="td-user"
                 :class="{'value-negative': row[user] < 0, 'value-positive': row[user] > 0}">
               {{ row[user] ? row[user].toLocaleString() : '-' }}
@@ -607,16 +642,18 @@ onMounted(() => {
 /* Controls Section */
 .controls-section {
   display: flex;
+  flex-direction: column;
   gap: 1.5rem;
-  justify-content: space-between;
-  align-items: center;
   margin-top: 2rem;
 }
 
 .action-buttons {
+  margin-top: 1rem;
   display: flex;
   gap: 0.75rem;
+  justify-content: flex-end;
 }
+
 
 /* Table Styles */
 .data-table {
@@ -883,5 +920,25 @@ th {
 .pnl-column {
   padding: 0.75rem 1.25rem;
 }
+
+
+/* Add these to your style section */
+.user-select-container {
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 64rem;
+}
+
+.ant-select {
+  width: 100%;
+}
+
+.ant-select-selection {
+  border-radius: 1rem;
+  border: 2px solid rgba(226, 232, 240, 0.6);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Modify the controls-section style */
 
 </style>
