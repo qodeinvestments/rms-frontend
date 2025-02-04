@@ -1612,3 +1612,26 @@ const client_holdings=[
       header: () => 'effective_qty',
     }),
   ]
+
+  export const rms_prev_day = [
+    columnHelper.accessor(row => row.Symbol, {
+      id: 'Symbol',
+      cell: info => info.getValue(),
+      header: () => 'Symbol',
+    }),
+    columnHelper.accessor(row => row.AveragePrice, {
+      id: 'Average Price',
+      cell: info => info.getValue(),
+      header: () => 'Average Price',
+    }),
+    columnHelper.accessor(row => row.Quantity, {
+      id: 'Quantity',
+      cell: info => info.getValue(),
+      header: () => 'Quantity',
+    }),
+    columnHelper.accessor(row => row.Type, {
+      id: 'Type',
+      cell: info => info.getValue(),
+      header: () => 'Type',
+    }),
+  ]
