@@ -1,6 +1,8 @@
 <template>
-    <Transition name="toast-fade" @after-enter="playSound" @after-leave="stopSound">
-        <div v-if="isVisible" class="toast" :class="type">
+    <Transition name="toast-fade" @after-enter="handleEnter" @after-leave="handleLeave">
+        <div v-if="isVisible" 
+             class="toast" 
+             :class="type">
             {{ message }}
             <button @click="hide" class="close-btn">&times;</button>
         </div>
@@ -8,7 +10,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 
 // Define props
 const props = defineProps({
@@ -20,36 +22,47 @@ const props = defineProps({
         type: String,
         default: "info",
         validator: (value) => ["info", "success", "warning", "error"].includes(value)
+    },
+    volume: {
+        type: Number,
+        default: 0.3,
+        validator: (value) => value >= 0 && value <= 1
     }
 });
 
-// Emit event when toast is closed
 const emit = defineEmits(["close"]);
-
-// Toast visibility state
 const isVisible = ref(false);
+const audio = ref(null);
 
-// Load the sound
-let alertSound;
 onMounted(() => {
-    alertSound = new Audio("/alarm.mp3"); // ✅ Ensure file is in public/
-    alertSound.load();
+    // Initialize audio
+    audio.value = new Audio('/alarm.mp3');
+    audio.value.loop = true;
+    audio.value.volume = props.volume;
 });
 
-// Function to play the sound **after the toast is visible**
-const playSound = () => {
-    if (alertSound) {
-        console.log("🔊 Playing sound...");
-        alertSound.play().catch((err) => console.error("Error playing sound:", err));
+// Watch for volume changes
+watch(() => props.volume, (newVolume) => {
+    if (audio.value) {
+        audio.value.volume = newVolume;
+    }
+});
+
+const handleEnter = async () => {
+    if (audio.value) {
+        try {
+            audio.value.currentTime = 0;
+            await audio.value.play();
+        } catch (error) {
+            console.error('Error playing audio:', error);
+        }
     }
 };
 
-// Function to stop the sound **after the toast disappears**
-const stopSound = () => {
-    if (alertSound) {
-        console.log("🔇 Stopping sound...");
-        alertSound.pause();
-        alertSound.currentTime = 0; // ✅ Reset to the start
+const handleLeave = () => {
+    if (audio.value) {
+        audio.value.pause();
+        audio.value.currentTime = 0;
     }
 };
 
@@ -73,6 +86,13 @@ watch(() => props.message, () => {
 onMounted(() => {
     if (props.message) {
         show();
+    }
+});
+
+onBeforeUnmount(() => {
+    if (audio.value) {
+        audio.value.pause();
+        audio.value.currentTime = 0;
     }
 });
 </script>
@@ -101,6 +121,11 @@ onMounted(() => {
     font-size: 20px;
     cursor: pointer;
     margin-left: 10px;
+    padding: 0 5px;
+}
+
+.close-btn:hover {
+    opacity: 0.8;
 }
 
 .info {
@@ -113,6 +138,7 @@ onMounted(() => {
 
 .warning {
     background-color: #FFC107;
+    color: #333;
 }
 
 .error {
