@@ -39,6 +39,17 @@ onMounted(() => {
     audio.value = new Audio('/alarm.mp3');
     audio.value.loop = true;
     audio.value.volume = props.volume;
+
+    // Listen to visibility change event
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+});
+
+onBeforeUnmount(() => {
+    if (audio.value) {
+        audio.value.pause();
+        audio.value.currentTime = 0;
+    }
+    document.removeEventListener("visibilitychange", handleVisibilityChange);
 });
 
 // Watch for volume changes
@@ -66,14 +77,30 @@ const handleLeave = () => {
     }
 };
 
+// Handle page visibility change
+const handleVisibilityChange = async () => {
+    if (document.hidden) {
+        console.log("Tab is hidden, ensuring audio plays in the background.");
+        if (audio.value && isVisible.value) {
+            try {
+                await audio.value.play();
+            } catch (error) {
+                console.error("Error playing audio when hidden:", error);
+            }
+        }
+    }
+};
+
 // Function to show the toast
 const show = () => {
     isVisible.value = true;
+    handleEnter();
 };
 
 // Function to hide the toast
 const hide = () => {
     isVisible.value = false;
+    handleLeave();
     emit("close");
 };
 
@@ -86,13 +113,6 @@ watch(() => props.message, () => {
 onMounted(() => {
     if (props.message) {
         show();
-    }
-});
-
-onBeforeUnmount(() => {
-    if (audio.value) {
-        audio.value.pause();
-        audio.value.currentTime = 0;
     }
 });
 </script>
