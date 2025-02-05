@@ -479,7 +479,16 @@ const validateField = (row, field) => {
 // Update functions
 const updatePortfolioValue = async () => {
   if (!validatePortfolioValue()) return;
-  
+
+  const gg=Object.keys(data.value['params'][account.value][0])
+  const filteredArr = filteredData.value.map(obj => 
+        Object.fromEntries(
+            Object.entries(obj).filter(([key]) => 
+                gg.includes(key)
+            )
+        )
+  );
+
   isUpdatingPortfolio.value = true;
   try {
     const token = localStorage.getItem("access_token");
@@ -495,7 +504,7 @@ const updatePortfolioValue = async () => {
         totp_code: totpCode.value,
         account: account.value, 
         portfolioValue: Number(portfolioValue.value),
-        params: filteredData.value
+        params: filteredArr
       }),
     });
 
