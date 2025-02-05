@@ -37,7 +37,7 @@ const audio = ref(null);
 onMounted(() => {
     // Initialize audio
     audio.value = new Audio('/alarm.mp3');
-    audio.value.loop = true;
+    audio.value.loop = false; // Play once
     audio.value.volume = props.volume;
 
     // Listen to visibility change event
@@ -64,6 +64,11 @@ const handleEnter = async () => {
         try {
             audio.value.currentTime = 0;
             await audio.value.play();
+
+            // Stop audio after 2 seconds and close toast
+            setTimeout(() => {
+                hide();
+            }, 2000); // 2 seconds
         } catch (error) {
             console.error('Error playing audio:', error);
         }
