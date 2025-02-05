@@ -1,5 +1,5 @@
 <template>
-    <Transition name="toast-fade">
+    <Transition name="toast-fade" @after-enter="playSound" @after-leave="stopSound">
         <div v-if="isVisible" class="toast" :class="type">
             {{ message }}
             <button @click="hide" class="close-btn">&times;</button>
@@ -8,8 +8,9 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from "vue";
 
+// Define props
 const props = defineProps({
     message: {
         type: String,
@@ -17,32 +18,65 @@ const props = defineProps({
     },
     type: {
         type: String,
-        default: 'info',
-        validator: (value) => ['info', 'success', 'warning', 'error'].includes(value)
+        default: "info",
+        validator: (value) => ["info", "success", "warning", "error"].includes(value)
     }
-})
+});
 
-const emit = defineEmits(['close'])
+// Emit event when toast is closed
+const emit = defineEmits(["close"]);
 
-const isVisible = ref(false)
+// Toast visibility state
+const isVisible = ref(false);
 
+// Load the sound
+let alertSound;
+onMounted(() => {
+    alertSound = new Audio("/alarm.mp3"); // ✅ Ensure file is in public/
+    alertSound.load();
+});
+
+// Function to play the sound **after the toast is visible**
+const playSound = () => {
+    if (alertSound) {
+        console.log("🔊 Playing sound...");
+        alertSound.play().catch((err) => console.error("Error playing sound:", err));
+    }
+};
+
+// Function to stop the sound **after the toast disappears**
+const stopSound = () => {
+    if (alertSound) {
+        console.log("🔇 Stopping sound...");
+        alertSound.pause();
+        alertSound.currentTime = 0; // ✅ Reset to the start
+    }
+};
+
+// Function to show the toast
 const show = () => {
-    isVisible.value = true
-}
+    isVisible.value = true;
+};
 
+// Function to hide the toast
 const hide = () => {
-    isVisible.value = false
-    emit('close')
-}
+    isVisible.value = false;
+    emit("close");
+};
 
 // Watch for changes in the message prop
 watch(() => props.message, () => {
-    show()
-})
+    show();
+});
 
 // Show the toast initially when mounted
-show()
+onMounted(() => {
+    if (props.message) {
+        show();
+    }
+});
 </script>
+
 
 <style scoped>
 .toast {
@@ -57,6 +91,7 @@ show()
     display: flex;
     align-items: center;
     justify-content: space-between;
+    cursor: pointer; /* Ensures user clicks on toast */
 }
 
 .close-btn {
