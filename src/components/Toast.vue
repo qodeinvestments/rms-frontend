@@ -1,8 +1,6 @@
 <template>
     <Transition name="toast-fade" @after-enter="handleEnter" @after-leave="handleLeave">
-        <div v-if="isVisible" 
-             class="toast" 
-             :class="type">
+        <div v-if="isVisible" class="toast" :class="type">
             {{ message }}
             <button @click="hide" class="close-btn">&times;</button>
         </div>
@@ -12,7 +10,6 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 
-// Define props
 const props = defineProps({
     message: {
         type: String,
@@ -34,16 +31,63 @@ const emit = defineEmits(["close"]);
 const isVisible = ref(false);
 const audio = ref(null);
 
-onMounted(() => {
+// Function to request notification permission
+const requestNotificationPermission = async () => {
+    if (!("Notification" in window)) {
+        console.log("This browser does not support notifications");
+        return;
+    }
+
+    let permission = Notification.permission;
+    
+    if (permission === "default") {
+        try {
+            permission = await Notification.requestPermission();
+        } catch (error) {
+            console.error("Error requesting permission:", error);
+        }
+    }
+    
+    console.log("Notification permission:", permission);
+    if (permission !== "granted") {
+        alert("Please enable notifications in your browser settings.");
+    }
+};
+
+// Function to show Windows notification (Only Called Once)
+const showWindowsNotification = async () => {
+    if (!("Notification" in window) || Notification.permission !== "granted") {
+        console.log("No notification permission");
+        return;
+    }
+
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.ready.then((reg) => {
+            reg.showNotification("New Alert!", {
+                body: props.message, // Use the toast message
+                icon: "/favicon.ico",
+                requireInteraction: true,  // Keeps notification visible
+                silent: false, // Ensures sound plays
+            });
+        }).catch((err) => console.error("Error showing notification:", err));
+    }
+};
+
+// Mount the component
+onMounted(async () => {
     // Initialize audio
     audio.value = new Audio('/alarm.mp3');
-    audio.value.loop = false; // Play once
+    audio.value.loop = false;
     audio.value.volume = props.volume;
 
-    // Listen to visibility change event
+    // Request notification permission
+    await requestNotificationPermission();
+
+    // Add visibility change listener
     document.addEventListener("visibilitychange", handleVisibilityChange);
 });
 
+// Cleanup on unmount
 onBeforeUnmount(() => {
     if (audio.value) {
         audio.value.pause();
@@ -59,22 +103,25 @@ watch(() => props.volume, (newVolume) => {
     }
 });
 
+// Function to handle toast enter
 const handleEnter = async () => {
+    // Play sound
     if (audio.value) {
         try {
             audio.value.currentTime = 0;
             await audio.value.play();
-
-            // Stop audio after 2 seconds and close toast
+            
+            // Auto close toast after 2 seconds
             setTimeout(() => {
                 hide();
-            }, 2000); // 2 seconds
+            }, 2000);
         } catch (error) {
             console.error('Error playing audio:', error);
         }
     }
 };
 
+// Function to handle toast leave
 const handleLeave = () => {
     if (audio.value) {
         audio.value.pause();
@@ -84,10 +131,14 @@ const handleLeave = () => {
 
 // Handle page visibility change
 const handleVisibilityChange = async () => {
-    if (document.hidden) {
+    if (document.hidden && isVisible.value) {
         console.log("Tab is hidden, ensuring audio plays in the background.");
-        if (audio.value && isVisible.value) {
+        
+        await showWindowsNotification(); // Only one notification
+        
+        if (audio.value) {
             try {
+                audio.value.currentTime = 0;
                 await audio.value.play();
             } catch (error) {
                 console.error("Error playing audio when hidden:", error);
@@ -99,6 +150,11 @@ const handleVisibilityChange = async () => {
 // Function to show the toast
 const show = () => {
     isVisible.value = true;
+
+    // Show notification only once
+    showWindowsNotification();
+    
+    // Play the alarm sound
     handleEnter();
 };
 
@@ -109,9 +165,11 @@ const hide = () => {
     emit("close");
 };
 
-// Watch for changes in the message prop
-watch(() => props.message, () => {
-    show();
+// Watch for message updates (Only Trigger if it Actually Changes)
+watch(() => props.message, (newMessage, oldMessage) => {
+    if (newMessage && newMessage !== oldMessage) {
+        show();
+    }
 });
 
 // Show the toast initially when mounted
@@ -121,7 +179,6 @@ onMounted(() => {
     }
 });
 </script>
-
 
 <style scoped>
 .toast {
