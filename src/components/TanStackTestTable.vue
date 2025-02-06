@@ -11,6 +11,56 @@ import {
 } from '@tanstack/vue-table'
 import * as XLSX from 'xlsx';
 
+// Global stats selection
+const globalStatType = ref('')
+
+// Stats selection state for individual columns
+const columnStats = ref({})
+
+// Watch global stat type changes
+watch(globalStatType, (newValue) => {
+    if (newValue) {
+        // Apply the selected stat type to all numeric columns
+        table.getAllLeafColumns().forEach(column => {
+            if (isNumericColumn(column.id)) {
+                columnStats.value[column.id] = newValue
+            }
+        })
+    } else {
+        // Clear all column stats when global stat is cleared
+        columnStats.value = {}
+    }
+})
+
+// Function to calculate column statistics
+const calculateColumnStats = (column) => {
+    const values = props.data
+        .map(row => row[column])
+        .filter(val => typeof val === 'number' && !isNaN(val))
+    
+    if (values.length === 0) return null
+
+    return {
+        sum: values.reduce((a, b) => a + b, 0),
+        avg: values.reduce((a, b) => a + b, 0) / values.length,
+        min: Math.min(...values),
+        max: Math.max(...values)
+    }
+}
+
+// Get formatted stat value for a column
+const getColumnStat = (column) => {
+    const stats = calculateColumnStats(column)
+    if (!stats || !columnStats.value[column]) return null
+    
+    const stat = columnStats.value[column]
+    return formatIndianNumber(stats[stat])
+}
+
+// Check if column is numeric
+const isNumericColumn = (column) => {
+    return props.data.some(row => typeof row[column] === 'number')
+}
 
 // Add this new ref for prefix search
 const prefixSearch = ref('')
@@ -149,11 +199,11 @@ const checkNavigate = (data) => {
 const sorting = ref([])
 const filter = ref('')
 const toggleAllColumns = (value) => {
-  table.toggleAllColumnsVisible(value)
+    table.toggleAllColumnsVisible(value)
 }
 
 const isAllColumnsVisible = computed(() => {
-  return table.getIsAllColumnsVisible()
+    return table.getIsAllColumnsVisible()
 })
 
 // Custom pagination state
@@ -320,10 +370,10 @@ onUnmounted(() => {
                 <div class="mb-2 border-b pb-2">
                     <label class="flex items-center">
                         <input
-                        type="checkbox"
-                        :checked="isAllColumnsVisible"
-                        @change="e => toggleAllColumns(e.target.checked)"
-                        class="mr-2"
+                            type="checkbox"
+                            :checked="isAllColumnsVisible"
+                            @change="e => toggleAllColumns(e.target.checked)"
+                            class="mr-2"
                         />
                         <span>Toggle All</span>
                     </label>
@@ -331,13 +381,13 @@ onUnmounted(() => {
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                     <div v-for="column in table.getAllLeafColumns()" :key="column.id">
                         <label class="flex items-center">
-                        <input
-                            type="checkbox"
-                            :checked="column.getIsVisible()"
-                            @change="column.toggleVisibility()"
-                            class="mr-2"
-                        />
-                        <span>{{ column.id }}</span>
+                            <input
+                                type="checkbox"
+                                :checked="column.getIsVisible()"
+                                @change="column.toggleVisibility()"
+                                class="mr-2"
+                            />
+                            <span>{{ column.id }}</span>
                         </label>
                     </div>
                 </div>
@@ -358,6 +408,16 @@ onUnmounted(() => {
                             placeholder="Prefix Search..." 
                             v-model="prefixSearch"
                         />
+                        <select 
+                            v-model="globalStatType" 
+                            class="border border-gray-400 rounded px-2 py-2"
+                        >
+                            <option value="">Global Statistics</option>
+                            <option value="sum">Sum All</option>
+                            <option value="avg">Average All</option>
+                            <option value="min">Min All</option>
+                            <option value="max">Max All</option>
+                        </select>
                     </div>
                     <button @click="download('csv')"
                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
@@ -368,17 +428,17 @@ onUnmounted(() => {
                         Download Excel
                     </button>
                     <div class="relative">
-                    <button 
-                        @click="copyToClipboard"
-                        class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
-                        Copy to Clipboard
-                    </button>
+                        <button 
+                            @click="copyToClipboard"
+                            class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+                            Copy to Clipboard
+                        </button>
                     <!-- Notification popup -->
-                    <div v-if="showCopiedNotification" 
-                        class="copied-notification">
-                        Copied!
+                        <div v-if="showCopiedNotification" 
+                            class="copied-notification">
+                            Copied!
+                        </div>
                     </div>
-                </div>
                 </div>
 
                 <div class="table-container -mx-4 -my-2 overflow-x-auto overflow-y-auto sm:-mx-6 lg:-mx-8">
@@ -391,10 +451,24 @@ onUnmounted(() => {
                                         :class="{
                                             'cursor-pointer select-none': header.column.getCanSort(),
                                             'sticky-header': header.index === 0,
-                                        }" @click="header.column.getToggleSortingHandler()?.($event)">
-                                        <FlexRender :render="header.column.columnDef.header"
-                                            :props="header.getContext()" />
-                                        {{ { asc: ' ↑', desc: '↓' }[header.column.getIsSorted()] }}
+                                        }">
+                                        <!-- Statistics display -->
+                                        <div v-if="isNumericColumn(header.column.id) && columnStats[header.column.id]" 
+                                             class="mb-2 text-xs font-normal stats-value">
+                                            {{ columnStats[header.column.id].toUpperCase() }}: {{ getColumnStat(header.column.id) }}
+                                            
+                                        </div>
+                                        <div v-else
+                                             class="mb-2 text-xs font-normal stats-value">
+                                        </div>
+                                        
+                                       <!-- Column header -->
+                                       <div @click="header.column.getToggleSortingHandler()?.($event)" 
+                                             class="column-header">
+                                            <FlexRender :render="header.column.columnDef.header"
+                                                :props="header.getContext()" />
+                                            {{ { asc: ' ↑', desc: '↓' }[header.column.getIsSorted()] }}
+                                        </div>
                                     </th>
                                 </tr>
                             </thead>
@@ -500,18 +574,18 @@ onUnmounted(() => {
 }
 /* Add these styles to your existing <style> section */
 .column-visibility-controls {
-  background-color: white;
-  border-color: #e5e7eb;
+    background-color: white;
+    border-color: #e5e7eb;
 }
 
 .column-visibility-controls label {
-  cursor: pointer;
-  font-size: 0.875rem;
-  color: #374151;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #374151;
 }
 
 .column-visibility-controls input[type="checkbox"] {
-  cursor: pointer;
+    cursor: pointer;
 }
 .red {
     color: red;
@@ -626,5 +700,11 @@ table {
     width: 100%;
 }
 
+/* Statistics styles */
+.stats-value {
+    height: 1.5rem;
+    color: #2563eb;
+    font-weight: 500;
+}
 
 </style>
