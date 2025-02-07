@@ -180,7 +180,8 @@ const props = defineProps({
   },
   show_change_menu:{
     type:Boolean,
-    required: true
+    required: true,
+    default:true
   }
 })
 
