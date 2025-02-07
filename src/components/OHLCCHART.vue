@@ -8,7 +8,7 @@
       </div>
     </div>
 
-    <div class="chart-header">
+    <div v-if="show_change_menu" class="chart-header">
       <h2 class="chart-title">Market Data</h2>
       <div class="controls-container">
         <!-- Symbol Dropdown -->
@@ -176,6 +176,10 @@ const emit = defineEmits(['submit-config'])
 const props = defineProps({
   data: {
     type: Object,
+    required: true
+  },
+  show_change_menu:{
+    type:Boolean,
     required: true
   }
 })
