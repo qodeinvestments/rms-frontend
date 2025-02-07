@@ -203,7 +203,7 @@ const isTimeframeDropdownOpen = ref(false)
 const isIndicatorModalOpen = ref(false)
 
 // Available options
-const symbols = ['NIFTY', 'SENSEX']
+const symbols = ['NIFTY', 'SENSEX' ,'BANKNIFTY' , 'MIDCAPNIFTY' ,'FINNIFTY']
 const timeframes = ['1m', '5m', '15m', '1h', '1d']
 
 

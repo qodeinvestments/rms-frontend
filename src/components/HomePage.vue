@@ -16,7 +16,7 @@ import { MyEnum } from '../Enums/Prefix.js'
 import Histogram from './Histogram.vue'
 import { columns } from '../components/TableVariables/HomePageTable.js'; 
 import webSocketService from '../services/websocketService';
-
+import OHLCChart from './OHLCCHART.vue'
 
 import LightWeightChart from './LightWeightChart.vue';
 import CustomSelect from './CustomSelect.vue'
@@ -28,7 +28,10 @@ const NavigationMap = {
 
 const data = ref(defaultData)
 const columnHelper = createColumnHelper()
-
+// Add new refs for OHLC chart
+const selectedIndex = ref(null)
+const chartData = ref(null)
+const isLoading = ref(false)
 
 
 const client_BackendData = ref({})
@@ -121,6 +124,69 @@ const updateData = () => {
 
 
 }
+
+
+// SVG content for arrows
+const arrowDownSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="w-3 h-3">
+  <path fill="currentColor" d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8V64c0-17.7-14.3-32-32-32s-32 14.3-32 32v306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"/>
+</svg>`
+
+const arrowUpSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="w-3 h-3">
+  <path fill="currentColor" d="M214.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-160 160c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 141.2V448c0 17.7 14.3 32 32 32s32-14.3 32-32V141.2L329.4 246.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-160-160z"/>
+</svg>`
+
+// Loading spinner component
+const LoadingSpinner = {
+  template: `
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+    </div>
+  `
+}
+
+// Add new method to toggle chart visibility
+const toggleChart = async (key) => {
+  if (selectedIndex.value === key) {
+    // If clicking the same index, close the chart
+    selectedIndex.value = null
+    chartData.value = null
+    return
+  }
+  
+  selectedIndex.value = key
+  isLoading.value = true
+  chartData.value = null
+  
+  try {
+    const response = await fetch('https://production2.swancapital.in/Psar', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        symbol: formatIndexName(key),
+        timeframe: '5m',
+        indicators: []
+      })
+    })
+    
+    if (!response.ok) throw new Error('Failed to fetch chart data')
+    chartData.value = await response.json()
+  } catch (error) {
+    console.error('Error fetching chart data:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Add method to get arrow direction
+const getArrowDirection = (key) => {
+  return selectedIndex.value === key ? 'up' : 'down'
+}
+
 
 const formatDate = (timestamp) => {
   try {
@@ -284,11 +350,18 @@ onUnmounted(() => {
 <template>
   <div class="homepage-container  bg-[#efefef]/30">
 
-       <!-- Index Data Cards -->
+    <!-- Index Data Cards -->
     <div v-if="index_data" class="index-cards-container">
       <div v-for="(value, key) in index_data" :key="key" 
            class="index-card">
-        <div class="index-header">{{ formatIndexName(key) }}</div>
+        <div class="index-header">
+          <span class="index-name">{{ formatIndexName(key) }}</span>
+          <button @click="toggleChart(key)" class="toggle-button">
+            <div v-html="arrowDownSvg" 
+                :class="['arrow-icon', selectedIndex === key ? 'rotate-180' : '']">
+            </div>
+          </button>
+        </div>
         <div class="index-content">
           <span :class="['index-value', getPercentageClass(key)]">
             {{ formatNumber(value) }}
@@ -312,6 +385,26 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
+
+    <!-- OHLC Chart Section -->
+    <transition name="chart-fade">
+      <div v-if="selectedIndex" class="chart-container">
+        <div class="chart-header">
+          <h3 class="chart-title">{{ formatIndexName(selectedIndex) }} Chart</h3>
+        </div>
+        <div v-if="isLoading" class="loading-container">
+          <LoadingSpinner />
+          <p class="loading-text">Loading chart data...</p>
+        </div>
+        <OHLCChart 
+          v-else-if="chartData"
+          :data="chartData" 
+          @submit-config="(config) => fetchDiffData({...config, symbol: formatIndexName(selectedIndex)})"
+        />
+      </div>
+    </transition>
+
+
 
     <div class="time-container">
     <p class="timeDiv flex gap-4 items-center flex-wrap">
@@ -348,33 +441,103 @@ onUnmounted(() => {
   padding: 1.5rem;
 }
 .index-cards-container {
- display: grid;
- grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
- gap: 0.75rem;
- padding: 0.75rem;
- background: white;
- border-radius: 12px;
- box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
 }
 
 .index-card {
- background: white;
- padding: 0.75rem;
- border-radius: 6px;
- border: 1px solid rgba(229, 231, 235, 0.5);
- transition: transform 0.2s, box-shadow 0.2s;
+  background: white;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid rgba(229, 231, 235, 0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .index-card:hover {
- transform: translateY(-2px);
- box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .index-header {
- font-weight: 600;
- color: #1e293b;
- margin-bottom: 0.5rem;
- font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.index-name {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.9rem;
+}
+
+.toggle-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.toggle-button:hover {
+  transform: scale(1.1);
+}
+
+.arrow-icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  color: #64748b;
+  transition: transform 0.3s ease;
+}
+
+.arrow-icon.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Chart Container Styles */
+.chart-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.chart-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Chart Transition Animation */
+.chart-fade-enter-active,
+.chart-fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.chart-fade-enter-from,
+.chart-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 
 .index-content {
