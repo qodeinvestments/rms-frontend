@@ -79,6 +79,10 @@ export const zerodha_order_book_columns = (() => {
 })();
 
 
+
+
+
+
 const zerodha_pos_columns = [
   'product', 'tradingsymbol', 'quantity', 'average_price', 'last_price', 'pnl', 
   'm2m', 'unrealised', 'realised', 'exchange', 'instrument_token', 
@@ -137,9 +141,24 @@ export const zerodha_position_book_columns = (() => {
 })();
 
 
+const xts_order_book_columns = ['OrderGeneratedDateTime', 'OrderSide', 'TradingSymbol',  'OrderPrice', 'OrderQuantity',  'OrderStatus', 'OrderAverageTradedPrice','OrderType', 'ProductType', 'LeavesQuantity', 'CumulativeQuantity', 'OrderDisclosedQuantity', 'ExchangeTransactTime',  'LastUpdateDateTime', 'OrderExpiryDate', 'CancelRejectReason', 'OrderUniqueIdentifier', 'OrderLegStatus', 'BoLegDetails', 'IsSpread', 'BoEntryOrderId', 'ApiOrderSource', 'MessageCode', 'MessageVersion', 'TokenID', 'ApplicationType', 'SequenceNumber', 'IsAMO','LoginID', 'ClientID', 'AppOrderID', 'OrderReferenceID', 'GeneratedBy', 'ExchangeOrderID', 'OrderCategoryType', 'ExchangeSegment', 'ExchangeInstrumentID','TimeInForce','OrderStopPrice']
 
+export const xts_order_book=xts_order_book_columns.map(column => {
+  return columnHelper.accessor(row => row[column], {
+    id: column,
+    cell: info => info.getValue(),
+    header: () => column,
+  });
+})
 
-
+const xts_pos_book_columns=['AccountID', 'TradingSymbol', 'ExchangeSegment', 'ExchangeInstrumentId', 'ProductType', 'Marketlot', 'Multiplier', 'BuyAveragePrice', 'SellAveragePrice', 'OpenBuyQuantity', 'OpenSellQuantity', 'Quantity', 'BuyAmount', 'SellAmount', 'NetAmount', 'UnrealizedMTM', 'RealizedMTM', 'MTM', 'BEP', 'SumOfTradedQuantityAndPriceBuy', 'SumOfTradedQuantityAndPriceSell', 'StatisticsLevel', 'IsInterOpPosition', 'childPositions', 'MessageCode', 'MessageVersion', 'TokenID', 'ApplicationType', 'SequenceNumber']
+export const xts_pos_book=xts_pos_book_columns.map(column => {
+  return columnHelper.accessor(row => row[column], {
+    id: column,
+    cell: info => info.getValue(),
+    header: () => column,
+  });
+})
 
 const client_holdings=[
   'tradingsymbol', 'quantity', 
