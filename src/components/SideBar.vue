@@ -4,24 +4,25 @@
       <div class="menu-btn" @click="toggleSideBar()">
         <i class="ph-bold ph-caret-left"></i>
       </div>
-      <div class="head">
-        <div class="user-img">
-          <img src="../assets/swan_capital.jpeg" alt="">
-        </div>
+      <div class="sidebar-content">
+        <div class="head">
+          <div class="user-img">
+            <img src="../assets/swan_capital.jpeg" alt="">
+          </div>
         <!-- <div class="user-details">
           <p class="name"> Swan Capital</p>
         </div> -->
-      </div>
-      <div class="nav">
-        <div class="menu">
-          <p class="title" :class="sidebarState === true ? 'aligncenter' : ''">main</p>
-          <ul>
-            <li :class="selected == 'Dashboard' ? 'active' : ''" @click="changeSelected('Dashboard')">
-              <a href="#">
-                <i class="icon ph-bold ph-house-simple"></i>
-                <span class="text">Dashboard</span>
-              </a>
-            </li>
+        </div>
+        <div class="nav">
+          <div class="menu">
+            <p class="title" :class="sidebarState === true ? 'aligncenter' : ''">main</p>
+            <ul>
+              <li :class="selected == 'Dashboard' ? 'active' : ''" @click="changeSelected('Dashboard')">
+                <a href="#">
+                  <i class="icon ph-bold ph-house-simple"></i>
+                  <span class="text">Dashboard</span>
+                </a>
+              </li>
             <!-- <li>
               <a href="#" :class="selected == 'Audience' ? 'active' : ''" @click="changeSelected('Audience')">
                 <i class="icon ph-bold ph-user"></i>
@@ -42,42 +43,42 @@
                 </li>
               </ul>
             </li> -->
-            <li :class="selected == 'Errors' ? 'active' : ''" @click="changeSelected('Errors')">
-              <a href="#">
-                <i class="icon ph-bold ph-file-text"></i>
-                <span class="text">Errors</span>
-              </a>
-            </li>
-            <li :class="selected == 'KeyDBLogs' ? 'active' : ''" @click="changeSelected('KeyDBLogs')">
-              <a href="#">
-                <i class="icon ph-bold ph-calendar-blank"></i>
-                <span class="text">KeyDBLogs</span>
-              </a>
-            </li>
-            <li :class="selected == 'DataVisualizer' ? 'active' : ''" @click="changeSelected('DataVisualizer')">
-              <a href="#">
-                <i class="icon ph-bold ph-calendar-blank"></i>
-                <span class="text">Data Visualizer</span>
-              </a>
-            </li>
-            <li :class="selected == 'SignalBook' ? 'active' : ''" @click="changeSelected('SignalBook')">
-              <a href="#">
-                <i class="icon ph-bold ph-calendar-blank"></i>
-                <span class="text">SignalBook</span>
-              </a>
-            </li>
-            <li :class="selected == 'ServerData' ? 'active' : ''" @click="changeSelected('ServerData')">
-              <a href="#">
-                <i class="icon ph-bold ph-calendar-blank"></i>
-                <span class="text">Server Data</span>
-              </a>
-            </li>
-            <li :class="selected == 'LivePositions' ? 'active' : ''" @click="changeSelected('LivePositions')">
-              <a href="#">
-                <i class="icon ph-bold ph-calendar-blank"></i>
-                <span class="text">Live Positions </span>
-              </a>
-            </li>
+              <li :class="selected == 'Errors' ? 'active' : ''" @click="changeSelected('Errors')">
+                <a href="#">
+                  <i class="icon ph-bold ph-file-text"></i>
+                  <span class="text">Errors</span>
+                </a>
+              </li>
+              <li :class="selected == 'KeyDBLogs' ? 'active' : ''" @click="changeSelected('KeyDBLogs')">
+                <a href="#">
+                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <span class="text">KeyDBLogs</span>
+                </a>
+              </li>
+              <li :class="selected == 'DataVisualizer' ? 'active' : ''" @click="changeSelected('DataVisualizer')">
+                <a href="#">
+                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <span class="text">Data Visualizer</span>
+                </a>
+              </li>
+              <li :class="selected == 'SignalBook' ? 'active' : ''" @click="changeSelected('SignalBook')">
+                <a href="#">
+                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <span class="text">SignalBook</span>
+                </a>
+              </li>
+              <li :class="selected == 'ServerData' ? 'active' : ''" @click="changeSelected('ServerData')">
+                <a href="#">
+                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <span class="text">Server Data</span>
+                </a>
+              </li>
+              <li :class="selected == 'LivePositions' ? 'active' : ''" @click="changeSelected('LivePositions')">
+                <a href="#">
+                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <span class="text">Live Positions </span>
+                </a>
+              </li>
             
             <!-- <li>
               <a href="#" :class="selected == 'Income' ? 'active' : ''" @click="changeSelected('Income')">
@@ -109,49 +110,50 @@
               </ul>
             </li> -->
 
-          </ul>
+            </ul>
+          </div>
+          <div class="menu">
+            <p class="title">Settings</p>
+            <ul>
+              <li>
+                <a href="#">
+                  <i class="icon ph-bold ph-gear"></i>
+                  <span class="text">Settings</span>
+                </a>
+              </li>
+              <li :class="selected == 'AdminPanel' ? 'active' : ''" @click="changeSelected('AdminPanel')">
+                <a href="#">
+                  <i class="icon ph-bold ph-gear"></i>
+                  <span class="text">Admin Panel</span>
+                </a>
+              </li>
+              <li :class="selected == 'MarginUpdate' ? 'active' : ''" @click="changeSelected('MarginUpdate')">
+                <a href="#">
+                  <i class="icon ph-bold ph-gear"></i>
+                  <span class="text">Margin Update</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        
         </div>
-        <div class="menu">
-          <p class="title">Settings</p>
+        <div class="menu account-menu">
+          <p class="title">Account</p>
           <ul>
             <li>
               <a href="#">
-                <i class="icon ph-bold ph-gear"></i>
-                <span class="text">Settings</span>
+                <i class="icon ph-bold ph-info"></i>
+                <span class="text">Help</span>
               </a>
             </li>
-            <li :class="selected == 'AdminPanel' ? 'active' : ''" @click="changeSelected('AdminPanel')">
-              <a href="#">
-                <i class="icon ph-bold ph-gear"></i>
-                <span class="text">Admin Panel</span>
-              </a>
-            </li>
-            <li :class="selected == 'MarginUpdate' ? 'active' : ''" @click="changeSelected('MarginUpdate')">
-              <a href="#">
-                <i class="icon ph-bold ph-gear"></i>
-                <span class="text">Margin Update</span>
+            <li>
+              <a href="#" @click="logout">
+                <i class="icon ph-bold ph-sign-out"></i>
+                <span class="text">Logout</span>
               </a>
             </li>
           </ul>
         </div>
-        
-      </div>
-      <div class="menu">
-        <p class="title">Account</p>
-        <ul>
-          <li>
-            <a href="#">
-              <i class="icon ph-bold ph-info"></i>
-              <span class="text">Help</span>
-            </a>
-          </li>
-          <li>
-            <a href="#" @click="logout">
-              <i class="icon ph-bold ph-sign-out"></i>
-              <span class="text">Logout</span>
-            </a>
-          </li>
-        </ul>
       </div>
     </div>
   </div>
@@ -258,30 +260,43 @@ export default {
 .sidebar {
   width: 256px;
   height: 100vh;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-
+  position: relative;
   background: linear-gradient(135deg,
       rgba(255, 255, 255, 0.05),
       rgba(32, 32, 32, 0.1),
       rgba(255, 255, 255, 0.05));
   background-blend-mode: overlay;
-
-  padding: 24px;
   transition: all 0.3s ease-in-out;
-
-
   backdrop-filter: blur(20px) saturate(250%);
   -webkit-backdrop-filter: blur(20px) saturate(250%);
-
   border: 1px solid rgba(255, 255, 255, 0.15);
-
   box-shadow:
     inset 0 0 8px rgba(255, 255, 255, 0.2),
     0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
+.sidebar-content {
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Custom scrollbar styles */
+.sidebar-content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
 
 .sidebar .head {
   display: flex;
@@ -302,26 +317,6 @@ export default {
 .user-img img {
   width: 100%;
   object-fit: cover;
-}
-
-.user-details .title,
-.menu .title {
-  font-size: 10px;
-  font-weight: 500;
-  color: black;
-  text-transform: uppercase;
-  margin-bottom: 10px;
-}
-
-.user-details {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.user-details .name {
-  font-size: 14px;
-  font-weight: 500;
 }
 
 .nav {
@@ -347,11 +342,10 @@ export default {
   transition: all 0.3s;
 }
 
-.menu ul li>a:hover,
-.menu ul li.active>a {
+.menu ul li > a:hover,
+.menu ul li.active > a {
   color: #000;
   background-color: #fff;
-  ;
 }
 
 .menu ul li .icon {
@@ -362,38 +356,24 @@ export default {
   flex: 1;
 }
 
-.menu ul li .arrow {
-  font-size: 14px;
-  transition: all 0.3s;
-}
-
-.menu ul li.active .arrow {
-  transform: rotate(180deg);
-}
-
-.menu .sub-menu {
-  /* display: none; */
-  margin-left: 20px;
-  padding-left: 20px;
-  padding-top: 5px;
-  border-left: 1px solid #f6f6f6;
-}
-
-.menu .sub-menu li a {
-  padding: 10px 8px;
-  font-size: 12px;
-}
-
 .menu:not(:last-child) {
   padding-bottom: 10px;
   margin-bottom: 20px;
   border-bottom: 2px solid #f6f6f6;
 }
 
+.menu .title {
+  font-size: 10px;
+  font-weight: 500;
+  color: black;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
 .menu-btn {
   position: absolute;
   right: -14px;
-  top: 3.5%;
+  top: 24px;
   width: 28px;
   height: 28px;
   border-radius: 8px;
@@ -404,6 +384,7 @@ export default {
   color: black;
   border: 2px solid #f6f6f6;
   background-color: #fff;
+  z-index: 1;
 }
 
 .menu-btn:hover i {
@@ -422,26 +403,18 @@ export default {
   transform: rotate(180deg);
 }
 
-.sidebar.active .user-details {
-  display: none;
-}
-
 .sidebar.active .menu.title {
   text-align: center;
 }
 
-.sidebar.active .menu ul li .arrow {
-  display: none;
-}
-
-.sidebar.active .menu>ul>li>a {
+.sidebar.active .menu > ul > li > a {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.sidebar.active .menu>ul>li>a .text {
+.sidebar.active .menu > ul > li > a .text {
   position: absolute;
   left: 70px;
   top: 50%;
@@ -454,7 +427,7 @@ export default {
   visibility: hidden;
 }
 
-.sidebar.active .menu>ul>li>a .text::after {
+.sidebar.active .menu > ul > li > a .text::after {
   content: "";
   position: absolute;
   left: -5px;
@@ -467,23 +440,14 @@ export default {
   z-index: -1;
 }
 
-.sidebar.active .menu>ul>li>a:hover .text {
+.sidebar.active .menu > ul > li > a:hover .text {
   left: 50px;
   opacity: 1;
   visibility: visible;
-
   transition: all 0.3s;
 }
 
-.sidebar.active .menu .sub-menu {
-  position: absolute;
-  top: 0;
-  left: 20px;
-  width: 200px;
-  border-radius: 20px;
-  padding: 10px 20px;
-  border: 1px solid #f6f6f6;
-  background-color: #4E47E5;
-  box-shadow: 0px 10px 8px rgba(0, 0, 0, 0.1);
+.account-menu {
+  margin-top: auto;
 }
 </style>
