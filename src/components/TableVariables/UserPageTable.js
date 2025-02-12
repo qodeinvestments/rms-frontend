@@ -151,7 +151,7 @@ export const xts_order_book=xts_order_book_columns.map(column => {
   });
 })
 
-const xts_pos_book_columns=['AccountID', 'TradingSymbol', 'ExchangeSegment', 'ExchangeInstrumentId', 'ProductType', 'Marketlot', 'Multiplier', 'BuyAveragePrice', 'SellAveragePrice', 'OpenBuyQuantity', 'OpenSellQuantity', 'Quantity', 'BuyAmount', 'SellAmount', 'NetAmount', 'UnrealizedMTM', 'RealizedMTM', 'MTM', 'BEP', 'SumOfTradedQuantityAndPriceBuy', 'SumOfTradedQuantityAndPriceSell', 'StatisticsLevel', 'IsInterOpPosition', 'childPositions', 'MessageCode', 'MessageVersion', 'TokenID', 'ApplicationType', 'SequenceNumber']
+const xts_pos_book_columns=[ 'TradingSymbol',  'ProductType', 'Marketlot', 'Multiplier', 'BuyAveragePrice', 'SellAveragePrice', 'OpenBuyQuantity', 'OpenSellQuantity', 'Quantity', 'BuyAmount', 'SellAmount', 'NetAmount', 'UnrealizedMTM', 'RealizedMTM', 'MTM', 'BEP', 'SumOfTradedQuantityAndPriceBuy', 'SumOfTradedQuantityAndPriceSell', 'StatisticsLevel', 'IsInterOpPosition', 'childPositions', 'MessageCode', 'MessageVersion', 'TokenID', 'ApplicationType', 'SequenceNumber','AccountID','ExchangeSegment', 'ExchangeInstrumentId']
 export const xts_pos_book=xts_pos_book_columns.map(column => {
   return columnHelper.accessor(row => row[column], {
     id: column,

@@ -460,7 +460,6 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     <div class="heading-container">
       <p class="table-heading LagButton" @click="LagPageHandler()">Lags </p>
     </div>
-    {{ user_data['broker'] }}
 
     <div class="my-8">
       <TanStackTestTable title="Account Details" :data="data" :columns="columns"
