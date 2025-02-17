@@ -12,14 +12,22 @@
           class="search-input"
         />
       </div>
+
       <div class="submit-container">
-        <button 
-          @click="showTotpModal = true" 
-          class="submit-button"
-        >
-          Submit
-        </button>
-      </div>
+      <button 
+        @click="gotoMarginSettings()" 
+        class="margin-button"
+      >
+        Margin Settings
+      </button>
+      <button 
+        @click="showTotpModal = true" 
+        class="submit-button"
+      >
+        Submit
+      </button>
+    </div>
+
     </div>
 
     <!-- TOTP Verification Modal -->
@@ -125,6 +133,10 @@ const filteredAccounts = computed(() => {
     }, {});
 });
 
+
+const gotoMarginSettings = () =>{
+  router.push("/marginSettings");
+}
 
 
 
@@ -296,9 +308,7 @@ onMounted(async () => {
   flex: 0 1 300px; /* Allow shrinking but limit initial width */
 }
 
-.submit-container {
-  flex: 0 0 auto; /* Don't grow or shrink */
-}
+
 
 .search-input {
   flex: 1;
@@ -319,6 +329,36 @@ onMounted(async () => {
 
 .search-input::placeholder {
   color: #9ca3af;
+}
+
+.submit-container {
+  display: flex;
+  gap: 16px; /* Adds spacing between buttons */
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.margin-button {
+  padding: 12px 24px;
+  background-color: #10B981; /* Green color */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.margin-button:hover:not(:disabled) {
+  background-color: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+}
+
+.margin-button:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .submit-button {
