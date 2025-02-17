@@ -125,6 +125,8 @@ const connectToSSE = () => {
 onMounted(() => {
   connectToSSE();
   checkLoginStatus();
+
+  // triggerToast('New Error in Order', 'error')
 })
 
 provide('triggerToast', triggerToast)
@@ -142,6 +144,7 @@ provide('book', book.value)
 
     <SideBar v-if="isLoggedIn" @State="ChangeSideBarState" class="sideBar" />
     <Toast v-if="toastConfig.show && isLoggedIn" :message="toastConfig.message" :type="toastConfig.type" @close="hideToast" />
+   
     <RouterView v-if="isLoggedIn" :class="sideBarState ? 'content' : 'content2'" />
 
   </div>

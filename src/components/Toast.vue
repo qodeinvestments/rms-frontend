@@ -76,7 +76,7 @@ const showWindowsNotification = async () => {
 // Mount the component
 onMounted(async () => {
     // Initialize audio
-    audio.value = new Audio('/alarm.mp3');
+    audio.value = new Audio('/fein.mp3');
     audio.value.loop = false;
     audio.value.volume = props.volume;
 
@@ -114,7 +114,7 @@ const handleEnter = async () => {
             // Auto close toast after 2 seconds
             setTimeout(() => {
                 hide();
-            }, 2000);
+            }, 10000);
         } catch (error) {
             console.error('Error playing audio:', error);
         }

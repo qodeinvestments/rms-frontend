@@ -480,7 +480,8 @@ const validateField = (row, field) => {
 const updatePortfolioValue = async () => {
   if (!validatePortfolioValue()) return;
 
-  const gg=Object.keys(data.value['params'][account.value][0])
+  const gg = Object.keys(data.value?.params?.[account.value]?.[0] ?? []);
+
   const filteredArr = filteredData.value.map(obj => 
         Object.fromEntries(
             Object.entries(obj).filter(([key]) => 
