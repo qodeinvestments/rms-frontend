@@ -76,7 +76,7 @@ const showWindowsNotification = async () => {
 // Mount the component
 onMounted(async () => {
     // Initialize audio
-    audio.value = new Audio('/fein.mp3');
+    audio.value = new Audio('/alarm.mp3');
     audio.value.loop = false;
     audio.value.volume = props.volume;
 
