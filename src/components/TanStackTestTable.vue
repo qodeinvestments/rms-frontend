@@ -186,12 +186,15 @@ const props = defineProps({
 })
 
 const tellnav = (data) => {
-    return props.navigateTo[data.id.substring(2)];
+    const [str1Part1, str1Part2] = data.id.split('_');
+    return props.navigateTo[str1Part2];
 }
 const checkNavigate = (data) => {
 
-    if (props.navigateTo[data.id.substring(2)]) {
-        let link = props.navigateTo[data.id.substring(2)] + data.getValue()
+    const [str1Part1, str1Part2] = data.id.split('_');
+    
+    if (props.navigateTo[str1Part2]) {
+        let link = props.navigateTo[str1Part2] + data.getValue()
         router.push(link);
     }
 }
