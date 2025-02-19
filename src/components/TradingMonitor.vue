@@ -12,6 +12,41 @@ const props = defineProps({
   }
 });
 
+const userSelectOptions = computed(() => {
+  const totalUsers = filteredUsers.value.length;
+  const allSelected = selectedUsers.value.length === totalUsers;
+  
+  // Special "select all/deselect all" item:
+  const selectAllOption = {
+    label: allSelected ? 'Deselect All' : 'Select All',
+    value: '__ALL__'
+  };
+
+  // Return an array with the special item + the real user options
+  return [selectAllOption, ...filteredUsers.value];
+});
+function handleSelectChange(newValue) {
+  // 1. Check if user clicked the special item
+  if (newValue.includes('__ALL__')) {
+    // Remove the special "__ALL__" item right away
+    newValue = newValue.filter(item => item !== '__ALL__');
+
+    // 2. Compare to see if we already have all real users selected
+    const allUsers = filteredUsers.value.map(u => u.value);
+
+    // If after removing __ALL__, we still have the same length as all users,
+    // it means the user is trying to "deselect all".
+    if (newValue.length === allUsers.length) {
+      selectedUsers.value = [];
+    } else {
+      // Otherwise, let's select all users
+      selectedUsers.value = [...allUsers];
+    }
+  } else {
+    // 3. No special item was selected; just update the model
+    selectedUsers.value = newValue;
+  }
+}
 
 const tableContainerRef = ref(null);
 const tradingData = ref({});
@@ -301,8 +336,8 @@ onMounted(() => {
               mode="multiple"
               style="width: 100%"
               placeholder="Select Users"
-              :options="filteredUsers"
-              :defaultValue="uniqueUsers"
+              :options="userSelectOptions"     
+              @change="handleSelectChange"     
             >
             </a-select>
           </div>
