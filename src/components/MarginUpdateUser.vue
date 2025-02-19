@@ -1,10 +1,8 @@
 <template>
   <!-- Keeping existing HTML structure -->
   <div class="data-fetch-container bg-gray-50">
-    
-    <!-- Add TOTP Modal -->
+
     <!-- TOTP Verification Modal -->
-<!-- TOTP Verification Modal -->
     <div v-if="showTotpModal" class="modal-overlay">
       <div class="modal-content">
         <h2 class="modal-title">Enter Password</h2>
@@ -35,42 +33,98 @@
         </div>
       </div>
     </div>
+
+    <!-- Header & Margin Row -->
     <div class="header">
       <h1 class="account-heading">Account: {{ account }}</h1>
-      <div class="portfolio-section">
-        <div class="portfolio-label">Portfolio Value:</div>
-        <div class="portfolio-input-group">
-          <span class="currency-symbol">₹</span>
-          <input 
-            type="number" 
-            v-model="portfolioValue" 
-            class="portfolio-input"
-            @input="validatePortfolioValue"
-            :class="{ 'error-input': portfolioError }"
-          />
-          <button 
-            @click="showTotpModalWithAction('portfolio')" 
-            class="update-button"
-            :disabled="portfolioError || isUpdatingPortfolio"
-          >
-            <i v-if="!isUpdatingPortfolio" class="ph-bold ph-check"></i>
-            <i v-else class="ph-bold ph-spinner animate-spin"></i>
-          </button>
-        </div>
-        <span v-if="portfolioError" class="error-text text-sm text-red-500 mt-1">
-          {{ portfolioError }}
-        </span>
-      </div>
-    </div>
 
-    <!-- Existing template structure remains the same -->
+      <!-- Row container for Portfolio & Margins -->
+      <div class="portfolio-row">
+        
+        <!-- Portfolio Value -->
+        <div class="portfolio-field">
+          <label class="portfolio-label">Portfolio Value</label>
+          <div class="portfolio-input-group">
+            <span class="currency-symbol">₹</span>
+            <input 
+              type="number" 
+              v-model="portfolioValue" 
+              class="portfolio-input"
+              @input="validatePortfolioValue"
+              :class="{ 'error-input': portfolioError }"
+            />
+          </div>
+          <span v-if="portfolioError" class="error-text text-sm text-red-500 mt-1">
+            {{ portfolioError }}
+          </span>
+        </div>
+
+        <!-- Excess Margin -->
+        <div class="portfolio-field">
+          <label class="portfolio-label">Excess Margin</label>
+          <div class="portfolio-input-group">
+            <span class="currency-symbol">₹</span>
+            <input
+              type="number"
+              v-model="excessMargin"
+              class="portfolio-input"
+              @input="validateExcessMargin"
+              :class="{ 'error-input': excessMarginError }"
+            />
+          </div>
+          <span v-if="excessMarginError" class="error-text text-sm text-red-500 mt-1">
+            {{ excessMarginError }}
+          </span>
+        </div>
+
+        <!-- Minimum Margin -->
+        <div class="portfolio-field">
+          <label class="portfolio-label">Minimum Margin</label>
+          <div class="portfolio-input-group">
+            <span class="currency-symbol">₹</span>
+            <input
+              type="number"
+              v-model="minMargin"
+              class="portfolio-input"
+              @input="validateMinMargin"
+              :class="{ 'error-input': minMarginError }"
+            />
+          </div>
+          <span v-if="minMarginError" class="error-text text-sm text-red-500 mt-1">
+            {{ minMarginError }}
+          </span>
+        </div>
+
+        <!-- Drawdown Margin (%) -->
+        <div class="portfolio-field">
+          <label class="portfolio-label">Drawdown Margin (%)</label>
+          <div class="portfolio-input-group">
+            <input
+              type="number"
+              v-model="ddMarginPercent"
+              class="portfolio-input"
+              @input="validateDDMarginPercent"
+              :class="{ 'error-input': ddMarginPercentError }"
+            />
+            <span class="currency-symbol">%</span>
+          </div>
+          <span v-if="ddMarginPercentError" class="error-text text-sm text-red-500 mt-1">
+            {{ ddMarginPercentError }}
+          </span>
+        </div>
+
+      </div> <!-- End of .portfolio-row -->
+
+    </div> <!-- End of .header -->
+
+    <!-- Loading / Error states -->
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
       <p>Loading data...</p>
     </div>
 
 
-
+    
     <!-- Main Data Table -->
     <div v-if="filteredData && filteredData.length > 0 && !loading && !error" class="content-wrapper">
       <!-- Existing content structure -->
@@ -153,9 +207,9 @@
 
       <div class="action-buttons">
         <button 
-            @click="showTotpModalWithAction('portfolio')" 
-            class="save-button"
-            :disabled="hasErrors || isSaving"
+          @click="showTotpModalWithAction('portfolio')" 
+          class="save-button"
+          :disabled="hasErrors || isSaving"
         >
           <span class="button-icon">{{ isSaving ? '⌛' : '💾' }}</span>
           {{ isSaving ? 'Saving...' : 'Save Changes' }}
@@ -166,11 +220,34 @@
         </button>
       </div>
     </div>
-        <!-- Client Multiplier Table -->
-        <div v-if="!loading && !error" class="content-wrapper">
-      <h2 class="text-xl font-semibold mb-4 text-gray-700">Client Multiplier Settings</h2>
-        <!-- New Multi-Select Component -->
-        <div class="select-container">
+    <!-- Client Multiplier Table -->
+    <div v-if="!loading && !error" class="content-wrapper">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-700">
+          Client Multiplier Settings
+        </h2>
+       
+      </div>
+
+      <!-- Display the fetched dictionary if we have data -->
+      <div v-if="fetchedDict" class="table-container" style="margin-top: 1rem;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Key</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(val, key) in fetchedDict" :key="key">
+              <td>{{ key }}</td>
+              <td>{{ val }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="select-container flex items-center justify-between mb-4">
         <a-select
           v-model:value="selectedFeatures"
           mode="multiple"
@@ -181,7 +258,17 @@
           @change="handleFeatureChange"
           :disabled="isUpdatingMultiplier"
         ></a-select>
-  </div>
+       
+       
+        <button 
+          @click="showTotpModalWithAction('fetchmultiplier')" 
+          class="fetch-button"
+        >
+          Fetch Data
+        </button>
+ 
+      </div>
+      
       <div class="table-container">
         <table class="data-table">
           <thead>
@@ -231,82 +318,89 @@ import { useRoute, useRouter } from "vue-router";
 const route = useRoute();
 const router = useRouter();
 
-// State management
+// Data references
 const data = ref(null);
 const filteredData = ref(null);
 const account = ref(route.params.username);
 const loading = ref(false);
 const error = ref(null);
 const selectedStat = ref("sum");
-const portfolioValue = ref('');
-const portfolioError = ref('');
+// Right below your existing refs
+const fetchedDict = ref(null);
+
+// Existing Portfolio Value
+const portfolioValue = ref("");
+const portfolioError = ref("");
+
+// New margin-related fields
+const excessMargin = ref("");
+const excessMarginError = ref("");
+const minMargin = ref("");
+const minMarginError = ref("");
+const ddMarginPercent = ref("");
+const ddMarginPercentError = ref("");
+
+// UI & Modal states
 const isSaving = ref(false);
 const isUpdatingPortfolio = ref(false);
 const hasUnsavedChanges = ref(false);
+const showTotpModal = ref(false);
+const totpCode = ref("");
+const totpError = ref("");
+const modalAction = ref("");
+
+// Data for multipliers
 const live_clients = ref({});
 const client_multiplier = ref({});
-const modalAction = ref(''); 
-
-// Client multiplier state
 const multiplierErrors = ref({});
 const isUpdatingMultiplier = ref(false);
 
-// TOTP Modal state
-const showTotpModal = ref(false);
-const totpCode = ref('');
-const totpError = ref('');
-
-// New state for features selection
+// Multi-select for features
 const selectedFeatures = ref([]);
 const isAllSelected = ref(false);
 
-// Modified computed property with null checks
+// Computed for features
 const featuresOptionsWithAll = computed(() => {
   if (!data.value || !data.value.baskets) {
     return [];
   }
-  
   return [
-    { 
-      label: isAllSelected.value ? 'Remove All' : 'All', 
-      value: 'all' 
-    },
-    ...data.value.baskets.map(feature => ({
+    { label: isAllSelected.value ? "Remove All" : "All", value: "all" },
+    ...data.value.baskets.map((feature) => ({
       label: feature,
-      value: feature
-    }))
+      value: feature,
+    })),
   ];
 });
 
-// Modified handler with null checks
+// Handle multi-select feature changes
 const handleFeatureChange = (value) => {
   if (!data.value || !data.value.baskets) return;
-  if (value.includes('all')) {
+  if (value.includes("all")) {
     if (isAllSelected.value) {
       // Deselect all features
       selectedFeatures.value = [];
       isAllSelected.value = false;
-      client_multiplier.value = {};  // Clear the client_multiplier
+      client_multiplier.value = {};
     } else {
       // Select all features
       selectedFeatures.value = data.value.baskets;
       isAllSelected.value = true;
-      
       // Update client_multiplier with existing values or 0
       const updatedMultiplier = {};
-      data.value.baskets.forEach(basket => {
+      data.value.baskets.forEach((basket) => {
         updatedMultiplier[basket] = client_multiplier.value[basket] || 0;
       });
       client_multiplier.value = updatedMultiplier;
     }
   } else {
     // Normal selection handling
-    selectedFeatures.value = value.filter(feature => feature !== 'all');
-    isAllSelected.value = selectedFeatures.value.length === data.value.baskets.length;
+    selectedFeatures.value = value.filter((feature) => feature !== "all");
+    isAllSelected.value =
+      selectedFeatures.value.length === data.value.baskets.length;
 
-    // Update client_multiplier to only include selected features
     const updatedMultiplier = {};
-    selectedFeatures.value.forEach(feature => {
+    selectedFeatures.value.forEach((feature) => {
       updatedMultiplier[feature] = client_multiplier.value[feature] || 0;
     });
     client_multiplier.value = updatedMultiplier;
@@ -314,51 +408,63 @@ const handleFeatureChange = (value) => {
   hasUnsavedChanges.value = true;
 };
 
+// Show TOTP Modal with action
 const showTotpModalWithAction = (action) => {
   modalAction.value = action;
   showTotpModal.value = true;
-  totpCode.value = '';
-  totpError.value = '';
+  totpCode.value = "";
+  totpError.value = "";
 };
 
+// Cancel TOTP Modal
 const cancelTotpModal = () => {
   showTotpModal.value = false;
-  modalAction.value = '';
-  totpCode.value = '';
-  totpError.value = '';
+  modalAction.value = "";
+  totpCode.value = "";
+  totpError.value = "";
 };
 
+// TOTP Submit Handler
 const handleTotpSubmit = async () => {
   switch (modalAction.value) {
-    case 'portfolio':
+    case "portfolio":
       await updatePortfolioValue();
       break;
-    case 'multiplier':
+    case "multiplier":
       await updateMultiplier();
+      break;
+    case "fetchmultiplier":
+      await fetchNewDict();
       break;
   }
 };
 
-
-
+// Check if any table row has errors
 const hasErrors = computed(() => {
   if (!filteredData.value) return false;
-  return filteredData.value.some(row => row.errors && Object.keys(row.errors).length > 0);
+  return filteredData.value.some(
+    (row) => row.errors && Object.keys(row.errors).length > 0
+  );
 });
 
-// API calls with enhanced error handling
+// --------------------
+// Data fetching
+// --------------------
 const fetchData = async (endpoint, stateRef) => {
   try {
     const token = localStorage.getItem("access_token");
     if (!token) throw new Error("Authentication required. Please log in again.");
 
-    const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `https://production2.swancapital.in/${endpoint}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (response.status === 401) {
       localStorage.removeItem("access_token");
@@ -380,35 +486,88 @@ const fetchData = async (endpoint, stateRef) => {
   }
 };
 
-// Data fetching with retry mechanism
+const fetchNewDict = async () => {
+  try {
+    const token = localStorage.getItem("access_token");
+    if (!token) throw new Error("Authentication required. Please log in again.");
+
+    const response = await fetch("https://production2.swancapital.in/fetchClientMultiplier", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      // If you need to send a request body, include it here:
+      body: JSON.stringify({
+          totp_code: totpCode.value,
+          account: account.value
+        }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || errorData.message || "An error occurred");
+    }
+
+    const result = await response.json();
+    fetchedDict.value = result; // Store the dictionary in fetchedDict
+    Object.keys(client_multiplier.value).forEach((key) => {
+      if (key === 'swanlongoptions' || key === 'swan_positional') return;
+      client_multiplier.value[key] = fetchedDict.value['Multiplier'];
+      validateMultiplier(key);
+    });
+
+    alert("Fetched data successfully!");
+    showTotpModal.value = false;
+    totpCode.value = "";
+    hasUnsavedChanges.value = false;
+    
+  } catch (err) {
+    alert(`Error fetching data: ${err.message}`);
+    console.error("fetchNewDict error:", err.message);
+  }
+};
+
+
+
 const fetchMarginData = async () => {
   loading.value = true;
   error.value = null;
-  
+
   try {
     await fetchData("MarginData", data);
     if (!data.value) throw new Error("Failed to fetch margin data");
-    console.log("data is:",data.value)
-    
+
+    // Fill in local data from response
     filteredData.value = data.value?.params?.[account.value] ?? [];
     portfolioValue.value = data.value["pf"][account.value];
+
+    excessMargin.value=data.value[ "margininfo" ][ account.value ]["excessMargin"];
+    minMargin.value=data.value[ "margininfo" ][ account.value ]["minimumMargin"];
+    ddMarginPercent.value=data.value[ "margininfo" ][ account.value ]["drawdownMargin"];
+
+
+
+
+
     live_clients.value = data.value["live_clients"];
-    
-    
-    // Find the key
+
+    // Identify the correct user key in live_clients
     const matchingKey = Object.keys(live_clients.value).find(
-      key => live_clients.value[key].user_id === account.value
+      (key) => live_clients.value[key].user_id === account.value
     );
-    
+
     // Initialize client_multiplier
-    client_multiplier.value = live_clients.value[matchingKey]?.client_multiplier || {};
-    
-    // Initialize selected features based on existing client_multiplier
+    client_multiplier.value =
+      live_clients.value[matchingKey]?.client_multiplier || {};
+
+    // If baskets exist, decide which features are selected
     if (data.value.baskets) {
       selectedFeatures.value = Object.keys(client_multiplier.value);
-      isAllSelected.value = selectedFeatures.value.length === data.value.baskets.length;
+      isAllSelected.value =
+        selectedFeatures.value.length === data.value.baskets.length;
     }
-    
+
     hasUnsavedChanges.value = false;
   } catch (err) {
     error.value = err.message;
@@ -418,55 +577,100 @@ const fetchMarginData = async () => {
   }
 };
 
-// Validation functions
+// --------------------
+// Validation
+// --------------------
 const validatePortfolioValue = () => {
   const value = Number(portfolioValue.value);
-  
   if (isNaN(value)) {
-    portfolioError.value = 'Please enter a valid number';
+    portfolioError.value = "Please enter a valid number for Portfolio Value";
     return false;
   }
-  
   if (value < 0) {
-    portfolioError.value = 'Value cannot be negative';
+    portfolioError.value = "Portfolio Value cannot be negative";
     return false;
   }
-  portfolioError.value = ''; 
+  portfolioError.value = "";
   hasUnsavedChanges.value = true;
   return true;
 };
-const validateMultiplier = (key) => {
-  const value = Number(client_multiplier.value[key]);
-  
-  multiplierErrors.value[key] = '';
-  
-  if (isNaN(value) || value === '' ) {
-    multiplierErrors.value[key] = 'Please enter a valid number';
+
+const validateExcessMargin = () => {
+  const value = Number(excessMargin.value);
+  if (isNaN(value)) {
+    excessMarginError.value = "Please enter a valid number for Excess Margin";
     return false;
   }
   if (value < 0) {
-    multiplierErrors.value[key] = 'Multiplier cannot be negative';
+    excessMarginError.value = "Excess Margin cannot be negative";
+    return false;
+  }
+  excessMarginError.value = "";
+  hasUnsavedChanges.value = true;
+  return true;
+};
+
+const validateMinMargin = () => {
+  const value = Number(minMargin.value);
+  if (isNaN(value)) {
+    minMarginError.value = "Please enter a valid number for Minimum Margin";
+    return false;
+  }
+  if (value < 0) {
+    minMarginError.value = "Minimum Margin cannot be negative";
+    return false;
+  }
+  minMarginError.value = "";
+  hasUnsavedChanges.value = true;
+  return true;
+};
+
+const validateDDMarginPercent = () => {
+  const value = Number(ddMarginPercent.value);
+  if (isNaN(value)) {
+    ddMarginPercentError.value = "Please enter a valid percentage";
+    return false;
+  }
+  if (value < 0) {
+    ddMarginPercentError.value = "Drawdown Margin % cannot be negative";
+    return false;
+  }
+  ddMarginPercentError.value = "";
+  hasUnsavedChanges.value = true;
+  return true;
+};
+
+const validateMultiplier = (key) => {
+  const value = Number(client_multiplier.value[key]);
+  multiplierErrors.value[key] = "";
+
+  if (isNaN(value) || value === "") {
+    multiplierErrors.value[key] = "Please enter a valid number";
+    return false;
+  }
+  if (value < 0) {
+    multiplierErrors.value[key] = "Multiplier cannot be negative";
     return false;
   }
   hasUnsavedChanges.value = true;
   return true;
-}
+};
 
 const validateField = (row, field) => {
   if (!row.errors) row.errors = {};
   const value = Number(row[field]);
-  
+
   if (isNaN(value)) {
-    row.errors[field] = 'Invalid number';
+    row.errors[field] = "Invalid number";
     return;
   }
   switch (field) {
-    case 'qtylimit':
-    case 'cvlimit' :
-    case 'factor1':
-    case 'factor2': 
-      if (value < 0 ) {
-        row.errors[field] = 'Must be Above 0';
+    case "qtylimit":
+    case "cvlimit":
+    case "factor1":
+    case "factor2":
+      if (value < 0) {
+        row.errors[field] = "Must be Above 0";
       } else {
         delete row.errors[field];
       }
@@ -475,19 +679,24 @@ const validateField = (row, field) => {
   hasUnsavedChanges.value = true;
 };
 
-
-// Update functions
+// --------------------
+// Updates
+// --------------------
 const updatePortfolioValue = async () => {
-  if (!validatePortfolioValue()) return;
+  // Validate all 4 fields together
+  const allValid =
+    validatePortfolioValue() &&
+    validateExcessMargin() &&
+    validateMinMargin() &&
+    validateDDMarginPercent();
+  if (!allValid) return;
 
+  // Get the structure for 'params'
   const gg = Object.keys(data.value?.params?.[account.value]?.[0] ?? []);
-
-  const filteredArr = filteredData.value.map(obj => 
-        Object.fromEntries(
-            Object.entries(obj).filter(([key]) => 
-                gg.includes(key)
-            )
-        )
+  const filteredArr = filteredData.value.map((obj) =>
+    Object.fromEntries(
+      Object.entries(obj).filter(([key]) => gg.includes(key))
+    )
   );
 
   isUpdatingPortfolio.value = true;
@@ -495,30 +704,37 @@ const updatePortfolioValue = async () => {
     const token = localStorage.getItem("access_token");
     if (!token) throw new Error("Authentication required");
 
-    const response = await fetch(`https://production2.swancapital.in/UpdatePortfolioValue`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ 
-        totp_code: totpCode.value,
-        account: account.value, 
-        portfolioValue: Number(portfolioValue.value),
-        params: filteredArr
-      }),
-    });
+    const response = await fetch(
+      `https://production2.swancapital.in/UpdatePortfolioValue`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          totp_code: totpCode.value,
+          account: account.value,
+          portfolioValue: Number(portfolioValue.value),
+          excessMargin: Number(excessMargin.value),
+          minMargin: Number(minMargin.value),
+          ddMarginPercent: Number(ddMarginPercent.value),
+          params: filteredArr,
+        }),
+      }
+    );
 
-    const data = await response.json();
-    
+    const result = await response.json();
+
     if (!response.ok) {
-      throw new Error(data.detail || data.message || 'An error occurred');
+      throw new Error(result.detail || result.message || "An error occurred");
     }
 
-    alert("Portfolio value updated successfully!");
+    alert("Portfolio & Margin values updated successfully!");
     showTotpModal.value = false;
-    totpCode.value = '';
-
+    totpCode.value = "";
+    hasUnsavedChanges.value = false;
+    window.location.reload();
   } catch (err) {
     alert(`Error updating portfolio value: ${err.message}`);
     totpError.value = err.message;
@@ -529,38 +745,45 @@ const updatePortfolioValue = async () => {
 };
 
 const updateMultiplier = async () => {
-  const ErrorMultiplier = Object.keys(client_multiplier.value).some(key => !validateMultiplier(key));
-  if (ErrorMultiplier) return;
-  
+  const ErrorMultiplier = Object.keys(client_multiplier.value).some(
+    (key) => !validateMultiplier(key)
+  );
+  if (ErrorMultiplier){
+     alert("There are Some Error Correct Them!");
+     return;
+  }
+
   isUpdatingMultiplier.value = true;
   try {
     const token = localStorage.getItem("access_token");
     if (!token) throw new Error("Authentication required");
 
-    const response = await fetch(`https://production2.swancapital.in/UpdateClientMultiplier`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ 
-        account: account.value,
-        client_multiplier: client_multiplier.value,
-        totp_code: totpCode.value
-      }),
-    });
+    const response = await fetch(
+      `https://production2.swancapital.in/UpdateClientMultiplier`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          account: account.value,
+          client_multiplier: client_multiplier.value,
+          totp_code: totpCode.value,
+        }),
+      }
+    );
 
     if (!response.ok) {
       const data = await response.json();
-      throw new Error(data.detail || data.message || 'An error occurred');
+      throw new Error(data.detail || data.message || "An error occurred");
     }
 
-    // Close modal and clear TOTP code
     showTotpModal.value = false;
-    totpCode.value = '';
-
+    totpCode.value = "";
     alert("Client multiplier updated successfully!");
     hasUnsavedChanges.value = false;
+    window.location.reload();
 
     // Optionally refresh data
     await fetchMarginData();
@@ -572,7 +795,9 @@ const updateMultiplier = async () => {
   }
 };
 
-// Enhanced cancel functionality
+// --------------------
+// Cancel Logic
+// --------------------
 const confirmCancel = () => {
   if (hasUnsavedChanges.value) {
     if (confirm("You have unsaved changes. Are you sure you want to cancel?")) {
@@ -584,24 +809,26 @@ const confirmCancel = () => {
 };
 
 const cancelChanges = () => {
-
   router.push("/marginUpdate");
 };
 
-
-
-// Statistics computation
+// --------------------
+// Stats Computation
+// --------------------
 const computeStat = (field) => {
   if (!filteredData.value || filteredData.value.length === 0) return "-";
-
-  const values = filteredData.value.map((row) => Number(row[field])).filter(val => !isNaN(val));
+  const values = filteredData.value
+    .map((row) => Number(row[field]))
+    .filter((val) => !isNaN(val));
   if (values.length === 0) return "-";
 
   switch (selectedStat.value) {
     case "sum":
       return values.reduce((acc, val) => acc + val, 0).toFixed(2);
     case "avg":
-      return (values.reduce((acc, val) => acc + val, 0) / values.length).toFixed(2);
+      return (
+        values.reduce((acc, val) => acc + val, 0) / values.length
+      ).toFixed(2);
     case "max":
       return Math.max(...values).toFixed(2);
     case "min":
@@ -611,12 +838,13 @@ const computeStat = (field) => {
   }
 };
 
-// Lifecycle hooks
+// Lifecycle
 onMounted(() => {
   fetchMarginData();
 });
 </script>
 <style scoped>
+/* (All existing styles retained; only included for completeness) */
 
 /* Select Container Styles */
 .select-container {
@@ -646,7 +874,6 @@ onMounted(() => {
   border-color: #3b82f6 !important;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
 }
-
 
 .submit-button {
   padding: 12px 24px;
@@ -693,8 +920,6 @@ onMounted(() => {
   background-color: #4b5563;
 }
 
-
-
 .modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -702,13 +927,12 @@ onMounted(() => {
   padding-top: 16px;
   border-top: 1px solid #e5e7eb;
 }
+
 .error-text {
   color: #ef4444;
   font-size: 14px;
   margin-top: 4px;
 }
-
-
 
 .form-input {
   width: 100%;
@@ -729,7 +953,6 @@ onMounted(() => {
   border-color: #ef4444;
 }
 
-
 .form-group {
   display: flex;
   flex-direction: column;
@@ -741,29 +964,6 @@ onMounted(() => {
   font-weight: 500;
   color: #4b5563;
 }
-
-.form-group input, .form-select {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  font-size: 14px;
-  color: #1f2937;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  width: 100%;
-}
-
-.form-group input:focus, .form-select:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-}
-
-.form-group input:disabled, .form-select:disabled {
-  background-color: #f3f4f6;
-  color: #9ca3af;
-  cursor: not-allowed;
-}
-
 
 .modal-overlay {
   position: fixed;
@@ -778,7 +978,6 @@ onMounted(() => {
   z-index: 1000;
 }
 
-/* Transitions */
 .modal-overlay {
   transition: opacity 0.2s ease;
 }
@@ -832,7 +1031,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .portfolio-label {
@@ -850,6 +1049,8 @@ onMounted(() => {
   padding: 0.5rem;
   transition: all 0.15s ease;
   gap: 0.5rem;
+  width: 100%;
+  max-width: 300px;
 }
 
 .portfolio-input-group:focus-within {
@@ -864,7 +1065,7 @@ onMounted(() => {
 }
 
 .portfolio-input {
-  width: 150px;
+  flex: 1;
   border: none;
   outline: none;
   font-size: 1rem;
@@ -901,7 +1102,6 @@ onMounted(() => {
   margin-top: 1.75rem;
 }
 
-/* Table styles matching sidebar theme */
 .table-container {
   border: 1px solid rgba(229, 231, 235, 0.5);
   border-radius: 10px;
@@ -943,7 +1143,6 @@ onMounted(() => {
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
-/* Action buttons matching sidebar theme */
 .action-buttons {
   display: flex;
   justify-content: center;
@@ -971,7 +1170,6 @@ onMounted(() => {
   background: #2563eb;
   color: white;
 }
-
 .save-button:hover {
   background: #1d4ed8;
 }
@@ -980,12 +1178,10 @@ onMounted(() => {
   background: #ef4444;
   color: white;
 }
-
 .cancel-button:hover {
   background: #dc2626;
 }
 
-/* Stats dropdown matching sidebar theme */
 .stat-dropdown {
   padding: 0.75rem 1.25rem;
   border: 1px solid rgba(229, 231, 235, 0.5);
@@ -1012,16 +1208,12 @@ onMounted(() => {
   .data-fetch-container {
     padding: 1rem;
   }
-
   .action-buttons {
     flex-direction: column;
   }
-
   .portfolio-input-group {
     width: 100%;
-    max-width: 300px;
   }
-
   .modal-content {
     width: 95%;
     padding: 16px;
@@ -1029,13 +1221,11 @@ onMounted(() => {
   .select-container {
     padding: 0.75rem;
   }
-
   .data-table {
     display: block;
     overflow-x: auto;
     white-space: nowrap;
   }
-
   .editable-input {
     min-width: 100px;
   }
@@ -1064,12 +1254,10 @@ onMounted(() => {
   100% { transform: rotate(360deg); }
 }
 
-/* Error States */
 .error-input {
   border-color: #ef4444 !important;
 }
 
-/* Accessibility */
 @media (prefers-reduced-motion: reduce) {
   .loading-spinner,
   .modal-overlay,
@@ -1079,32 +1267,61 @@ onMounted(() => {
   }
 }
 
-/* Print Styles */
 @media print {
   .data-fetch-container {
     background: white;
     padding: 0;
   }
-
   .action-buttons,
   .update-button,
   .portfolio-input-group button {
     display: none;
   }
-
   .content-wrapper {
     box-shadow: none;
     border: none;
     padding: 0;
   }
-
   .table-container {
     border: none;
   }
-
   .data-table th,
   .data-table td {
     border: 1px solid #e5e7eb;
   }
 }
+
+/* Arrange Portfolio fields in a single row */
+.portfolio-row {
+  display: flex;
+  flex-wrap: wrap; /* so on smaller screens they wrap */
+  justify-content: center;
+  gap: 2rem;
+}
+
+.portfolio-field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 220px; /* to keep a consistent width if possible */
+}
+
+
+.fetch-button {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: #3b82f6;
+  color: white;
+  border: 1px solid rgba(229, 231, 235, 0.5);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-left: 1rem;
+}
+
+.fetch-button:hover {
+  background: #1d4ed8;
+}
+
 </style>
