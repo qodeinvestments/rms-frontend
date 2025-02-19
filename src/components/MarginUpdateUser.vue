@@ -114,6 +114,20 @@
         </div>
 
       </div> <!-- End of .portfolio-row -->
+      <div v-if="filteredData.length == 0" class="action-buttons">
+        <button 
+          @click="showTotpModalWithAction('portfolio')" 
+          class="save-button"
+          :disabled="hasErrors || isSaving"
+        >
+          <span class="button-icon">{{ isSaving ? '⌛' : '💾' }}</span>
+          {{ isSaving ? 'Saving...' : 'Save Changes' }}
+        </button>
+        <button @click="confirmCancel" class="cancel-button">
+          <span class="button-icon">✖</span>
+          Cancel
+        </button>
+      </div>
 
     </div> <!-- End of .header -->
 
@@ -126,7 +140,7 @@
 
     
     <!-- Main Data Table -->
-    <div v-if="filteredData  && !loading && !error" class="content-wrapper">
+    <div v-if="filteredData && filteredData.length > 0 && !loading && !error" class="content-wrapper">
       <!-- Existing content structure -->
       <div class="stats-selector">
         <label for="stat-option" class="stat-label">Choose a Statistic:</label>
