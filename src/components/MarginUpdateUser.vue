@@ -14,6 +14,7 @@
             class="form-input"
             :class="{ 'input-error': totpError }"
             @input="totpError = ''"
+            :disabled="isProcessing"
           />
           <span v-if="totpError" class="error-text">{{ totpError }}</span>
         </div>
@@ -21,14 +22,17 @@
           <button 
             @click="cancelTotpModal" 
             class="cancel-button2"
+            :disabled="isProcessing"
           >
             Cancel
           </button>
           <button 
             @click="handleTotpSubmit" 
             class="submit-button"
+            :disabled="isProcessing"
           >
-            Submit
+            <span v-if="isProcessing" class="loader-icon"></span>
+            {{ isProcessing ? 'Processing...' : 'Submit' }}
           </button>
         </div>
       </div>
@@ -114,7 +118,7 @@
         </div>
 
       </div> <!-- End of .portfolio-row -->
-      <div v-if="filteredData.length == 0" class="action-buttons">
+      <div v-if="filteredData && filteredData.length == 0" class="action-buttons">
         <button 
           @click="showTotpModalWithAction('portfolio')" 
           class="save-button"
@@ -277,7 +281,9 @@
         <button 
           @click="showTotpModalWithAction('fetchmultiplier')" 
           class="fetch-button"
+          :disabled="isProcessing"
         >
+          <span v-if="isProcessing && modalAction === 'fetchmultiplier'" class="loader-icon-light"></span>
           Fetch Data
         </button>
  
@@ -315,7 +321,7 @@
         <button 
           @click="showTotpModalWithAction('multiplier')" 
           class="save-button"
-          :disabled="isUpdatingMultiplier"
+          :disabled="isUpdatingMultiplier || isProcessing"
         >
           <span class="button-icon">{{ isUpdatingMultiplier ? '⌛' : '💾' }}</span>
           {{ isUpdatingMultiplier ? 'Updating...' : 'Update Multiplier' }}
@@ -362,6 +368,7 @@ const showTotpModal = ref(false);
 const totpCode = ref("");
 const totpError = ref("");
 const modalAction = ref("");
+const isProcessing = ref(false);
 
 // Data for multipliers
 const live_clients = ref({});
@@ -432,6 +439,8 @@ const showTotpModalWithAction = (action) => {
 
 // Cancel TOTP Modal
 const cancelTotpModal = () => {
+  if (isProcessing.value) return;
+  
   showTotpModal.value = false;
   modalAction.value = "";
   totpCode.value = "";
@@ -440,16 +449,26 @@ const cancelTotpModal = () => {
 
 // TOTP Submit Handler
 const handleTotpSubmit = async () => {
-  switch (modalAction.value) {
-    case "portfolio":
-      await updatePortfolioValue();
-      break;
-    case "multiplier":
-      await updateMultiplier();
-      break;
-    case "fetchmultiplier":
-      await fetchNewDict();
-      break;
+  if (isProcessing.value) return;
+  
+  isProcessing.value = true;
+  try {
+    switch (modalAction.value) {
+      case "portfolio":
+        await updatePortfolioValue();
+        break;
+      case "multiplier":
+        await updateMultiplier();
+        break;
+      case "fetchmultiplier":
+        await fetchNewDict();
+        break;
+    }
+  } catch (error) {
+    console.error("TOTP submission error:", error);
+    totpError.value = "An unexpected error occurred. Please try again.";
+  } finally {
+    isProcessing.value = false;
   }
 };
 
@@ -537,7 +556,7 @@ const fetchNewDict = async () => {
     hasUnsavedChanges.value = false;
     
   } catch (err) {
-    alert(`Error fetching data: ${err.message}`);
+    totpError.value = `Error: ${err.message}`;
     console.error("fetchNewDict error:", err.message);
   }
 };
@@ -803,6 +822,7 @@ const updateMultiplier = async () => {
     await fetchMarginData();
   } catch (err) {
     alert(`Error updating client multiplier: ${err.message}`);
+    totpError.value = err.message;
     console.error("Error updating client multiplier:", err.message);
   } finally {
     isUpdatingMultiplier.value = false;
@@ -1336,6 +1356,34 @@ onMounted(() => {
 
 .fetch-button:hover {
   background: #1d4ed8;
+}
+
+/* Add this to your existing styles */
+.loader-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.submit-button:disabled,
+.cancel-button2:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Make sure input matches disabled state */
+.form-input:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
 }
 
 </style>
