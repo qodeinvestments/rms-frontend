@@ -26,6 +26,8 @@ const past_time = ref(0)
 const histogram = ref(0)
 const selected_uid = ref('')
 
+// Add filter for checker status
+const showOnlyUnchecked = ref(false)
 
 const selectedUids = ref([]);
 const selectedBasketItems = ref([]);
@@ -41,18 +43,25 @@ const filteredUids = computed(() => {
 
 const filteredOptions = computed(() => filteredUids.value.filter(o => !selectedUids.value.includes(o)));
 
-
-
-// Updated computed property for filtered signal_book_data
+// Updated computed property for filtered signal_book_data with checker filter
 const filteredSignalBookData = computed(() => {
-    if (selectedUids.value.length === 0 && selectedBasketItems.value.length === 0) {
-        return signal_book_data.value;
+    let filteredData = signal_book_data.value;
+    
+    // Apply checker filter if enabled
+    if (showOnlyUnchecked.value) {
+        filteredData = filteredData.filter(item => item.checker === 'False');
     }
-    return signal_book_data.value.filter(item => {
-        const basketMatch = selectedBasketItems.value.length === 0 || selectedBasketItems.value.includes(item.uid.split('_')[0]);
-        const uidMatch = selectedUids.value.length === 0 || selectedUids.value.includes(item.uid);
-        return basketMatch && uidMatch;
-    });
+    
+    // Apply existing filters
+    if (selectedUids.value.length > 0 || selectedBasketItems.value.length > 0) {
+        filteredData = filteredData.filter(item => {
+            const basketMatch = selectedBasketItems.value.length === 0 || selectedBasketItems.value.includes(item.uid.split('_')[0]);
+            const uidMatch = selectedUids.value.length === 0 || selectedUids.value.includes(item.uid);
+            return basketMatch && uidMatch;
+        });
+    }
+    
+    return filteredData;
 });
 
 
@@ -100,8 +109,6 @@ const connectClientDetailsWebSocket = () => {
         console.log('Client Detail WebSocket connection closed:', event.reason);
     };
 
-
-
     return clientDetailSocket;
 };
 
@@ -122,9 +129,10 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     selectedUids.value = [];
 });
 
-
-
-
+// Toggle function for the checker filter
+const toggleCheckerFilter = () => {
+    showOnlyUnchecked.value = !showOnlyUnchecked.value;
+}
 </script>
 
 
@@ -135,19 +143,28 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
             <p> Max Client :<span class="latencyvalue">{{ max_latency }}</span></p>
         </div>
 
-        <!-- Basket multi-select component -->
-        <a-select v-model:value="selectedBasketItems" mode="multiple" placeholder="Select Basket Items"
-            style="width: 100%; margin-bottom: 10px;"
-            :options="filteredBasketOptions.map(item => ({ value: item }))"></a-select>
+        <div class="filter-controls">
+            <!-- Basket multi-select component -->
+            <a-select v-model:value="selectedBasketItems" mode="multiple" placeholder="Select Basket Items"
+                style="width: 100%; margin-bottom: 10px;"
+                :options="filteredBasketOptions.map(item => ({ value: item }))"></a-select>
 
-        <!-- UID multi-select component -->
-        <a-select v-model:value="selectedUids" mode="multiple" placeholder="Select UIDs" style="width: 100%"
-            :options="filteredOptions.map(item => ({ value: item }))"></a-select>
+            <!-- UID multi-select component -->
+            <a-select v-model:value="selectedUids" mode="multiple" placeholder="Select UIDs" style="width: 100%; margin-bottom: 10px;"
+                :options="filteredOptions.map(item => ({ value: item }))"></a-select>
+            
+            <!-- Checker filter toggle button with custom styling -->
+            <button 
+                @click="toggleCheckerFilter" 
+                class="custom-checker-btn">
+                {{ showOnlyUnchecked ? 'Showing Unchecked Only' : 'Show All Items' }}
+            </button>
+        </div>
 
         <div class="my-8" v-if="filteredSignalBookData.length">
             <!-- <p class="table-heading">Signal Book</p> -->
             <TanStackTestTable title="Signal Book" :data="filteredSignalBookData" :columns="columns" :hasColor="[]"
-                :navigateTo="[]" :showPagination=true  :showPin="true"/>
+                :navigateTo="[]" :showPagination=true :showPin="true"/>
         </div>
         <div v-if="histogram.length > 0" class="histogram-container">
             <p class="table-heading">Histogram Of Time Difference</p>
@@ -174,7 +191,36 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     margin-bottom: 30px;
 }
 
+.filter-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
 
+/* Custom button styling without hover effects and background colors */
+.custom-checker-btn {
+    align-self: flex-start;
+    padding: 8px 16px;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    background: none;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.85);
+}
+
+.custom-checker-btn:focus {
+    outline: none;
+}
+
+/* Simple border change to indicate active state */
+.custom-checker-btn:global(.active), 
+.custom-checker-btn:global([aria-pressed="true"]) {
+    border-color: #1890ff;
+    color: #1890ff;
+}
 
 .latencyvalue {
     font-weight: bold;
