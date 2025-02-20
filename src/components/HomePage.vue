@@ -45,6 +45,7 @@ const previous_day_close_index_data = ref({
   SENSEXSPOT: 81559.54
 })
 const pulse_signal = ref([])
+const extra_data=ref([])
 const time = ref([])
 const serverData = ref({})
 const checkBackendConnection = ref(false)
@@ -81,6 +82,7 @@ const updateData = () => {
       pulse_signal.value = pulse_data
       pulse_signal.value.backendConnection = checkBackendConnection
       pulse_signal.value.position_mismatch = connection_BackendData.value.position_mismatch
+      extra_data.value.broker_Position_Mismatch=connection_BackendData.value.broker_Position_Mismatch
     }
 
   }
@@ -415,7 +417,7 @@ onUnmounted(() => {
         <span class="font-medium ml-4">Time:</span> {{ formatTime(time) }}
       </span>
     </p>
-    <WarningSignal :signals="pulse_signal" :latency="Latency" :max_latency="max_latency" />
+    <WarningSignal :signals="pulse_signal" :latency="Latency" :max_latency="max_latency" :extra_data="extra_data" />
   </div>
     <!-- <button @click="showSuccessToast">Show Success Toast</button> -->
 

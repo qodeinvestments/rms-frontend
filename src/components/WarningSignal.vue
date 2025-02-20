@@ -15,6 +15,13 @@
             <span :class="calculate_position_mismatch() ? 'greensignal' : 'redsignal'"></span>
         </div>
 
+        
+        <div class="signal-container" @click="gotobrokermispospage">
+            <p class="textContainer"> Broker Position Mismatch :</p>
+            <span :class="calculate_broker_position_mismatch() ? 'greensignal' : 'redsignal'"></span>
+        </div>
+
+
         <div class="signal-container">
             <p class="textContainer">FrontToBack Latency :</p>
             <span class="latency">{{ latency }}</span>
@@ -35,6 +42,7 @@ const userAnd = ref(true);
 const router = useRouter();
 
 const gotomispospage = () => router.push('/posmismatch');
+const gotobrokermispospage = () => router.push('/brokerposmismatch');
 
 const toTitleCase = (str) =>
     str
@@ -82,19 +90,30 @@ const props = defineProps({
         type: Number,
         required: true,
     },
+    extra_data:{
+        type: Object,
+        required: true
+    }
 });
 
 const calculate_position_mismatch = () => {
     const val = props.signals.position_mismatch;
     let tell = true;
-    let ans = [];
+    for (const v in val) {
+        if (val.hasOwnProperty(v)) {
+            tell = tell && Object.keys(val[v]).length === 0;
+        }
+    }
+    return tell;
+};
+
+const calculate_broker_position_mismatch = () => {
+    const val = props.extra_data.broker_Position_Mismatch ;
+    let tell = true;
 
     for (const v in val) {
         if (val.hasOwnProperty(v)) {
             tell = tell && Object.keys(val[v]).length === 0;
-            if (Object.keys(val[v]).length !== 0) {
-                ans.push({ [v]: val[v] });
-            }
         }
     }
     return tell;
