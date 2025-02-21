@@ -5,6 +5,11 @@
             <span :class="value ? 'greensignal' : 'redsignal'"></span>
         </div>
 
+        <div class="signal-container" v-for="(value, key) in calculate_custom_pulse()" :key="key">
+            <div class="textContainer">{{ give_key_map(key) }}</div>
+            <span :class="value ? 'greensignal' : 'redsignal'"></span>
+        </div>
+
         <div class="signal-container">
             <p class="textContainer">User Error :</p>
             <span :class="userAnd ? 'greensignal' : 'redsignal'"></span>
@@ -118,6 +123,12 @@ const calculate_broker_position_mismatch = () => {
     }
     return tell;
 };
+const give_key_map=(key)=>{
+    if (key==='signalbook_position_checker')return 'Signalbook Position Checker';
+}
+const calculate_custom_pulse=()=>{
+    return props.extra_data.custom_pulse;
+}
 </script>
 
 <style scoped>
