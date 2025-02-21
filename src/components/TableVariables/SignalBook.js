@@ -8,8 +8,8 @@ import {
 const columnHelper = createColumnHelper()
 
  
-const columns_signal_book = [ 'timestamp', 'system_timestamp','new_timestamp','ohlc',
-     'system_tag', 'action',  'symbol',  'price','qty','index','spot','quantity','quantity_check', 'checker','portfolio_value','note','trade_id', 'uid',
+const columns_signal_book = [ 'timestamp', 'system_timestamp',
+     'system_tag', 'action',  'symbol',  'price','qty','index','quantity','quantity_check','spot','new_timestamp','ohlc', 'checker','portfolio_value','note','trade_id', 'uid',
      'qty_dir', , 'price_provided',
       'value', 'buy_value', 'sell_value', 'action_int'
 ];
