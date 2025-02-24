@@ -83,6 +83,7 @@ const updateData = () => {
       pulse_signal.value.backendConnection = checkBackendConnection
       pulse_signal.value.position_mismatch = connection_BackendData.value.position_mismatch
       extra_data.value.broker_Position_Mismatch=connection_BackendData.value.broker_Position_Mismatch
+      extra_data.value.position_broker_Mismatch = connection_BackendData.value.position_broker_Mismatch
       extra_data.value.custom_pulse=connection_BackendData.value.custom_pulse;
     }
 

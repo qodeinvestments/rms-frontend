@@ -121,6 +121,14 @@ const calculate_broker_position_mismatch = () => {
             tell = tell && Object.keys(val[v]).length === 0;
         }
     }
+
+    const val2 = props.extra_data.position_broker_Mismatch ;
+    
+    for (const v in val2) {
+        if (val2.hasOwnProperty(v)) {
+            tell = tell && Object.keys(val2[v]).length === 0;
+        }
+    }
     return tell;
 };
 const give_key_map=(key)=>{

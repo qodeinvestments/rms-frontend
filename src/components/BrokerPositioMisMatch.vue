@@ -22,7 +22,7 @@ const columns = [
         header: () => 'Symbol',
     }),
     columnHelper.accessor(row => row.Quantity, {
-        id: 'Quantity',
+        id: 'Difference Quantity',
         cell: info => info.getValue(),
         header: () => 'Quantity',
     }),
@@ -45,6 +45,7 @@ let reconnectAttempts = 0
 const users = ref([])
 const user = ref('')
 const fulldata = ref()
+const posdata=ref()
 
 
 
@@ -54,6 +55,7 @@ const handleMessage = (message) => {
     connection_BackendData.value = message.connection_data
     if (message.connection_data) {
         fulldata.value = message.connection_data.broker_Position_Mismatch;
+        posdata.value=message.connection_data.position_broker_Mismatch;
         users.value=Object.keys(fulldata.value);
     }
    
@@ -146,7 +148,7 @@ onUnmounted(() => {
             <label class="table-heading" for="options">Select an User:</label>
             <select class="table-heading" id="options" v-model="user">
                 <option v-for="option in users" :key="option" :value="option"
-                    :class="fulldata[option].length > 0 ? 'negativecolor' : ''">
+                    :class="(fulldata[option].length > 0 ||  posdata[option].length > 0 )? 'negativecolor' : ''">
                     {{ option }}
 
                 </option>
@@ -156,10 +158,21 @@ onUnmounted(() => {
         <div v-if="user === ''" class="mx-auto py-8 negative">
             <p class="table-heading">Select User !</p>
         </div>
-        <div v-else-if="Object.keys(fulldata[user]).length > 0" class="mx-auto px-8 py-8">
+        <div v-else-if="Object.keys(fulldata[user]).length > 0 || Object.keys(posdata[user]).length > 0" class="mx-auto px-8 py-8 flex flex-col gap-8">
             <!-- <p class="table-heading">Position MisMatch : {{ user }}</p> -->
-            <TanStackTestTable title="Broker Position MisMatch" :data="fulldata[user]" :columns="columns" :hasColor="[]" :navigateTo="{}"
+             <div v-if="Object.keys(fulldata[user]).length > 0">
+                <TanStackTestTable title="Broker Position MisMatch" :data="fulldata[user]" :columns="columns" :hasColor="[]" :navigateTo="{}"
                 :showPagination="true" :hasRowcolor="{}" />
+
+             </div>
+             <div v-if="Object.keys(posdata[user]).length > 0">
+
+                <TanStackTestTable title="Position Broker MisMatch" :data="posdata[user]" :columns="columns" :hasColor="[]" :navigateTo="{}"
+                :showPagination="true" :hasRowcolor="{}" />
+
+             </div>
+           
+           
         </div>
 
         <div v-else class="mx-auto px-8 py-8">
