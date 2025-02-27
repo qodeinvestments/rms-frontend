@@ -20,6 +20,7 @@ const fileInput = ref(null)
 // Add these refs for loading states
 const isUploading = ref(false)
 const isDownloading = ref(false)
+const isAllDownloading = ref(false)
 
 const handleFileUpload = async (event) => {
     try {
@@ -58,15 +59,22 @@ const handleFileUpload = async (event) => {
     }
 }
 
-const downloadCSV = async () => {
+const downloadCSV = async (type) => {
     try {
-        isDownloading.value = true  // Start loading
+        
         const token = localStorage.getItem('access_token');
         if (!token) {
             throw new Error('User not authenticated');
         }
 
-        const response = await fetch('https://production2.swancapital.in/DownloadBrokerPositionMismatch', {
+        let url = "DownloadBrokerPositionMismatch";
+        if (type === 'ALL') {
+            isAllDownloading.value=true
+            url = 'DownloadALLBrokerPositionMismatch';
+        }
+        else isDownloading.value = true  // Start loading
+
+        const response = await fetch(`https://production2.swancapital.in/${url}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -120,6 +128,7 @@ const downloadCSV = async () => {
         alert(`Error: ${error.message}`);
     } finally {
         isDownloading.value = false  // End loading
+        isAllDownloading.value=false
     }
 }
 const data = ref(defaultData)
@@ -291,11 +300,19 @@ onUnmounted(() => {
             </button>
             <button 
                 class="action-button" 
-                @click="downloadCSV"
+                @click="downloadCSV('ALL')"
+                :disabled="isAllDownloading"
+            >
+                <span v-if="isAllDownloading" class="loader"></span>
+                {{ isAllDownloading ? 'Downloading...' : 'Download All CSV' }}
+            </button>
+            <button 
+                class="action-button" 
+                @click="downloadCSV('ONE')"
                 :disabled="isDownloading"
             >
                 <span v-if="isDownloading" class="loader"></span>
-                {{ isDownloading ? 'Downloading...' : 'Download CSV' }}
+                {{ isDownloading ? 'Downloading...' : 'Download Current CSV' }}
             </button>
         </div>
         <div class="userSelectContainer" v-if="users">
