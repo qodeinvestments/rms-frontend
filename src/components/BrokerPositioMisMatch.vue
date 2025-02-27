@@ -148,7 +148,7 @@ onUnmounted(() => {
             <label class="table-heading" for="options">Select an User:</label>
             <select class="table-heading" id="options" v-model="user">
                 <option v-for="option in users" :key="option" :value="option"
-                    :class="(fulldata[option].length > 0 ||  posdata[option].length > 0 )? 'negativecolor' : ''">
+                    :class="(fulldata[option].length > 0 )? 'negativecolor' : ''">
                     {{ option }}
 
                 </option>
