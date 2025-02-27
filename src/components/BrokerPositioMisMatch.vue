@@ -257,7 +257,18 @@ const connectWebSocket = () => {
 }
 
 
-
+const givecolor=(option)=>{
+    
+    if(posdata.value){
+        if(option==='Swan Live Zerodha')
+    {
+        console.log(option," ",posdata.value)
+    }
+        if(option in posdata.value) if(posdata.value[option].length > 0 ) return 'negativecolor';
+    }
+    if(fulldata.value)if(option in fulldata.value) if(fulldata.value[option].length > 0 ) return 'negativecolor'
+    return '';
+}
 
 
 
@@ -319,7 +330,7 @@ onUnmounted(() => {
             <label class="table-heading" for="options">Select an User:</label>
             <select class="table-heading" id="options" v-model="user">
                 <option v-for="option in users" :key="option" :value="option"
-                    :class="(fulldata[option].length > 0 )? 'negativecolor' : ''">
+                    :class="givecolor(option)">
                     {{ option }}
 
                 </option>
