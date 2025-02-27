@@ -116,11 +116,14 @@ const calculate_broker_position_mismatch = () => {
     const val = props.extra_data.broker_Position_Mismatch ;
     let tell = true;
 
-    for (const v in val) {
-        if (val.hasOwnProperty(v)) {
-            tell = tell && Object.keys(val[v]).length === 0;
+    // Iterate over each key-value pair
+    Object.entries(val).forEach(([key, value]) => {
+        // Check if any element in the array has Checked = false
+        const uncheckedItems = value.filter(item => item.Checked === false);
+        if (uncheckedItems.length > 0) {
+           tell=false;
         }
-    }
+    });
 
     const val2 = props.extra_data.position_broker_Mismatch ;
     

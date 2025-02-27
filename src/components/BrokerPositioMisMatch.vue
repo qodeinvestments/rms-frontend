@@ -258,15 +258,18 @@ const connectWebSocket = () => {
 
 
 const givecolor=(option)=>{
-    
-    if(posdata.value){
-        if(option==='Swan Live Zerodha')
-    {
-        console.log(option," ",posdata.value)
+    if(fulldata.value){
+        for (const [key, value] of Object.entries(fulldata.value)) {
+            if (value.length > 0) {
+                value.forEach(item => {
+                   if (item['Checked'] === false)return 'negativecolor'
+                });
+             }
+         }
     }
+    if(posdata.value){
         if(option in posdata.value) if(posdata.value[option].length > 0 ) return 'negativecolor';
     }
-    if(fulldata.value)if(option in fulldata.value) if(fulldata.value[option].length > 0 ) return 'negativecolor'
     return '';
 }
 
