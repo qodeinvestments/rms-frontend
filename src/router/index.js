@@ -14,6 +14,7 @@ import MarginUpdateUser from '../components/MarginUpdateUser.vue'
 import LivePositions from '../components/TradingMonitor.vue'
 import MarginSettings from '../components/MarginSettings.vue'
 import BrokerPositioMisMatch from '../components/BrokerPositioMisMatch.vue'
+import OpenTrades from '../components/OpenTrades.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -92,6 +93,11 @@ const router = createRouter({
       path: '/marginSettings',
       name: 'MarginSettings',
       component:MarginSettings,
+    },
+    {
+      path: '/opentrades',
+      name:'OpenTrades',
+      component:OpenTrades
     }
     // {
     //   path: '/about',
