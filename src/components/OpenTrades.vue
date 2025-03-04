@@ -161,7 +161,7 @@
 
           </div>
               <!-- <p class="table-heading">Signal Book</p> -->
-              <TanStackTestTable title="Open Trades" :data="filteredSignalBookData" :columns="columns" :hasColor="[]"
+              <TanStackTestTable title="Overnight Trades" :data="filteredSignalBookData" :columns="columns" :hasColor="[]"
                   :navigateTo="[]" :showPagination=true :showPin="true"/>
           </div>
           <div v-else-if="!isLoading" class="no-data">

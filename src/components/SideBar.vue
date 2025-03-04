@@ -82,7 +82,7 @@
               <li :class="selected == 'OpenTrades' ? 'active' : ''" @click="changeSelected('OpenTrades')">
                 <a href="#">
                   <i class="icon ph-bold ph-calendar-blank"></i>
-                  <span class="text">Open Trades </span>
+                  <span class="text">Overnight Trades </span>
                 </a>
               </li>
             
