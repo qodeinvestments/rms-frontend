@@ -113,24 +113,30 @@ const calculate_position_mismatch = () => {
 };
 
 const calculate_broker_position_mismatch = () => {
-    const val = props.extra_data.broker_Position_Mismatch ;
+    const val = props.extra_data?.broker_Position_Mismatch || {};
     let tell = true;
 
-    // Iterate over each key-value pair
-    Object.entries(val).forEach(([key, value]) => {
-        // Check if any element in the array has Checked = false
-        const uncheckedItems = value.filter(item => item.Checked === false);
-        if (uncheckedItems.length > 0) {
-           tell=false;
-        }
-    });
+    // Only proceed with Object.entries if val exists
+    if (Object.keys(val).length > 0) {
+        Object.entries(val).forEach(([key, value]) => {
+            // Check if any element in the array has Checked = false
+            const uncheckedItems = value.filter(item => item.Checked === false);
+            if (uncheckedItems.length > 0) {
+                tell = false;
+            }
+        });
+    }
 
-    const val2 = props.extra_data.position_broker_Mismatch ;
+    const val2 = props.extra_data?.position_broker_Mismatch || {};
     
     for (const v in val2) {
-        if (val2.hasOwnProperty(v)) {
-            tell = tell && Object.keys(val2[v]).length === 0;
-        }
+        Object.entries(val2).forEach(([key, value]) => {
+            // Check if any element in the array has Checked = false
+            const uncheckedItems = value.filter(item => item.Checked === false);
+            if (uncheckedItems.length > 0) {
+                tell = false;
+            }
+        });
     }
     return tell;
 };

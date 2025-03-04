@@ -134,7 +134,10 @@ const downloadCSV = async (type) => {
 const data = ref(defaultData)
 const columnHelper = createColumnHelper()
 
-const columns_bp = [
+import { h } from 'vue'
+// ... existing imports ...
+
+const columns = [
     columnHelper.accessor(row => row.Symbol, {
         id: 'Symbol',
         cell: info => info.getValue(),
@@ -146,27 +149,22 @@ const columns_bp = [
         header: () => 'Quantity',
     }),
     columnHelper.accessor(row => row.Checked, {
-        id: 'Checked',
-        cell: info => info.getValue(),
-        header: () => 'Checked',
+    id: 'Checked',
+    cell: info => h('div', {
+        innerHTML: info.getValue()
+            ? '<span style="color: #22c55e; font-size: 1.2em;">✓</span>'  // Unicode checkmark
+            : '<span style="color: #ef4444; font-size: 1.2em;">✗</span>', // Unicode X
+        style: {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+        }
     }),
+    header: () => 'Checked',
+    enableSorting: true
+})
 ]
 
-
-const columns = [
-
-    columnHelper.accessor(row => row.Symbol, {
-        id: 'Symbol',
-        cell: info => info.getValue(),
-        header: () => 'Symbol',
-    }),
-    columnHelper.accessor(row => row.Quantity, {
-        id: 'Difference Quantity',
-        cell: info => info.getValue(),
-        header: () => 'Quantity',
-    }),
-
-]
 
 
 
@@ -346,7 +344,7 @@ onUnmounted(() => {
         <div v-else-if="Object.keys(fulldata[user]).length > 0 || Object.keys(posdata[user]).length > 0" class="mx-auto px-8 py-8 flex flex-col gap-8">
             <!-- <p class="table-heading">Position MisMatch : {{ user }}</p> -->
              <div v-if="Object.keys(fulldata[user]).length > 0">
-                <TanStackTestTable title="Broker Position MisMatch" :data="fulldata[user]" :columns="columns_bp" :hasColor="[]" :navigateTo="{}"
+                <TanStackTestTable title="Broker Position MisMatch" :data="fulldata[user]" :columns="columns" :hasColor="[]" :navigateTo="{}"
                 :showPagination="true" :hasRowcolor="{}" />
 
              </div>

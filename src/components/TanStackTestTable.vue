@@ -485,13 +485,18 @@ onUnmounted(() => {
                                             'green': cell.getValue() > 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
                                             'cursorpointer': tellnav(cell)
                                         }" @click="checkNavigate(cell)">
-                                        <template v-if="cell.getValue() !== undefined">
-                                            {{ typeof cell.getValue() === 'number' ? formatIndianNumber(cell.getValue())
-                                            : cell.getValue() }}
-                                        </template>
-
+                                        <FlexRender
+                                            v-if="cell.column.id === 'Checked'"
+                                            :render="cell.column.columnDef.cell"
+                                            :props="cell.getContext()"
+                                        />
                                         <template v-else>
-                                            N/A
+                                            <template v-if="cell.getValue() !== undefined">
+                                                {{ typeof cell.getValue() === 'number' ? formatIndianNumber(cell.getValue()) : cell.getValue() }}
+                                            </template>
+                                            <template v-else>
+                                                N/A
+                                            </template>
                                         </template>
                                     </td>
                                 </tr>
