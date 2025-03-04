@@ -104,6 +104,7 @@ const updateData = () => {
       PNL_PER_M: item['PNL Overall %'] !== undefined ? Number(item['PNL Overall %']) : 0,
       Peak_Margin: item['Peak Margin'] !== undefined ? item['Peak Margin'] : 0,
       Slippage: item.Slippage !== undefined ? item.Slippage : 0,
+      SlippagePer : item.SlippagePer !== undefined ? item.SlippagePer : 0,
       CompleteOrderCount: item.CompleteOrderCount !== undefined ? Number(item.CompleteOrderCount) : 0,
       openOrderCount: item.openOrderCount !== undefined ? Number(item.openOrderCount) : 0,
       RejectedOrderCount: item.Rejected_orders !== undefined ? Number(item.Rejected_orders) : 0,
@@ -427,7 +428,7 @@ onUnmounted(() => {
       <div class="my-8">
         <!-- <p class="table-heading">Accounts</p> -->
         <TanStackTestTable title="Accounts" :data="data" :columns="columns"
-          :hasColor="['IdealMTM', 'Day_PL', 'Slippage', 'PNL_PER_UM', 'PNL_PER_M','Slippage1','Slippage2','API DAY PNL','API NET PNL']" :navigateTo="NavigationMap"
+          :hasColor="['IdealMTM', 'Day_PL', 'Slippage','SlippagePer','PNL_PER_UM', 'PNL_PER_M','Slippage1','Slippage2','API DAY PNL','API NET PNL']" :navigateTo="NavigationMap"
           :showPagination=true :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }" />
 
 

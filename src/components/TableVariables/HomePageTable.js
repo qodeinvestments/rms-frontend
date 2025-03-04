@@ -62,6 +62,16 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'Slippage',
     }),
+    columnHelper.accessor(row=> row.SlippagePer,{
+
+        id: 'SlippagePer',
+        cell: info => {
+          const value = info.getValue(); // Get the value
+          return (typeof value === 'number' ? value : Number(value)).toFixed(2) + "%"; // Ensure it's a number and format
+        },
+        header: () => 'Slippage %',
+    }
+    ),
     columnHelper.accessor(row => row.Ideal_Margin, {
       id: 'Ideal Margin',
       cell: info => info.getValue(),
