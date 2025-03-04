@@ -79,6 +79,12 @@
                   <span class="text">Live Positions </span>
                 </a>
               </li>
+              <li :class="selected == 'OpenTrades' ? 'active' : ''" @click="changeSelected('OpenTrades')">
+                <a href="#">
+                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <span class="text">Open Trades </span>
+                </a>
+              </li>
             
             <!-- <li>
               <a href="#" :class="selected == 'Income' ? 'active' : ''" @click="changeSelected('Income')">
@@ -179,7 +185,8 @@ export default {
         'ServerData': '/serverData',
         'AdminPanel': '/adminPanel',
         'MarginUpdate':'/marginUpdate',
-        'LivePositions': '/livepositions'
+        'LivePositions': '/livepositions',
+        'OpenTrades':'/opentrades'
       }
 
     }
