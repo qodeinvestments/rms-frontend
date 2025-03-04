@@ -134,7 +134,7 @@ const downloadCSV = async (type) => {
 const data = ref(defaultData)
 const columnHelper = createColumnHelper()
 
-const columns = [
+const columns_bp = [
     columnHelper.accessor(row => row.Symbol, {
         id: 'Symbol',
         cell: info => info.getValue(),
@@ -153,6 +153,20 @@ const columns = [
 ]
 
 
+const columns = [
+
+    columnHelper.accessor(row => row.Symbol, {
+        id: 'Symbol',
+        cell: info => info.getValue(),
+        header: () => 'Symbol',
+    }),
+    columnHelper.accessor(row => row.Quantity, {
+        id: 'Difference Quantity',
+        cell: info => info.getValue(),
+        header: () => 'Quantity',
+    }),
+
+]
 
 
 
@@ -254,13 +268,7 @@ const givecolor=(option)=>{
          }
     }
     if(posdata.value){
-        for (const [key, value] of Object.entries(posdata.value)) {
-            if (value.length > 0) {
-                value.forEach(item => {
-                   if (item['Checked'] === false)return 'negativecolor'
-                });
-             }
-         }
+        if(option in posdata.value) if(posdata.value[option].length > 0 ) return 'negativecolor';
     }
     return '';
 }
