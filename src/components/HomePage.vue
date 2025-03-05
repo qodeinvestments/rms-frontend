@@ -113,7 +113,6 @@ const updateData = () => {
       NetQuantity: item.NetQuantity !== undefined ? Number(item.NetQuantity) : 0,
       Ideal_Margin: item.Live_Client_Margin !== undefined ? Number(item.Live_Client_Margin) : 0,
       VAR: item.Live_Client_Var !== undefined ? item.Live_Client_Var : 0,
-      Margin: item['Total Margin'] !== undefined ? item['Total Margin'] : 0, //item.Total Margin',
       Cash: item.cashAvailable !== undefined ? Number(item.cashAvailable) : 0,
       AvailableMargin: item.availableMargin !== undefined ? Number(item.availableMargin) : 0,
       Used_Margin: item.marginUtilized !== undefined ? item.marginUtilized : 0,

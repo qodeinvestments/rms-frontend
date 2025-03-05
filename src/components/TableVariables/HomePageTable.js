@@ -99,11 +99,6 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'Peak Margin',
     }),
-    columnHelper.accessor(row => row.Margin, {
-      id: ' Margin',
-      cell: info => info.getValue(),
-      header: () => 'Margin',
-    }),
     columnHelper.accessor(row => row.Portfolio_Value, {
       id: 'Portfolio Value',
       cell: info => info.getValue(),
