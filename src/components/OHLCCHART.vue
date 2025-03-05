@@ -56,13 +56,6 @@
           Indicators
         </button>
 
-        <!-- Just an example extra button -->
-        <button 
-          @click="handleNewButton"
-          class="settings-button"
-        >
-          Show Me
-        </button>
 
         <!-- Apply config -->
         <button 
@@ -335,11 +328,6 @@ const updatePriceDisplay = (candleData, psarValue, maValue) => {
   }
 }
 
-
-// Example new button handler
-const handleNewButton = () => {
-  alert('New button clicked!')
-}
 
 // Update and submit config
 const updateIndicators = () => {
