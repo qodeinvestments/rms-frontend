@@ -56,6 +56,15 @@
           Indicators
         </button>
 
+        <!-- Just an example extra button -->
+        <button 
+          @click="handleNewButton"
+          class="settings-button"
+        >
+          Show Me
+        </button>
+
+        <!-- Apply config -->
         <button 
           @click="submitConfig"
           class="submit-button"
@@ -83,7 +92,7 @@
       </div>
 
       <!-- Loading State -->
-      <div v-if="!data || Object.keys(data).length === 0" class="loading-overlay">
+      <div v-if="!data || data.length === 0" class="loading-overlay">
         <div class="loading-spinner"></div>
       </div>
     </div>
@@ -130,6 +139,23 @@
                         class="number-input"
                       />
                     </div>
+                    <!-- New: PSAR line selection dropdown -->
+                    <div class="setting-group">
+                      <label for="psarLine">PSAR Variation</label>
+                      <select 
+                        id="psarLine" 
+                        v-model="indicators.psar.selectedPsarLine"
+                        class="number-input"
+                      >
+                        <option 
+                          v-for="line in psarLines" 
+                          :key="line" 
+                          :value="line"
+                        >
+                          {{ line }}
+                        </option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
@@ -172,22 +198,25 @@
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { createChart } from 'lightweight-charts'
 
+// Emits
 const emit = defineEmits(['submit-config'])
+
+// Props
 const props = defineProps({
   data: {
-    type: Object,
-    required: true
-  },
-  show_change_menu:{
-    type:Boolean,
+    type: Array,
     required: true,
-    default:true
+    default: () => [],
+  },
+  show_change_menu: {
+    type: Boolean,
+    required: true,
+    default: true
   }
 })
 
 // Chart refs and instances
 const chartContainer = ref(null)
-// Chart instance variables
 let chart = null
 let candlestickSeries = null
 let psarSeries = null
@@ -196,13 +225,8 @@ let lastCandleData = null
 let lastPsarValue = null
 let lastMaValue = null
 
-
-
-
-// Add this with other refs
+// Loading and UI State
 const isLoading = ref(false)
-
-// UI State
 const isSymbolDropdownOpen = ref(false)
 const isTimeframeDropdownOpen = ref(false)
 const isIndicatorModalOpen = ref(false)
@@ -211,6 +235,22 @@ const isIndicatorModalOpen = ref(false)
 const symbols = ['NIFTY', 'SENSEX' ,'BANKNIFTY' , 'MIDCAPNIFTY' ,'FINNIFTY']
 const timeframes = ['1m', '5m', '15m', '1h', '1d']
 
+// For PSAR line selection:
+const psarLines = [
+  'psar1',
+  'psar2',
+  'psar3',
+  'psar4',
+  'psar5',
+  'psar6',
+  'psar7',
+  'psar8',
+  'psar9',
+  'psar10',
+  'psar11',
+  'psar12',
+  'psar13'
+]
 
 // Configuration state
 const config = ref({
@@ -224,7 +264,9 @@ const indicators = ref({
   psar: {
     enabled: false,
     af: 0.001,
-    maxAf: 0.001
+    maxAf: 0.001,
+    // which psar line is currently selected
+    selectedPsarLine: 'psar1'
   },
   ma: {
     enabled: false,
@@ -261,19 +303,18 @@ const showIndicatorModal = () => {
 const closeIndicatorModal = () => {
   isIndicatorModalOpen.value = false
 }
-
 const saveIndicatorSettings = () => {
   updateIndicators()
   closeIndicatorModal()
+  // Force the chart to re-check which PSAR line we want
+  updateChartData()
 }
-
-// Price display update function
+// Price display updates
 const updatePriceDisplay = (candleData, psarValue, maValue) => {
   const priceDisplay = document.querySelector('.price-display')
   if (!priceDisplay) return
 
   const priceValues = priceDisplay.querySelectorAll('.price-value')
-  
   if (!candleData) {
     priceValues.forEach(value => value.textContent = '-')
     return
@@ -294,6 +335,12 @@ const updatePriceDisplay = (candleData, psarValue, maValue) => {
   }
 }
 
+
+// Example new button handler
+const handleNewButton = () => {
+  alert('New button clicked!')
+}
+
 // Update and submit config
 const updateIndicators = () => {
   config.value.indicators = []
@@ -303,7 +350,9 @@ const updateIndicators = () => {
       name: 'Psar',
       setting: {
         af: Number(indicators.value.psar.af),
-        'max-af': Number(indicators.value.psar.maxAf)
+        'max-af': Number(indicators.value.psar.maxAf),
+        // Let our backend or other code know which psar line is selected
+        psarLine: indicators.value.psar.selectedPsarLine
       }
     })
   }
@@ -354,7 +403,7 @@ const createChartInstance = () => {
     },
   })
 
-  // Main candlestick series is always created
+  // Main candlestick series
   candlestickSeries = chart.addCandlestickSeries({
     upColor: '#26a69a',
     downColor: '#ef5350',
@@ -382,46 +431,58 @@ const createChartInstance = () => {
   })
 }
 
+// Update chart data to the new array-of-objects format
 const updateChartData = () => {
-  if (!props.data || !props.data.timestamp) return
+  if (!Array.isArray(props.data) || props.data.length === 0) return
 
   // Transform and set candlestick data
-  const transformedData = Object.keys(props.data.timestamp).map(index => ({
-    time: new Date(props.data.timestamp[index]).getTime() / 1000,
-    open: props.data.open[index],
-    high: props.data.high[index],
-    low: props.data.low[index],
-    close: props.data.close[index]
-  }))
+  // "o", "h", "l", "c" from each data item
+  const transformedData = props.data.map(item => {
+    return {
+      time: new Date(item.timestamp).getTime() / 1000,
+      open: item.o,
+      high: item.h,
+      low: item.l,
+      close: item.c
+    }
+  })
   candlestickSeries.setData(transformedData)
 
-  // Handle PSAR data if it exists
-  if (props.data.psar) {
-    // Create PSAR series if it doesn't exist
-    if (!psarSeries) {
-      psarSeries = chart.addLineSeries({
-        color: '#2962FF',
-        lineWidth: 2,
-        pointsVisible: true,
-        pointSize: 4,
-        title: 'PSAR'
-      })
+  // Handle PSAR
+  const psarKey = indicators.value.psar.selectedPsarLine // e.g. 'psar1'
+  if (
+    indicators.value.psar.enabled &&
+    props.data.some(d => d[psarKey] !== undefined)
+  ) {
+    // If psarSeries is already on the chart, remove it first
+    if (psarSeries) {
+      chart.removeSeries(psarSeries)
+      psarSeries = null
     }
-
-    const psarData = Object.keys(props.data.timestamp).map(index => ({
-      time: new Date(props.data.timestamp[index]).getTime() / 1000,
-      value: props.data.psar[index]
+    // Create new PSAR series for the selected line
+    psarSeries = chart.addLineSeries({
+      color: '#2962FF',
+      lineWidth: 2,
+      pointsVisible: true,
+      pointSize: 4,
+      title: psarKey.toUpperCase()
+    })
+    const psarData = props.data.map(item => ({
+      time: new Date(item.timestamp).getTime() / 1000,
+      value: item[psarKey], 
     }))
     psarSeries.setData(psarData)
   } else if (psarSeries) {
-    // Remove PSAR series if it exists but we don't have data
+    // Remove PSAR series if no psar data or psar not enabled
     chart.removeSeries(psarSeries)
     psarSeries = null
   }
 
-  // Handle MA data if it exists
-  if (props.data.ma) {
-    // Create MA series if it doesn't exist
+  // Handle MA
+  if (
+    indicators.value.ma.enabled &&
+    props.data.some(d => d.ma !== undefined)
+  ) {
     if (!maSeries) {
       maSeries = chart.addLineSeries({
         color: '#FF9800',
@@ -429,14 +490,13 @@ const updateChartData = () => {
         title: 'MA'
       })
     }
-
-    const maData = Object.keys(props.data.timestamp).map(index => ({
-      time: new Date(props.data.timestamp[index]).getTime() / 1000,
-      value: props.data.ma[index]
+    const maData = props.data.map(item => ({
+      time: new Date(item.timestamp).getTime() / 1000,
+      value: item.ma
     }))
     maSeries.setData(maData)
   } else if (maSeries) {
-    // Remove MA series if it exists but we don't have data
+    // Remove MA series if none found or MA not enabled
     chart.removeSeries(maSeries)
     maSeries = null
   }
@@ -477,8 +537,8 @@ onBeforeUnmount(() => {
       maSeries = null
     }
     chart.remove()
-    window.removeEventListener('resize', handleResize)
-    document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('resize', handleResize)
+  document.removeEventListener('click', handleClickOutside)
   }
 })
 
@@ -489,17 +549,17 @@ const handleResize = () => {
 }
 
 watch(() => props.data, () => {
-  if (chart) {
-    isLoading.value = true
-    try {
-      updateChartData()
-    } finally {
+    if (chart) {
+      isLoading.value = true
+      try {
+        updateChartData()
+      } finally {
       // Add a small delay to make the transition smoother
-      setTimeout(() => {
-        isLoading.value = false
-      }, 300)
+        setTimeout(() => {
+          isLoading.value = false
+        }, 300)
+      }
     }
-  }
 }, { deep: true })
 
 
@@ -942,6 +1002,4 @@ watch(() => props.data, () => {
     width: 100%;
   }
 }
-
-
 </style>
