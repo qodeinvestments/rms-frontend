@@ -122,8 +122,8 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'AvailableMargin',
     }),
-    columnHelper.accessor(row => row.Slippage1, {
-      id: 'Slippage1',
+    columnHelper.accessor(row => row.IdealTurnover, {
+      id: 'IdealTurnover',
       cell: info => info.getValue(),
       header: () => 'Ideal Slippage 0.5 MTM',
     }),

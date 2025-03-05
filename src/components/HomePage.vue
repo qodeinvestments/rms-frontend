@@ -98,7 +98,7 @@ const updateData = () => {
       AccountId : item.AccountId || '',
       IdealMTM: item.ideal_MTM !== undefined ? item.ideal_MTM : 0,
       Day_PL: item.MTM !== undefined ? item.MTM : 0,
-      Slippage1:item.Slippage1!==undefined?item.Slippage1:0,
+      IdealTurnover:item.IdealTurnover!==undefined?item.IdealTurnover:0,
       Slippage2:item.Slippage2!==undefined?item.Slippage2:0,
       PNL_PER_UM: item['PNL Utilized %'] !== undefined ? Number(item['PNL Utilized %']) : 0,
       PNL_PER_M: item['PNL Overall %'] !== undefined ? Number(item['PNL Overall %']) : 0,
@@ -428,7 +428,7 @@ onUnmounted(() => {
       <div class="my-8">
         <!-- <p class="table-heading">Accounts</p> -->
         <TanStackTestTable title="Accounts" :data="data" :columns="columns"
-          :hasColor="['IdealMTM', 'Day_PL', 'Slippage','SlippagePer','PNL_PER_UM', 'PNL_PER_M','Slippage1','Slippage2','API DAY PNL','API NET PNL']" :navigateTo="NavigationMap"
+          :hasColor="['IdealMTM', 'Day_PL', 'Slippage','SlippagePer','PNL_PER_UM', 'PNL_PER_M','IdealTurnover','Slippage2','API DAY PNL','API NET PNL']" :navigateTo="NavigationMap"
           :showPagination=true :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }" />
 
 
