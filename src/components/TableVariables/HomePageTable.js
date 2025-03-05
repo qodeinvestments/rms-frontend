@@ -120,7 +120,7 @@ export const columns = [
     columnHelper.accessor(row => row.IdealTurnover, {
       id: 'IdealTurnover',
       cell: info => info.getValue(),
-      header: () => 'Ideal Slippage 0.5 MTM',
+      header: () => 'Ideal Turnover',
     }),
     columnHelper.accessor(row => row.Slippage2 ,{
       id: 'Slippage2',
