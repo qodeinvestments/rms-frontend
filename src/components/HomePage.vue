@@ -400,12 +400,11 @@ onUnmounted(() => {
           <LoadingSpinner />
           <p class="loading-text">Loading chart data...</p>
         </div>
-        <OHLCChart 
+        <!-- <OHLCChart 
           v-else-if="chartData"
           :data="chartData" 
-          :show-change-menu="false"
           @submit-config="(config) => fetchDiffData({...config, symbol: formatIndexName(selectedIndex)})"
-        />
+        /> -->
       </div>
     </transition>
 

@@ -8,7 +8,7 @@
       </div>
     </div>
 
-    <div v-if="show_change_menu" class="chart-header">
+    <div  class="chart-header">
       <h2 class="chart-title">Market Data</h2>
       <div class="controls-container">
         <!-- Symbol Dropdown -->
@@ -200,11 +200,6 @@ const props = defineProps({
     type: Array,
     required: true,
     default: () => [],
-  },
-  show_change_menu: {
-    type: Boolean,
-    required: true,
-    default: true
   }
 })
 

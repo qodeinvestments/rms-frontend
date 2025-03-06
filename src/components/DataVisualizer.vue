@@ -3,6 +3,8 @@
 import { onMounted, ref } from 'vue';
 import Histogram from './Histogram.vue';
 import OHLCChart from './OHLCCHART.vue';
+import TanStackTestTable from './TanStackTestTable.vue'
+import { columns } from '../components/TableVariables/DataVisualizer.js'; 
 
 const WS7L = ref([]);
 const WS8L = ref([]);
@@ -100,7 +102,12 @@ onMounted(() => {
         </div>
   
         <div class="dashboard-card">
-          <OHLCChart :data="chartData" @submit-config="fetchDiffData($event)" />
+          <OHLCChart :data="chartData['Data']" @submit-config="fetchDiffData($event)" />
+        </div>
+        <div class="my-8" v-if="chartData['table']">
+          
+            <TanStackTestTable title="PsarTable" :data="chartData['table']" :columns="columns" :hasColor="[]"
+                :navigateTo="[]" :showPagination=true :showPin="true"/>
         </div>
       </div>
     </div>

@@ -163,7 +163,7 @@ const toggleCheckerFilter = () => {
 
         <div class="my-8" v-if="filteredSignalBookData.length">
             <!-- <p class="table-heading">Signal Book</p> -->
-            <TanStackTestTable title="Signal Book" :data="filteredSignalBookData" :columns="columns" :hasColor="[]"
+            <TanStackTestTable title="PsarTable" :data="filteredSignalBookData" :columns="columns" :hasColor="[]"
                 :navigateTo="[]" :showPagination=true :showPin="true"/>
         </div>
         <div v-if="histogram.length > 0" class="histogram-container">

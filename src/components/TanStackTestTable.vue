@@ -486,7 +486,7 @@ onUnmounted(() => {
                                             'cursorpointer': tellnav(cell)
                                         }" @click="checkNavigate(cell)">
                                         <FlexRender
-                                            v-if="cell.column.id === 'Checked'"
+                                            v-if="cell.column.id === 'Checked' || cell.column.id === 'Direction'"
                                             :render="cell.column.columnDef.cell"
                                             :props="cell.getContext()"
                                         />
