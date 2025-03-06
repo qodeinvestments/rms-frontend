@@ -157,7 +157,7 @@ const toggleCheckerFilter = () => {
             <button 
                 @click="toggleCheckerFilter" 
                 class="custom-checker-btn">
-                {{ showOnlyUnchecked ? 'Showing Unchecked Only' : 'Show All Items' }}
+                {{ showOnlyUnchecked ? 'Show All Items':'Showing Unchecked Only' }}
             </button>
         </div>
 
