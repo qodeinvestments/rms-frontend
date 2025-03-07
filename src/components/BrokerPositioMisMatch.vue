@@ -108,7 +108,7 @@ const downloadCSV = async (type) => {
                 const file_name = `broker_position_mismatch_${formattedDate}.xlsx`;
                 
                 const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.json_to_sheet(data.data);
+                const ws = XLSX.utils.json_to_sheet(data.data, { header: data.columns });
                 XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
                 XLSX.writeFile(wb, file_name);
             } catch (error) {
