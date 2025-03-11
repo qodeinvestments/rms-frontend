@@ -42,6 +42,11 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { inject } from 'vue';
+
+
+const triggerToast = inject('triggerToast')
+
 
 const userAnd = ref(true);
 const router = useRouter();
@@ -137,6 +142,9 @@ const calculate_broker_position_mismatch = () => {
                 tell = false;
             }
         });
+    }
+    if(!tell){
+        triggerToast('Broker Position Mismatch', 'warning')
     }
     return tell;
 };
