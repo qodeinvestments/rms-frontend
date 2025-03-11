@@ -141,8 +141,7 @@ export const zerodha_position_book_columns = (() => {
 })();
 
 
-// const xts_order_book_columns = ['OrderGeneratedDateTime', 'OrderSide', 'TradingSymbol',  'OrderPrice', 'OrderQuantity',  'OrderStatus', 'OrderAverageTradedPrice','OrderType', 'ProductType', 'LeavesQuantity', 'CumulativeQuantity', 'OrderDisclosedQuantity', 'ExchangeTransactTime',  'LastUpdateDateTime', 'OrderExpiryDate', 'CancelRejectReason', 'OrderUniqueIdentifier', 'OrderLegStatus', 'BoLegDetails', 'IsSpread', 'BoEntryOrderId', 'ApiOrderSource', 'MessageCode', 'MessageVersion', 'TokenID', 'ApplicationType', 'SequenceNumber', 'IsAMO','LoginID', 'ClientID', 'AppOrderID', 'OrderReferenceID', 'GeneratedBy', 'ExchangeOrderID', 'OrderCategoryType', 'ExchangeSegment', 'ExchangeInstrumentID','TimeInForce','OrderStopPrice']
-const xts_order_book_columns=['buy_price','buy_qty','buy_value', 'ltp','net_price','net_qty',   'net_value','pnl','sell_price','sell_qty','sell_value','symbol','turnover']
+const xts_order_book_columns = ['OrderGeneratedDateTime', 'OrderSide', 'TradingSymbol',  'OrderPrice', 'OrderQuantity',  'OrderStatus', 'OrderAverageTradedPrice','OrderType', 'ProductType', 'LeavesQuantity', 'CumulativeQuantity', 'OrderDisclosedQuantity', 'ExchangeTransactTime',  'LastUpdateDateTime', 'OrderExpiryDate', 'CancelRejectReason', 'OrderUniqueIdentifier', 'OrderLegStatus', 'BoLegDetails', 'IsSpread', 'BoEntryOrderId', 'ApiOrderSource', 'MessageCode', 'MessageVersion', 'TokenID', 'ApplicationType', 'SequenceNumber', 'IsAMO','LoginID', 'ClientID', 'AppOrderID', 'OrderReferenceID', 'GeneratedBy', 'ExchangeOrderID', 'OrderCategoryType', 'ExchangeSegment', 'ExchangeInstrumentID','TimeInForce','OrderStopPrice']
 export const xts_order_book=xts_order_book_columns.map(column => {
   return columnHelper.accessor(row => row[column], {
     id: column,
