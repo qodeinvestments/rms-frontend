@@ -144,7 +144,12 @@ const calculate_broker_position_mismatch = () => {
         });
     }
     if(!tell){
-        triggerToast('Broker Position Mismatch', 'warning')
+        const now = new Date();
+        const minutes = now.getMinutes();
+        const seconds = now.getSeconds();
+        if (minutes % 5 === 0 && seconds === 0) {
+            triggerToast('Broker Position Mismatch', 'warning')
+        } 
     }
     return tell;
 };
