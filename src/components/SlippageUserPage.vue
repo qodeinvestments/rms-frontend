@@ -544,5 +544,20 @@
     color: #dc2626;
     font-weight: 500;
   }
+
+  /* Freeze (sticky) the first column in both header and body rows */
+.admin-table thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2; /* Higher z-index so it stays above body cells */
+  background-color: #f3f4f6; /* Or use your header background color */
+}
+
+.admin-table tbody td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background-color: #ffffff; /* Usually match your table background */
+}
   </style>
   
