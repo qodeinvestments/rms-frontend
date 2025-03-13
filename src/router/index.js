@@ -15,6 +15,7 @@ import LivePositions from '../components/TradingMonitor.vue'
 import MarginSettings from '../components/MarginSettings.vue'
 import BrokerPositioMisMatch from '../components/BrokerPositioMisMatch.vue'
 import OpenTrades from '../components/OpenTrades.vue'
+import SlippageUserPage from '../components/SlippageUserPage.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -98,6 +99,11 @@ const router = createRouter({
       path: '/opentrades',
       name:'OpenTrades',
       component:OpenTrades
+    },
+    {
+      path:'/slippageUserPage',
+      name:'SlippageUserPage',
+      component:SlippageUserPage
     }
     // {
     //   path: '/about',

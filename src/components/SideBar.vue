@@ -85,6 +85,12 @@
                   <span class="text">Overnight Trades </span>
                 </a>
               </li>
+              <li :class="selected == 'SlippageUserPage' ? 'active' : ''" @click="changeSelected('SlippageUserPage')">
+                <a href="#">
+                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <span class="text">Slippage User Page </span>
+                </a>
+              </li>
             
             <!-- <li>
               <a href="#" :class="selected == 'Income' ? 'active' : ''" @click="changeSelected('Income')">
@@ -186,7 +192,8 @@ export default {
         'AdminPanel': '/adminPanel',
         'MarginUpdate':'/marginUpdate',
         'LivePositions': '/livepositions',
-        'OpenTrades':'/opentrades'
+        'OpenTrades':'/opentrades',
+        'SlippageUserPage':'/slippageUserPage'
       }
 
     }

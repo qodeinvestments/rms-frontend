@@ -94,15 +94,15 @@ const connectToSSE = () => {
       const message = JSON.parse(event.data);
       let ar2 = message["time"];
       if (past_time_client.value === 0) past_time_client.value = ar2;
-      if (past_time_client.value != 0) {
-        let date1 = new Date(past_time_client.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
-        let date2 = new Date(ar2.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
-        let diffInMs = date2 - date1;
-        let diffInSeconds = diffInMs / 1000;
-        client_latency.value = diffInSeconds;
-        max_client_latency.value = Math.max(max_client_latency.value, client_latency.value)
-        past_time_client.value = ar2;
-      }
+      // if (past_time_client.value != 0) {
+      //   let date1 = new Date(past_time_client.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+      //   let date2 = new Date(ar2.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+      //   let diffInMs = date2 - date1;
+      //   let diffInSeconds = diffInMs / 1000;
+      //   client_latency.value = diffInSeconds;
+      //   max_client_latency.value = Math.max(max_client_latency.value, client_latency.value)
+      //   past_time_client.value = ar2;
+      // }
 
       handleMessage(message)
     }
