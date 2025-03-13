@@ -53,7 +53,7 @@
                 </th>
               </tr>
               <!-- Header Row (clickable for sorting) -->
-              <tr class="header-row">
+              <tr class="sum-row">
                 <th
                   v-for="column in allColumns"
                   :key="'header-' + column"
