@@ -19,19 +19,11 @@
           <div class="date-filter-container">
             <div class="date-input-group">
               <label>Start Date:</label>
-              <input 
-                type="date" 
-                v-model="startDate" 
-                class="date-input"
-              />
+              <input type="date" v-model="startDate" class="date-input" />
             </div>
             <div class="date-input-group">
               <label>End Date:</label>
-              <input 
-                type="date" 
-                v-model="endDate" 
-                class="date-input"
-              />
+              <input type="date" v-model="endDate" class="date-input" />
             </div>
           </div>
         </div>
@@ -49,24 +41,42 @@
         </div>
         
         <!-- Performance Data Table -->
-        <div 
-          v-if="!loading && !error && columns.length > 0" 
-          class="table-container"
-        >
+        <div v-if="!loading && !error && allColumns.length > 0" class="table-container">
           <table class="admin-table">
             <thead>
-              <tr>
-                <th v-for="column in columns" :key="column">{{ column }}</th>
+              <!-- Summary Row (fixed) -->
+              <tr class="sum-row">
+                <th 
+                    v-for="column in allColumns" 
+                    :key="'sum-' + column"
+                    :class="column !== 'Date' ? (columnSums[column] > 0 ? 'positive-value' : (columnSums[column] < 0 ? 'negative-value' : '')) : ''"
+                >
+                    {{ column === 'Date' ? '' : formatPercentage(columnSums[column] || 0) }}
+                </th>
+              </tr>
+
+              <!-- Header Row (clickable for sorting) -->
+              <tr class="header-row">
+                <th 
+                  v-for="column in allColumns" 
+                  :key="'header-' + column" 
+                  @click="sortByColumn(column)"
+                  class="sortable-header"
+                >
+                  {{ column }}
+                  <span v-if="sortColumn === column && sortOrder === 'asc'"> ▲</span>
+                  <span v-else-if="sortColumn === column && sortOrder === 'desc'"> ▼</span>
+                </th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(row, index) in filteredPerformanceData" :key="index">
-                <td
-                  v-for="column in columns"
+              <tr v-for="(row, index) in sortedFilteredPerformanceData" :key="index">
+                <td 
+                  v-for="column in allColumns" 
                   :key="`${index}-${column}`"
-                  :class="getPerformanceClass(row[column])"
+                  :class="getPerformanceClass(column === 'Date' ? row.date : row[column])"
                 >
-                  {{ column !== 'Date' ? formatPercentage(row[column]) : formatDate(row[column]) }}
+                  {{ column === 'Date' ? formatDate(row.date) : formatPercentage(row[column]) }}
                 </td>
               </tr>
             </tbody>
@@ -84,23 +94,49 @@
   const error = ref(null);
   const performanceData = ref([]);
   const otherdata = ref([]);
-  const columns = ref([]);
   const searchQuery = ref('');
   const startDate = ref('');
   const endDate = ref('');
   
-  // Sample data - this would normally come from an API
+  // Sorting state
+  const sortColumn = ref(null); // The current sorted column (e.g., 'Maverick Fund' or 'Date')
+  const sortOrder = ref(null);  // 'asc', 'desc', or null
+  
+  // --- Sample Data ---
+  // (In a real scenario, your API returns data with a "Date" key)
   const sampleData = [
-    { date: '11-02-2025', 'Maverick Fund': -5.022643569, 'Kavan Marwadi Prop': -0.11257554 },
-    { date: '13-03-2025', 'Maverick Fund': 0, 'Kavan Marwadi Prop': -0.06686624 },
-    { date: '12-03-2025', 'Maverick Fund': 0, 'Kavan Marwadi Prop': -0.018489654 }
+    { Date: '11-02-2025', 'Maverick Fund': -5.022643569, 'Kavan Marwadi Prop': -0.11257554 },
+    { Date: '13-03-2025', 'Maverick Fund': 0, 'Kavan Marwadi Prop': -0.06686624 },
+    { Date: '12-03-2025', 'Maverick Fund': 0, 'Kavan Marwadi Prop': -0.018489654 }
   ];
   
-  // Immediately filters based on search and date range if set
+  // allColumns: Returns an array with "Date" as the first header, then the other keys.
+  const allColumns = computed(() => {
+    if (performanceData.value.length === 0) return [];
+    // Our data now only has a "date" property (lowercase) for the date
+    return ['Date', ...Object.keys(performanceData.value[0]).filter(key => key !== 'date')];
+  });
+  
+  // columnSums: Compute the sum for each numeric column (skip date)
+  const columnSums = computed(() => {
+    const sums = {};
+    filteredPerformanceData.value.forEach(row => {
+      for (const key in row) {
+        if (key === 'date') continue;
+        const num = parseFloat(row[key]);
+        if (!isNaN(num)) {
+          sums[key] = (sums[key] || 0) + num;
+        }
+      }
+    });
+    return sums;
+  });
+  
+  // filteredPerformanceData: Filter data by search and date
   const filteredPerformanceData = computed(() => {
     let filtered = [...performanceData.value];
     
-    // Search filter
+    // Apply search filter
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase();
       filtered = filtered.filter(row => {
@@ -113,11 +149,10 @@
       });
     }
     
-    // Date filter if startDate + endDate are selected
+    // Apply date filter if both startDate and endDate are provided
     if (startDate.value && endDate.value) {
       const start = toMidnightLocal(startDate.value);
       const end = toMidnightLocal(endDate.value);
-  
       filtered = filtered.filter(row => {
         const rowDate = parseRowDate(row.date);
         if (!rowDate) return false;
@@ -128,13 +163,53 @@
     return filtered;
   });
   
-  // Helper: Convert 'YYYY-MM-DD' to a JS Date and set to local midnight
+  // sortedFilteredPerformanceData: Sort filtered data based on sortColumn and sortOrder
+  const sortedFilteredPerformanceData = computed(() => {
+    let data = [...filteredPerformanceData.value];
+    if (sortColumn.value && sortOrder.value) {
+      data.sort((a, b) => {
+        if (sortColumn.value === 'Date') {
+          const dateA = parseRowDate(a.date);
+          const dateB = parseRowDate(b.date);
+          return sortOrder.value === 'asc' ? dateA - dateB : dateB - dateA;
+        } else {
+          const valA = parseFloat(a[sortColumn.value]);
+          const valB = parseFloat(b[sortColumn.value]);
+          if (isNaN(valA) || isNaN(valB)) return 0;
+          return sortOrder.value === 'asc' ? valA - valB : valB - valA;
+        }
+      });
+    }
+    return data;
+  });
+  
+  // sortByColumn: Toggle sort order on column header click
+  function sortByColumn(col) {
+    if (sortColumn.value !== col) {
+      sortColumn.value = col;
+      sortOrder.value = 'asc';
+    } else {
+      if (sortOrder.value === 'asc') {
+        sortOrder.value = 'desc';
+      } else if (sortOrder.value === 'desc') {
+        sortColumn.value = null;
+        sortOrder.value = null;
+      } else {
+        sortOrder.value = 'asc';
+      }
+    }
+  }
+  
+  // --- Helper Functions ---
+  
+  // Convert 'YYYY-MM-DD' string to Date at local midnight
   function toMidnightLocal(dateStr) {
     const d = new Date(dateStr);
     d.setHours(0, 0, 0, 0);
     return d;
   }
   
+  // Parse a row's date (assumed to be "YYYY-MM-DD")
   function parseRowDate(dateStr) {
     if (!dateStr) return null;
     const [year, month, day] = dateStr.split('-').map(Number);
@@ -143,60 +218,58 @@
     return d;
   }
   
-  // Format date for display (already "DD-MM-YYYY" if your API sends it that way)
+  // Format date for display (convert "YYYY-MM-DD" to "DD-MM-YYYY")
   const formatDate = (dateStr) => {
-    return dateStr;
+    if (!dateStr) return '';
+    const [year, month, day] = dateStr.split('-');
+    return `${day}-${month}-${year}`;
   };
   
-  // Helper function to format percentages
+  // Format numeric values as percentages
   const formatPercentage = (value) => {
     const numericValue = parseFloat(value);
     if (isNaN(numericValue)) return '0.0000%';
     return numericValue.toFixed(4) + '%';
   };
   
-  // Helper function to get CSS class based on performance
+  // Get CSS class based on value
   const getPerformanceClass = (value) => {
     return value < 0 ? 'negative-value' : value > 0 ? 'positive-value' : '';
   };
   
-  // Extract columns
-  const extractColumns = (data) => {
-    if (!data || data.length === 0) return [];
-    const firstRow = data[0];
-    return Object.keys(firstRow).filter(key => key !== 'date');
-  };
+  // --- Data Fetching Functions ---
   
-  // Example of fetching data, renaming "Date" -> "date"
+  // Fetch performance data: simulate API call and map raw data to use "date" property only.
   const fetchPerformanceData = async () => {
     loading.value = true;
     error.value = null;
-    
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
-  
-      // Suppose the API returns an array of objects with "Date" key:
-      // [ { "Date": "2025-02-11", "Maverick Fund": ... }, ... ]
-      // Rename "Date" -> "date"
+      // Suppose the API returns an array of objects with "Date" key.
+      // Uncomment the next line to use sampleData:
+      // otherdata.value = sampleData;
+      // Map each item: remove the original "Date" key and add a new "date" property.
       const raw = otherdata.value;
-      performanceData.value = raw.map(item => ({
-        ...item,
-        date: item.Date, 
-      }));
-  
-      columns.value = extractColumns(performanceData.value);
+      performanceData.value = raw.map(item => {
+        const { Date, ...rest } = item; // remove the original Date property
+        return {
+          ...rest,
+          date: Date, // new property "date"
+        };
+      });
     } catch (err) {
       error.value = err.message || 'Failed to fetch performance data';
+      console.error('Error fetching performance data:', err);
     } finally {
       loading.value = false;
     }
   };
   
+  // Generic fetch function
   const fetchData = async (endpoint, stateRef) => {
     try {
       const token = localStorage.getItem('access_token');
       if (!token) throw new Error('User not authenticated');
-  
       const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
         method: 'GET',
         headers: {
@@ -204,12 +277,10 @@
           'Content-Type': 'application/json',
         },
       });
-  
       if (!response.ok) {
         const errorMessage = await response.text();
         throw new Error(`Error fetching ${endpoint}: ${errorMessage}`);
       }
-  
       const data = await response.json();
       stateRef.value = data || [];
     } catch (err) {
@@ -218,24 +289,20 @@
     }
   };
   
+  // Fetch slippage data and assign to otherdata
   const fetchSlippage = () => fetchData('getuserSlippage', otherdata);
   
-  // Lifecycle
+  // --- Lifecycle ---
+  
   onMounted(async () => {
-    // Fetch real data from the endpoint
     await fetchSlippage();
     console.log('Slippage response:', otherdata.value);
-    
-    // Then fetch performance data
     await fetchPerformanceData();
-    
-    // Set default date range to cover all data
+    // Set default date range based on performanceData dates
     if (performanceData.value.length > 0) {
       const dateValues = performanceData.value.map(row => parseRowDate(row.date));
       const minDate = new Date(Math.min(...dateValues));
       const maxDate = new Date(Math.max(...dateValues));
-      
-      // Format for <input type="date">
       startDate.value = `${minDate.getFullYear()}-${String(minDate.getMonth() + 1).padStart(2, '0')}-${String(minDate.getDate()).padStart(2, '0')}`;
       endDate.value = `${maxDate.getFullYear()}-${String(maxDate.getMonth() + 1).padStart(2, '0')}-${String(maxDate.getDate()).padStart(2, '0')}`;
     }
@@ -243,22 +310,19 @@
   </script>
   
   <style scoped>
-  /* 
-    If your sidebar is fixed at ~240px wide, add margin-left so content doesn’t go behind it.
-    Adjust as needed for your layout. 
-  */
+  /* Container styling */
   .admin-container {
     padding: 20px;
     min-height: 100vh;
-    background: #f9fafb; 
+    background: #f9fafb;
     box-sizing: border-box;
   }
   
-  /* A card-like container for your content */
+  /* Card-like container */
   .admin-card {
     background-color: #ffffff;
     border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
@@ -271,7 +335,7 @@
     color: #111827;
   }
   
-  /* Actions section: flex layout with spacing */
+  /* Actions section */
   .actions-section {
     display: flex;
     flex-wrap: wrap;
@@ -280,7 +344,6 @@
     margin-bottom: 20px;
   }
   
-  /* Search input styling */
   .search-container {
     flex: 1;
     min-width: 200px;
@@ -297,7 +360,6 @@
     border-color: #4c86f9;
   }
   
-  /* Date filter container styling */
   .date-filter-container {
     display: flex;
     gap: 10px;
@@ -320,8 +382,6 @@
     border-color: #4c86f9;
   }
   
-  /* No filter button, so we removed that code */
-  
   /* Loading state */
   .loading-state {
     display: flex;
@@ -343,7 +403,7 @@
     100% { transform: rotate(360deg); }
   }
   
-  /* Error message styling */
+  /* Error message */
   .error-message {
     padding: 15px;
     background-color: #ffecec;
@@ -354,8 +414,6 @@
     justify-content: space-between;
     align-items: center;
   }
-  
-  /* Retry button (same styling as filter-button) */
   .retry-button {
     padding: 8px 16px;
     background-color: #ff6b6b;
@@ -368,32 +426,36 @@
     background-color: #e55c5c;
   }
   
-  /* Scrollable table container with horizontal + vertical scrolling */
+  /* Table container with scrolling */
   .table-container {
     margin-top: 10px;
     border: 1px solid #e5e7eb;
     border-radius: 6px;
     max-height: 600px;
-    overflow-x: auto;  /* horizontal scroll for wide columns */
-    overflow-y: auto;  /* vertical scroll for more rows */
+    overflow-x: auto;
+    overflow-y: auto;
   }
   
-  /* Modern table styling with sticky header */
+  /* Table styling */
   .admin-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
   }
   
-  /* Sticky header */
-  .admin-table thead th {
+  /* Make the summary (sum) row fixed (sticky) */
+  .admin-table thead .sum-row {
     position: sticky;
     top: 0;
     background-color: #f3f4f6;
-    text-align: left;
-    font-weight: 600;
-    padding: 12px 15px;
-    border-bottom: 2px solid #e5e7eb;
+    z-index: 2;
+    text-align: center;
+  }
+
+  
+  /* Header row (sortable) can scroll normally */
+  .admin-table thead .header-row {
+    background-color: #f3f4f6;
     z-index: 1;
   }
   
@@ -404,9 +466,17 @@
     border-bottom: 1px solid #e5e7eb;
   }
   
-  /* Hover effect on rows */
+  .admin-table thead th {
+    border-bottom: 2px solid #e5e7eb;
+  }
+  
   .admin-table tbody tr:hover {
     background-color: #f9fafb;
+  }
+  
+  /* Sortable header styling */
+  .sortable-header {
+    cursor: pointer;
   }
   
   /* Positive/negative styling */
@@ -418,5 +488,8 @@
     color: #dc2626;
     font-weight: 500;
   }
+  .admin-table td {
+  text-align: center;
+}
   </style>
   
