@@ -1,20 +1,18 @@
 <template>
     <div class="admin-container">
-      <!-- Card-like container for the content -->
       <div class="admin-card">
         <h1 class="admin-title">Performance Data</h1>
   
         <!-- Actions Section -->
         <div class="actions-section">
           <div class="search-container">
-            <input 
-              type="text" 
-              v-model="searchQuery" 
-              placeholder="Search..." 
+            <input
+              type="text"
+              v-model="searchQuery"
+              placeholder="Search..."
               class="search-input"
             />
           </div>
-  
           <!-- Date Filter Section (no apply button) -->
           <div class="date-filter-container">
             <div class="date-input-group">
@@ -33,33 +31,32 @@
           <div class="loader"></div>
           <p>Loading Performance Data...</p>
         </div>
-        
+  
         <!-- Error State -->
         <div v-if="error" class="error-message">
           {{ error }}
           <button @click="fetchPerformanceData" class="retry-button">Retry</button>
         </div>
-        
+  
         <!-- Performance Data Table -->
         <div v-if="!loading && !error && allColumns.length > 0" class="table-container">
           <table class="admin-table">
             <thead>
               <!-- Summary Row (fixed) -->
               <tr class="sum-row">
-                <th 
-                    v-for="column in allColumns" 
-                    :key="'sum-' + column"
-                    :class="column !== 'Date' ? (columnSums[column] > 0 ? 'positive-value' : (columnSums[column] < 0 ? 'negative-value' : '')) : ''"
+                <th
+                  v-for="column in allColumns"
+                  :key="'sum-' + column"
+                  :class="column !== 'Date' ? (columnSums[column] > 0 ? 'positive-value' : (columnSums[column] < 0 ? 'negative-value' : '')) : ''"
                 >
-                    {{ column === 'Date' ? '' : formatPercentage(columnSums[column] || 0) }}
+                  {{ column === 'Date' ? '' : formatPercentage(columnSums[column] || 0) }}
                 </th>
               </tr>
-
               <!-- Header Row (clickable for sorting) -->
-              <tr class="sum-row">
-                <th 
-                  v-for="column in allColumns" 
-                  :key="'header-' + column" 
+              <tr class="header-row">
+                <th
+                  v-for="column in allColumns"
+                  :key="'header-' + column"
                   @click="sortByColumn(column)"
                   class="sortable-header"
                 >
@@ -71,8 +68,8 @@
             </thead>
             <tbody>
               <tr v-for="(row, index) in sortedFilteredPerformanceData" :key="index">
-                <td 
-                  v-for="column in allColumns" 
+                <td
+                  v-for="column in allColumns"
                   :key="`${index}-${column}`"
                   :class="getPerformanceClass(column === 'Date' ? row.date : row[column])"
                 >
@@ -82,14 +79,28 @@
             </tbody>
           </table>
         </div>
+  
+        <!-- a-select to choose which users to display on the chart -->
+        <a-select
+          v-model:value="selectedChartUsers"
+          mode="multiple"
+          placeholder="Select Users for Chart"
+          style="width: 100%; margin-top: 20px;"
+          :options="chartUserOptions"
+          @change="updateChartSeries"
+        />
+  
+        <!-- Lightweight Chart Container -->
+        <div ref="chartContainerRef" class="chart-container"></div>
       </div>
     </div>
   </template>
   
   <script setup>
-  import { ref, computed, onMounted } from 'vue';
+  import { ref, computed, onMounted, watch } from 'vue';
+  import { createChart } from 'lightweight-charts';
   
-  // State management
+  // ----- State Management -----
   const loading = ref(false);
   const error = ref(null);
   const performanceData = ref([]);
@@ -99,10 +110,10 @@
   const endDate = ref('');
   
   // Sorting state
-  const sortColumn = ref(null); // The current sorted column (e.g., 'Maverick Fund' or 'Date')
-  const sortOrder = ref(null);  // 'asc', 'desc', or null
+  const sortColumn = ref(null);
+  const sortOrder = ref(null);
   
-  // --- Sample Data ---
+  // ----- Sample Data -----
   // (In a real scenario, your API returns data with a "Date" key)
   const sampleData = [
     { Date: '11-02-2025', 'Maverick Fund': -5.022643569, 'Kavan Marwadi Prop': -0.11257554 },
@@ -110,14 +121,14 @@
     { Date: '12-03-2025', 'Maverick Fund': 0, 'Kavan Marwadi Prop': -0.018489654 }
   ];
   
-  // allColumns: Returns an array with "Date" as the first header, then the other keys.
+  // ----- Computed Properties -----
+  // allColumns: Build header with "Date" first then the other keys.
   const allColumns = computed(() => {
     if (performanceData.value.length === 0) return [];
-    // Our data now only has a "date" property (lowercase) for the date
     return ['Date', ...Object.keys(performanceData.value[0]).filter(key => key !== 'date')];
   });
   
-  // columnSums: Compute the sum for each numeric column (skip date)
+  // columnSums: Sum numeric values for each column (skip date)
   const columnSums = computed(() => {
     const sums = {};
     filteredPerformanceData.value.forEach(row => {
@@ -132,24 +143,19 @@
     return sums;
   });
   
-  // filteredPerformanceData: Filter data by search and date
+  // filteredPerformanceData: Filter data by search and date.
   const filteredPerformanceData = computed(() => {
     let filtered = [...performanceData.value];
-    
-    // Apply search filter
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase();
-      filtered = filtered.filter(row => {
-        return Object.entries(row).some(([key, val]) => {
-          if (key === 'date') {
-            return (row.date || '').toLowerCase().includes(query);
-          }
-          return val.toString().toLowerCase().includes(query);
-        });
-      });
+      filtered = filtered.filter(row =>
+        Object.entries(row).some(([key, val]) =>
+          key === 'date'
+            ? (row.date || '').toLowerCase().includes(query)
+            : val.toString().toLowerCase().includes(query)
+        )
+      );
     }
-    
-    // Apply date filter if both startDate and endDate are provided
     if (startDate.value && endDate.value) {
       const start = toMidnightLocal(startDate.value);
       const end = toMidnightLocal(endDate.value);
@@ -159,11 +165,10 @@
         return rowDate >= start && rowDate <= end;
       });
     }
-    
     return filtered;
   });
   
-  // sortedFilteredPerformanceData: Sort filtered data based on sortColumn and sortOrder
+  // sortedFilteredPerformanceData: Apply sorting to filtered data.
   const sortedFilteredPerformanceData = computed(() => {
     let data = [...filteredPerformanceData.value];
     if (sortColumn.value && sortOrder.value) {
@@ -183,33 +188,112 @@
     return data;
   });
   
-  // sortByColumn: Toggle sort order on column header click
-  function sortByColumn(col) {
-    if (sortColumn.value !== col) {
-      sortColumn.value = col;
-      sortOrder.value = 'asc';
-    } else {
-      if (sortOrder.value === 'asc') {
-        sortOrder.value = 'desc';
-      } else if (sortOrder.value === 'desc') {
-        sortColumn.value = null;
-        sortOrder.value = null;
-      } else {
-        sortOrder.value = 'asc';
-      }
-    }
+  // ----- a-select for Chart Users -----
+  // chartUserOptions: Options for the a-select (all columns except Date).
+  const chartUserOptions = computed(() =>
+    allColumns.value.filter(col => col !== 'Date').map(col => ({
+      value: col,
+      label: col,
+    }))
+  );
+  
+  // v-model for a-select: which user columns are selected to display in the chart.
+  const selectedChartUsers = ref([]);
+  
+  // ----- Chart Setup -----
+  const chartContainerRef = ref(null);
+  let chart;
+  let seriesMap = {}; // key: user column, value: series object
+  
+  // A palette of colors to assign to each series.
+  const colorPalette = ['#FF6633', '#FF33FF', '#00B3E6', '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D', '#80B300', '#809900'];
+  
+  // Initialize the chart.
+  function initChart() {
+    chart = createChart(chartContainerRef.value, {
+      width: chartContainerRef.value.clientWidth,
+      height: 300,
+      layout: {
+        backgroundColor: '#ffffff',
+        textColor: '#333',
+      },
+      timeScale: {
+        timeVisible: true,
+        secondsVisible: false,
+      },
+    });
+    // Set default: show all users (columns except Date).
+    selectedChartUsers.value = chartUserOptions.value.map(option => option.value);
+    updateChartSeries();
+    updateChartData();
   }
   
-  // --- Helper Functions ---
+  // updateChartSeries: Rebuild seriesMap based on selectedChartUsers.
+  function updateChartSeries() {
+    // Remove series not selected.
+    Object.keys(seriesMap).forEach(key => {
+      if (!selectedChartUsers.value.includes(key)) {
+        chart.removeSeries(seriesMap[key]);
+        delete seriesMap[key];
+      }
+    });
+    // Add series for newly selected users.
+    selectedChartUsers.value.forEach((col, index) => {
+      if (!seriesMap[col]) {
+        const color = colorPalette[index % colorPalette.length];
+        seriesMap[col] = chart.addLineSeries({
+          title: col,
+          color: color,
+        });
+      }
+    });
+    updateChartData();
+  }
   
-  // Convert 'YYYY-MM-DD' string to Date at local midnight
+  // updateChartData: Update each series with data points from sortedFilteredPerformanceData.
+  function updateChartData() {
+    const data = sortedFilteredPerformanceData.value;
+    // For each selected user column, update its series.
+    selectedChartUsers.value.forEach(col => {
+      if (seriesMap[col]) {
+        let seriesData = data.map(row => ({
+          time: row.date, // "YYYY-MM-DD" format is accepted by lightweight-charts.
+          value: parseFloat(row[col]) || 0,
+        }));
+        // Sort data points by time.
+        seriesData.sort((a, b) => new Date(a.time) - new Date(b.time));
+        seriesMap[col].setData(seriesData);
+      }
+    });
+  }
+  
+  // Watch the sorted & filtered data to update the chart.
+  watch(sortedFilteredPerformanceData, () => {
+    if (chart) updateChartData();
+  });
+  
+  // Watch for changes in selectedChartUsers to update chart series.
+  watch(selectedChartUsers, () => {
+    if (chart) updateChartSeries();
+  });
+  
+  // Update chart width on window resize.
+  window.addEventListener('resize', () => {
+    if (chart && chartContainerRef.value) {
+      chart.applyOptions({ width: chartContainerRef.value.clientWidth });
+    }
+  });
+  
+  // ----- Helper Functions -----
+  
+  // Convert a 'YYYY-MM-DD' string to Date at local midnight.
   function toMidnightLocal(dateStr) {
     const d = new Date(dateStr);
     d.setHours(0, 0, 0, 0);
     return d;
   }
   
-  // Parse a row's date (assumed to be "YYYY-MM-DD")
+  // Parse a row's date string (assumed "YYYY-MM-DD").
   function parseRowDate(dateStr) {
     if (!dateStr) return null;
     const [year, month, day] = dateStr.split('-').map(Number);
@@ -218,44 +302,39 @@
     return d;
   }
   
-  // Format date for display (convert "YYYY-MM-DD" to "DD-MM-YYYY")
+  // Format date for display ("YYYY-MM-DD" → "DD-MM-YYYY")
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
     const [year, month, day] = dateStr.split('-');
     return `${day}-${month}-${year}`;
   };
   
-  // Format numeric values as percentages
+  // Format a numeric value as a percentage.
   const formatPercentage = (value) => {
     const numericValue = parseFloat(value);
     if (isNaN(numericValue)) return '0.0000%';
     return numericValue.toFixed(4) + '%';
   };
   
-  // Get CSS class based on value
+  // Return a CSS class based on value.
   const getPerformanceClass = (value) => {
     return value < 0 ? 'negative-value' : value > 0 ? 'positive-value' : '';
   };
   
-  // --- Data Fetching Functions ---
+  // ----- Data Fetching Functions -----
   
-  // Fetch performance data: simulate API call and map raw data to use "date" property only.
+  // Fetch performance data: simulate API call and map raw data to use "date" property.
   const fetchPerformanceData = async () => {
     loading.value = true;
     error.value = null;
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
-      // Suppose the API returns an array of objects with "Date" key.
-      // Uncomment the next line to use sampleData:
+      // Uncomment the next line to use sampleData instead of API data:
       // otherdata.value = sampleData;
-      // Map each item: remove the original "Date" key and add a new "date" property.
       const raw = otherdata.value;
       performanceData.value = raw.map(item => {
-        const { Date, ...rest } = item; // remove the original Date property
-        return {
-          ...rest,
-          date: Date, // new property "date"
-        };
+        const { Date, ...rest } = item; // Remove original "Date"
+        return { ...rest, date: Date }; // Use new property "date"
       });
     } catch (err) {
       error.value = err.message || 'Failed to fetch performance data';
@@ -265,7 +344,6 @@
     }
   };
   
-  // Generic fetch function
   const fetchData = async (endpoint, stateRef) => {
     try {
       const token = localStorage.getItem('access_token');
@@ -289,16 +367,14 @@
     }
   };
   
-  // Fetch slippage data and assign to otherdata
   const fetchSlippage = () => fetchData('getuserSlippage', otherdata);
   
-  // --- Lifecycle ---
+  // ----- Lifecycle -----
   
   onMounted(async () => {
     await fetchSlippage();
     console.log('Slippage response:', otherdata.value);
     await fetchPerformanceData();
-    // Set default date range based on performanceData dates
     if (performanceData.value.length > 0) {
       const dateValues = performanceData.value.map(row => parseRowDate(row.date));
       const minDate = new Date(Math.min(...dateValues));
@@ -306,19 +382,17 @@
       startDate.value = `${minDate.getFullYear()}-${String(minDate.getMonth() + 1).padStart(2, '0')}-${String(minDate.getDate()).padStart(2, '0')}`;
       endDate.value = `${maxDate.getFullYear()}-${String(maxDate.getMonth() + 1).padStart(2, '0')}-${String(maxDate.getDate()).padStart(2, '0')}`;
     }
+    initChart();
   });
   </script>
   
   <style scoped>
-  /* Container styling */
   .admin-container {
     padding: 20px;
     min-height: 100vh;
     background: #f9fafb;
     box-sizing: border-box;
   }
-  
-  /* Card-like container */
   .admin-card {
     background-color: #ffffff;
     border-radius: 8px;
@@ -327,15 +401,12 @@
     max-width: 1200px;
     margin: 0 auto;
   }
-  
   .admin-title {
     margin-bottom: 20px;
     font-size: 24px;
     font-weight: 600;
     color: #111827;
   }
-  
-  /* Actions section */
   .actions-section {
     display: flex;
     flex-wrap: wrap;
@@ -343,7 +414,6 @@
     align-items: center;
     margin-bottom: 20px;
   }
-  
   .search-container {
     flex: 1;
     min-width: 200px;
@@ -359,7 +429,6 @@
     outline: none;
     border-color: #4c86f9;
   }
-  
   .date-filter-container {
     display: flex;
     gap: 10px;
@@ -381,8 +450,6 @@
     outline: none;
     border-color: #4c86f9;
   }
-  
-  /* Loading state */
   .loading-state {
     display: flex;
     flex-direction: column;
@@ -402,8 +469,6 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
-  
-  /* Error message */
   .error-message {
     padding: 15px;
     background-color: #ffecec;
@@ -425,8 +490,6 @@
   .retry-button:hover {
     background-color: #e55c5c;
   }
-  
-  /* Table container with scrolling */
   .table-container {
     margin-top: 10px;
     border: 1px solid #e5e7eb;
@@ -435,15 +498,11 @@
     overflow-x: auto;
     overflow-y: auto;
   }
-  
-  /* Table styling */
   .admin-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
   }
-  
-  /* Make the summary (sum) row fixed (sticky) */
   .admin-table thead .sum-row {
     position: sticky;
     top: 0;
@@ -451,35 +510,32 @@
     z-index: 2;
     text-align: center;
   }
-
-  
-  /* Header row (sortable) can scroll normally */
   .admin-table thead .header-row {
     background-color: #f3f4f6;
     z-index: 1;
+    cursor: pointer;
   }
-  
   .admin-table th,
   .admin-table td {
     white-space: nowrap;
     padding: 12px 15px;
     border-bottom: 1px solid #e5e7eb;
+    text-align: center;
   }
-  
   .admin-table thead th {
     border-bottom: 2px solid #e5e7eb;
   }
-  
   .admin-table tbody tr:hover {
     background-color: #f9fafb;
   }
-  
-  /* Sortable header styling */
   .sortable-header {
     cursor: pointer;
   }
-  
-  /* Positive/negative styling */
+  .chart-container {
+    width: 100%;
+    height: 300px;
+    margin-top: 20px;
+  }
   .positive-value {
     color: #16a34a;
     font-weight: 500;
@@ -488,8 +544,5 @@
     color: #dc2626;
     font-weight: 500;
   }
-  .admin-table td {
-  text-align: center;
-}
   </style>
   
