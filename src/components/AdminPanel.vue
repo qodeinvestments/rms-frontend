@@ -35,8 +35,8 @@
               <td>{{ user.password }}</td>
               <td>{{ user.email }}</td>
               <td>{{ user.role }}</td>
-              <td>{{ user['Account Access'].join(', ') }}</td>
-              <td>{{ user['Features'].join(', ') }}</td>
+              <td>{{ user['account_access'].join(', ') }}</td>
+              <td>{{ user['features'].join(', ') }}</td>
               <td>
                 <button 
                   @click="openEditModal(user)"
@@ -242,8 +242,8 @@ const openEditModal = (user) => {
   editingIndex.value = users.value.findIndex(u => u.email === user.email);
   updateError.value = null;
   showModal.value = true;
-  selectedAccounts.value = user['Account Access'] || []; // Pre-fill selected accounts in modal
-  selectedFeatures.value= user['Features'] || []; // Pre-fill selected features in modal
+  selectedAccounts.value = user['account_access'] || []; // Pre-fill selected accounts in modal
+  selectedFeatures.value= user['features'] || []; // Pre-fill selected features in modal
 };
 
 // Close modal
@@ -302,8 +302,8 @@ const saveChanges = async () => {
     // Prepare data for API
     const updatedUser = {
       ...editingUser.value,
-      'Account Access': selectedAccounts.value,
-      'Features': selectedFeatures.value, // Add this line
+      'account_access': selectedAccounts.value,
+      'features': selectedFeatures.value, // Add this line
     };
 
     const response = await fetch('https://production2.swancapital.in/editUser', {
