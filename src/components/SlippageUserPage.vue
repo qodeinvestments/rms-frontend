@@ -128,6 +128,27 @@
     return ['Date', ...Object.keys(performanceData.value[0]).filter(key => key !== 'date')];
   });
   
+  // Add this function to your script setup section
+const sortByColumn = (column) => {
+  // If clicking on the same column, cycle through sort orders: asc -> desc -> null
+  if (sortColumn.value === column) {
+    if (sortOrder.value === 'asc') {
+      sortOrder.value = 'desc';
+    } else if (sortOrder.value === 'desc') {
+      sortOrder.value = null;
+      sortColumn.value = null;
+    } else {
+      sortOrder.value = 'asc';
+    }
+  } else {
+    // If clicking on a new column, start with ascending order
+    sortColumn.value = column;
+    sortOrder.value = 'asc';
+  }
+};
+
+
+
   // columnSums: Sum numeric values for each column (skip date)
   const columnSums = computed(() => {
     const sums = {};
