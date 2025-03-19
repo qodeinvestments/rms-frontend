@@ -92,6 +92,21 @@ const filteredSignals = () => {
         } 
     }
 
+    if (val !== undefined) {
+        // Use Object.entries to iterate over the key-value pairs of the object
+        Object.entries(val).forEach(([key, value]) => {
+            if(!value && (key=='Pulse Check Net Positions' || key=='Pulse Run Strats')){
+            const now = new Date();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            if (minutes % 5 === 0 && seconds === 0) {
+                triggerToast(key, 'warning')
+            } 
+        }
+        });
+    }
+
+
     return val;
 };
 
@@ -172,9 +187,25 @@ const calculate_broker_position_mismatch = () => {
 const give_key_map=(key)=>{
     if (key==='signalbook_position_checker')return 'Signalbook Position Checker';
 }
-const calculate_custom_pulse=()=>{
-    return props.extra_data.custom_pulse;
-}
+const calculate_custom_pulse = () => {
+
+  if (props.extra_data.custom_pulse !== undefined) {
+    // Use Object.entries to iterate over the key-value pairs of the object
+    Object.entries(props.extra_data.custom_pulse).forEach(([key, value]) => {
+        if(!value){
+        const now = new Date();
+        const minutes = now.getMinutes();
+        const seconds = now.getSeconds();
+        if (minutes % 5 === 0 && seconds === 0) {
+            triggerToast(key, 'warning')
+        } 
+    }
+    });
+  }
+  
+  
+  return props.extra_data.custom_pulse;
+};
 </script>
 
 <style scoped>
