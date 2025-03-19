@@ -38,6 +38,13 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'API NET PNL',
     }),
+
+    columnHelper.accessor(row => row.HoldingPnl, {
+      id: 'HoldingsDayPL',
+      cell: info => info.getValue(),
+      header: () => 'HoldingsDayPL',
+    }),
+    
   
   
     columnHelper.accessor(row => row.PNL_PER_UM, {
@@ -180,11 +187,7 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'PositionDayPL',
     }),
-    columnHelper.accessor(row => row.HoldingsDayPL, {
-      id: 'HoldingsDayPL',
-      cell: info => info.getValue(),
-      header: () => 'HoldingsDayPL',
-    }),
+   
   
     columnHelper.accessor(row => row.TotalOrderCount, {
       id: 'TotalOrderCount',

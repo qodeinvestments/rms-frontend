@@ -161,7 +161,7 @@ export const xts_pos_book=xts_pos_book_columns.map(column => {
 
 const client_holdings=[
   'tradingsymbol', 'quantity', 
-  'price', 'average_price','product', 'exchange','instrument_token']
+  'last_price', 'average_price','product', 'exchange','instrument_token']
 
   export const holding_book_columns  = client_holdings.map(column => {
     return columnHelper.accessor(row => row[column], {

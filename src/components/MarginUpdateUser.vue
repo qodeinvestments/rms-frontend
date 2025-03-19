@@ -119,7 +119,7 @@
 
 
         <!-- Put Protection  -->
-        <div class="portfolio-field">
+        <div v-if="putProtection" class="portfolio-field">
           <label class="portfolio-label">Put Protection</label>
           <div class="portfolio-input-group">
             <input
@@ -415,7 +415,7 @@ const minMargin = ref("");
 const minMarginError = ref("");
 const ddMarginPercent = ref("");
 const ddMarginPercentError = ref("");
-const putProtection = ref("");
+const putProtection = ref(null);
 const putProtectionError = ref("");
 
 // UI & Modal states
@@ -663,13 +663,20 @@ const fetchMarginData = async () => {
 
     // Fill in local data from response
     filteredData.value = data.value?.params?.[account.value] ?? [];
-    limits.value=data.value["limits"][account.value];
+    
+    if (data.value?.limits && data.value.limits[account.value] !== undefined) {
+      limits.value = data.value.limits[account.value];
+    }
     portfolioValue.value = data.value["pf"][account.value];
 
     excessMargin.value=data.value[ "margininfo" ][ account.value ]["excessMargin"];
     minMargin.value=data.value[ "margininfo" ][ account.value ]["minimumMargin"];
     ddMarginPercent.value=data.value[ "margininfo" ][ account.value ]["drawdownMargin"];
-    putProtection.value=data.value[ "putProtection" ][ account.value ]
+
+    if (data.value?.putProtection && data.value.putProtection[account.value] !== undefined) {
+      putProtection.value=data.value[ "putProtection" ][ account.value ]
+    }
+
 
 
 

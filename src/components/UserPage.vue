@@ -545,7 +545,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
 
     <div class="my-8" v-if="book && showOnPage === 'Holdings'">
       <TanStackTestTable title="Holdings" :data="book" :columns="holding_book_columns"
-        :hasColor="[]" :navigateTo="[]" :showPagination=true />
+        :hasColor="['pnl']" :navigateTo="[]" :showPagination=true />
     </div>
 
     <div class="my-8" v-if="book && showOnPage === 'EOD'">
