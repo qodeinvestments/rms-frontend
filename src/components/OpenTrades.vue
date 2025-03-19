@@ -1,297 +1,344 @@
+<script setup>
+import { onMounted, onUnmounted, computed, ref, watch } from 'vue'
+import {
+    FlexRender,
+    getCoreRowModel,
+    useVueTable,
+    createColumnHelper,
+} from '@tanstack/vue-table'
+import { MyEnum } from '../Enums/Prefix.js'
+import TanStackTestTable from './TanStackTestTable.vue'
+import { columns } from '../components/TableVariables/OpenTrades.js'
 
+const signal_book_data = ref([])
+const uids = ref([])
+const basket = ref([])
+const isLoading = ref(false)
+const columnHelper = createColumnHelper()
 
+const past_time = ref(0)
+const selected_uid = ref('')
 
+// Filter-related refs
+const error = ref("")
+const selectedUids = ref([])
+const selectedBasketItems = ref([])
 
-  <script setup>
-  import { onMounted, onUnmounted, computed } from 'vue'
-  import {
-      FlexRender,
-      getCoreRowModel,
-      useVueTable,
-      createColumnHelper,
-  } from '@tanstack/vue-table'
-  
-  import { MyEnum } from '../Enums/Prefix.js';
-  import { ref, watch } from 'vue'
-  import TanStackTestTable from './TanStackTestTable.vue'
-  import { columns } from '../components/TableVariables/OpenTrades.js'; 
-  
-  
-  const signal_book_data = ref([])
-  const uids = ref([])
-  const basket = ref([])
-  const isLoading = ref(false)
-  const columnHelper = createColumnHelper()
- 
-  const past_time = ref(0)
-  const selected_uid = ref('')
-  
-  // Add filter for checker status
+const filteredBasketOptions = computed(() =>
+  basket.value.filter(o => !selectedBasketItems.value.includes(o))
+)
 
-  const error=ref("");
-  const selectedUids = ref([]);
-  const selectedBasketItems = ref([]);
-  
-  const filteredBasketOptions = computed(() => basket.value.filter(o => !selectedBasketItems.value.includes(o)));
-  
-  const filteredUids = computed(() => {
-      if (selectedBasketItems.value.length === 0) {
-          return uids.value;
-      }
-      return uids.value.filter(uid => selectedBasketItems.value.includes(uid.split('_')[0]));
-  });
-  
-  const filteredOptions = computed(() => filteredUids.value.filter(o => !selectedUids.value.includes(o)));
-  
-  // Updated computed property for filtered signal_book_data with checker filter
-  const filteredSignalBookData = computed(() => {
-      let filteredData = signal_book_data.value;
-    
-      // Apply existing filters
-      if (selectedUids.value.length > 0 || selectedBasketItems.value.length > 0) {
-          filteredData = filteredData.filter(item => {
-              const basketMatch = selectedBasketItems.value.length === 0 || selectedBasketItems.value.includes(item.uid.split('_')[0]);
-              const uidMatch = selectedUids.value.length === 0 || selectedUids.value.includes(item.uid);
-              return basketMatch && uidMatch;
-          });
-      }
-      
-      return filteredData;
-  });
+const filteredUids = computed(() => {
+  if (selectedBasketItems.value.length === 0) {
+    return uids.value
+  }
+  return uids.value.filter(uid => selectedBasketItems.value.includes(uid.split('_')[0]))
+})
 
+const filteredOptions = computed(() =>
+  filteredUids.value.filter(o => !selectedUids.value.includes(o))
+)
 
-  const fetchData = async () => {
-    try {
-        isLoading.value = true
-        error.value = ""
-        const token = localStorage.getItem("access_token")
-        if (!token) throw new Error("Authentication required. Please log in again.")
+const filteredSignalBookData = computed(() => {
+  let filteredData = signal_book_data.value
 
-        const response = await fetch(
-            `https://production2.swancapital.in/get_open_trades`,
-            {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-            }
-        )
+  if (selectedUids.value.length > 0 || selectedBasketItems.value.length > 0) {
+    filteredData = filteredData.filter(item => {
+      const basketMatch =
+        selectedBasketItems.value.length === 0 ||
+        selectedBasketItems.value.includes(item.uid.split('_')[0])
+      const uidMatch =
+        selectedUids.value.length === 0 || selectedUids.value.includes(item.uid)
+      return basketMatch && uidMatch
+    })
+  }
 
-        if (response.status === 401) {
-            localStorage.removeItem("access_token")
-            router.push("/login")
-            throw new Error("Session expired. Please log in again.")
-        }
+  return filteredData
+})
 
-        if (!response.ok) {
-            const errorMessage = await response.text()
-            throw new Error(`Error: ${errorMessage}`)
-        }
+const fetchData = async () => {
+  try {
+    isLoading.value = true
+    error.value = ""
+    const token = localStorage.getItem("access_token")
+    if (!token) throw new Error("Authentication required. Please log in again.")
 
-        const jsonData = await response.json()
-        signal_book_data.value = Object.values(jsonData)
-        uids.value = [...new Set(signal_book_data.value.map(item => item.uid))]
-        basket.value = [...new Set(signal_book_data.value.map(item => item.uid.split('_')[0]))]
-    } catch (err) {
-        error.value = err.message
-        console.error('Error fetching data:', err.message)
-    } finally {
-        isLoading.value = false
+    const response = await fetch(`https://production2.swancapital.in/get_open_trades`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+
+    if (response.status === 401) {
+      localStorage.removeItem("access_token")
+      router.push("/login")
+      throw new Error("Session expired. Please log in again.")
     }
+
+    if (!response.ok) {
+      const errorMessage = await response.text()
+      throw new Error(`Error: ${errorMessage}`)
+    }
+
+    const jsonData = await response.json()
+    signal_book_data.value = Object.values(jsonData)
+    uids.value = [...new Set(signal_book_data.value.map(item => item.uid))]
+    basket.value = [...new Set(signal_book_data.value.map(item => item.uid.split('_')[0]))]
+  } catch (err) {
+    error.value = err.message
+    console.error('Error fetching data:', err.message)
+  } finally {
+    isLoading.value = false
+  }
 }
-  
 
-  
-  const showOnPage = ref('Positions')
-  
-  onMounted(() => {
-    fetchData();
-  })
-  
-  onUnmounted(() => {
-  
-  })
-  
-  // Watch for changes in selectedBasketItems
-  watch(selectedBasketItems, (newSelectedBasketItems) => {
-      console.log('Selected Basket items changed:', newSelectedBasketItems);
-      // Reset UID selection when basket selection changes
-      selectedUids.value = [];
-  });
-  
+const downloadExcel = async () => {
+  try {
+    const token = localStorage.getItem("access_token")
+    if (!token) throw new Error("Authentication required. Please log in again.")
 
-  </script>
-  
-  
-  <template>
-      <div class="px-8 py-8 pageContainer">
-        <!-- Loading Overlay -->
-        <div v-if="isLoading" class="loading-overlay">
-            <div class="loading-content">
-                <div class="spinner"></div>
-                <p>Loading data...</p>
-            </div>
-        </div>
+    const response = await fetch('https://production2.swancapital.in/getmismatchpdf', {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
 
+    if (!response.ok) {
+      throw new Error("Error downloading file")
+    }
 
-        <!-- Error State -->
-        <div v-if="error" class="error">
-            {{ error }}
-            <button @click="fetchData" class="retry-button">
-                Retry
-            </button>
-        </div>
+    // Convert the response into a blob
+    const blob = await response.blob()
+    // Create a temporary URL for the blob
+    const url = window.URL.createObjectURL(blob)
+    // Create a temporary link element
+    const link = document.createElement("a")
+    link.href = url
+    link.download = "mismatches.xlsx" // Set the file name for the download
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error("Download failed", error)
+  }
+}
 
+const showOnPage = ref('Positions')
 
+onMounted(() => {
+  fetchData()
+})
 
-         
-  
-          <div class="my-8" v-if="filteredSignalBookData.length">
-            <div class="filter-controls">
-              <!-- Basket multi-select component -->
-              <a-select v-model:value="selectedBasketItems" mode="multiple" placeholder="Select Basket Items"
-                  style="width: 100%; margin-bottom: 10px;"
-                  :options="filteredBasketOptions.map(item => ({ value: item }))"></a-select>
-  
-              <!-- UID multi-select component -->
-              <a-select v-model:value="selectedUids" mode="multiple" placeholder="Select UIDs" style="width: 100%; margin-bottom: 10px;"
-                  :options="filteredOptions.map(item => ({ value: item }))"></a-select>
-              
+onUnmounted(() => {
+  // cleanup if needed
+})
 
-          </div>
-              <!-- <p class="table-heading">Signal Book</p> -->
-              <TanStackTestTable title="Overnight Trades" :data="filteredSignalBookData" :columns="columns" :hasColor="[]"
-                  :navigateTo="[]" :showPagination=true :showPin="true"/>
-          </div>
-          <div v-else-if="!isLoading" class="no-data">
-            No trades available
-        </div>
+watch(selectedBasketItems, (newSelectedBasketItems) => {
+  console.log('Selected Basket items changed:', newSelectedBasketItems)
+  selectedUids.value = []
+})
+</script>
+
+<template>
+  <div class="px-8 py-8 pageContainer">
+    <!-- Loading Overlay -->
+    <div v-if="isLoading" class="loading-overlay">
+      <div class="loading-content">
+        <div class="spinner"></div>
+        <p>Loading data...</p>
       </div>
-  </template>
-  
+    </div>
+
+    <!-- Error State -->
+    <div v-if="error" class="error">
+      {{ error }}
+      <button @click="fetchData" class="retry-button">
+        Retry
+      </button>
+    </div>
+
+    <!-- Download Button -->
+    <div style="margin-bottom: 20px;">
+      <button @click="downloadExcel" class="download-button">
+        Download Mismatch Excel File
+      </button>
+    </div>
+
+    <!-- Table and Filter Section -->
+    <div class="my-8" v-if="filteredSignalBookData.length">
+      <div class="filter-controls">
+        <!-- Basket multi-select component -->
+        <a-select
+          v-model:value="selectedBasketItems"
+          mode="multiple"
+          placeholder="Select Basket Items"
+          style="width: 100%; margin-bottom: 10px;"
+          :options="filteredBasketOptions.map(item => ({ value: item }))"
+        ></a-select>
+
+        <!-- UID multi-select component -->
+        <a-select
+          v-model:value="selectedUids"
+          mode="multiple"
+          placeholder="Select UIDs"
+          style="width: 100%; margin-bottom: 10px;"
+          :options="filteredOptions.map(item => ({ value: item }))"
+        ></a-select>
+      </div>
+      <TanStackTestTable
+        title="Overnight Trades"
+        :data="filteredSignalBookData"
+        :columns="columns"
+        :hasColor="[]"
+        :navigateTo="[]"
+        :showPagination="true"
+        :showPin="true"
+      />
+    </div>
+    <div v-else-if="!isLoading" class="no-data">
+      No trades available
+    </div>
+  </div>
+</template>
+
 <style scoped>
 .container {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-    position: relative;
-    min-height: 400px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  min-height: 400px;
 }
 
 .filters-container {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
 .filter-section {
-    flex: 1;
+  flex: 1;
 }
 
 .filter-section h3 {
-    margin-bottom: 8px;
-    font-size: 16px;
-    color: #374151;
+  margin-bottom: 8px;
+  font-size: 16px;
+  color: #374151;
 }
 
 .filter-select {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    min-height: 100px;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  min-height: 100px;
 }
 
 .loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(255, 255, 255, 0.9);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
 .loading-content {
-    text-align: center;
+  text-align: center;
 }
 
 .loading-content p {
-    margin-top: 1rem;
-    color: #4b5563;
-    font-size: 1.1rem;
+  margin-top: 1rem;
+  color: #4b5563;
+  font-size: 1.1rem;
 }
 
 .spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid #f3f3f3;
-    border-top: 5px solid #3498db;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto;
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .error {
-    background-color: #fee2e2;
-    border: 1px solid #ef4444;
-    color: #dc2626;
-    padding: 12px;
-    border-radius: 6px;
-    margin: 10px 0;
+  background-color: #fee2e2;
+  border: 1px solid #ef4444;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 6px;
+  margin: 10px 0;
 }
 
 .retry-button {
-    background-color: #dc2626;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    margin-top: 10px;
-    cursor: pointer;
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin-top: 10px;
+  cursor: pointer;
 }
 
 .retry-button:hover {
-    background-color: #b91c1c;
+  background-color: #b91c1c;
+}
+
+.download-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.download-button:hover {
+  background-color: #2980b9;
 }
 
 .data-container {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .no-data {
-    text-align: center;
-    color: #666;
-    padding: 20px;
+  text-align: center;
+  color: #666;
+  padding: 20px;
 }
 
-/* Loading overlay animations */
 .loading-overlay {
-    animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .loading-content p {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 </style>
