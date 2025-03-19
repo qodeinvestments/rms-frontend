@@ -114,6 +114,14 @@ const calculate_position_mismatch = () => {
             tell = tell && Object.keys(val[v]).length === 0;
         }
     }
+    if(!tell){
+        const now = new Date();
+        const minutes = now.getMinutes();
+        const seconds = now.getSeconds();
+        if (minutes % 5 === 0 && seconds === 0) {
+            triggerToast('Position Mismatch', 'warning')
+        } 
+    }
     return tell;
 };
 
