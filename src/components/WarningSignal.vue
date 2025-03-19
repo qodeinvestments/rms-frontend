@@ -83,6 +83,14 @@ const filteredSignals = () => {
         and = and && user[key];
     }
     userAnd.value = and;
+    if(!and){
+        const now = new Date();
+        const minutes = now.getMinutes();
+        const seconds = now.getSeconds();
+        if (minutes % 5 === 0 && seconds === 0) {
+            triggerToast('User Error', 'warning')
+        } 
+    }
 
     return val;
 };
