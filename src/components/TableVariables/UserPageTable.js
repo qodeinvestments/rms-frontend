@@ -44,7 +44,7 @@ const customColumns = [
     accessor: row => {
         const quantity = parseInt(row['quantity']) || 0;
         const avgPrice = parseFloat(row['average_price']) || 0;
-        return (quantity * avgPrice);
+        return (row['transaction_type']=='BUY' ? (quantity * avgPrice) : -(quantity * avgPrice));
     },
     header: 'ContractValue'
   }
@@ -161,7 +161,8 @@ export const xts_pos_book=xts_pos_book_columns.map(column => {
 
 const client_holdings=[
   'tradingsymbol', 'quantity', 
-  'last_price', 'average_price','pnl','product', 'exchange','instrument_token']
+  'last_price', 'average_price','pnl','EntryContractValue',
+  'ExitContractValue','product', 'exchange','instrument_token']
 
   export const holding_book_columns  = client_holdings.map(column => {
     return columnHelper.accessor(row => row[column], {

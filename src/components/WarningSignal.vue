@@ -100,6 +100,7 @@ const filteredSignals = () => {
             const minutes = now.getMinutes();
             const seconds = now.getSeconds();
             if (minutes % 5 === 0 && seconds === 0) {
+                console.log("i trigged from here").
                 triggerToast(key, 'warning')
             } 
         }

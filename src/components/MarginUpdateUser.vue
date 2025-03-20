@@ -194,101 +194,121 @@
   </div>
 
     
-    <!-- Main Data Table -->
-    <div v-if="filteredData && filteredData.length > 0 && !loading && !error" class="content-wrapper">
-      <!-- Existing content structure -->
-      <div class="stats-selector">
-        <label for="stat-option" class="stat-label">Choose a Statistic:</label>
-        <select v-model="selectedStat" id="stat-option" class="stat-dropdown">
-          <option value="sum">Sum</option>
-          <option value="avg">Average</option>
-          <option value="max">Maximum</option>
-          <option value="min">Minimum</option>
-        </select>
-      </div>
-
-      <div class="table-container">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Strategy</th>
-              <th>Qty Limit ({{ computeStat('qtylimit') }})</th>
-              <th>CV Limit ({{ computeStat('cvlimit') }})</th>
-              <th>Factor 1 ({{ computeStat('factor1') }})</th>
-              <th>Factor 2 ({{ computeStat('factor2') }})</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(row, index) in filteredData" :key="index">
-              <td class="strategy-cell">{{ row.strategy }}</td>
-              <td>
-                <input 
-                  type="number" 
-                  v-model="row.qtylimit" 
-                  class="editable-input"
-                  @input="validateField(row, 'qtylimit')"
-                  :class="{ 'error-input': row.errors?.qtylimit }"
-                />
-                <span v-if="row.errors?.qtylimit" class="error-text text-sm text-red-500 mt-1">
-                  {{ row.errors.qtylimit }}
-                </span>
-              </td>
-              <td>
-                <input 
-                  type="number" 
-                  v-model="row.cvlimit" 
-                  class="editable-input"
-                  @input="validateField(row, 'cvlimit')"
-                  :class="{ 'error-input': row.errors?.cvlimit }"
-                />
-                <span v-if="row.errors?.cvlimit" class="error-text text-sm text-red-500 mt-1">
-                  {{ row.errors.cvlimit }}
-                </span>
-              </td>
-              <td>
-                <input 
-                  type="number" 
-                  v-model="row.factor1" 
-                  class="editable-input"
-                  @input="validateField(row, 'factor1')"
-                  :class="{ 'error-input': row.errors?.factor1 }"
-                />
-                <span v-if="row.errors?.factor1" class="error-text text-sm text-red-500 mt-1">
-                  {{ row.errors.factor1 }}
-                </span>
-              </td>
-              <td>
-                <input 
-                  type="number" 
-                  v-model="row.factor2" 
-                  class="editable-input"
-                  @input="validateField(row, 'factor2')"
-                  :class="{ 'error-input': row.errors?.factor2 }"
-                />
-                <span v-if="row.errors?.factor2" class="error-text text-sm text-red-500 mt-1">
-                  {{ row.errors.factor2 }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="action-buttons">
-        <button 
-          @click="showTotpModalWithAction('portfolio')" 
-          class="save-button"
-          :disabled="hasErrors || isSaving"
-        >
-          <span class="button-icon">{{ isSaving ? '⌛' : '💾' }}</span>
-          {{ isSaving ? 'Saving...' : 'Save Changes' }}
-        </button>
-        <button @click="confirmCancel" class="cancel-button">
-          <span class="button-icon">✖</span>
-          Cancel
-        </button>
-      </div>
+<!-- Main Data Table -->
+<div v-if="filteredData  && !loading && !error" class="content-wrapper">
+  <!-- Existing content structure -->
+  <div class="flex items-center justify-between mb-4">
+    <!-- Add title here similar to other sections -->
+    <h2 class="text-xl font-semibold text-gray-700">
+      Main Data Table
+    </h2>
+  </div>
+  
+  <div class="select-container flex items-center justify-between mb-4">
+    <a-select
+      v-model:value="selectedStrategies"
+      mode="multiple"
+      placeholder="Select Strategies"
+      style="width: 100%"
+      :options="strategiesOptionsWithAll"
+      :maxTagCount="3"
+      @change="handleStrategyChange"
+      :disabled="isSaving"
+    ></a-select>
+    
+    <div class="stats-selector ml-4">
+      <label for="stat-option" class="stat-label">Choose a Statistic:</label>
+      <select v-model="selectedStat" id="stat-option" class="stat-dropdown">
+        <option value="sum">Sum</option>
+        <option value="avg">Average</option>
+        <option value="max">Maximum</option>
+        <option value="min">Minimum</option>
+      </select>
     </div>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Strategy</th>
+          <th>Qty Limit ({{ computeStat('qtylimit') }})</th>
+          <th>CV Limit ({{ computeStat('cvlimit') }})</th>
+          <th>Factor 1 ({{ computeStat('factor1') }})</th>
+          <th>Factor 2 ({{ computeStat('factor2') }})</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(row, index) in filteredData" :key="index">
+          <td class="strategy-cell">{{ row.strategy }}</td>
+          <td>
+            <input 
+              type="number" 
+              v-model="row.qtylimit" 
+              class="editable-input"
+              @input="validateField(row, 'qtylimit')"
+              :class="{ 'error-input': row.errors?.qtylimit }"
+            />
+            <span v-if="row.errors?.qtylimit" class="error-text text-sm text-red-500 mt-1">
+              {{ row.errors.qtylimit }}
+            </span>
+          </td>
+          <td>
+            <input 
+              type="number" 
+              v-model="row.cvlimit" 
+              class="editable-input"
+              @input="validateField(row, 'cvlimit')"
+              :class="{ 'error-input': row.errors?.cvlimit }"
+            />
+            <span v-if="row.errors?.cvlimit" class="error-text text-sm text-red-500 mt-1">
+              {{ row.errors.cvlimit }}
+            </span>
+          </td>
+          <td>
+            <input 
+              type="number" 
+              v-model="row.factor1" 
+              class="editable-input"
+              @input="validateField(row, 'factor1')"
+              :class="{ 'error-input': row.errors?.factor1 }"
+            />
+            <span v-if="row.errors?.factor1" class="error-text text-sm text-red-500 mt-1">
+              {{ row.errors.factor1 }}
+            </span>
+          </td>
+          <td>
+            <input 
+              type="number" 
+              v-model="row.factor2" 
+              class="editable-input"
+              @input="validateField(row, 'factor2')"
+              :class="{ 'error-input': row.errors?.factor2 }"
+            />
+            <span v-if="row.errors?.factor2" class="error-text text-sm text-red-500 mt-1">
+              {{ row.errors.factor2 }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="action-buttons">
+    <button 
+      @click="showTotpModalWithAction('portfolio')" 
+      class="save-button"
+      :disabled="hasErrors || isSaving"
+    >
+      <span class="button-icon">{{ isSaving ? '⌛' : '💾' }}</span>
+      {{ isSaving ? 'Saving...' : 'Save Changes' }}
+    </button>
+    <button @click="confirmCancel" class="cancel-button">
+      <span class="button-icon">✖</span>
+      Cancel
+    </button>
+  </div>
+</div>
     <!-- Client Multiplier Table -->
     <div v-if="!loading && !error" class="content-wrapper">
       <div class="flex items-center justify-between mb-4">
@@ -437,6 +457,84 @@ const isUpdatingMultiplier = ref(false);
 // Multi-select for features
 const selectedFeatures = ref([]);
 const isAllSelected = ref(false);
+
+
+
+// Add these new refs for strategy selection
+const selectedStrategies = ref([]);
+const originalFilteredData = ref(null);
+
+const checkAllPresent= () => {
+      return Object.values(data.value.swan_baskets).every(value =>
+        Object.values(selectedStrategies.value).includes(value)
+      );
+};
+
+
+// Computed for features
+const strategiesOptionsWithAll = computed(() => {
+  if (!data.value || !data.value.swan_baskets) {
+    return [];
+  }
+  return [
+    { label: checkAllPresent() ? "Remove All" : "All", value: "all" },
+    ...data.value.swan_baskets.map((feature) => ({
+      label: feature,
+      value: feature,
+    })),
+  ];
+});
+
+
+const selectStrategyMainTable=(basket)=>{
+  // Filter the data based on selected strategies
+    filteredData.value = originalFilteredData.value.filter(item => 
+          selectedStrategies.value.includes(item.strategy)
+        );
+
+    // Loop over the selected strategies and add a default object if it doesn't exist in strategies
+    basket.forEach(strategy => {
+      // Check if the strategy does NOT exist in the strategies array
+      if (!filteredData.value.some(item => item.strategy === strategy)) {
+        filteredData.value.push({
+          strategy: strategy,
+          qtylimit: 0,
+          cvlimit: 0,
+          factor1: 0,
+          factor2: 0
+        });
+      }
+    });
+}
+
+// Handle strategy selection changes
+const handleStrategyChange = (value) => {
+  if (!filteredData.value) return;
+  console.log("value is:",value);
+  
+  // Store original data if not stored yet
+  if (!originalFilteredData.value) {
+    originalFilteredData.value = [...filteredData.value];
+  }
+  
+  if (value.includes("all")) {
+    if (checkAllPresent()) {
+      selectedStrategies.value=[];
+    } else {
+      selectedStrategies.value=data.value.swan_baskets;
+    }
+    selectStrategyMainTable(selectedStrategies.value)
+  } else {
+    // Normal selection handling
+    selectedStrategies.value = value.filter((strategy) => strategy !== "all");
+    if (selectedStrategies.value.length ===0){
+      selectedStrategies.value=[]
+      filteredData.value = [];
+    }
+    selectStrategyMainTable(selectedStrategies.value)
+  }
+};
+
 
 const validateLimits = () => {
   let isValid = true;
@@ -653,6 +751,7 @@ const fetchNewDict = async () => {
 
 
 
+// Update your fetchMarginData function to store original data
 const fetchMarginData = async () => {
   loading.value = true;
   error.value = null;
@@ -663,7 +762,10 @@ const fetchMarginData = async () => {
 
     // Fill in local data from response
     filteredData.value = data.value?.params?.[account.value] ?? [];
+    // Store original data for filtering
+    originalFilteredData.value = [...filteredData.value];
     
+    // Rest of your existing function...
     if (data.value?.limits && data.value.limits[account.value] !== undefined) {
       limits.value = data.value.limits[account.value];
     }
@@ -698,6 +800,12 @@ const fetchMarginData = async () => {
       selectedFeatures.value = Object.keys(client_multiplier.value);
       isAllSelected.value =
         selectedFeatures.value.length === data.value.baskets.length;
+    }
+    
+    // Initialize selectedStrategies with all strategies
+    if (filteredData.value && filteredData.value.length > 0) {
+      const allStrategies = [...new Set(filteredData.value.map(item => item.strategy))];
+      selectedStrategies.value = allStrategies;
     }
 
     hasUnsavedChanges.value = false;

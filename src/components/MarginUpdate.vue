@@ -14,12 +14,12 @@
       </div>
 
       <div class="submit-container">
-      <button 
+      <!-- <button 
         @click="gotoMarginSettings()" 
         class="margin-button"
       >
         Margin Settings
-      </button>
+      </button> -->
       <button 
         @click="showTotpModal = true" 
         class="submit-button"
@@ -78,14 +78,19 @@
       <table class="admin-table">
         <thead>
           <tr>
-            <th>Account</th>
+            <th @click="sortByAccount" class="sortable-column">
+              Account
+              <span v-if="sortKey === 'account'" class="sort-icon">
+                {{ sortOrder === 'asc' ? '▲' : '▼' }}
+              </span>
+            </th>
             <th>Portfolio Value</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(account, index) in filteredAccounts" :key="index">
-            <td>{{index}}</td>
+          <tr v-for="(account, index) in sortedAccounts" :key="index">
+            <td>{{account.index}}</td>
             <td>{{ marginData['pf'][account.user_id] }}</td>
             <td>
               <button 
@@ -120,25 +125,58 @@ const showTotpModal = ref(false);
 const totpCode = ref('');
 const totpError = ref('');
 
-// Computed property for filtered accounts
-const filteredAccounts = computed(() => {
-  if (!searchQuery.value) return accounts.value; // Return the original object if no query
+// Sorting state
+const sortKey = ref('account');
+const sortOrder = ref('asc');
 
-  // Filter keys and rebuild the object
-  return Object.keys(accounts.value)
-    .filter(key => key.toLowerCase().includes(searchQuery.value.toLowerCase()))
-    .reduce((filtered, key) => {
-      filtered[key] = accounts.value[key];
-      return filtered;
-    }, {});
+// Sort function
+const sortByAccount = () => {
+  if (sortKey.value === 'account') {
+    // Toggle sort order if already sorting by account
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    // Set sort key to account and default to ascending
+    sortKey.value = 'account';
+    sortOrder.value = 'asc';
+  }
+};
+
+// Transform accounts object to array for easier sorting
+const accountsArray = computed(() => {
+  return Object.keys(accounts.value).map(key => ({
+    index: key,
+    user_id: accounts.value[key].user_id
+  }));
 });
 
+// Filtered accounts based on search query
+const filteredAccounts = computed(() => {
+  if (!searchQuery.value) return accountsArray.value;
+  
+  return accountsArray.value.filter(account => 
+    account.index.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
 
-const gotoMarginSettings = () =>{
+// Sorted accounts based on sort key and order
+const sortedAccounts = computed(() => {
+  if (sortKey.value !== 'account') return filteredAccounts.value;
+  
+  return [...filteredAccounts.value].sort((a, b) => {
+    const aValue = a.index.toLowerCase();
+    const bValue = b.index.toLowerCase();
+    
+    if (sortOrder.value === 'asc') {
+      return aValue.localeCompare(bValue);
+    } else {
+      return bValue.localeCompare(aValue);
+    }
+  });
+});
+
+const gotoMarginSettings = () => {
   router.push("/marginSettings");
 }
-
-
 
 import * as XLSX from 'xlsx';
 
@@ -268,6 +306,21 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.sortable-column {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+.sortable-column:hover {
+  background-color: #f5f5f5;
+}
+
+.sort-icon {
+  margin-left: 5px;
+  font-size: 0.8em;
+}
+
 
 .form-input {
   width: 100%;

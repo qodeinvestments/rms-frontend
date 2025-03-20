@@ -526,11 +526,11 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     </div>
     <div class="my-8" v-if="book && showOnPage === 'Zerodha Order Book'">
       <TanStackTestTable title="Zerodha Order Book" :data="book" :columns="zerodha_order_book_columns"
-        :hasColor="[]" :navigateTo="[]" :showPagination=true />
+        :hasColor="['ContractValue']" :navigateTo="[]" :showPagination=true />
     </div>
     <div class="my-8" v-if="book && showOnPage === 'XTS Order Book'">
       <TanStackTestTable title="XTS Order Book" :data="book" :columns="xts_order_book"
-        :hasColor="[]" :navigateTo="[]" :showPagination=true />
+        :hasColor="['ContractValue']" :navigateTo="[]" :showPagination=true />
     </div>
     
     <div class="my-8" v-if="book && showOnPage === 'Zerodha Position Book'">
