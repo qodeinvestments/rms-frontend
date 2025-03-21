@@ -91,6 +91,13 @@
                   <span class="text">Slippage User Page </span>
                 </a>
               </li>
+              <li :class="selected == 'UserStrategyVar' ? 'active' : ''" @click="changeSelected('UserStrategyVar')">
+                <a href="#">
+                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <span class="text"> User Strategy Var </span>
+                </a>
+              </li>
+             
             
             <!-- <li>
               <a href="#" :class="selected == 'Income' ? 'active' : ''" @click="changeSelected('Income')">
@@ -193,7 +200,8 @@ export default {
         'MarginUpdate':'/marginUpdate',
         'LivePositions': '/livepositions',
         'OpenTrades':'/opentrades',
-        'SlippageUserPage':'/slippageUserPage'
+        'SlippageUserPage':'/slippageUserPage',
+        'UserStrategyVar':'/userstrategyvar'
       }
 
     }
