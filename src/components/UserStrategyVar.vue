@@ -1,24 +1,96 @@
+<template>
+  <div class="px-8 py-8 pageContainer">
+    <!-- LOADING / ERROR STATES -->
+    <div v-if="loading">Loading...</div>
+    <div v-else-if="error">{{ error }}</div>
+    <!-- MAIN CONTENT -->
+    <div v-else>
+      <!-- Percentage Input Section Above the First Table -->
+      <div class="my-4 percentage-section">
+        <InputNumber
+          v-model:value="inputPercentage"
+          :min="1"
+          :max="100"
+          placeholder="Enter percentage (1-100)"
+          size="large"
+          style="width: 200px; margin-right: 8px;"
+        />
+        <Button size="large" @click="applyPercentage">
+          Apply Percentage
+        </Button>
+      </div>
+
+      <!-- FIRST TABLE (PSAR TABLE) -->
+      <div class="my-8" v-if="var_calculation_data.length">
+        <TanStackTestTable
+          title="All User Var Table"
+          :data="var_calculation_data"
+          :columns="columns"
+          :hasColor="Object.keys(var_calculation_data[0])"
+          :navigateTo="[]"
+          :showPagination="true"
+          :showPin="true"
+        />
+      </div>
+
+      <!-- DROPDOWN + APPLY BUTTON FOR CLIENT SELECTION -->
+      <div class="my-4">
+        <Select
+          v-model:value="selectedClient"
+          size="large"
+          placeholder="Select an account"
+          style="width: 400px; margin-right: 8px;"
+        >
+          <Select.Option 
+            v-for="account in accountNames" 
+            :key="account" 
+            :value="account"
+          >
+            {{ account }}
+          </Select.Option>
+        </Select>
+        <Button size="large" @click="applyClientSelection">
+          Apply
+        </Button>
+      </div>
+
+      <!-- SECOND TABLE (USER VAR TABLE) -->
+      <div class="my-8" v-if="user_var_calculation_data.length">
+        <TanStackTestTable
+          :title="`${selectedClient} User Var Table`" 
+          :data="user_var_calculation_data"
+          :columns="columns"
+          :hasColor="Object.keys(user_var_calculation_data[0])"
+          :navigateTo="[]"
+          :showPagination="true"
+          :showPin="true"
+        />
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup>
-import { onMounted, onUnmounted, computed, ref } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { createColumnHelper } from '@tanstack/vue-table'
+import { Select, Button, InputNumber } from 'ant-design-vue'
 import TanStackTestTable from './TanStackTestTable.vue'
 
-// Reactive state definitions
+// -------------------------------------------------------
+// REACTIVE STATE
+// -------------------------------------------------------
 const var_calculation_data = ref([])
+const user_var_calculation_data = ref([])
+const accounts = ref({})       // Expected format: { "Account A": true, "Account B": true }
+const selectedClient = ref('Delthro Vega') // Default selected account
+const inputPercentage = ref(10)  // Default percentage value is 10
 const error = ref(null)
 const loading = ref(false)
-const uids = ref([])      // not used in this snippet but declared
-const basket = ref([])    // not used in this snippet but declared
 
-// Placeholder for WebSocket connection function; replace with your actual function
-function connectClientDetailsWebSocket() {
-  console.log('Connecting WebSocket client details...')
-}
-
-// Create a column helper instance
+// -------------------------------------------------------
+// COLUMN HELPER FOR TABLE
+// -------------------------------------------------------
 const columnHelper = createColumnHelper()
-
-// Compute columns based on the first element of var_calculation_data
 const columns = computed(() => {
   if (var_calculation_data.value.length === 0) return []
   const keys = Object.keys(var_calculation_data.value[0])
@@ -31,8 +103,10 @@ const columns = computed(() => {
   })
 })
 
-// API function to fetch data and update a reactive state
-const fetchData = async (endpoint, stateRef) => {
+// -------------------------------------------------------
+// API FUNCTIONS (fetch/post helpers)
+// -------------------------------------------------------
+async function fetchData(endpoint, stateRef) {
   try {
     const token = localStorage.getItem('access_token')
     if (!token) throw new Error('User not authenticated')
@@ -58,14 +132,67 @@ const fetchData = async (endpoint, stateRef) => {
   }
 }
 
-// Function to fetch var_calculations data
-const var_calculations = () => fetchData('uservarcalculations', var_calculation_data)
+async function postData(endpoint, payload, stateRef) {
+  try {
+    const token = localStorage.getItem('access_token')
+    if (!token) throw new Error('User not authenticated')
 
-// Lifecycle hooks
+    const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) {
+      const errorMessage = await response.text()
+      throw new Error(`Error posting to ${endpoint}: ${errorMessage}`)
+    }
+
+    const data = await response.json()
+    if (stateRef) {
+      stateRef.value = data || []
+    }
+    
+    return data
+  } catch (err) {
+    error.value = err.message
+    console.error(`Error posting to ${endpoint}:`, err.message)
+    throw err
+  }
+}
+
+// -------------------------------------------------------
+// SPECIFIC DATA LOADERS
+// -------------------------------------------------------
+// Changed var_calculations to a POST request that sends {"percentage": <value>}
+const var_calculations = (percentage) => postData('uservarcalculations', { percentage }, var_calculation_data)
+const fetchAccounts = () => fetchData('getAccounts', accounts)
+
+// user_var_table now takes a clientName argument
+const user_var_table = (clientName) => {
+  return postData('uservartable', { client: clientName }, user_var_calculation_data)
+}
+
+// -------------------------------------------------------
+// COMPUTED ARRAY FOR THE DROPDOWN
+// -------------------------------------------------------
+const accountNames = computed(() => Object.keys(accounts.value))
+
+// -------------------------------------------------------
+// LIFECYCLE HOOKS
+// -------------------------------------------------------
 onMounted(async () => {
   loading.value = true
   try {
-    await Promise.all([var_calculations()])
+    // Load initial data.
+    await Promise.all([
+      var_calculations(inputPercentage.value),
+      fetchAccounts(),
+      user_var_table('Delthro Vega'), // default client value
+    ])
   } finally {
     loading.value = false
   }
@@ -75,97 +202,67 @@ onMounted(async () => {
 onUnmounted(() => {
   // Cleanup if needed
 })
+
+// Example: existing websocket connection function
+function connectClientDetailsWebSocket() {
+  console.log('Connecting WebSocket client details...')
+}
+
+// -------------------------------------------------------
+// HANDLER WHEN USER CLICKS "APPLY" FOR CLIENT SELECTION
+// -------------------------------------------------------
+async function applyClientSelection() {
+  console.log(selectedClient.value, "is the selected client")
+  if (!selectedClient.value) return
+  try {
+    loading.value = true
+    // Re-fetch user var data for the newly selected account
+    await user_var_table(selectedClient.value)
+  } catch (err) {
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
+}
+
+// -------------------------------------------------------
+// HANDLER FOR APPLYING PERCENTAGE CHANGE
+// -------------------------------------------------------
+async function applyPercentage() {
+  // Validate that inputPercentage is between 1 and 100
+  if (inputPercentage.value < 1 || inputPercentage.value > 100) {
+    alert("Please enter a number between 1 and 100.")
+    return
+  }
+  try {
+    loading.value = true
+    // Re-fetch var_calculation_data with the new percentage value
+    await var_calculations(inputPercentage.value)
+  } catch (err) {
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
-<template>
-  <div class="px-8 py-8 pageContainer">
-    <div v-if="loading">Loading...</div>
-    <div v-else-if="error">{{ error }}</div>
-    <div class="my-8" v-else-if="var_calculation_data.length">
-      <TanStackTestTable 
-        title="PsarTable" 
-        :data="var_calculation_data" 
-        :columns="columns" 
-        :hasColor="Object.keys(var_calculation_data[0])"
-        :navigateTo="[]" 
-        :showPagination="true" 
-        :showPin="true"
-      />
-    </div>
-  </div>
-</template>
-
-
 <style scoped>
-.a-select {
-    margin-top: 20px;
-    margin-bottom: 20px;
-}
-
 .pageContainer {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.histogram-container {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 30px;
+.my-4 {
+  margin: 1rem 0;
 }
 
-.filter-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
+.my-8 {
+  margin: 2rem 0;
 }
 
-/* Custom button styling without hover effects and background colors */
-.custom-checker-btn {
-    align-self: flex-start;
-    padding: 8px 16px;
-    border: 1px solid #d9d9d9;
-    border-radius: 2px;
-    cursor: pointer;
-    transition: border-color 0.3s;
-    background: none;
-    font-size: 14px;
-    color: rgba(0, 0, 0, 0.85);
-}
-
-.custom-checker-btn:focus {
-    outline: none;
-}
-
-/* Simple border change to indicate active state */
-.custom-checker-btn:global(.active), 
-.custom-checker-btn:global([aria-pressed="true"]) {
-    border-color: #1890ff;
-    color: #1890ff;
-}
-
-.latencyvalue {
-    font-weight: bold;
-}
-
-.LatencyTable {
-    display: flex;
-    width: 100;
-    align-items: flex-end;
-    justify-content: flex-end;
-    padding: 20px;
-    flex-direction: column;
-}
-
-.table-heading {
-    font-size: 22px;
-    font-weight: 600;
-    margin-left: 30px;
-}
-
-html {
-    /* font-family: poppins; */
-    font-size: 14px;
+.percentage-section {
+  display: flex;
+  align-items: center;
 }
 </style>
