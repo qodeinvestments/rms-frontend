@@ -176,34 +176,6 @@ export const columns = [
       id: 'PendingOrderCount',
       cell: info => info.getValue(),
       header: () => 'PendingOrderCount',
-    }),
-    columnHelper.accessor(row => row.PortfolioValue, {
-      id: 'PortfolioValue',
-      cell: info => info.getValue(),
-      header: () => 'Portfolio Value',
-    }),
-    columnHelper.accessor(row => row.PositionDayPL, {
-      id: 'PositionDayPL',
-      cell: info => info.getValue(),
-      header: () => 'PositionDayPL',
-    }),
-   
-  
-    columnHelper.accessor(row => row.TotalOrderCount, {
-      id: 'TotalOrderCount',
-      cell: info => info.getValue(),
-      header: () => 'TotalOrderCount',
-    }),
-  
-    columnHelper.accessor(row => row.PositionsCount, {
-      id: 'PositionsCount',
-      cell: info => info.getValue(),
-      header: () => 'PositionsCount',
-    }),
-    columnHelper.accessor(row => row.HoldingsCount, {
-      id: 'HoldingsCount',
-      cell: info => info.getValue(),
-      header: () => 'HoldingsCount',
-    }),
+    })
   
   ]
