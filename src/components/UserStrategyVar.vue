@@ -29,7 +29,6 @@
           :hasColor="Object.keys(var_calculation_data[0])"
           :navigateTo="[]"
           :showPagination="true"
-          :showPin="true"
         />
       </div>
 
@@ -59,11 +58,10 @@
         <TanStackTestTable
           :title="`${selectedClient} User Var Table`" 
           :data="user_var_calculation_data"
-          :columns="columns"
+          :columns="user_value_table_columns"
           :hasColor="Object.keys(user_var_calculation_data[0])"
           :navigateTo="[]"
           :showPagination="true"
-          :showPin="true"
         />
       </div>
     </div>
@@ -102,6 +100,19 @@ const columns = computed(() => {
     })
   })
 })
+
+const user_value_table_columns = computed(() => {
+  if (user_var_calculation_data.value.length === 0) return []
+  const keys = Object.keys(user_var_calculation_data.value[0])
+  return keys.map(column => {
+    return columnHelper.accessor(row => row[column], {
+      id: column,
+      cell: info => info.getValue(),
+      header: () => column,
+    })
+  })
+})
+
 
 // -------------------------------------------------------
 // API FUNCTIONS (fetch/post helpers)
