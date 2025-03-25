@@ -111,7 +111,7 @@ const elmcalculatordata = ref([])
 const accounts = ref({})       // Expected format: { "Account A": true, "Account B": true }
 const selectedClient = ref('Delthro Vega') // Default selected account
 const inputPercentage = ref(10)  // Default percentage value is 10
-const elmpercentage= ref(20)  // Default percentage value is 2
+const elmpercentage= ref(2)  // Default percentage value is 2
 const error = ref(null)
 const loading = ref(false)
 
