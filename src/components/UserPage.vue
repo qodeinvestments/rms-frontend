@@ -128,7 +128,7 @@ const handleMessage = (message) => {
         Used_Margin: result.marginUtilized !== undefined ? result.marginUtilized : 0,
         VAR_PERCENTAGE: result.Live_Client_Var !== undefined && (result['Total Margin'] > 0) ? ((Number(result.Live_Client_Var) / result['Total Margin']) * 100).toPrecision(4) : 0,
       }];
-      mix_real_ideal_mtm_table.value = { "real": result['MTMTable'], "ideal": result['ideal_MTMTable'] }
+      
       position_sum.value = result.MTM !== undefined ? result.MTM : 0
 
     } else {
@@ -278,6 +278,7 @@ const connectBasketWebSocket = () => {
   clientBasketSocket.onmessage = function (event) {
     const data = JSON.parse(event.data);
     let ar2 = data["time"];
+    mix_real_ideal_mtm_table.value = { "real": data['MTMTable'], "ideal": data['ideal_MTMTable'] }
     if (past_time_basket.value === 0) past_time_basket.value = ar2;
     if (past_time_basket.value != 0) {
       let date1 = new Date(past_time_basket.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
@@ -288,6 +289,8 @@ const connectBasketWebSocket = () => {
       basket_max_latency.value = Math.max(basket_max_latency.value, basket_latency.value)
       past_time_basket.value = ar2;
     }
+    console.log(data,"  is the data")
+   
     basketData.value = data
     if (data.live) {
       basket_chart_data.value = data.live;
@@ -467,10 +470,9 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
         :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }" />
     </div>
     <!--  <input type="date" v-model="date" /> -->
-
     <div class="chartContainer">
       <p class="table-heading">MTM AND IDEAL MTM</p>
-      <LightWeightChart v-if="user_data['MTMTable']" :Chartdata="mix_real_ideal_mtm_table" />
+      <LightWeightChart v-if="mix_real_ideal_mtm_table['real']" :Chartdata="mix_real_ideal_mtm_table" />
     </div>
 
 
