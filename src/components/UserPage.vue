@@ -100,7 +100,7 @@ const handleMessage = (message) => {
     if (message.client_data === undefined) return;
     client_BackendData.value = message.client_data
     let result = client_BackendData.value.find(client => client.name === name.value);
-    signal_position_tables.value = result.signalPosition
+ 
     broker.value = result.broker;
     if (result) {
       user_data.value = result;
@@ -279,6 +279,7 @@ const connectBasketWebSocket = () => {
     const data = JSON.parse(event.data);
     let ar2 = data["time"];
     mix_real_ideal_mtm_table.value = { "real": data['MTMTable'], "ideal": data['ideal_MTMTable'] }
+    signal_position_tables.value = data.signalPosition
     if (past_time_basket.value === 0) past_time_basket.value = ar2;
     if (past_time_basket.value != 0) {
       let date1 = new Date(past_time_basket.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
