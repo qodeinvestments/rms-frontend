@@ -64,6 +64,34 @@
           :showPagination="true"
         />
       </div>
+
+
+      <div class="my-4 percentage-section">
+        <InputNumber
+          v-model:value="elmpercentage"
+          :min="1"
+          :max="100"
+          placeholder="Enter percentage (1-100)"
+          size="large"
+          style="width: 200px; margin-right: 8px;"
+        />
+        <Button size="large" @click="applyelmpercentage">
+          Apply ELM Percentage
+        </Button>
+      </div>
+
+
+      <!-- SECOND TABLE (USER VAR TABLE) -->
+      <div class="my-8" v-if="emlcalculatordata.length">
+        <TanStackTestTable
+          :title="`${selectedClient} User Var Table`" 
+          :data="emlcalculatordata"
+          :columns="elm_table_columns"
+          :hasColor="Object.keys(emlcalculatordata[0])"
+          :navigateTo="[]"
+          :showPagination="true"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -79,9 +107,11 @@ import TanStackTestTable from './TanStackTestTable.vue'
 // -------------------------------------------------------
 const var_calculation_data = ref([])
 const user_var_calculation_data = ref([])
+const emlcalculatordata = ref([])
 const accounts = ref({})       // Expected format: { "Account A": true, "Account B": true }
 const selectedClient = ref('Delthro Vega') // Default selected account
 const inputPercentage = ref(10)  // Default percentage value is 10
+const elmpercentage= ref(20)  // Default percentage value is 2
 const error = ref(null)
 const loading = ref(false)
 
@@ -104,6 +134,18 @@ const columns = computed(() => {
 const user_value_table_columns = computed(() => {
   if (user_var_calculation_data.value.length === 0) return []
   const keys = Object.keys(user_var_calculation_data.value[0])
+  return keys.map(column => {
+    return columnHelper.accessor(row => row[column], {
+      id: column,
+      cell: info => info.getValue(),
+      header: () => column,
+    })
+  })
+})
+
+const elm_table_columns = computed(() => {
+  if (emlcalculatordata.value.length === 0) return []
+  const keys = Object.keys(emlcalculatordata.value[0])
   return keys.map(column => {
     return columnHelper.accessor(row => row[column], {
       id: column,
@@ -181,7 +223,7 @@ async function postData(endpoint, payload, stateRef) {
 // Changed var_calculations to a POST request that sends {"percentage": <value>}
 const var_calculations = (percentage) => postData('uservarcalculations', { percentage }, var_calculation_data)
 const fetchAccounts = () => fetchData('getAccounts', accounts)
-
+const calculate_elm  = (percentage) => postData('emlcalculator', { percentage }, emlcalculatordata)
 // user_var_table now takes a clientName argument
 const user_var_table = (clientName) => {
   return postData('uservartable', { client: clientName }, user_var_calculation_data)
@@ -201,6 +243,7 @@ onMounted(async () => {
     // Load initial data.
     await Promise.all([
       var_calculations(inputPercentage.value),
+      calculate_elm(elmpercentage.value),
       fetchAccounts(),
       user_var_table('Delthro Vega'), // default client value
     ])
@@ -249,6 +292,23 @@ async function applyPercentage() {
     loading.value = true
     // Re-fetch var_calculation_data with the new percentage value
     await var_calculations(inputPercentage.value)
+  } catch (err) {
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
+}
+
+async function applyelmpercentage() {
+  // Validate that elmpercentage is between 1 and 100
+  if (elmpercentage.value < 1 || elmpercentage.value > 100) {
+    alert("Please enter a number between 1 and 100.")
+    return
+  }
+  try {
+    loading.value = true
+    // Re-fetch elm_calculation_data with the new percentage value
+    await calculate_elm(elmpercentage.value)
   } catch (err) {
     console.error(err)
   } finally {
