@@ -53,7 +53,6 @@ const checkServerDataConnection = ref(false)
 const Latency = ref(0)
 const max_latency = ref(0);
 const past_time = ref(0)
-const live_weights = ref([]);
 
 let socket = null
 
@@ -281,9 +280,6 @@ const connectWebSocket = () => {
     } else {
 
       const message = JSON.parse(event.data);
-      if (message['live_weights']) {
-        live_weights.value = message['live_weights'];
-      }
       let ar2 = message.time;
       if (past_time.value === 0) past_time.value = ar2;
       let date1 = new Date(past_time.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
