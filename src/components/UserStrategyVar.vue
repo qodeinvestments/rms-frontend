@@ -82,12 +82,12 @@
 
 
       <!-- SECOND TABLE (USER VAR TABLE) -->
-      <div class="my-8" v-if="emlcalculatordata.length">
+      <div class="my-8" v-if="elmcalculatordata.length">
         <TanStackTestTable
           :title="`${selectedClient} User Var Table`" 
-          :data="emlcalculatordata"
+          :data="elmcalculatordata"
           :columns="elm_table_columns"
-          :hasColor="Object.keys(emlcalculatordata[0])"
+          :hasColor="Object.keys(elmcalculatordata[0])"
           :navigateTo="[]"
           :showPagination="true"
         />
@@ -107,7 +107,7 @@ import TanStackTestTable from './TanStackTestTable.vue'
 // -------------------------------------------------------
 const var_calculation_data = ref([])
 const user_var_calculation_data = ref([])
-const emlcalculatordata = ref([])
+const elmcalculatordata = ref([])
 const accounts = ref({})       // Expected format: { "Account A": true, "Account B": true }
 const selectedClient = ref('Delthro Vega') // Default selected account
 const inputPercentage = ref(10)  // Default percentage value is 10
@@ -144,8 +144,8 @@ const user_value_table_columns = computed(() => {
 })
 
 const elm_table_columns = computed(() => {
-  if (emlcalculatordata.value.length === 0) return []
-  const keys = Object.keys(emlcalculatordata.value[0])
+  if (elmcalculatordata.value.length === 0) return []
+  const keys = Object.keys(elmcalculatordata.value[0])
   return keys.map(column => {
     return columnHelper.accessor(row => row[column], {
       id: column,
@@ -223,7 +223,7 @@ async function postData(endpoint, payload, stateRef) {
 // Changed var_calculations to a POST request that sends {"percentage": <value>}
 const var_calculations = (percentage) => postData('uservarcalculations', { percentage }, var_calculation_data)
 const fetchAccounts = () => fetchData('getAccounts', accounts)
-const calculate_elm  = (percentage) => postData('emlcalculator', { percentage }, emlcalculatordata)
+const calculate_elm  = (percentage) => postData('elmcalculator', { percentage }, elmcalculatordata)
 // user_var_table now takes a clientName argument
 const user_var_table = (clientName) => {
   return postData('uservartable', { client: clientName }, user_var_calculation_data)
