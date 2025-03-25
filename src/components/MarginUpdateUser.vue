@@ -830,6 +830,15 @@ const validatePortfolioValue = () => {
     portfolioError.value = "Portfolio Value cannot be negative";
     return false;
   }
+  
+  if(value<limits.value.lower){
+    portfolioError.value = "Portfolio Value cannot be less than Minimum Portfolio Value"; 
+    return false;
+  }
+  if(value>limits.value.upper){
+    portfolioError.value = "Portfolio Value cannot be greater than Maximum Portfolio Value";  
+    return false;
+  }
   portfolioError.value = "";
   hasUnsavedChanges.value = true;
   return true;
