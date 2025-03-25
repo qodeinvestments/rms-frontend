@@ -84,7 +84,7 @@
       <!-- SECOND TABLE (USER VAR TABLE) -->
       <div class="my-8" v-if="elmcalculatordata.length">
         <TanStackTestTable
-          :title="`${selectedClient} User Var Table`" 
+          :title="`$ELM Table`" 
           :data="elmcalculatordata"
           :columns="elm_table_columns"
           :hasColor="Object.keys(elmcalculatordata[0])"
