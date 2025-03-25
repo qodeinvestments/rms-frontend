@@ -289,7 +289,7 @@ const connectBasketWebSocket = () => {
       basket_max_latency.value = Math.max(basket_max_latency.value, basket_latency.value)
       past_time_basket.value = ar2;
     }
-    console.log(data,"  is the data")
+ 
    
     basketData.value = data
     if (data.live) {
