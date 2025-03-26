@@ -52,7 +52,7 @@ const checkBackendConnection = ref(false)
 const checkServerDataConnection = ref(false)
 const Latency = ref(0)
 const max_latency = ref(0);
-const past_time = ref(0)
+const past_time = ref(0);
 
 let socket = null
 
@@ -395,13 +395,33 @@ onUnmounted(() => {
         </div>
         <div v-if="isLoading" class="loading-container">
           <LoadingSpinner />
-          <p class="loading-text">Loading chart data...</p>
         </div>
-        <!-- <OHLCChart 
-          v-else-if="chartData"
-          :data="chartData" 
-          @submit-config="(config) => fetchDiffData({...config, symbol: formatIndexName(selectedIndex)})"
-        /> -->
+        <div class="flex-container">
+          <div class="flex-item">
+            <p>09:15 O :</p>
+            <p :class="connection_BackendData['long_options_indicator'][formatIndexName(selectedIndex)]['09:15 O']>0 ? 'green' : 'red' " >
+            {{ connection_BackendData['long_options_indicator'][formatIndexName(selectedIndex)]["09:15 O"] }} %
+            </p>
+          </div>
+          <div class="flex-item">
+            <p>09:15 C :</p>
+            <p :class="connection_BackendData['long_options_indicator'][formatIndexName(selectedIndex)]['09:15 C'] >0 ? 'green' : 'red' " >
+              {{ connection_BackendData['long_options_indicator'][formatIndexName(selectedIndex)]["09:15 C"] }} %
+            </p>
+          </div>
+          <div class="flex-item">
+            <p>12:00 O :</p>
+            <p :class="connection_BackendData['long_options_indicator'][formatIndexName(selectedIndex)]['12:00 O']>0 ? 'green' : 'red' " >
+              {{ connection_BackendData['long_options_indicator'][formatIndexName(selectedIndex)]["12:00 O"] }} %
+            </p>
+          </div>
+          <div class="flex-item">
+            <p>12:00 C :</p>
+            <p :class="connection_BackendData['long_options_indicator'][formatIndexName(selectedIndex)]['12:00 C']>0 ? 'green' : 'red' " >
+              {{ connection_BackendData['long_options_indicator'][formatIndexName(selectedIndex)]["12:00 C"] }} %
+            </p>
+          </div>
+        </div>
       </div>
     </transition>
 
@@ -435,7 +455,32 @@ onUnmounted(() => {
 
 
 <style>
+  .green{
+    color:green;
+  }
+  .red{
+    color:red;
+  }
+  .flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 10px;
+  }
 
+  .flex-item {
+    font-weight: bold;
+    flex: 1 1 200px; /* grow, shrink, and a minimum width */
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+    text-align: center;
+  }
+
+  .flex-item p {
+    margin: 5px 0;
+  }
 .homepage-container {
   min-height: 100vh;
   background-color: #f8fafc;
