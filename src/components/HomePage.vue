@@ -391,7 +391,7 @@ onUnmounted(() => {
     <transition name="chart-fade">
       <div v-if="selectedIndex" class="chart-container">
         <div class="chart-header">
-          <h3 class="chart-title">{{ formatIndexName(selectedIndex) }} Chart</h3>
+          <h3 class="chart-title">{{ formatIndexName(selectedIndex) }} Percentage Move</h3>
         </div>
         <div v-if="isLoading" class="loading-container">
           <LoadingSpinner />
