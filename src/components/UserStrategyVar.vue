@@ -22,10 +22,19 @@
 
       <!-- FIRST TABLE (PSAR TABLE) -->
       <div class="my-8" v-if="var_calculation_data.length">
+        <a-select 
+            v-model:value="varcalculation"
+            mode="multiple" 
+            placeholder="Select Columns" 
+            style="width: 100%; margin-bottom: 10px;"
+            :options="categoryOptions">
+        </a-select>
+            
         <TanStackTestTable
+          :key="varcalculation.join('-')" 
           title="All User Var Table"
-          :data="var_calculation_data"
-          :columns="columns"
+          :data="give_var_calculation_data()"
+          :columns="filteredColumns"
           :hasColor="Object.keys(var_calculation_data[0])"
           :navigateTo="[]"
           :showPagination="true"
@@ -55,10 +64,18 @@
 
       <!-- SECOND TABLE (USER VAR TABLE) -->
       <div class="my-8" v-if="user_var_calculation_data.length">
+        <a-select 
+            v-model:value="uservarcalculation"
+            mode="multiple" 
+            placeholder="Select Columns" 
+            style="width: 100%; margin-bottom: 10px;"
+            :options="categoryOptions">
+        </a-select>
         <TanStackTestTable
+          :key="uservarcalculation.join('-')" 
           :title="`${selectedClient} User Var Table`" 
-          :data="user_var_calculation_data"
-          :columns="user_value_table_columns"
+          :data="give_user_var_calculation_data()"
+          :columns="filteredUserVarColumns"
           :hasColor="Object.keys(user_var_calculation_data[0])"
           :navigateTo="[]"
           :showPagination="true"
@@ -114,10 +131,125 @@ const inputPercentage = ref(10)  // Default percentage value is 10
 const elmpercentage= ref(2)  // Default percentage value is 2
 const error = ref(null)
 const loading = ref(false)
-
+const varcalculation = ref([])
+const uservarcalculation = ref([])
+// Category options for the multi-select
+const categoryOptions = [
+  { label: 'Broker', value: 'Broker' },
+  { label: 'System', value: 'System' },
+  { label: 'Basket', value: 'Basket' }
+]
 // -------------------------------------------------------
 // COLUMN HELPER FOR TABLE
 // -------------------------------------------------------
+const filteredColumns = computed(() => {
+  // Guard against empty data
+  if (!var_calculation_data.value.length) return [];
+  // Use the filterColumns function to get the keys you want based on the current selection.
+  const keysToKeep = filterColumns(var_calculation_data.value[0], varcalculation.value);
+  return keysToKeep.map(key => {
+    return columnHelper.accessor(row => row[key], {
+      id: key,
+      cell: info => info.getValue(),
+      header: () => key,
+    });
+  });
+});
+
+const filteredUserVarColumns = computed(() => {
+  // Guard against empty data
+  if (!user_var_calculation_data.value.length) return [];
+  // Use the filterColumns function to get the keys you want based on the current selection.
+  const keysToKeep = filterColumns(user_var_calculation_data.value[0], uservarcalculation.value);
+  return keysToKeep.map(key => {
+    return columnHelper.accessor(row => row[key], {
+      id: key,
+      cell: info => info.getValue(),
+      header: () => key,
+    });
+  });
+});
+
+
+
+
+
+const filterColumns = (masterObj, options) => {
+  const result = [];
+  result.push('User');
+
+  // Get an array of keys from the master object.
+  const master = Object.keys(masterObj);
+
+  const systemGroup = new Set(['Upside', 'Upside%', 'Downside', 'Downside%']);
+  const brokerGroup = new Set(['BrokerUpside', 'BrokerUpside%', 'BrokerDownside', 'BrokerDownside%']);
+  const combinedSet = new Set([...systemGroup, ...brokerGroup,'User']);
+
+  if (options.includes('System')) {
+    master.forEach(col => {
+      if (systemGroup.has(col)) {
+        result.push(col);
+      }
+    });
+  }
+
+  if (options.includes('Broker')) {
+    master.forEach(col => {
+      if (brokerGroup.has(col)) {
+        result.push(col);
+      }
+    });
+  }
+
+  if (options.includes('Basket')) {
+    const alreadyAdded = new Set( combinedSet );
+    master.forEach(col => {
+      if (!alreadyAdded.has(col)) {
+        result.push(col);
+      }
+    });
+  }
+ 
+  return result;
+}
+
+const give_var_calculation_data = () => {
+  // The original data array
+  const data = var_calculation_data.value;
+  const keysToKeep = filterColumns(var_calculation_data.value[0], varcalculation.value);
+  const updatedData = data.map(item => {
+    const newItem = {};
+    keysToKeep.forEach(key => {
+      if (item.hasOwnProperty(key)) {
+        newItem[key] = item[key];
+      }
+    });
+    newItem.summary = `${newItem.User} has a downside of ${newItem.Downside}`;
+    return newItem;
+  });
+
+  return updatedData;
+};
+
+const give_user_var_calculation_data=()=>{
+    // The original data array
+    const data = user_var_calculation_data.value;
+    const keysToKeep = filterColumns(user_var_calculation_data.value[0], uservarcalculation.value);
+    const updatedData = data.map(item => {
+      const newItem = {};
+      keysToKeep.forEach(key => {
+        if (item.hasOwnProperty(key)) {
+          newItem[key] = item[key];
+        }
+      });
+      newItem.summary = `${newItem.User} has a downside of ${newItem.Downside}`;
+      return newItem;
+    });
+
+  return updatedData;
+
+}
+
 const columnHelper = createColumnHelper()
 const columns = computed(() => {
   if (var_calculation_data.value.length === 0) return []
