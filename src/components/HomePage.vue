@@ -163,27 +163,27 @@ const toggleChart = async (key) => {
   isLoading.value = true
   chartData.value = null
   
-  try {
-    const response = await fetch('https://production2.swancapital.in/Psar', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        symbol: formatIndexName(key),
-        timeframe: '5m',
-        indicators: []
-      })
-    })
+  // try {
+  //   const response = await fetch('https://production2.swancapital.in/Psar', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+  //       'Content-Type': 'application/json'
+  //     },
+  //     body: JSON.stringify({
+  //       symbol: formatIndexName(key),
+  //       timeframe: '5m',
+  //       indicators: []
+  //     })
+  //   })
     
-    if (!response.ok) throw new Error('Failed to fetch chart data')
-    chartData.value = await response.json()
-  } catch (error) {
-    console.error('Error fetching chart data:', error)
-  } finally {
-    isLoading.value = false
-  }
+  //   if (!response.ok) throw new Error('Failed to fetch chart data')
+  //   chartData.value = await response.json()
+  // } catch (error) {
+  //   console.error('Error fetching chart data:', error)
+  // } finally {
+  //   isLoading.value = false
+  // }
 }
 
 // Add method to get arrow direction
