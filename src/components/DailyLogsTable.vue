@@ -1,67 +1,97 @@
 <template>
-  <div class="px-8 py-8 pageContainer">
-    <!-- LOADING / ERROR STATES -->
-    <div v-if="loading">Loading...</div>
-    <div v-else-if="error">{{ error }}</div>
-    <!-- MAIN CONTENT -->
-    <div v-else>
-      <!-- FIRST TABLE (PSAR TABLE) -->
-      <div class="my-8" v-if="logs.length">
-        <a-select 
-          v-model:value="selectedCategories"
-          mode="multiple" 
-          placeholder="Select Categories" 
-          style="width: 100%; margin-bottom: 10px;"
-          :options="categoryOptions"
-        >
-        </a-select>
+  <div class="min-h-screen bg-gray-50 p-8">
+    <div class="container mx-auto">
+      <!-- Create New Log Button -->
+      <div class="mb-6">
+        <a-button  @click="handleCreateNewLog">
+          Create New Log
+        </a-button>
+      </div>
 
-        <TanStackTestTable
-          title="All User Var Table"
-          :data="filteredLogs"
-          :columns="columns"
-          :hasColor="Object.keys(logs[0] || {})"
-          :navigateTo="[]"
-          :showPagination="true"
-        />
+      <!-- Category Select -->
+      <a-select 
+        v-model:value="selectedCategories"
+        mode="multiple" 
+        placeholder="Select Categories" 
+        class="w-full mb-6"
+        :options="categoryOptions"
+      >
+      </a-select>
+      
+
+      <!-- Modern Table -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <table class="w-full">
+          <thead class="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+            <tr>
+              <th class="px-6 py-4 text-left font-semibold">Date</th>
+              <th class="px-6 py-4 text-left font-semibold">Category</th>
+              <th class="px-6 py-4 text-left font-semibold">Message</th>
+              <th class="px-6 py-4 text-center font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr 
+              v-for="log in filteredLogs" 
+              :key="log.id" 
+              class="border-b hover:bg-gray-100 transition-colors duration-200"
+            >
+              <td class="px-6 py-4">{{ log.Date }}</td>
+              <td class="px-6 py-4">
+                <span 
+                  class="px-3 py-1 rounded-full text-xs font-medium"
+                  :class="getCategoryClass(log.Category)"
+                >
+                  {{ log.Category }}
+                </span>
+              </td>
+              <td class="px-6 py-4">{{ log.Message['Title'] }}</td>
+              <td class="px-6 py-4 flex justify-center space-x-2">
+                <!-- Read Button -->
+                <button 
+                  @click="handleRead(log)"
+                  class="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 transition-colors"
+                >
+                  Read
+                </button>
+                
+                <!-- Update Button -->
+                <button 
+                  @click="handleUpdate(log)"
+                  class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition-colors"
+                >
+                  Update
+                </button>
+                
+                <!-- Delete Button -->
+                <button 
+                  @click="handleDelete(log)"
+                  class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition-colors"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </template>
-  
+
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { createColumnHelper } from '@tanstack/vue-table'
-import { Select } from 'ant-design-vue'
-import TanStackTestTable from './TanStackTestTable.vue'
-  
-// -------------------------------------------------------
-// REACTIVE STATE
-// -------------------------------------------------------
+import { ref, computed, onMounted } from 'vue'
+import { Select, Button, message } from 'ant-design-vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
+// Reactive State
 const logs = ref([])
+const selectedCategories = ref([])
 const error = ref(null)
 const loading = ref(false)
-const selectedCategories = ref([])
 
-// -------------------------------------------------------
-// COLUMN HELPER FOR TABLE
-// -------------------------------------------------------
-const columnHelper = createColumnHelper()
-const columns = computed(() => {
-  if (logs.value.length === 0) return []
-  const keys = Object.keys(logs.value[0])
-  return keys.map(column => {
-    return columnHelper.accessor(row => row[column], {
-      id: column,
-      cell: info => info.getValue(),
-      header: () => column,
-    })
-  })
-})
-
-// -------------------------------------------------------
-// COMPUTED PROPERTIES
-// -------------------------------------------------------
+// Computed Properties
 const categoryOptions = computed(() => {
   const uniqueCategories = [...new Set(logs.value.map(log => log.Category))]
   return uniqueCategories.map(category => ({
@@ -76,36 +106,56 @@ const filteredLogs = computed(() => {
     selectedCategories.value.includes(log.Category)
   )
 })
-  
-// -------------------------------------------------------
-// API FUNCTIONS (fetch/post helpers)
-// -------------------------------------------------------
-async function fetchData(endpoint, stateRef) {
+
+// Category Color Mapping
+const getCategoryClass = (category) => {
+  const categoryColors = {
+    'Execution': 'bg-blue-100 text-blue-800',
+    'Broker': 'bg-green-100 text-green-800',
+    'Default': 'bg-gray-100 text-gray-800'
+  }
+  return categoryColors[category] || categoryColors['Default']
+}
+
+// Action Handlers
+async function handleRead(log) {
+  router.push(`/readlog/${log.id}`)
   try {
-    const token = localStorage.getItem('access_token')
-    if (!token) throw new Error('User not authenticated')
-  
-    const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    })
-  
-    if (!response.ok) {
-      const errorMessage = await response.text()
-      throw new Error(`Error fetching ${endpoint}: ${errorMessage}`)
-    }
-  
-    const data = await response.json()
-    stateRef.value = data || []
+    message.success('Log read successfully')
   } catch (err) {
-    error.value = err.message
-    console.error(`Error fetching ${endpoint}:`, err.message)
+    message.error('Failed to read log')
+    console.error('Read error:', err)
   }
 }
-  
+
+async function handleUpdate(log) {
+  try {
+    // Implement update endpoint logic
+    await postData('updatelog', log, null)
+    message.success('Log updated successfully')
+  } catch (err) {
+    message.error('Failed to update log')
+    console.error('Update error:', err)
+  }
+}
+
+async function handleDelete(log) {
+  try {
+    // Implement delete endpoint logic
+    await postData('deletelog', { id: log.id }, null)
+    logs.value = logs.value.filter(item => item.id !== log.id)
+    message.success('Log deleted successfully')
+  } catch (err) {
+    message.error('Failed to delete log')
+    console.error('Delete error:', err)
+  }
+}
+
+function handleCreateNewLog() {
+  router.push('/newlog')
+}
+
+// API Functions
 async function postData(endpoint, payload, stateRef) {
   try {
     const token = localStorage.getItem('access_token')
@@ -137,49 +187,39 @@ async function postData(endpoint, payload, stateRef) {
     throw err
   }
 }
-  
-// -------------------------------------------------------
-// SPECIFIC DATA LOADERS
-// -------------------------------------------------------
-const getlogs = () => fetchData('getdailylogs', logs)
-  
-// -------------------------------------------------------
-// LIFECYCLE HOOKS
-// -------------------------------------------------------
-onMounted(async () => {
-  loading.value = true
+
+async function fetchData(endpoint, stateRef) {
   try {
-    // Load initial data.
-    await Promise.all([
-      getlogs()
-    ])
-  } finally {
-    loading.value = false
+    const token = localStorage.getItem('access_token')
+    if (!token) throw new Error('User not authenticated')
+
+    const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      const errorMessage = await response.text()
+      throw new Error(`Error fetching ${endpoint}: ${errorMessage}`)
+    }
+
+    const data = await response.json()
+    stateRef.value = data || []
+  } catch (err) {
+    error.value = err.message
+    console.error(`Error fetching ${endpoint}:`, err.message)
   }
-})
-  
-onUnmounted(() => {
-  // Cleanup if needed
-})
+}
+
+const fetchLogs = () => fetchData('getdailylogs', logs)
+
+// Lifecycle Hook
+onMounted(fetchLogs)
 </script>
-  
+
 <style scoped>
-.pageContainer {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-  
-.my-4 {
-  margin: 1rem 0;
-}
-  
-.my-8 {
-  margin: 2rem 0;
-}
-  
-.percentage-section {
-  display: flex;
-  align-items: center;
-}
+/* Additional custom styles can be added here if needed */
 </style>

@@ -18,6 +18,8 @@ import OpenTrades from '../components/OpenTrades.vue'
 import SlippageUserPage from '../components/SlippageUserPage.vue'
 import UserStrategyVar from '../components/UserStrategyVar.vue'
 import DailyLogsTable from '../components/DailyLogsTable.vue'
+import ReadDailyLog from  '../components/ReadDailyLog.vue'
+import NewDailyLog from '../components/NewDailyLog.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -116,6 +118,16 @@ const router = createRouter({
       path:'/dailylogs',
       name:'DailyLogsTable',
       component:DailyLogsTable
+    },
+    {
+      path:'/readlog/:id',
+      name:'ReadDailyLog',
+      component:ReadDailyLog
+    },
+    {
+      path:'/newlog',
+      name:'NewDailyLog',
+      component:NewDailyLog
     }
     // {
     //   path: '/about',
