@@ -17,6 +17,7 @@ import BrokerPositioMisMatch from '../components/BrokerPositioMisMatch.vue'
 import OpenTrades from '../components/OpenTrades.vue'
 import SlippageUserPage from '../components/SlippageUserPage.vue'
 import UserStrategyVar from '../components/UserStrategyVar.vue'
+import DailyLogsTable from '../components/DailyLogsTable.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -110,6 +111,11 @@ const router = createRouter({
       path:'/userstrategyvar',
       name:'UserStrategyVar',
       component:UserStrategyVar
+    },
+    {
+      path:'/dailylogs',
+      name:'DailyLogsTable',
+      component:DailyLogsTable
     }
     // {
     //   path: '/about',

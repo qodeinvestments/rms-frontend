@@ -97,6 +97,12 @@
                   <span class="text"> User Strategy Var </span>
                 </a>
               </li>
+              <li :class="selected == 'DailyLogsTable' ? 'active' : ''" @click="changeSelected('DailyLogsTable')">
+                <a href="#">
+                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <span class="text"> Daily Logs Table </span>
+                </a>
+              </li>
              
             
             <!-- <li>
@@ -201,7 +207,8 @@ export default {
         'LivePositions': '/livepositions',
         'OpenTrades':'/opentrades',
         'SlippageUserPage':'/slippageUserPage',
-        'UserStrategyVar':'/userstrategyvar'
+        'UserStrategyVar':'/userstrategyvar',
+        'DailyLogsTable':'/dailylogs'
       }
 
     }
