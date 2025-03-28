@@ -20,6 +20,7 @@ import UserStrategyVar from '../components/UserStrategyVar.vue'
 import DailyLogsTable from '../components/DailyLogsTable.vue'
 import ReadDailyLog from  '../components/ReadDailyLog.vue'
 import NewDailyLog from '../components/NewDailyLog.vue'
+import UpdateLog from '../components/UpdateLog.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -123,6 +124,11 @@ const router = createRouter({
       path:'/readlog/:id',
       name:'ReadDailyLog',
       component:ReadDailyLog
+    },
+    {
+      path:'/updatelog/:id',
+      name:'UpdateLog',
+      component:UpdateLog
     },
     {
       path:'/newlog',

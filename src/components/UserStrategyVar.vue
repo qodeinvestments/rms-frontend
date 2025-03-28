@@ -382,17 +382,13 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-  connectClientDetailsWebSocket()
+
 })
 
 onUnmounted(() => {
   // Cleanup if needed
 })
 
-// Example: existing websocket connection function
-function connectClientDetailsWebSocket() {
-  console.log('Connecting WebSocket client details...')
-}
 
 // -------------------------------------------------------
 // HANDLER WHEN USER CLICKS "APPLY" FOR CLIENT SELECTION

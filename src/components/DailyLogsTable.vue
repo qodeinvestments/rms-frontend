@@ -128,10 +128,11 @@ async function handleRead(log) {
   }
 }
 
+
+
 async function handleUpdate(log) {
+  router.push(`/updatelog/${log.id}`)
   try {
-    // Implement update endpoint logic
-    await postData('updatelog', log, null)
     message.success('Log updated successfully')
   } catch (err) {
     message.error('Failed to update log')
@@ -139,10 +140,10 @@ async function handleUpdate(log) {
   }
 }
 
+
 async function handleDelete(log) {
   try {
-    // Implement delete endpoint logic
-    await postData('deletelog', { id: log.id }, null)
+    await postData('deletelog', { index: log.id }, null)
     logs.value = logs.value.filter(item => item.id !== log.id)
     message.success('Log deleted successfully')
   } catch (err) {
@@ -150,7 +151,6 @@ async function handleDelete(log) {
     console.error('Delete error:', err)
   }
 }
-
 function handleCreateNewLog() {
   router.push('/newlog')
 }
