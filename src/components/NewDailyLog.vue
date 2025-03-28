@@ -92,101 +92,90 @@
             </button>
           </div>
         </form>
-  
-        <!-- Success/Error Modals -->
-        <div v-if="successMessage" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div class="bg-white p-8 rounded-xl shadow-2xl text-center">
-            <div class="text-green-500 text-6xl mb-4">
-              ✓
-            </div>
-            <h2 class="text-2xl font-bold mb-4">Log Created Successfully!</h2>
-            <button 
-              @click="successMessage = ''" 
-              class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-            >
-              Close
-            </button>
-          </div>
-        </div>
       </div>
     </div>
-  </template>
+</template>
   
-  <script setup>
-  import { ref } from 'vue'
-  
-  // Form Data
-  const logDate = ref('')
-  const logTime = ref('')
-  const category = ref('')
-  const messageTitle = ref('')
-  const messageBody = ref('')
-  const successMessage = ref('')
-  
-  // Submit Handler
-  async function submitLog() {
-    try {
-      // Combine date and time
-      const fullDateTime = `${logDate.value}T${logTime.value}`
-  
-      // Prepare payload
-      const payload = {
-        Date: fullDateTime,
-        Category: category.value,
-        Message: {
-          Title: messageTitle.value,
-          Body: messageBody.value
-        }
+<script setup>
+import { ref } from 'vue'
+import { message } from 'ant-design-vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+// Form Data
+const logDate = ref('')
+const logTime = ref('')
+const category = ref('')
+const messageTitle = ref('')
+const messageBody = ref('')
+
+// Submit Handler
+async function submitLog() {
+  try {
+    // Combine date and time
+    const fullDateTime = `${logDate.value}T${logTime.value}`
+
+    // Prepare payload
+    const payload = {
+      Date: fullDateTime,
+      Category: category.value,
+      Message: {
+        Title: messageTitle.value,
+        Body: messageBody.value
       }
-  
-      // Get token for authentication
-      const token = localStorage.getItem('access_token')
-      if (!token) throw new Error('User not authenticated')
-  
-      // Send to API
-      const response = await fetch('https://production2.swancapital.in/appendlog', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-      })
-  
-      if (!response.ok) {
-        const errorMessage = await response.text()
-        throw new Error(`Error creating log: ${errorMessage}`)
-      }
-  
-      // Show success message
-      successMessage.value = 'Log created successfully!'
-  
-      // Reset form
-      resetForm()
-    } catch (error) {
-      console.error('Log creation error:', error)
-      alert(error.message)
     }
+
+    // Get token for authentication
+    const token = localStorage.getItem('access_token')
+    if (!token) throw new Error('User not authenticated')
+
+    // Send to API
+    const response = await fetch('https://production2.swancapital.in/appendlog', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload)
+    })
+
+    if (!response.ok) {
+      const errorMessage = await response.text()
+      throw new Error(`Error creating log: ${errorMessage}`)
+    }
+
+    // Show success message using Ant Design Vue message
+    message.success('Log created successfully!')
+
+    // Reset form
+    resetForm()
+
+    // Navigate back to log list
+    router.push('/dailylogs')
+  } catch (error) {
+    console.error('Log creation error:', error)
+    message.error(error.message)
   }
+}
   
-  // Reset Form
-  function resetForm() {
-    logDate.value = ''
-    logTime.value = ''
-    category.value = ''
-    messageTitle.value = ''
-    messageBody.value = ''
-  }
-  </script>
+// Reset Form
+function resetForm() {
+  logDate.value = ''
+  logTime.value = ''
+  category.value = ''
+  messageTitle.value = ''
+  messageBody.value = ''
+}
+</script>
   
-  <style scoped>
-  /* Additional custom styles if needed */
-  input, select, textarea {
-    transition: all 0.3s ease;
-  }
+<style scoped>
+input, select, textarea {
+  transition: all 0.3s ease;
+}
   
-  input:focus, select:focus, textarea:focus {
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
-    border-color: #3b82f6;
-  }
-  </style>
+input:focus, select:focus, textarea:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+  border-color: #3b82f6;
+}
+</style>

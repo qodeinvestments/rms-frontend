@@ -1,14 +1,13 @@
 <template>
-
     <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
       <div class="max-w-2xl mx-auto bg-white shadow-2xl rounded-xl overflow-hidden">
         <!-- Header -->
         <div class="bg-blue-600 text-white p-6">
-          <h1 class="text-3xl font-bold">Create New Log</h1>
+          <h1 class="text-3xl font-bold">Update Log</h1>
         </div>
-  
+    
         <!-- Form Container -->
-        <form @submit.prevent="submitLog" class="p-8 space-y-6">
+        <form @submit.prevent="updateLog" class="p-8 space-y-6">
           <!-- Date and Time Row -->
           <div class="grid grid-cols-2 gap-6">
             <!-- Date Selector -->
@@ -23,7 +22,7 @@
                 required
               />
             </div>
-  
+    
             <!-- Time Selector -->
             <div>
               <label class="block text-gray-700 font-semibold mb-2">
@@ -37,7 +36,7 @@
               />
             </div>
           </div>
-  
+    
           <!-- Category Selector -->
           <div>
             <label class="block text-gray-700 font-semibold mb-2">
@@ -53,7 +52,7 @@
               <option value="Broker">Broker</option>
             </select>
           </div>
-  
+    
           <!-- Message Section -->
           <div class="space-y-4">
             <div>
@@ -68,7 +67,7 @@
                 required
               />
             </div>
-  
+    
             <div>
               <label class="block text-gray-700 font-semibold mb-2">
                 Message Body
@@ -82,41 +81,28 @@
               ></textarea>
             </div>
           </div>
-  
+    
           <!-- Submit Button -->
           <div>
             <button 
               type="submit" 
               class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-all duration-300 ease-in-out transform hover:scale-101 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             >
-              Create Log
+              Update Log
             </button>
           </div>
         </form>
-  
-        <!-- Success/Error Modals -->
-        <div v-if="successMessage" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div class="bg-white p-8 rounded-xl shadow-2xl text-center">
-            <div class="text-green-500 text-6xl mb-4">
-              ✓
-            </div>
-            <h2 class="text-2xl font-bold mb-4">Log Created Successfully!</h2>
-            <button 
-              @click="successMessage = ''" 
-              class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-            >
-              Close
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   </template>
-  
+    
   <script setup>
-
   import { ref, onMounted } from 'vue'
-  import { useRoute } from 'vue-router'
+  import { message } from 'ant-design-vue'
+  import { useRouter, useRoute } from 'vue-router'
+  
+  const router = useRouter()
+  const route = useRoute()
   
   // Form Data
   const logDate = ref('')
@@ -124,22 +110,19 @@
   const category = ref('')
   const messageTitle = ref('')
   const messageBody = ref('')
-  const successMessage = ref('')
-
- // Reactive State
-  const logs = ref([])
-  const error = ref(null)
-  const loading = ref(true)
-  const route = useRoute()
   
-  // Submit Handler
-  async function submitLog() {
+  // We'll store the log index to update (as returned from the backend or from route params)
+  const logIndex = ref(null)
+  
+  // Update Log Submit Handler
+  async function updateLog() {
     try {
-      // Combine date and time
+      // Combine date and time into a full datetime string
       const fullDateTime = `${logDate.value}T${logTime.value}`
   
-      // Prepare payload
+      // Prepare payload including the index
       const payload = {
+        index: logIndex.value,
         Date: fullDateTime,
         Category: category.value,
         Message: {
@@ -152,8 +135,8 @@
       const token = localStorage.getItem('access_token')
       if (!token) throw new Error('User not authenticated')
   
-      // Send to API
-      const response = await fetch('https://production2.swancapital.in/appendlog', {
+      // Send update request to the API
+      const response = await fetch('https://production2.swancapital.in/updatelog', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -164,21 +147,24 @@
   
       if (!response.ok) {
         const errorMessage = await response.text()
-        throw new Error(`Error creating log: ${errorMessage}`)
+        throw new Error(`Error updating log: ${errorMessage}`)
       }
   
-      // Show success message
-      successMessage.value = 'Log created successfully!'
+      const data = await response.json()
   
-      // Reset form
-      resetForm()
+      // Display success message
+      message.success(data.detail || 'Log updated successfully!')
+  
+      // Navigate back to daily logs list
+      router.push('/dailylogs')
+  
     } catch (error) {
-      console.error('Log creation error:', error)
-      alert(error.message)
+      console.error('Log update error:', error)
+      message.error(error.message || 'Failed to update log.')
     }
   }
   
-  // Reset Form
+  // Reset Form (optional)
   function resetForm() {
     logDate.value = ''
     logTime.value = ''
@@ -186,60 +172,53 @@
     messageTitle.value = ''
     messageBody.value = ''
   }
-
-
   
-  // API Function
-  async function fetchSpecificLogs(index) {
-  try {
-    const token = localStorage.getItem('access_token')
-    if (!token) throw new Error('User not authenticated')
-
-    const response = await fetch(`https://production2.swancapital.in/getspecificlog`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ index }),
-    })
-
-    if (!response.ok) {
-      const errorMessage = await response.text()
-      throw new Error(`Error fetching log: ${errorMessage}`)
+  // API Function: Fetch the specific log to pre-fill the form
+  async function fetchSpecificLog(index) {
+    try {
+      const token = localStorage.getItem('access_token')
+      if (!token) throw new Error('User not authenticated')
+  
+      const response = await fetch('https://production2.swancapital.in/getspecificlog', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ index })
+      })
+  
+      if (!response.ok) {
+        const errorMessage = await response.text()
+        throw new Error(`Error fetching log: ${errorMessage}`)
+      }
+  
+      const data = await response.json()
+  
+      // Store the log index (either from the data or fallback to the route param)
+      logIndex.value = data.id || index
+  
+      // Parse the date and time from the backend timestamp
+      const dateTime = new Date(data['Date'])
+      logDate.value = dateTime.toISOString().split('T')[0]
+      logTime.value = dateTime.toTimeString().slice(0, 5)
+      category.value = data["Category"]
+      messageTitle.value = data["Message"]['Title']
+      messageBody.value = data["Message"]['Body']
+  
+    } catch (err) {
+      console.error('Error fetching log:', err.message)
     }
-
-    const data = await response.json()
-    logs.value = data || []
-
-    // Parse the date and time from the backend timestamp
-    const dateTime = new Date(data['Date'])
-    
-    // Format date for input type="date" (YYYY-MM-DD)
-    logDate.value = dateTime.toISOString().split('T')[0]
-    
-    // Format time for input type="time" (HH:MM)
-    logTime.value = dateTime.toTimeString().slice(0, 5)
-
-    category.value = data["Category"]
-    messageTitle.value = data["Message"]['Title'] 
-    messageBody.value = data["Message"]['Body'] 
-  } catch (err) {
-    error.value = err.message
-    console.error('Error fetching log:', err.message)
-  } finally {
-    loading.value = false
   }
-}
   
+  // On component mount, fetch the specific log using the index from route params
   onMounted(async () => {
     const index = route.params.id
-    await fetchSpecificLogs(index)
+    await fetchSpecificLog(index)
   })
   </script>
-  
+    
   <style scoped>
-  /* Additional custom styles if needed */
   input, select, textarea {
     transition: all 0.3s ease;
   }
@@ -249,3 +228,4 @@
     border-color: #3b82f6;
   }
   </style>
+  

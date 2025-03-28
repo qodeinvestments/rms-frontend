@@ -133,7 +133,7 @@ async function handleRead(log) {
 async function handleUpdate(log) {
   router.push(`/updatelog/${log.id}`)
   try {
-    message.success('Log updated successfully')
+    message.success('Log Detail Fetched Successfully')
   } catch (err) {
     message.error('Failed to update log')
     console.error('Update error:', err)
