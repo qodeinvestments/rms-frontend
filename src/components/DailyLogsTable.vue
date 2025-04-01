@@ -13,16 +13,39 @@
         </a-button>
       </div>
 
-      <!-- Category Select -->
-      <a-select 
-        v-model:value="selectedCategories"
-        mode="multiple" 
-        placeholder="Select Categories" 
-        class="w-full mb-6"
-        :options="categoryOptions"
-      >
-      </a-select>
-      
+      <!-- Category Select (on its own line) -->
+      <div class="mb-6">
+        <a-select 
+          v-model:value="selectedCategories"
+          mode="multiple" 
+          placeholder="Select Categories" 
+          class="w-full"
+          :options="categoryOptions"
+        ></a-select>
+      </div>
+
+      <!-- Date Filters: Start and End Date Side by Side -->
+      <div class="flex gap-4 mb-6">
+        <!-- Start Date Filter -->
+        <div class="w-1/2">
+          <label class="block text-gray-700 font-semibold mb-2">Start Date</label>
+          <input 
+            type="date" 
+            v-model="startDate" 
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          />
+        </div>
+        
+        <!-- End Date Filter -->
+        <div class="w-1/2">
+          <label class="block text-gray-700 font-semibold mb-2">End Date</label>
+          <input 
+            type="date" 
+            v-model="endDate" 
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          />
+        </div>
+      </div>
 
       <!-- Modern Table -->
       <div class="bg-white shadow-lg rounded-lg overflow-hidden">
@@ -131,6 +154,10 @@ const selectedCategories = ref([])
 const error = ref(null)
 const loading = ref(false)
 
+// New Date Filter State
+const startDate = ref('')
+const endDate = ref('')
+
 // TOTP Modal State
 const showTotpModal = ref(false)
 const totpCode = ref('')
@@ -147,10 +174,26 @@ const categoryOptions = computed(() => {
 })
 
 const filteredLogs = computed(() => {
-  if (selectedCategories.value.length === 0) return logs.value
-  return logs.value.filter(log => 
-    selectedCategories.value.includes(log.Category)
-  )
+  let result = logs.value
+
+  // Filter by selected categories
+  if (selectedCategories.value.length > 0) {
+    result = result.filter(log => selectedCategories.value.includes(log.Category))
+  }
+
+  // Filter by start date if provided
+  if (startDate.value) {
+    const start = new Date(startDate.value)
+    result = result.filter(log => new Date(log.Date) >= start)
+  }
+
+  // Filter by end date if provided
+  if (endDate.value) {
+    const end = new Date(endDate.value)
+    result = result.filter(log => new Date(log.Date) <= end)
+  }
+
+  return result
 })
 
 // Category Color Mapping
@@ -406,6 +449,11 @@ onMounted(fetchLogs)
   color: white;
   border: none;
   margin-right: 8px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer;
 }
 
 .cancel-button:hover:not(:disabled) {
@@ -429,6 +477,7 @@ button:disabled {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  transition: opacity 0.2s ease;
 }
 
 .modal-content {
@@ -440,6 +489,7 @@ button:disabled {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
 }
 
 .modal-title {
@@ -456,14 +506,6 @@ button:disabled {
   margin-top: 24px;
   padding-top: 16px;
   border-top: 1px solid #e5e7eb;
-}
-/* Button Styles */
-.cancel-button {
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-weight: 500;
-  transition: all 0.2s;
-  cursor: pointer;
 }
 
 .form-group {
