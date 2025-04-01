@@ -23,7 +23,8 @@
           :options="categoryOptions"
         ></a-select>
       </div>
-
+   {{ startDate }} {{ endDate }}
+   {{ filteredLogs }}
       <!-- Date Filters: Start and End Date Side by Side -->
       <div class="flex gap-4 mb-6">
         <!-- Start Date Filter -->
@@ -55,6 +56,7 @@
               <th class="px-6 py-4 text-left font-semibold">Date</th>
               <th class="px-6 py-4 text-left font-semibold">Category</th>
               <th class="px-6 py-4 text-left font-semibold">Created By</th>
+              <th class="px-6 py-4 text-left font-semibold">Created Time</th>
               <th class="px-6 py-4 text-left font-semibold">Message</th>
               <th class="px-6 py-4 text-center font-semibold">Actions</th>
             </tr>
@@ -75,6 +77,7 @@
                 </span>
               </td>
               <td class="px-6 py-4">{{ log['Created By'] }}</td>
+              <td class="px-6 py-4">{{  log['Created Time']}}</td>
               <td class="px-6 py-4">{{ log.Message['Title'] }}</td>
               <td class="px-6 py-4 flex justify-center space-x-2">
                 <!-- Read Button -->
@@ -190,6 +193,8 @@ const filteredLogs = computed(() => {
   // Filter by end date if provided
   if (endDate.value) {
     const end = new Date(endDate.value)
+    // Set end to the end of the day to be inclusive
+    end.setHours(23, 59, 59, 999)
     result = result.filter(log => new Date(log.Date) <= end)
   }
 
