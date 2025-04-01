@@ -23,8 +23,7 @@
           :options="categoryOptions"
         ></a-select>
       </div>
-   {{ startDate }} {{ endDate }}
-   {{ filteredLogs }}
+
       <!-- Date Filters: Start and End Date Side by Side -->
       <div class="flex gap-4 mb-6">
         <!-- Start Date Filter -->
