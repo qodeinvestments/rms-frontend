@@ -57,6 +57,11 @@
           />
         </div>
       </div>
+      
+      <!-- Date Warning Message -->
+      <p v-if="dateWarning" class="text-red-500 text-sm mb-4">
+        {{ dateWarning }}
+      </p>
 
       <!-- Modern Table -->
       <div class="bg-white shadow-lg rounded-lg overflow-hidden">
@@ -232,6 +237,18 @@ const filteredLogs = computed(() => {
   }
 
   return result
+})
+
+// Computed property for date warning
+const dateWarning = computed(() => {
+  if (startDate.value && endDate.value) {
+    const start = new Date(startDate.value)
+    const end = new Date(endDate.value)
+    if (end < start) {
+      return 'End date should be greater than start date.'
+    }
+  }
+  return ''
 })
 
 // Category Color Mapping
