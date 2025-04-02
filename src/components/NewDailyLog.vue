@@ -156,16 +156,14 @@ const loading = ref(true)
 
 // Function to convert a string to camelCase
 function toCamelCase(str) {
-  if (!str) return ''
+  if (!str) return '';
   return str
+    .trim()
     .split(/[\s-_]+/)
-    .map((word, index) =>
-      index === 0 
-        ? word.toLowerCase() 
-        : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    )
-    .join('')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join('');
 }
+
 
 // Submit Handler
 async function submitLog() {
@@ -180,6 +178,8 @@ async function submitLog() {
     const finalSubcategory = subcategory.value === 'custom' 
       ? toCamelCase(customSubcategory.value) 
       : toCamelCase(subcategory.value)
+
+    
 
     // Prepare payload
     const payload = {
