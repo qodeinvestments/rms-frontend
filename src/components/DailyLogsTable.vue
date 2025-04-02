@@ -87,7 +87,7 @@
                   {{ log.Category }}
                 </span>
               </td>
-              <td class="px-6 py-4">{{ log['Sub Category'] }}</td>
+              <td class="px-6 py-4">{{ log['SubCategory'] }}</td>
               <td class="px-6 py-4">{{ log['Created By'] }}</td>
               <td class="px-6 py-4">{{  log['Created Time']}}</td>
               <td class="px-6 py-4">{{ log.Message['Title'] }}</td>
