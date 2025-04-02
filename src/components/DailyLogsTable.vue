@@ -54,6 +54,7 @@
             <tr>
               <th class="px-6 py-4 text-left font-semibold">Date</th>
               <th class="px-6 py-4 text-left font-semibold">Category</th>
+              <th class="px-6 py-4 text-left font-semibold">Sub Category</th>
               <th class="px-6 py-4 text-left font-semibold">Created By</th>
               <th class="px-6 py-4 text-left font-semibold">Created Time</th>
               <th class="px-6 py-4 text-left font-semibold">Message</th>
@@ -75,6 +76,7 @@
                   {{ log.Category }}
                 </span>
               </td>
+              <td class="px-6 py-4">{{ log['Sub Category'] }}</td>
               <td class="px-6 py-4">{{ log['Created By'] }}</td>
               <td class="px-6 py-4">{{  log['Created Time']}}</td>
               <td class="px-6 py-4">{{ log.Message['Title'] }}</td>
