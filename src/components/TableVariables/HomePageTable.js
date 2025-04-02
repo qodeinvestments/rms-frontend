@@ -44,8 +44,48 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'HoldingsDayPL',
     }),
-    
+    columnHelper.accessor(row => row.Slippage, {
+      id: 'Slippage',
+      cell: info => info.getValue(),
+      header: () => 'Slippage',
+    }),
+    columnHelper.accessor(row => row.Cash, {
+      id: 'Cash',
+      cell: info => info.getValue(),
+      header: () => 'Cash',
+    }),
+    columnHelper.accessor(row => row.AvailableMargin, {
+      id: 'AvailableMargin',
+      cell: info => info.getValue(),
+      header: () => 'AvailableMargin',
+    }),
+    columnHelper.accessor(row => row.Used_Margin, {
+      id: 'Used_Margin',
+      cell: info => info.getValue(),
+      header: () => 'Used_Margin',
+    }),
+    columnHelper.accessor(row => row.Portfolio_Value, {
+      id: 'Portfolio Value',
+      cell: info => info.getValue(),
+      header: () => 'Portfolio Value',
+    }),
+    columnHelper.accessor(row => row.Ideal_Margin, {
+      id: 'Ideal Margin',
+      cell: info => info.getValue(),
+      header: () => 'Ideal Margin',
+    }),
   
+    columnHelper.accessor(row => row.Peak_Margin, {
+      id: 'Peak_Margin',
+      cell: info => info.getValue(),
+      header: () => 'Peak Margin',
+    }),
+    columnHelper.accessor(row => row.Slippage2 ,{
+      id: 'Slippage2',
+      cell: info => info.getValue(),
+      header: () => 'Ideal Slippage 1 MTM',
+    }),
+
   
     columnHelper.accessor(row => row.PNL_PER_UM, {
       id: 'PNL_PER_UM',
@@ -64,11 +104,7 @@ export const columns = [
       header: () => 'PNL Overall %',
     }),
   
-    columnHelper.accessor(row => row.Slippage, {
-      id: 'Slippage',
-      cell: info => info.getValue(),
-      header: () => 'Slippage',
-    }),
+    
     columnHelper.accessor(row=> row.SlippagePer,{
 
         id: 'SlippagePer',
@@ -79,51 +115,19 @@ export const columns = [
         header: () => 'Slippage %',
     }
     ),
-    columnHelper.accessor(row => row.Ideal_Margin, {
-      id: 'Ideal Margin',
-      cell: info => info.getValue(),
-      header: () => 'Ideal Margin',
-    }),
-  
-    columnHelper.accessor(row => row.Peak_Margin, {
-      id: 'Peak_Margin',
-      cell: info => info.getValue(),
-      header: () => 'Peak Margin',
-    }),
-    columnHelper.accessor(row => row.Portfolio_Value, {
-      id: 'Portfolio Value',
-      cell: info => info.getValue(),
-      header: () => 'Portfolio Value',
-    }),
-    
+
+
   
   
-    columnHelper.accessor(row => row.Used_Margin, {
-      id: 'Used_Margin',
-      cell: info => info.getValue(),
-      header: () => 'Used_Margin',
-    }),
-    columnHelper.accessor(row => row.AvailableMargin, {
-      id: 'AvailableMargin',
-      cell: info => info.getValue(),
-      header: () => 'AvailableMargin',
-    }),
+  
     columnHelper.accessor(row => row.IdealTurnover, {
       id: 'IdealTurnover',
       cell: info => info.getValue(),
       header: () => 'Ideal Turnover',
     }),
-    columnHelper.accessor(row => row.Slippage2 ,{
-      id: 'Slippage2',
-      cell: info => info.getValue(),
-      header: () => 'Ideal Slippage 1 MTM',
-    }),
+
   
-    columnHelper.accessor(row => row.Cash, {
-      id: 'Cash',
-      cell: info => info.getValue(),
-      header: () => 'Cash',
-    }),
+
     columnHelper.accessor(row => row.Cashperpf, {
       id: 'Cash/pf',
       cell: info => info.getValue(),
