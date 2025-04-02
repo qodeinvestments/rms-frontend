@@ -144,7 +144,7 @@ const router = useRouter()
 
 // Form Data
 const logDate = ref('')
-const logTime = ref('')
+const logTime = ref('00:00')
 const category = ref('')
 const customCategory = ref('')
 const subcategory = ref('')
