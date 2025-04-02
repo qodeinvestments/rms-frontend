@@ -12,9 +12,7 @@
         <div class="grid grid-cols-2 gap-6">
           <!-- Date Selector -->
           <div>
-            <label class="block text-gray-700 font-semibold mb-2">
-              Date
-            </label>
+            <label class="block text-gray-700 font-semibold mb-2">Date</label>
             <input 
               type="date" 
               v-model="logDate" 
@@ -22,12 +20,9 @@
               required
             />
           </div>
-
           <!-- Time Selector -->
           <div>
-            <label class="block text-gray-700 font-semibold mb-2">
-              Time
-            </label>
+            <label class="block text-gray-700 font-semibold mb-2">Time</label>
             <input 
               type="time" 
               v-model="logTime" 
@@ -37,26 +32,26 @@
           </div>
         </div>
 
-        <!-- Category Selector -->
+        <!-- Category Selector with Search -->
         <div>
-          <label class="block text-gray-700 font-semibold mb-2">
-            Category
-          </label>
-          <select 
-            v-model="category" 
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          <label class="block text-gray-700 font-semibold mb-2">Category</label>
+          <a-select
+            v-model:value="category"
+            show-search
+            placeholder="Select a Category"
+            class="w-full"
             required
+            filter-option
           >
-            <option value="" disabled>Select a Category</option>
-            <option 
+            <a-select-option 
               v-for="option in logdetails['Category']" 
               :value="option" 
               :key="option"
             >
               {{ option }}
-            </option>
-            <option value="custom">Custom Category</option>
-          </select>
+            </a-select-option>
+            <a-select-option value="custom">Custom Category</a-select-option>
+          </a-select>
           <!-- Custom Category Input -->
           <div v-if="category === 'custom'" class="mt-2">
             <input 
@@ -69,26 +64,26 @@
           </div>
         </div>
 
-        <!-- Sub Category Selector -->
+        <!-- Sub Category Selector with Search -->
         <div>
-          <label class="block text-gray-700 font-semibold mb-2">
-            Sub Category
-          </label>
-          <select 
-            v-model="subcategory" 
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          <label class="block text-gray-700 font-semibold mb-2">Sub Category</label>
+          <a-select
+            v-model:value="subcategory"
+            show-search
+            placeholder="Select a Sub Category"
+            class="w-full"
             required
+            filter-option
           >
-            <option value="" disabled>Select a Sub Category</option>
-            <option 
+            <a-select-option 
               v-for="option in logdetails['Sub Category']" 
               :value="option" 
               :key="option"
             >
               {{ option }}
-            </option>
-            <option value="custom">Custom Sub Category</option>
-          </select>
+            </a-select-option>
+            <a-select-option value="custom">Custom Sub Category</a-select-option>
+          </a-select>
           <!-- Custom Sub Category Input -->
           <div v-if="subcategory === 'custom'" class="mt-2">
             <input 
@@ -104,9 +99,7 @@
         <!-- Message Section -->
         <div class="space-y-4">
           <div>
-            <label class="block text-gray-700 font-semibold mb-2">
-              Message Title
-            </label>
+            <label class="block text-gray-700 font-semibold mb-2">Message Title</label>
             <input 
               type="text" 
               v-model="messageTitle" 
@@ -115,11 +108,8 @@
               required
             />
           </div>
-
           <div>
-            <label class="block text-gray-700 font-semibold mb-2">
-              Message Body
-            </label>
+            <label class="block text-gray-700 font-semibold mb-2">Message Body</label>
             <textarea 
               v-model="messageBody" 
               placeholder="Enter log details"
@@ -145,9 +135,10 @@
 </template>
 
 <script setup>
-import { message } from 'ant-design-vue'
+import { message, Select } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
+const { Option: ASelectOption } = Select
 
 const router = useRouter()
 
@@ -168,11 +159,11 @@ function toCamelCase(str) {
   if (!str) return ''
   return str
     .split(/[\s-_]+/)
-    .map((word, index) => {
-      return index === 0 
+    .map((word, index) =>
+      index === 0 
         ? word.toLowerCase() 
         : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    })
+    )
     .join('')
 }
 
@@ -210,7 +201,7 @@ async function submitLog() {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     })
@@ -244,8 +235,8 @@ async function fetchData(endpoint, stateRef) {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+        'Content-Type': 'application/json'
+      }
     })
 
     if (!response.ok) {

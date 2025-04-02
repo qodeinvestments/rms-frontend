@@ -10,171 +10,89 @@
       <div class="bg-blue-600 text-white p-6">
         <h1 class="text-3xl font-bold">Update Log</h1>
       </div>
-  
+
       <!-- Form Container -->
       <form @submit.prevent="openTotpModal" class="p-8 space-y-6">
         <!-- Date and Time Row -->
         <div class="grid grid-cols-2 gap-6">
-          <!-- Date Selector -->
           <div>
-            <label class="block text-gray-700 font-semibold mb-2">
-              Date
-            </label>
-            <input 
-              type="date" 
-              v-model="logDate" 
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              required
-            />
+            <label class="block text-gray-700 font-semibold mb-2">Date</label>
+            <input type="date" v-model="logDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required />
           </div>
-  
-          <!-- Time Selector -->
           <div>
-            <label class="block text-gray-700 font-semibold mb-2">
-              Time
-            </label>
-            <input 
-              type="time" 
-              v-model="logTime" 
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              required
-            />
+            <label class="block text-gray-700 font-semibold mb-2">Time</label>
+            <input type="time" v-model="logTime" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required />
           </div>
         </div>
-  
+
         <!-- Category Selector -->
         <div>
-          <label class="block text-gray-700 font-semibold mb-2">
-            Category
-          </label>
-          <select 
-            v-model="category" 
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          <label class="block text-gray-700 font-semibold mb-2">Category</label>
+          <a-select
+            v-model:value="category"
+            show-search
+            placeholder="Select a Category"
+            class="w-full"
             required
+            filter-option
           >
-            <option value="" disabled>Select a Category</option>
-            <option 
-              v-for="option in logdetails['Category']" 
-              :value="option" 
-              :key="option"
-            >
-              {{ option }}
-            </option>
-            <option value="custom">Custom Category</option>
-          </select>
-          <!-- Custom Category Input -->
+            <a-select-option v-for="option in logdetails['Category']" :value="option" :key="option">{{ option }}</a-select-option>
+            <a-select-option value="custom">Custom Category</a-select-option>
+          </a-select>
           <div v-if="category === 'custom'" class="mt-2">
-            <input 
-              type="text" 
-              v-model="customCategory" 
-              placeholder="Enter custom category"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              required
-            />
+            <input type="text" v-model="customCategory" placeholder="Enter custom category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required />
           </div>
         </div>
-  
+
         <!-- Sub Category Selector -->
         <div>
-          <label class="block text-gray-700 font-semibold mb-2">
-            Sub Category
-          </label>
-          <select 
-            v-model="subcategory" 
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          <label class="block text-gray-700 font-semibold mb-2">Sub Category</label>
+          <a-select
+            v-model:value="subcategory"
+            show-search
+            placeholder="Select a Sub Category"
+            class="w-full"
             required
+            filter-option
           >
-            <option value="" disabled>Select a Sub Category</option>
-            <option 
-              v-for="option in logdetails['Sub Category']" 
-              :value="option" 
-              :key="option"
-            >
-              {{ option }}
-            </option>
-            <option value="custom">Custom Sub Category</option>
-          </select>
-          <!-- Custom Sub Category Input -->
+            <a-select-option v-for="option in logdetails['Sub Category']" :value="option" :key="option">{{ option }}</a-select-option>
+            <a-select-option value="custom">Custom Sub Category</a-select-option>
+          </a-select>
           <div v-if="subcategory === 'custom'" class="mt-2">
-            <input 
-              type="text" 
-              v-model="customSubcategory" 
-              placeholder="Enter custom sub category"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              required
-            />
+            <input type="text" v-model="customSubcategory" placeholder="Enter custom sub category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required />
           </div>
         </div>
-  
+
         <!-- Message Section -->
         <div class="space-y-4">
           <div>
-            <label class="block text-gray-700 font-semibold mb-2">
-              Message Title
-            </label>
-            <input 
-              type="text" 
-              v-model="messageTitle" 
-              placeholder="Enter log title"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              required
-            />
+            <label class="block text-gray-700 font-semibold mb-2">Message Title</label>
+            <input type="text" v-model="messageTitle" placeholder="Enter log title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required />
           </div>
-  
           <div>
-            <label class="block text-gray-700 font-semibold mb-2">
-              Message Body
-            </label>
-            <textarea 
-              v-model="messageBody" 
-              placeholder="Enter log details"
-              rows="4"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
-              required
-            ></textarea>
+            <label class="block text-gray-700 font-semibold mb-2">Message Body</label>
+            <textarea v-model="messageBody" placeholder="Enter log details" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none" required></textarea>
           </div>
         </div>
-  
+
         <!-- Submit Button -->
         <div>
-          <button 
-            type="submit" 
-            class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-all duration-300 ease-in-out transform hover:scale-101 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-          >
-            Update Log
-          </button>
+          <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-all duration-300 ease-in-out transform hover:scale-101 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Update Log</button>
         </div>
       </form>
     </div>
-  
-    <!-- TOTP Verification Modal -->
+
+    <!-- TOTP Modal -->
     <div v-if="showTotpModal" class="modal-overlay">
       <div class="modal-content">
         <h2 class="modal-title">Enter Password</h2>
         <div class="form-group">
-          <input 
-            type="password" 
-            v-model="totpCode"
-            placeholder="Enter password"
-            class="form-input"
-            :class="{ 'input-error': totpError }"
-            @input="totpError = ''"
-          />
+          <input type="password" v-model="totpCode" placeholder="Enter password" class="form-input" :class="{ 'input-error': totpError }" @input="totpError = ''" />
           <span v-if="totpError" class="error-text">{{ totpError }}</span>
         </div>
         <div class="modal-actions">
-          <button 
-            @click="showTotpModal = false" 
-            class="cancel-button"
-          >
-            Cancel
-          </button>
-          <button 
-            @click="handleSubmitWithTotp" 
-            class="submit-button"
-          >
-            Submit
-          </button>
+          <button @click="showTotpModal = false" class="cancel-button">Cancel</button>
+          <button @click="handleSubmitWithTotp" class="submit-button">Submit</button>
         </div>
       </div>
     </div>
@@ -183,8 +101,9 @@
   
 <script setup>
 import { ref, onMounted } from 'vue'
-import { message } from 'ant-design-vue'
+import { message, Select } from 'ant-design-vue'
 import { useRouter, useRoute } from 'vue-router'
+const { Option: ASelectOption } = Select
 
 const router = useRouter()
 const route = useRoute()
@@ -243,21 +162,12 @@ async function handleSubmitWithTotp() {
   }
 }
 
-// Update Log Submit Handler
 async function updateLog() {
   try {
-    // Combine date and time into a full datetime string
     const fullDateTime = `${logDate.value}T${logTime.value}`
+    const finalCategory = category.value === 'custom' ? toCamelCase(customCategory.value) : toCamelCase(category.value)
+    const finalSubcategory = subcategory.value === 'custom' ? toCamelCase(customSubcategory.value) : toCamelCase(subcategory.value)
 
-    // Determine final category and sub-category with camelCase conversion
-    const finalCategory = category.value === 'custom'
-      ? toCamelCase(customCategory.value)
-      : toCamelCase(category.value)
-    const finalSubcategory = subcategory.value === 'custom'
-      ? toCamelCase(customSubcategory.value)
-      : toCamelCase(subcategory.value)
-
-    // Prepare payload including the index and TOTP code
     const payload = {
       index: logIndex.value,
       Date: fullDateTime,
@@ -339,11 +249,10 @@ async function fetchSpecificLog(index) {
     const dateTime = new Date(data['Date'])
     logDate.value = dateTime.toISOString().split('T')[0]
     logTime.value = dateTime.toTimeString().slice(0, 5)
-    category.value = data["Category"]
-    subcategory.value = data["SubCategory"]
-    messageTitle.value = data["Message"]['Title']
-    messageBody.value = data["Message"]['Body']
-
+    category.value = data['Category']
+    subcategory.value = data['SubCategory']
+    messageTitle.value = data['Message']['Title']
+    messageBody.value = data['Message']['Body']
   } catch (err) {
     console.error('Error fetching log:', err.message)
   }
