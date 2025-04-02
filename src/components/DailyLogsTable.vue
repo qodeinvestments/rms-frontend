@@ -24,6 +24,17 @@
         ></a-select>
       </div>
 
+      <!-- Sub Category Select (on its own line) -->
+      <div class="mb-6">
+        <a-select 
+          v-model:value="selectedSubCategories"
+          mode="multiple" 
+          placeholder="Select Sub Categories" 
+          class="w-full"
+          :options="subCategoryOptions"
+        ></a-select>
+      </div>
+
       <!-- Date Filters: Start and End Date Side by Side -->
       <div class="flex gap-4 mb-6">
         <!-- Start Date Filter -->
@@ -150,11 +161,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { Select, Button, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
+
 const router = useRouter()
 
 // Reactive State
 const logs = ref([])
 const selectedCategories = ref([])
+const selectedSubCategories = ref([])
 const error = ref(null)
 const loading = ref(false)
 
@@ -177,12 +190,31 @@ const categoryOptions = computed(() => {
   }))
 })
 
+const subCategoryOptions = computed(() => {
+  const uniqueSubCategories = [
+    ...new Set(logs.value.map(log => log['SubCategory']))
+  ]
+  return uniqueSubCategories.map(subCat => ({
+    label: subCat,
+    value: subCat
+  }))
+})
+
 const filteredLogs = computed(() => {
   let result = logs.value
 
   // Filter by selected categories
   if (selectedCategories.value.length > 0) {
-    result = result.filter(log => selectedCategories.value.includes(log.Category))
+    result = result.filter(log =>
+      selectedCategories.value.includes(log.Category)
+    )
+  }
+
+  // Filter by selected sub categories
+  if (selectedSubCategories.value.length > 0) {
+    result = result.filter(log =>
+      selectedSubCategories.value.includes(log['SubCategory'])
+    )
   }
 
   // Filter by start date if provided
