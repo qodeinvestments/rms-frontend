@@ -73,8 +73,33 @@ const showWindowsNotification = async () => {
     }
 };
 
-// Mount the component
+// // Mount the component
+// onMounted(async () => {
+//     // Initialize audio
+//     audio.value = new Audio('/alarm.mp3');
+//     audio.value.loop = false;
+//     audio.value.volume = props.volume;
+
+//     // Request notification permission
+//     await requestNotificationPermission();
+
+//     // Add visibility change listener
+//     document.addEventListener("visibilitychange", handleVisibilityChange);
+// });
+
+
 onMounted(async () => {
+  // Get current time
+  const now = new Date();
+  const hour = now.getHours();    // 0-23 (e.g., 15 = 3 PM)
+  const minute = now.getMinutes(); // 0-59
+
+  // Check if after 9:00 AM AND before 3:30 PM
+  const withinBusinessHours = 
+    (hour > 9 || (hour === 9 && minute >= 0)) && 
+    (hour < 15 || (hour === 15 && minute < 30));
+
+  if (withinBusinessHours) {
     // Initialize audio
     audio.value = new Audio('/alarm.mp3');
     audio.value.loop = false;
@@ -85,7 +110,9 @@ onMounted(async () => {
 
     // Add visibility change listener
     document.addEventListener("visibilitychange", handleVisibilityChange);
+  }
 });
+
 
 // Cleanup on unmount
 onBeforeUnmount(() => {
