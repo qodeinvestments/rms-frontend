@@ -49,6 +49,34 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'Slippage',
     }),
+    columnHelper.accessor(row=> row.SlippagePer,{
+
+      id: 'SlippagePer',
+      cell: info => {
+        const value = info.getValue(); // Get the value
+        return (typeof value === 'number' ? value : Number(value)).toFixed(2) + "%"; // Ensure it's a number and format
+      },
+      header: () => 'Slippage %',
+  }
+  ),
+    
+  columnHelper.accessor(row => row.PNL_PER_UM, {
+    id: 'PNL_PER_UM',
+    cell: info => {
+      const value = info.getValue(); // Get the value
+      return (typeof value === 'number' ? value : Number(value)).toFixed(2) + "%"; // Ensure it's a number and format
+    },
+    header: () => 'PNL Utilized %',
+  }),
+  columnHelper.accessor(row => row.PNL_PER_M, {
+    id: 'PNL_PER_M',
+    cell: info => {
+      const value = info.getValue(); // Get the value
+      return (typeof value === 'number' ? value : Number(value)).toFixed(2) + "%"; // Ensure it's a number and format
+    },
+    header: () => 'PNL Overall %',
+  }),
+
     columnHelper.accessor(row => row.Cash, {
       id: 'Cash',
       cell: info => info.getValue(),
@@ -85,36 +113,21 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'Ideal Slippage 1 MTM',
     }),
+        
+    columnHelper.accessor(row => row.NetQuantity, {
+      id: 'NetQuantity',
+      cell: info => info.getValue(),
+      header: () => 'NetQuantity',
+    }),
+    columnHelper.accessor(row => row.OpenQuantity, {
+      id: 'OpenQuantity',
+      cell: info => info.getValue(),
+      header: () => 'OpenQuantity',
+    }),
 
-  
-    columnHelper.accessor(row => row.PNL_PER_UM, {
-      id: 'PNL_PER_UM',
-      cell: info => {
-        const value = info.getValue(); // Get the value
-        return (typeof value === 'number' ? value : Number(value)).toFixed(2) + "%"; // Ensure it's a number and format
-      },
-      header: () => 'PNL Utilized %',
-    }),
-    columnHelper.accessor(row => row.PNL_PER_M, {
-      id: 'PNL_PER_M',
-      cell: info => {
-        const value = info.getValue(); // Get the value
-        return (typeof value === 'number' ? value : Number(value)).toFixed(2) + "%"; // Ensure it's a number and format
-      },
-      header: () => 'PNL Overall %',
-    }),
-  
+
     
-    columnHelper.accessor(row=> row.SlippagePer,{
-
-        id: 'SlippagePer',
-        cell: info => {
-          const value = info.getValue(); // Get the value
-          return (typeof value === 'number' ? value : Number(value)).toFixed(2) + "%"; // Ensure it's a number and format
-        },
-        header: () => 'Slippage %',
-    }
-    ),
+  
 
 
   
@@ -134,17 +147,7 @@ export const columns = [
       header: () => 'Cash/PF',
     }),
     
-    
-    columnHelper.accessor(row => row.NetQuantity, {
-      id: 'NetQuantity',
-      cell: info => info.getValue(),
-      header: () => 'NetQuantity',
-    }),
-    columnHelper.accessor(row => row.OpenQuantity, {
-      id: 'OpenQuantity',
-      cell: info => info.getValue(),
-      header: () => 'OpenQuantity',
-    }),
+
     columnHelper.accessor(row => row.openOrderCount, {
       id: 'OpenOrderCount',
       cell: info => info.getValue(),
