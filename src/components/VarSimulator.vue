@@ -158,7 +158,9 @@
                 <tbody>
                   <tr v-for="(value, key) in responseData.TableOld" :key="key">
                     <td class="px-4 py-2 border">{{ key }}</td>
-                    <td class="px-4 py-2 border">{{ formatIndianNumber(value) }}</td>
+                    <td class="px-4 py-2 border" :class="{'positive': value >= 0, 'negative': value < 0}">
+                      {{ formatIndianNumber(value) }}
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -177,7 +179,9 @@
                 <tbody>
                   <tr v-for="(value, key) in responseData.TableNew" :key="key">
                     <td class="px-4 py-2 border">{{ key }}</td>
-                    <td class="px-4 py-2 border">{{ formatIndianNumber(value) }}</td>
+                    <td class="px-4 py-2 border" :class="{'positive': value >= 0, 'negative': value < 0}">
+                      {{ formatIndianNumber(value) }}
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -254,7 +258,7 @@
         ? remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree
         : lastThree;
   
-    return `${withCommas}.${decimalPart}`;
+    return `${isNegative ? '-' : ''}${withCommas}.${decimalPart}`;
   };
   
   // Fetch Users
@@ -356,6 +360,12 @@
   </script>
   
   <style scoped>
-  /* Optional: Add your custom styles here */
+  .positive {
+    color: green;
+  }
+  
+  .negative {
+    color: red;
+  }
   </style>
   
