@@ -141,23 +141,48 @@
           </div>
         </form>
   
-        <!-- Response Data Table (hidden when a new user is selected) -->
+        <!-- Response Data Table (side by side) -->
         <div v-if="responseData" class="mt-8 p-6 bg-gray-50 border border-gray-100 rounded-md">
           <h3 class="text-lg font-semibold text-gray-800 mb-3">Response Data</h3>
-          <table class="min-w-full table-auto">
-            <thead>
-              <tr>
-                <th class="px-4 py-2 border text-left">Metric</th>
-                <th class="px-4 py-2 border text-left">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(value, key) in responseData" :key="key">
-                <td class="px-4 py-2 border">{{ key }}</td>
-                <td class="px-4 py-2 border">{{ formatIndianNumber(value) }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="flex gap-8">
+            <!-- Table for TableOld -->
+            <div class="w-1/2">
+              <h4 class="text-xl font-semibold text-gray-700 mb-4">TableOld</h4>
+              <table class="min-w-full table-auto">
+                <thead>
+                  <tr>
+                    <th class="px-4 py-2 border text-left">Metric</th>
+                    <th class="px-4 py-2 border text-left">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(value, key) in responseData.TableOld" :key="key">
+                    <td class="px-4 py-2 border">{{ key }}</td>
+                    <td class="px-4 py-2 border">{{ formatIndianNumber(value) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+  
+            <!-- Table for TableNew -->
+            <div class="w-1/2">
+              <h4 class="text-xl font-semibold text-gray-700 mb-4">TableNew</h4>
+              <table class="min-w-full table-auto">
+                <thead>
+                  <tr>
+                    <th class="px-4 py-2 border text-left">Metric</th>
+                    <th class="px-4 py-2 border text-left">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(value, key) in responseData.TableNew" :key="key">
+                    <td class="px-4 py-2 border">{{ key }}</td>
+                    <td class="px-4 py-2 border">{{ formatIndianNumber(value) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -166,9 +191,7 @@
   <script setup>
   import { ref, reactive, onMounted, watch, computed } from 'vue'
   
-  // -------------------------------------------------
   // State variables
-  // -------------------------------------------------
   const users = ref([])
   const selectedUser = ref('')
   const loading = ref(true)
@@ -178,15 +201,13 @@
   const responseData = ref(null)  // Store the response data
   
   // Additional input at the top
-  const percentage = ref('')  // or numeric if you prefer: ref(0)
+  const percentage = ref('')
   
   // "trades" array for the currently selected user
   const trades = ref([])
   const userTrades = reactive({})
   
-  // -------------------------------------------------
   // Utility function for authenticated fetch
-  // -------------------------------------------------
   const fetchData = async (endpoint, method = 'GET', body = null) => {
     try {
       const token = localStorage.getItem('access_token')
@@ -213,9 +234,7 @@
     }
   }
   
-  // -------------------------------------------------
-  // Format numbers in Indian style (with commas) 
-  // -------------------------------------------------
+  // Format numbers in Indian style (with commas)
   const formatIndianNumber = (value) => {
     if (value === null || value === undefined || value === '') return value;
   
@@ -238,9 +257,7 @@
     return `${withCommas}.${decimalPart}`;
   };
   
-  // -------------------------------------------------
   // Fetch Users
-  // -------------------------------------------------
   const fetchUsers = async () => {
     loading.value = true
     error.value = null
@@ -262,9 +279,7 @@
     }
   }
   
-  // -------------------------------------------------
   // Watch for user changes
-  // -------------------------------------------------
   watch(selectedUser, (newUser, oldUser) => {
     // Clear the response data when a new user is selected
     responseData.value = null;
@@ -276,7 +291,6 @@
   
     // Load new user's trades
     if (newUser && newUser.id) {
-      // If we haven't stored anything yet for this user, init an empty array
       if (!userTrades[newUser.id]) {
         userTrades[newUser.id] = [
           { symbol: '', quantity: '' }
@@ -284,14 +298,11 @@
       }
       trades.value = userTrades[newUser.id]
     } else {
-      // No user selected
       trades.value = []
     }
   })
   
-  // -------------------------------------------------
   // Computed: isFormValid
-  // -------------------------------------------------
   const isFormValid = computed(() => {
     if (!selectedUser.value) return false
     if (!percentage.value) return false
@@ -299,25 +310,19 @@
     return trades.value.every(trade => trade.symbol && trade.quantity !== '')
   })
   
-  // -------------------------------------------------
   // Add a new empty trade row
-  // -------------------------------------------------
   const addTrade = () => {
     trades.value.push({ symbol: '', quantity: '' })
   }
   
-  // -------------------------------------------------
   // Remove a trade entry by index
-  // -------------------------------------------------
   const removeTrade = (tradeIndex) => {
     if (trades.value.length > 1) {
       trades.value.splice(tradeIndex, 1)
     }
   }
   
-  // -------------------------------------------------
   // Submit trades
-  // -------------------------------------------------
   const submitTrades = async () => {
     isSubmitting.value = true
     result.value = null
@@ -344,15 +349,13 @@
     }
   }
   
-  // -------------------------------------------------
   // onMounted
-  // -------------------------------------------------
   onMounted(() => {
     fetchUsers()
   })
   </script>
   
   <style scoped>
-  /* Optional: Place your CSS here */
+  /* Optional: Add your custom styles here */
   </style>
   
