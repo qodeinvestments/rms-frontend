@@ -21,6 +21,7 @@ import DailyLogsTable from '../components/DailyLogsTable.vue'
 import ReadDailyLog from  '../components/ReadDailyLog.vue'
 import NewDailyLog from '../components/NewDailyLog.vue'
 import UpdateLog from '../components/UpdateLog.vue'
+import VarSimulator from '../components/VarSimulator.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -134,6 +135,11 @@ const router = createRouter({
       path:'/newlog',
       name:'NewDailyLog',
       component:NewDailyLog
+    },
+    {
+      path:'/varsimulator',
+      name: 'VarSimulator' ,
+      component: VarSimulator 
     }
     // {
     //   path: '/about',
