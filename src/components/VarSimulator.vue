@@ -141,15 +141,7 @@
           </div>
         </form>
   
-        <!-- Results section -->
-        <!-- <div v-if="result" class="mt-8 p-6 bg-green-50 border border-green-100 rounded-md">
-          <h3 class="text-lg font-semibold text-green-800 mb-3">Submission Successful</h3>
-          <pre class="text-sm text-gray-800 bg-gray-100 p-3 rounded overflow-auto max-h-60">
-            {{ JSON.stringify(result, null, 2) }}
-          </pre>
-        </div> -->
-  
-        <!-- Response Data Table -->
+        <!-- Response Data Table (hidden when a new user is selected) -->
         <div v-if="responseData" class="mt-8 p-6 bg-gray-50 border border-gray-100 rounded-md">
           <h3 class="text-lg font-semibold text-gray-800 mb-3">Response Data</h3>
           <table class="min-w-full table-auto">
@@ -162,7 +154,7 @@
             <tbody>
               <tr v-for="(value, key) in responseData" :key="key">
                 <td class="px-4 py-2 border">{{ key }}</td>
-                <td class="px-4 py-2 border">{{  formatIndianNumber(value) }}</td>
+                <td class="px-4 py-2 border">{{ formatIndianNumber(value) }}</td>
               </tr>
             </tbody>
           </table>
@@ -221,38 +213,31 @@
     }
   }
   
-
-  // Add this after the existing imports
-// Add after imports
-const formatIndianNumber = (value) => {
+  // -------------------------------------------------
+  // Format numbers in Indian style (with commas) 
+  // -------------------------------------------------
+  const formatIndianNumber = (value) => {
     if (value === null || value === undefined || value === '') return value;
-
+  
     const num = Number(value);
     if (isNaN(num)) return value;
-
-    // Handle the negative sign
+  
     const isNegative = num < 0;
     const absoluteNum = Math.abs(num);
-
-    // Format to 2 decimal places first
+  
     const formattedDecimal = absoluteNum.toFixed(2);
     const [integerPart, decimalPart] = formattedDecimal.split('.');
-    
+  
     const lastThree = integerPart.slice(-3);
     const remaining = integerPart.slice(0, -3);
-
+  
     const withCommas = remaining
         ? remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree
         : lastThree;
-
-    // Decimal part is now always present due to toFixed(2)
-    const formattedNumber = `${withCommas}.${decimalPart}`;
-
-    // Add back the negative sign if necessary
-    return isNegative ? `-${formattedNumber}` : formattedNumber;
-};
-
-
+  
+    return `${withCommas}.${decimalPart}`;
+  };
+  
   // -------------------------------------------------
   // Fetch Users
   // -------------------------------------------------
@@ -281,12 +266,15 @@ const formatIndianNumber = (value) => {
   // Watch for user changes
   // -------------------------------------------------
   watch(selectedUser, (newUser, oldUser) => {
-    // 1. Save old user's trades (if any)
+    // Clear the response data when a new user is selected
+    responseData.value = null;
+  
+    // Save old user's trades (if any)
     if (oldUser && oldUser.id) {
       userTrades[oldUser.id] = trades.value
     }
   
-    // 2. Load new user's trades
+    // Load new user's trades
     if (newUser && newUser.id) {
       // If we haven't stored anything yet for this user, init an empty array
       if (!userTrades[newUser.id]) {
@@ -305,19 +293,10 @@ const formatIndianNumber = (value) => {
   // Computed: isFormValid
   // -------------------------------------------------
   const isFormValid = computed(() => {
-    // Must have selectedUser
     if (!selectedUser.value) return false
-  
-    // Must have a percentage (and not empty string)
     if (!percentage.value) return false
-  
-    // Must have at least one trade
     if (!trades.value.length) return false
-  
-    // Every trade must have symbol and quantity
-    return trades.value.every(trade => {
-      return trade.symbol && trade.quantity !== ''
-    })
+    return trades.value.every(trade => trade.symbol && trade.quantity !== '')
   })
   
   // -------------------------------------------------
@@ -355,7 +334,7 @@ const formatIndianNumber = (value) => {
       const data = await fetchData('varsimulator', 'POST', payload)
       result.value = data
   
-      // Fetch response data (replace with actual response)
+      // Store response data for display
       responseData.value = data
   
     } catch (err) {

@@ -103,6 +103,13 @@
                   <span class="text"> Daily Logs Table </span>
                 </a>
               </li>
+              <li :class="selected == ' VarSimulator' ? 'active' : ''" @click="changeSelected('VarSimulator')">
+                <a href="#">
+                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <span class="text">  Var Simulator </span>
+                </a>
+              </li>
+             
              
             
             <!-- <li>
@@ -208,7 +215,8 @@ export default {
         'OpenTrades':'/opentrades',
         'SlippageUserPage':'/slippageUserPage',
         'UserStrategyVar':'/userstrategyvar',
-        'DailyLogsTable':'/dailylogs'
+        'DailyLogsTable':'/dailylogs',
+        'VarSimulator':'/varsimulator'
       }
 
     }
