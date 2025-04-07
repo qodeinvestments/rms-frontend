@@ -1,9 +1,11 @@
 <template>
     <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <ParentOptionChain/>
       <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-lg p-8">
         <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">
           User Trade Management
         </h1>
+        
   
         <!-- Loading state for users -->
         <div v-if="loading" class="flex justify-center my-8">
@@ -194,7 +196,7 @@
   
   <script setup>
   import { ref, reactive, onMounted, watch, computed } from 'vue'
-  
+  import ParentOptionChain from './ParentOptionChain.vue'
   // State variables
   const users = ref([])
   const selectedUser = ref('')
