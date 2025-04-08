@@ -207,7 +207,7 @@
   const responseData = ref(null)  // Store the response data
   
   // Additional input at the top
-  const percentage = ref('')
+  const percentage = ref(10)
   
   // "trades" array for the currently selected user
   const trades = ref([])
@@ -298,9 +298,7 @@
     // Load new user's trades
     if (newUser && newUser.id) {
       if (!userTrades[newUser.id]) {
-        userTrades[newUser.id] = [
-          { symbol: '', quantity: '' }
-        ]
+        userTrades[newUser.id] = []  // Start with an empty array instead of a default trade
       }
       trades.value = userTrades[newUser.id]
     } else {
@@ -310,6 +308,7 @@
   
   // Computed: isFormValid
   const isFormValid = computed(() => {
+    if (trades.value.length==0)return true
     if (!selectedUser.value) return false
     if (!percentage.value) return false
     if (!trades.value.length) return false
