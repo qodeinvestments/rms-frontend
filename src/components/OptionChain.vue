@@ -57,11 +57,12 @@
           <div v-if="error" class="bg-red-100 text-red-700 p-4 rounded-lg mb-4">
             {{ error }}
           </div>
-          
-          <!-- 2-column Layout for CE and PE side by side -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+  
+          <!-- Single scroll container for both CE and PE tables -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 overflow-auto rounded-lg border border-gray-200 max-h-[400px] p-4">
+  
             <!-- CE Column -->
-            <div class="bg-gray-50 p-4 rounded-xl shadow-md">
+            <div class="bg-gray-50 rounded-xl shadow-md p-4">
               <div class="flex justify-between items-center mb-3">
                 <h3 class="text-lg font-bold text-blue-600">Call Options (CE)</h3>
                 <div class="flex space-x-2">
@@ -73,7 +74,7 @@
                   <span class="text-xs text-gray-600">OTM</span>
                 </div>
               </div>
-              
+  
               <!-- CE Search Input -->
               <div class="relative mb-3">
                 <input
@@ -83,56 +84,73 @@
                   class="border border-gray-300 rounded-lg w-full p-2 pl-8 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 />
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-2 top-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 
+                    11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
               </div>
-              
-              <div class="overflow-auto rounded-lg border border-gray-200 max-h-[400px]">
-                <table class="w-full border-collapse text-left">
-                  <thead>
-                    <tr class="bg-gray-100">
-                      <th class="py-2 px-3 font-semibold text-gray-700 text-sm">Symbol</th>
-                      <th class="py-2 px-3 font-semibold text-gray-700 text-sm">LTP</th>
-                      <th class="py-2 px-3 font-semibold text-gray-700 text-sm">Moneyness</th>
-                      <th class="py-2 px-3 font-semibold text-gray-700 text-sm text-center">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      v-for="(row, index) in filteredCeData"
-                      :key="index"
-                      class="border-t border-gray-200 hover:bg-gray-50 transition-colors"
-                      :class="getRowClass(row.moneyness)"
-                    >
-                      <td class="py-2 px-3 font-medium text-sm">{{ row.symbol }}</td>
-                      <td class="py-2 px-3 text-sm">₹{{ row.ltp }}</td>
-                      <td class="py-2 px-3 text-sm">
-                        <span :class="getMoneynessPillClass(row.moneyness)" class="px-2 py-1 rounded-full text-xs font-medium">
-                          {{ row.moneyness }}
-                        </span>
-                      </td>
-                      <td class="py-2 px-3 text-center">
-                        <button
-                          @click="copySymbol(row.symbol)"
-                          class="bg-blue-500 text-white rounded-lg p-1.5 hover:bg-blue-600 transition-colors"
-                          title="Copy Symbol"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr v-if="filteredCeData.length === 0">
-                      <td colspan="4" class="py-4 px-3 text-center text-gray-500 text-sm">No data available</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+  
+              <!-- CE Table (no separate scrollbar here) -->
+              <table class="w-full border-collapse text-left">
+                <thead>
+                  <tr class="bg-gray-100">
+                    <th class="py-2 px-3 font-semibold text-gray-700 text-sm">Symbol</th>
+                    <th class="py-2 px-3 font-semibold text-gray-700 text-sm">LTP</th>
+                    <th class="py-2 px-3 font-semibold text-gray-700 text-sm">Moneyness</th>
+                    <th class="py-2 px-3 font-semibold text-gray-700 text-sm text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(row, index) in filteredCeData"
+                    :key="index"
+                    class="border-t border-gray-200 hover:bg-gray-50 transition-colors"
+                    :class="getRowClass(row.moneyness)"
+                  >
+                    <td class="py-2 px-3 font-medium text-sm">{{ row.symbol }}</td>
+                    <td class="py-2 px-3 text-sm">₹{{ row.ltp }}</td>
+                    <td class="py-2 px-3 text-sm">
+                      <span
+                        :class="getMoneynessPillClass(row.moneyness)"
+                        class="px-2 py-1 rounded-full text-xs font-medium"
+                      >
+                        {{ row.moneyness }}
+                      </span>
+                    </td>
+                    <td class="py-2 px-3 text-center">
+                      <button
+                        @click="copySymbol(row.symbol)"
+                        class="bg-blue-500 text-white rounded-lg p-1.5 hover:bg-blue-600 transition-colors"
+                        title="Copy Symbol"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 16H6a2 
+                            2 0 01-2-2V6a2 2 0 012-2h8a2 
+                            2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 
+                            2 0 00-2-2h-8a2 2 0 00-2 2v8a2 
+                            2 0 002 2z"
+                          />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr v-if="filteredCeData.length === 0">
+                    <td colspan="4" class="py-4 px-3 text-center text-gray-500 text-sm">No data available</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            
+  
             <!-- PE Column -->
-            <div class="bg-gray-50 p-4 rounded-xl shadow-md">
+            <div class="bg-gray-50 rounded-xl shadow-md p-4">
               <div class="flex justify-between items-center mb-3">
                 <h3 class="text-lg font-bold text-purple-600">Put Options (PE)</h3>
                 <div class="flex space-x-2">
@@ -144,7 +162,7 @@
                   <span class="text-xs text-gray-600">OTM</span>
                 </div>
               </div>
-              
+  
               <!-- PE Search Input -->
               <div class="relative mb-3">
                 <input
@@ -154,64 +172,91 @@
                   class="border border-gray-300 rounded-lg w-full p-2 pl-8 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 />
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-2 top-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 
+                    11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
               </div>
-              
-              <div class="overflow-auto rounded-lg border border-gray-200 max-h-[400px]">
-                <table class="w-full border-collapse text-left">
-                  <thead>
-                    <tr class="bg-gray-100">
-                      <th class="py-2 px-3 font-semibold text-gray-700 text-sm">Symbol</th>
-                      <th class="py-2 px-3 font-semibold text-gray-700 text-sm">LTP</th>
-                      <th class="py-2 px-3 font-semibold text-gray-700 text-sm">Moneyness</th>
-                      <th class="py-2 px-3 font-semibold text-gray-700 text-sm text-center">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      v-for="(row, index) in filteredPeData"
-                      :key="index"
-                      class="border-t border-gray-200 hover:bg-gray-50 transition-colors"
-                      :class="getRowClass(row.moneyness)"
-                    >
-                      <td class="py-2 px-3 font-medium text-sm">{{ row.symbol }}</td>
-                      <td class="py-2 px-3 text-sm">₹{{ row.ltp }}</td>
-                      <td class="py-2 px-3 text-sm">
-                        <span :class="getMoneynessPillClass(row.moneyness)" class="px-2 py-1 rounded-full text-xs font-medium">
-                          {{ row.moneyness }}
-                        </span>
-                      </td>
-                      <td class="py-2 px-3 text-center">
-                        <button
-                          @click="copySymbol(row.symbol)"
-                          class="bg-purple-500 text-white rounded-lg p-1.5 hover:bg-purple-600 transition-colors"
-                          title="Copy Symbol"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr v-if="filteredPeData.length === 0">
-                      <td colspan="4" class="py-4 px-3 text-center text-gray-500 text-sm">No data available</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+  
+              <!-- PE Table (no separate scrollbar here) -->
+              <table class="w-full border-collapse text-left">
+                <thead>
+                  <tr class="bg-gray-100">
+                    <th class="py-2 px-3 font-semibold text-gray-700 text-sm">Symbol</th>
+                    <th class="py-2 px-3 font-semibold text-gray-700 text-sm">LTP</th>
+                    <th class="py-2 px-3 font-semibold text-gray-700 text-sm">Moneyness</th>
+                    <th class="py-2 px-3 font-semibold text-gray-700 text-sm text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(row, index) in filteredPeData"
+                    :key="index"
+                    class="border-t border-gray-200 hover:bg-gray-50 transition-colors"
+                    :class="getRowClass(row.moneyness)"
+                  >
+                    <td class="py-2 px-3 font-medium text-sm">{{ row.symbol }}</td>
+                    <td class="py-2 px-3 text-sm">₹{{ row.ltp }}</td>
+                    <td class="py-2 px-3 text-sm">
+                      <span
+                        :class="getMoneynessPillClass(row.moneyness)"
+                        class="px-2 py-1 rounded-full text-xs font-medium"
+                      >
+                        {{ row.moneyness }}
+                      </span>
+                    </td>
+                    <td class="py-2 px-3 text-center">
+                      <button
+                        @click="copySymbol(row.symbol)"
+                        class="bg-purple-500 text-white rounded-lg p-1.5 hover:bg-purple-600 transition-colors"
+                        title="Copy Symbol"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 16H6a2 
+                            2 0 01-2-2V6a2 2 0 012-2h8a2 
+                            2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 
+                            2 0 00-2-2h-8a2 2 0 00-2 2v8a2 
+                            2 0 002 2z"
+                          />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr v-if="filteredPeData.length === 0">
+                    <td colspan="4" class="py-4 px-3 text-center text-gray-500 text-sm">No data available</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-          </div>
+  
+          </div> <!-- End of single scroll container -->
         </div>
       </div>
-      
+  
       <!-- Toast for copy success -->
-      <div 
-        v-if="showToast" 
+      <div
+        v-if="showToast"
         class="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          <path
+            fill-rule="evenodd"
+            d="M10 18a8 8 0 
+            100-16 8 8 0 
+            000 16zm3.707-9.293a1 1 0 
+            00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 
+            00-1.414 1.414l2 2a1 1 0 
+            001.414 0l4-4z"
+            clip-rule="evenodd"
+          />
         </svg>
         <span>{{ toastMessage }}</span>
       </div>
