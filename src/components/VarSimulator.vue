@@ -189,6 +189,66 @@
               </table>
             </div>
           </div>
+
+          
+          <div class="flex gap-8">
+            <!-- Table for Old Quantity -->
+            <div class="w-1/2">
+              <table class="min-w-full table-auto">
+                <thead>
+                  <tr>
+                    <th class="px-4 py-2 border text-left">Index</th>
+                    <th class="px-4 py-2 border text-left">CE</th>
+                    <th class="px-4 py-2 border text-left">PE</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(qtyObj, key) in responseData['Old Quantity']" :key="key">
+                    <td class="px-4 py-2 border">{{ key }}</td>
+                    <td class="px-4 py-2 border"
+                        :class="{'positive': qtyObj.CE >= 0, 'negative': qtyObj.CE < 0}">
+                      {{ formatIndianNumber(qtyObj.CE) }}
+                    </td>
+                    <td class="px-4 py-2 border"
+                        :class="{'positive': qtyObj.PE >= 0, 'negative': qtyObj.PE < 0}">
+                      {{ formatIndianNumber(qtyObj.PE) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Table for New_Quantity -->
+            <div class="w-1/2">
+              <table class="min-w-full table-auto">
+                <thead>
+                  <tr>
+                    <th class="px-4 py-2 border text-left">Index</th>
+                    <th class="px-4 py-2 border text-left">CE</th>
+                    <th class="px-4 py-2 border text-left">PE</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(qtyObj, key) in responseData['New_Quantity']" :key="key">
+                    <td class="px-4 py-2 border">{{ key }}</td>
+                    <td class="px-4 py-2 border"
+                        :class="{'positive': qtyObj.CE >= 0, 'negative': qtyObj.CE < 0}">
+                      {{ formatIndianNumber(qtyObj.CE) }}
+                    </td>
+                    <td class="px-4 py-2 border"
+                        :class="{'positive': qtyObj.PE >= 0, 'negative': qtyObj.PE < 0}">
+                      {{ formatIndianNumber(qtyObj.PE) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+
+
+
+          
         </div>
       </div>
     </div>
@@ -203,7 +263,6 @@
   const loading = ref(true)
   const error = ref(null)
   const isSubmitting = ref(false)
-  const result = ref(null)
   const responseData = ref(null)  // Store the response data
   const optionsDetails=ref({})
   
@@ -271,6 +330,7 @@
     try {
       const data = await fetchData('getAccounts')
       const testdata = data || {}
+      
   
       // Make an array of objects with `id` and `name`.
       users.value = Object.keys(testdata)
@@ -294,6 +354,7 @@
     try {
       const data = await fetchData('optionexpirydetails')
       optionsDetails.value = data || {}
+      
      
     } catch (err) {
       error.value = err.message || 'Failed to load users. Please try again later.'
@@ -347,7 +408,7 @@
   // Submit trades
   const submitTrades = async () => {
     isSubmitting.value = true
-    result.value = null
+
   
     try {
       const payload = {
@@ -359,8 +420,7 @@
   
       // POST trades with token
       const data = await fetchData('varsimulator', 'POST', payload)
-      result.value = data
-  
+
       // Store response data for display
       responseData.value = data
   
