@@ -1,7 +1,6 @@
 <template>
     <div class="bg-gray-100 p-4 rounded-lg">
-    
-  
+
       <!-- Card with form and option chain -->
       <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <!-- Form Section -->
@@ -21,14 +20,27 @@
               </select>
             </div>
             
-            <!-- Date Picker -->
+
+
+            <!-- Category Selector with Search -->
             <div class="flex-1 min-w-48">
-              <label class="font-semibold block mb-2 text-white">Expiry Date</label>
-              <input
-                type="date"
-                v-model="selectedDate"
-                class="border border-gray-300 rounded-lg w-full p-2 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-              />
+              <label class="block text-gray-700 font-semibold mb-2">Expiry Dates</label>
+              <a-select
+                v-model:value="selectedDate"
+                show-search
+                placeholder="Select a Expiry Dates"
+                class="w-full"
+                required
+                filter-option
+              >
+                <a-select-option 
+                  v-for="option in optionsDetails[selectedIndex]" 
+                  :value="option" 
+                  :key="option"
+                >
+                  {{ option }}
+                </a-select-option>
+              </a-select>
             </div>
             
             <!-- Submit Button -->
@@ -265,7 +277,18 @@
   
   <script setup>
   import { ref, computed, onMounted } from 'vue'
-  
+  import { message, Select } from 'ant-design-vue'
+  const { Option: ASelectOption } = Select
+
+
+  // Define props including the new "optionDetails" prop
+  const props = defineProps({
+    optionsDetails: {
+      type: Object,
+      required: false,
+      default: () => ({})
+    }
+  })
   /**
    * Options for the index dropdown
    */

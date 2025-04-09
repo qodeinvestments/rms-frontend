@@ -1,6 +1,6 @@
 <template>
     <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <ParentOptionChain/>
+      <ParentOptionChain :optionsDetails="optionsDetails" />
       <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-lg p-8">
         <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">
           User Trade Management
@@ -205,6 +205,7 @@
   const isSubmitting = ref(false)
   const result = ref(null)
   const responseData = ref(null)  // Store the response data
+  const optionsDetails=ref({})
   
   // Additional input at the top
   const percentage = ref(10)
@@ -284,6 +285,22 @@
       loading.value = false
     }
   }
+
+
+    // Fetch Users
+  const fetchOptionsDetails = async () => {
+    loading.value = true
+    error.value = null
+    try {
+      const data = await fetchData('optionexpirydetails')
+      optionsDetails.value = data || {}
+     
+    } catch (err) {
+      error.value = err.message || 'Failed to load users. Please try again later.'
+    } finally {
+      loading.value = false
+    }
+  }
   
   // Watch for user changes
   watch(selectedUser, (newUser, oldUser) => {
@@ -357,6 +374,7 @@
   // onMounted
   onMounted(() => {
     fetchUsers()
+    fetchOptionsDetails()
   })
   </script>
   

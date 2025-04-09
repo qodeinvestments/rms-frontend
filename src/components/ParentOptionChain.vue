@@ -34,7 +34,12 @@
           <!-- Modal Content - Scrollable -->
           <div class="flex-grow overflow-auto p-4">
             <!-- Render OptionChain inside the modal with a class to maximize width -->
-            <OptionChain @symbolSelected="handleSymbolSelected" class="option-chain-full-width" />
+            <OptionChain
+              :optionsDetails="optionsDetails"
+              @symbolSelected="handleSymbolSelected"
+              class="option-chain-full-width"
+            />
+             
           </div>
         </div>
       </div>
@@ -45,6 +50,15 @@
 <script setup>
 import { ref } from 'vue'
 import OptionChain from './OptionChain.vue' // Adjust path if necessary
+
+// Define props including the new "optionDetails" prop
+const props = defineProps({
+  optionsDetails: {
+    type: Object,
+    required: false,
+    default: () => ({})
+  }
+})
 
 const showModal = ref(false)
 
