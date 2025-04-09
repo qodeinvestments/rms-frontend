@@ -14,6 +14,7 @@
               <label class="font-semibold block mb-2 text-white">Index</label>
               <select
                 v-model="selectedIndex"
+                @change="handleIndexChange"  
                 class="border border-gray-300 rounded-lg w-full p-2 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
               >
                 <option v-for="idx in indices" :key="idx" :value="idx">{{ idx }}</option>
@@ -47,6 +48,7 @@
             <div>
               <button
                 type="submit"
+                :disabled="!selectedDate"  
                 class="bg-white text-blue-600 font-bold py-2 px-4 rounded-lg hover:bg-blue-50 transition-colors shadow-sm"
               >
                 Fetch Chain
@@ -280,7 +282,10 @@
   import { message, Select } from 'ant-design-vue'
   const { Option: ASelectOption } = Select
 
-
+  // When the index changes, clear the date
+  function handleIndexChange() {
+    selectedDate.value = ''
+  }
   // Define props including the new "optionDetails" prop
   const props = defineProps({
     optionsDetails: {
@@ -327,7 +332,7 @@
   onMounted(() => {
     // Set default date to today
     const today = new Date()
-    selectedDate.value = today.toISOString().split('T')[0]
+
     
     const cachedData = localStorage.getItem('optionchainData')
     if (cachedData) {
@@ -368,17 +373,7 @@
     )
   })
   
-  /**
-   * Parse the selected date to year/month/day
-   */
-  function parseSelectedDate(dateStr) {
-    const dateObj = new Date(dateStr)
-    if (isNaN(dateObj)) return { year: '', month: '', day: '' }
-    const year = dateObj.getFullYear().toString().slice(-2)
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0')
-    const day = String(dateObj.getDate()).padStart(2, '0')
-    return { year, month, day }
-  }
+
   
   /**
    * Submits the form data
@@ -391,8 +386,8 @@
       return
     }
     
-    const { year, month, day } = parseSelectedDate(selectedDate.value)
-    const formData = { index: selectedIndex.value, year, month, day }
+    const date = selectedDate.value
+    const formData = { index: selectedIndex.value, date }
     console.log('Submitting Form Data:', formData)
     await postData('optionchain', formData)
   }
