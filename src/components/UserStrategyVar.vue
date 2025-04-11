@@ -45,7 +45,7 @@
           title="All User Var Table"
           :data="processedVarCalculationData"
           :columns="updatedFilteredColumns"
-          :hasColor="[...new Set([...Object.keys(var_calculation_data[0]), 'Addition'])]"
+          :hasColor="[...new Set([...Object.keys(var_calculation_data[0]), 'customUpside','customDownside'])]"
           :navigateTo="[]"
           :showPagination="true"
         />
@@ -155,26 +155,27 @@ const categoryOptions = [
 
 // Options for addition columns
 const additionColumnOptions = computed(() => {
-  if (!var_calculation_data.value.length) return []
-  
-  const excludedColumns = [
-    'User', 'Upside', 'Downside', 
-    'BrokerUpside', 'BrokerDownside'
-  ]
-  
-  return Object.keys(var_calculation_data.value[0])
-    .filter(column => {
-      // Exclude columns that end with %
-      if (column.endsWith('%')) return false
-      // Exclude specific columns
-      if (excludedColumns.includes(column)) return false
-      return true
-    })
-    .map(column => ({
-      label: column,
-      value: column
-    }))
-})
+  if (!var_calculation_data.value.length) return [];
+  const keys = Object.keys(var_calculation_data.value[0]);
+  const prefixSet = new Set();
+
+  keys.forEach(key => {
+    if (key.endsWith('Upside')) {
+      const prefix = key.slice(0, -'Upside'.length);
+      if (prefix) prefixSet.add(prefix);
+    } else if (key.endsWith('Downside')) {
+      const prefix = key.slice(0, -'Downside'.length);
+      if (prefix) prefixSet.add(prefix);
+    }
+  });
+
+  return Array.from(prefixSet).map(prefix => ({
+    label: prefix,
+    value: prefix
+  }));
+});
+
+
 
 // -------------------------------------------------------
 // COLUMN HELPER FOR TABLE
@@ -193,32 +194,42 @@ const filteredColumns = computed(() => {
   });
 });
 
+// Updated filtered columns computed property: inject two new columns instead of the single Addition column
 const updatedFilteredColumns = computed(() => {
   const baseColumns = filteredColumns.value;
-
+  
   // If no columns are selected for addition, return the base columns as-is.
   if (!columnsForAddition.value.length) return baseColumns;
-
-  // Create the Addition column.
-  const additionColumn = columnHelper.accessor(
-    row => row.Addition,
+  
+  // Create the Custom Upside column
+  const customUpsideColumn = columnHelper.accessor(
+    row => row.customUpside,
     {
-      id: 'Addition',
+      id: 'customUpside',
       cell: info => info.getValue(),
-      header: () => 'Addition',
+      header: () => 'Custom Upside',
     }
   );
-
-  // Find the "User" column and filter it out from baseColumns.
+  
+  // Create the Custom Downside column
+  const customDownsideColumn = columnHelper.accessor(
+    row => row.customDownside,
+    {
+      id: 'customDownside',
+      cell: info => info.getValue(),
+      header: () => 'Custom Downside',
+    }
+  );
+  
+  // Find the "User" column and separate it from the other base columns.
   const userColumn = baseColumns.find(col => col.id === 'User');
   const otherColumns = baseColumns.filter(col => col.id !== 'User');
-
-  // If the "User" column exists, return "User" then Addition then the rest.
+  
+  // If the "User" column exists, place it first, then our new two columns, then the rest.
   if (userColumn) {
-    return [userColumn, additionColumn, ...otherColumns];
+    return [userColumn, customUpsideColumn, customDownsideColumn, ...otherColumns];
   } else {
-    // Otherwise, just put the Addition column at the beginning.
-    return [additionColumn, ...baseColumns];
+    return [customUpsideColumn, customDownsideColumn, ...baseColumns];
   }
 });
 
@@ -280,30 +291,34 @@ const filterColumns = (masterObj, options) => {
   return result;
 }
 
-// New computed property that processes data and adds the Addition column when needed
 const processedVarCalculationData = computed(() => {
   const filteredData = give_var_calculation_data();
   
-  // If no columns are selected for addition, return the filtered data as is
+  // If no columns are selected for addition, return the filtered data unchanged.
   if (!columnsForAddition.value.length) return filteredData;
   
-  // Add the Addition column to each row
+  // Map over filtered data to compute customUpside and customDownside
   return filteredData.map(row => {
     const newRow = { ...row };
     
-    // Calculate sum of selected columns
-    newRow.Addition = columnsForAddition.value.reduce((sum, column) => {
-      // Only add if the column exists and its value is a number
-      const value = var_calculation_data.value.find(item => item.User === row.User)?.[column];
-      if (value !== undefined && !isNaN(Number(value))) {
-        return sum + Number(value);
-      }
-      return sum;
+    // Compute customUpside: sum values from selected columns (append "Upside" to column name)
+    newRow.customUpside = columnsForAddition.value.reduce((sum, col) => {
+      const key = col + 'Upside'; // explicitly create the key
+      const originalValue = var_calculation_data.value.find(item => item.User === row.User)?.[key];
+      return sum + (originalValue !== undefined && !isNaN(Number(originalValue)) ? Number(originalValue) : 0);
+    }, 0);
+    
+    // Compute customDownside: sum values from selected columns (append "Downside" to column name)
+    newRow.customDownside = columnsForAddition.value.reduce((sum, col) => {
+      const key = col + 'Downside';
+      const originalValue = var_calculation_data.value.find(item => item.User === row.User)?.[key];
+      return sum + (originalValue !== undefined && !isNaN(Number(originalValue)) ? Number(originalValue) : 0);
     }, 0);
     
     return newRow;
   });
 });
+
 
 const give_var_calculation_data = () => {
   // The original data array
