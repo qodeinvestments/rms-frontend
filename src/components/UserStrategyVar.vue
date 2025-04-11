@@ -22,6 +22,7 @@
 
       <!-- FIRST TABLE (PSAR TABLE) -->
       <div class="my-8" v-if="var_calculation_data.length">
+        <!-- The existing category selector -->
         <a-select 
             v-model:value="varcalculation"
             mode="multiple" 
@@ -29,16 +30,25 @@
             style="width: 100%; margin-bottom: 10px;"
             :options="categoryOptions">
         </a-select>
+        
+        <!-- New column selector for addition calculation -->
+        <a-select 
+            v-model:value="columnsForAddition"
+            mode="multiple" 
+            placeholder="Select columns to add" 
+            style="width: 100%; margin-bottom: 10px;"
+            :options="additionColumnOptions">
+        </a-select>
             
         <TanStackTestTable
-          :key="varcalculation.join('-')" 
-          title="All User Var Table"
-          :data="give_var_calculation_data()"
-          :columns="filteredColumns"
-          :hasColor="Object.keys(var_calculation_data[0])"
-          :navigateTo="[]"
-          :showPagination="true"
-        />
+  :key="`${varcalculation.join('-')}-${columnsForAddition.length}`" 
+  title="All User Var Table"
+  :data="processedVarCalculationData"
+  :columns="updatedFilteredColumns"
+  :hasColor="tableHasColorKeys"
+  :navigateTo="[]"
+  :showPagination="true"
+/>
       </div>
 
       <!-- DROPDOWN + APPLY BUTTON FOR CLIENT SELECTION -->
@@ -133,12 +143,39 @@ const error = ref(null)
 const loading = ref(false)
 const varcalculation = ref(['Broker','System','Basket'])
 const uservarcalculation = ref(['Broker','System','Basket'])
+// New ref for columns to be added
+const columnsForAddition = ref([])
+
 // Category options for the multi-select
 const categoryOptions = [
   { label: 'Broker', value: 'Broker' },
   { label: 'System', value: 'System' },
   { label: 'Basket', value: 'Basket' }
 ]
+
+// Options for addition columns
+const additionColumnOptions = computed(() => {
+  if (!var_calculation_data.value.length) return []
+  
+  const excludedColumns = [
+    'User', 'Upside', 'Downside', 
+    'BrokerUpside', 'BrokerDownside'
+  ]
+  
+  return Object.keys(var_calculation_data.value[0])
+    .filter(column => {
+      // Exclude columns that end with %
+      if (column.endsWith('%')) return false
+      // Exclude specific columns
+      if (excludedColumns.includes(column)) return false
+      return true
+    })
+    .map(column => ({
+      label: column,
+      value: column
+    }))
+})
+
 // -------------------------------------------------------
 // COLUMN HELPER FOR TABLE
 // -------------------------------------------------------
@@ -155,6 +192,36 @@ const filteredColumns = computed(() => {
     });
   });
 });
+
+const updatedFilteredColumns = computed(() => {
+  const baseColumns = filteredColumns.value;
+
+  // If no columns are selected for addition, return the base columns as-is.
+  if (!columnsForAddition.value.length) return baseColumns;
+
+  // Create the Addition column.
+  const additionColumn = columnHelper.accessor(
+    row => row.Addition,
+    {
+      id: 'Addition',
+      cell: info => info.getValue(),
+      header: () => 'Addition',
+    }
+  );
+
+  // Find the "User" column and filter it out from baseColumns.
+  const userColumn = baseColumns.find(col => col.id === 'User');
+  const otherColumns = baseColumns.filter(col => col.id !== 'User');
+
+  // If the "User" column exists, return "User" then Addition then the rest.
+  if (userColumn) {
+    return [userColumn, additionColumn, ...otherColumns];
+  } else {
+    // Otherwise, just put the Addition column at the beginning.
+    return [additionColumn, ...baseColumns];
+  }
+});
+
 
 const filteredUserVarColumns = computed(() => {
   // Guard against empty data
@@ -212,6 +279,31 @@ const filterColumns = (masterObj, options) => {
  
   return result;
 }
+
+// New computed property that processes data and adds the Addition column when needed
+const processedVarCalculationData = computed(() => {
+  const filteredData = give_var_calculation_data();
+  
+  // If no columns are selected for addition, return the filtered data as is
+  if (!columnsForAddition.value.length) return filteredData;
+  
+  // Add the Addition column to each row
+  return filteredData.map(row => {
+    const newRow = { ...row };
+    
+    // Calculate sum of selected columns
+    newRow.Addition = columnsForAddition.value.reduce((sum, column) => {
+      // Only add if the column exists and its value is a number
+      const value = var_calculation_data.value.find(item => item.User === row.User)?.[column];
+      if (value !== undefined && !isNaN(Number(value))) {
+        return sum + Number(value);
+      }
+      return sum;
+    }, 0);
+    
+    return newRow;
+  });
+});
 
 const give_var_calculation_data = () => {
   // The original data array
