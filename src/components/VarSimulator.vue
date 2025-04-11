@@ -43,6 +43,29 @@
           <h2 class="text-xl font-semibold text-gray-700">
             Add Trades for {{ selectedUser.name }}
           </h2>
+
+      <!-- Multi-select Basket selection for the selected user -->
+        <div v-if="selectedUser" class="mb-8">
+          <label for="basket-select" class="block text-sm font-medium text-gray-700 mb-2">
+            Select Basket(s)
+          </label>
+          <!-- Multi-select with mode="multiple" -->
+          <a-select 
+            id="basket-select"
+            v-model="selectedBaskets"
+            mode="multiple"
+            class="w-full"
+            placeholder="Select one or more baskets"
+          >
+            <a-select-option 
+              v-for="basket in baskets" 
+              :key="basket" 
+              :value="basket"
+            >
+              {{ basket }}
+            </a-select-option>
+          </a-select>
+        </div>
   
           <!-- Single "Percentage" input -->
           <div>
@@ -265,6 +288,22 @@
   const isSubmitting = ref(false)
   const responseData = ref(null)  // Store the response data
   const optionsDetails=ref({})
+
+  // --- Multi-Select Basket State ---
+  // Define your basket options
+  const baskets = ref([
+    'swanlongoptions_v2',
+    'swan_positional',
+    'swanlongoptions',
+    'thetaN',
+    'delta_trail',
+    'ikigai',
+    'swan_dma'
+  ])
+  // Store the selected baskets for the current user (as an array)
+  const selectedBaskets = ref([])
+  // Object to maintain basket selections per user
+  const userBasketsMulti = reactive({})
   
   // Additional input at the top
   const percentage = ref(10)
@@ -362,27 +401,27 @@
       loading.value = false
     }
   }
+
+// Watch for user changes to save/load trades and basket selections
+watch(selectedUser, (newUser, oldUser) => {
+  // Clear the response data when a new user is selected
+  responseData.value = null;
   
-  // Watch for user changes
-  watch(selectedUser, (newUser, oldUser) => {
-    // Clear the response data when a new user is selected
-    responseData.value = null;
+  // Save the old user's trades and basket selection if applicable
+  if (oldUser && oldUser.id) {
+    userTrades[oldUser.id] = trades.value
+    userBasketsMulti[oldUser.id] = selectedBaskets.value
+  }
   
-    // Save old user's trades (if any)
-    if (oldUser && oldUser.id) {
-      userTrades[oldUser.id] = trades.value
-    }
-  
-    // Load new user's trades
-    if (newUser && newUser.id) {
-      if (!userTrades[newUser.id]) {
-        userTrades[newUser.id] = []  // Start with an empty array instead of a default trade
-      }
-      trades.value = userTrades[newUser.id]
-    } else {
-      trades.value = []
-    }
-  })
+  // Load new user's trades and baskets; use an empty array as default for baskets
+  if (newUser && newUser.id) {
+    trades.value = userTrades[newUser.id] || []
+    selectedBaskets.value = userBasketsMulti[newUser.id] || []
+  } else {
+    trades.value = []
+    selectedBaskets.value = []
+  }
+})
   
   // Computed: isFormValid
   const isFormValid = computed(() => {
@@ -415,7 +454,8 @@
         userId: selectedUser.value.id,
         userName: selectedUser.value.name,
         trades: [...trades.value],
-        percentage: percentage.value
+        percentage: percentage.value,
+        baskets: [...selectedBaskets.value]
       }
   
       // POST trades with token
