@@ -41,14 +41,14 @@
         </a-select>
             
         <TanStackTestTable
-  :key="`${varcalculation.join('-')}-${columnsForAddition.length}`" 
-  title="All User Var Table"
-  :data="processedVarCalculationData"
-  :columns="updatedFilteredColumns"
-  :hasColor="tableHasColorKeys"
-  :navigateTo="[]"
-  :showPagination="true"
-/>
+          :key="`${varcalculation.join('-')}-${columnsForAddition.length}`" 
+          title="All User Var Table"
+          :data="processedVarCalculationData"
+          :columns="updatedFilteredColumns"
+          :hasColor="[...new Set([...Object.keys(var_calculation_data[0]), 'Addition'])]"
+          :navigateTo="[]"
+          :showPagination="true"
+        />
       </div>
 
       <!-- DROPDOWN + APPLY BUTTON FOR CLIENT SELECTION -->
