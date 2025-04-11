@@ -43,9 +43,21 @@
           <h2 class="text-xl font-semibold text-gray-700">
             Add Trades for {{ selectedUser.name }}
           </h2>
+          
+           <!-- Toggle for Basket Multi-Select Visibility -->
+          <div class="mb-8">
+            <label class="inline-flex items-center">
+              <input 
+                type="checkbox" 
+                v-model="basketToggle" 
+                class="form-checkbox h-5 w-5 text-blue-600"
+              />
+              <span class="ml-2 text-gray-700">Enable Basket Selection</span>
+            </label>
+          </div>
 
-      <!-- Multi-select Basket selection for the selected user -->
-        <div v-if="selectedUser" class="mb-8">
+        <!-- Multi-select Basket selection (only shown if toggle is enabled) -->
+        <div v-if="basketToggle" class="mb-8">
           <label for="basket-select" class="block text-sm font-medium text-gray-700 mb-2">
             Select Basket(s)
           </label>
@@ -289,21 +301,24 @@
   const responseData = ref(null)  // Store the response data
   const optionsDetails=ref({})
 
-  // --- Multi-Select Basket State ---
-  // Define your basket options
-  const baskets = ref([
-    'swanlongoptions_v2',
-    'swan_positional',
-    'swanlongoptions',
-    'thetaN',
-    'delta_trail',
-    'ikigai',
-    'swan_dma'
-  ])
-  // Store the selected baskets for the current user (as an array)
-  const selectedBaskets = ref([])
-  // Object to maintain basket selections per user
-  const userBasketsMulti = reactive({})
+// --- Multi-Select Basket State ---
+// Define your basket options
+const baskets = ref([
+  'swanlongoptions_v2',
+  'swan_positional',
+  'swanlongoptions',
+  'thetaN',
+  'delta_trail',
+  'ikigai',
+  'swan_dma'
+])
+// Store the selected baskets for the current user (as an array)
+const selectedBaskets = ref([])
+// Object to maintain basket selections per user
+const userBasketsMulti = reactive({})
+
+// Toggle to show/hide the multi-select
+const basketToggle = ref(false)
   
   // Additional input at the top
   const percentage = ref(10)
