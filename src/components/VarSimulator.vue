@@ -61,22 +61,16 @@
           <label for="basket-select" class="block text-sm font-medium text-gray-700 mb-2">
             Select Basket(s)
           </label>
-          <!-- Multi-select with mode="multiple" -->
           <a-select 
             id="basket-select"
-            v-model="selectedBaskets"
+            v-model:value="selectedBaskets"
             mode="multiple"
             class="w-full"
             placeholder="Select one or more baskets"
-          >
-            <a-select-option 
-              v-for="basket in baskets" 
-              :key="basket" 
-              :value="basket"
-            >
-              {{ basket }}
-            </a-select-option>
-          </a-select>
+            :options="basketOptionsWithAll"
+
+            @update:value="handleBasketChange"
+          />
         </div>
   
           <!-- Single "Percentage" input -->
@@ -319,6 +313,41 @@ const userBasketsMulti = reactive({})
 
 // Toggle to show/hide the multi-select
 const basketToggle = ref(false)
+
+// New flag for "Select All" functionality in basket selection
+const isbasketAllSelected = ref(false)
+
+// Computed property to add "All"/"Remove All" option dynamically
+const basketOptionsWithAll = computed(() => [
+  { label: isbasketAllSelected.value ? 'Deselect All' : 'Select All', value: 'all' },
+  ...baskets.value.map(basket => ({
+    label: basket,
+    value: basket
+  }))
+])
+
+const handleBasketChange = (value) => {
+  console.log("handleBasketChange triggered, value:", value);
+  if (value.includes('all')) {
+    if (isbasketAllSelected.value) {
+      // Deselect all baskets
+      selectedBaskets.value = [];
+      isbasketAllSelected.value = false;
+      console.log("Deselect all triggered");
+    } else {
+      // Select all baskets
+      selectedBaskets.value = [...baskets.value];
+      isbasketAllSelected.value = true;
+      console.log("Select all triggered");
+    }
+  } else {
+    // Normal selection handling: update selected baskets
+    selectedBaskets.value = value.filter(basket => basket !== 'all');
+    isbasketAllSelected.value = selectedBaskets.value.length === baskets.value.length;
+  }
+  console.log("Final selectedBaskets:", selectedBaskets.value);
+}
+
   
   // Additional input at the top
   const percentage = ref(10)
