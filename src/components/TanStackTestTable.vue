@@ -182,8 +182,38 @@ const props = defineProps({
     hasRowcolor: {
         type: Object,
         required: false
+    },
+    // New prop: an array of rules in which each rule defines
+    // the primary column to check, the secondary column to compare,
+    // and the percentage threshold.
+    compareRules: {
+        type: Array,
+        default: () => []  // for example: [ { primary: 'a', secondary: 'b', percentage: 2 } ]
     }
 })
+
+const getComparisonClass = (row, colId) => {
+    // Find the rule where the current column is the primary
+    const rule = props.compareRules.find(r => r.primary === colId)
+    if (!rule) return ''
+
+    // Get the values for the primary and secondary columns in the row.
+    const primaryVal = row.getValue(rule.primary)
+    const secondaryVal = row.getValue(rule.secondary)
+
+    // Check that both values are numbers (and avoid division by zero)
+    if (
+        typeof primaryVal === 'number' &&
+        typeof secondaryVal === 'number' &&
+        secondaryVal !== 0
+    ) {
+        // Calculate the threshold
+        const threshold = (rule.percentage / 100) * secondaryVal
+        // Return "red" if primary is above the threshold and "green" otherwise
+        return primaryVal < threshold ? 'red' : 'green'
+    }
+    return ''
+}
 
 const tellnav = (data) => {
     const [str1Part1, str1Part2] = data.id.split('_');
@@ -479,12 +509,21 @@ onUnmounted(() => {
                                 <tr v-for="row in rows" :key="row.id">
                                     <td v-for="(cell, index) in row.getVisibleCells()" :key="cell.id"
                                         class="maxwidth150 minwidhth100 break-words whitespace-normal px-3 py-4 text-sm text-black-600 textcenter"
-                                        :class="{
-                                            'sticky-column': index === 0,
-                                            'red': cell.getValue() < 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
-                                            'green': cell.getValue() > 0 && hasColor.includes(cell.id.split('_').slice(1).join('_')),
-                                            'cursorpointer': tellnav(cell)
-                                        }" @click="checkNavigate(cell)">
+                                        :class="[
+                                            // This condition fixes the first column:
+                                            index === 0 ? 'sticky-column' : '',
+                                            // Your existing condition for color comparison:
+                                            getComparisonClass(row, cell.column.id) ||
+                                                (cell.getValue() < 0 && hasColor.includes(cell.id.split('_').slice(1).join('_'))
+                                                    ? 'red'
+                                                    : cell.getValue() > 0 && hasColor.includes(cell.id.split('_').slice(1).join('_'))
+                                                    ? 'green'
+                                                    : ''),
+                                            // Other conditions such as navigation:
+                                            tellnav(cell) ? 'cursorpointer' : ''
+                                        ]"
+                                        @click="checkNavigate(cell)"
+                                    >
                                         <FlexRender
                                             v-if="cell.column.id === 'Checked' || cell.column.id === 'Direction'"
                                             :render="cell.column.columnDef.cell"

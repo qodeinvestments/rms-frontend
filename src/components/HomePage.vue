@@ -444,7 +444,10 @@ onUnmounted(() => {
         <!-- <p class="table-heading">Accounts</p> -->
         <TanStackTestTable title="Accounts" :data="data" :columns="columns"
           :hasColor="['IdealMTM', 'Day_PL', 'Slippage','SlippagePer','PNL_PER_UM', 'HoldingsDayPL','PNL_PER_M','Slippage2','API DAY PNL','API NET PNL']" :navigateTo="NavigationMap"
-          :showPagination=true :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }" />
+          :showPagination=true :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }"
+          :compareRules="[ { primary: 'Cash', secondary: 'Portfolio Value', percentage: 3 } ]"
+          
+          />
 
 
       </div>

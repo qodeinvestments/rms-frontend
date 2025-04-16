@@ -173,6 +173,7 @@
       <!-- Response Data Table (side by side) -->
       <div v-if="responseData" class="mt-8 p-6 bg-gray-50 border border-gray-100 rounded-md">
         <h3 class="text-lg font-semibold text-gray-800 mb-3">Response Data</h3>
+        <h4 class="text-lg font-semibold text-gray-800 mb-3">Premium : <span class="px-4 py-2 border"> {{ responseData["Price"]}}</span></h4>
         <div class="flex gap-8">
           <!-- Table for TableOld -->
           <div class="w-1/2">
