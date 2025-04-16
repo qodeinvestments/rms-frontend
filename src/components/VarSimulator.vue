@@ -297,15 +297,7 @@
 
 // --- Multi-Select Basket State ---
 // Define your basket options
-const baskets = ref([
-  'swanlongoptions_v2',
-  'swan_positional',
-  'swanlongoptions',
-  'thetaN',
-  'delta_trail',
-  'ikigai',
-  'swan_dma'
-])
+const baskets = ref([])
 // Store the selected baskets for the current user (as an array)
 const selectedBaskets = ref([])
 // Object to maintain basket selections per user
@@ -437,8 +429,7 @@ const handleBasketChange = (value) => {
     try {
       const data = await fetchData('optionexpirydetails')
       optionsDetails.value = data || {}
-      
-     
+      baskets.value=data["BASKETS"]
     } catch (err) {
       error.value = err.message || 'Failed to load users. Please try again later.'
     } finally {
