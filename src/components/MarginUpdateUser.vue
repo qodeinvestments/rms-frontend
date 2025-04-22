@@ -733,7 +733,7 @@ const fetchNewDict = async () => {
     const result = await response.json();
     fetchedDict.value = result; // Store the dictionary in fetchedDict
     Object.keys(client_multiplier.value).forEach((key) => {
-      if (key === 'swanlongoptions' || key === 'swan_positional' || key==='swan_dma') return;
+      if (key === 'swanlongoptions' || key === 'swan_positional' || key==='swan_dma' || key==='swanlongoptions_v2') return;
       client_multiplier.value[key] = fetchedDict.value['Multiplier'];
       validateMultiplier(key);
     });
