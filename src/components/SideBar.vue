@@ -109,6 +109,12 @@
                   <span class="text">  Var Simulator </span>
                 </a>
               </li>
+              <li :class="selected == 'ClientPage' ? 'active' : ''" @click="changeSelected('ClientPage')">
+                <a href="#">
+                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <span class="text">  Clients Page </span>
+                </a>
+              </li>
              
              
             
@@ -216,7 +222,8 @@ export default {
         'SlippageUserPage':'/slippageUserPage',
         'UserStrategyVar':'/userstrategyvar',
         'DailyLogsTable':'/dailylogs',
-        'VarSimulator':'/varsimulator'
+        'VarSimulator':'/varsimulator',
+        'ClientPage':'/clientpage'
       }
 
     }
