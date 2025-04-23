@@ -1,5 +1,38 @@
 <template>
   <div class="admin-container">
+
+    <!-- TOTP Verification Modal -->
+    <div v-if="showTotpModal" class="modal-overlay">
+      <div class="modal-content">
+        <h2 class="modal-title">Enter Password</h2>
+        <div class="form-group">
+          <input 
+            type="password" 
+            v-model="totpCode"
+            placeholder="Enter password"
+            class="form-input"
+            :class="{ 'input-error': totpError }"
+            @input="totpError = ''"
+           
+          />
+          <span v-if="totpError" class="error-text">{{ totpError }}</span>
+        </div>
+        <div class="modal-actions">
+          <button 
+            @click="cancelTotpModal" 
+            class="cancel-button"
+          >
+            Cancel
+          </button>
+          <button 
+            @click="handleTotpSubmit" 
+            class="submit-button"
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    </div>
     <h1 class="admin-title">User Management</h1>
 
     <!-- Loading State -->
@@ -48,7 +81,7 @@
             </td>
             <td class="icon-cell">
               <i class="fas fa-trash-alt"
-                 @click="deleteUser(user)"
+                 @click="showTotpModalWithAction('deleteid',user)" 
                  title="Delete User"
                  style="cursor: pointer;"
               ></i>
@@ -190,6 +223,10 @@
 import { ref, computed, onMounted } from 'vue';
 
 // State management
+const showTotpModal = ref(false);
+const totpCode = ref("");
+const totpError = ref("");
+const modalAction = ref("");
 const users = ref([]);
 const loading = ref(false);
 const error = ref(null);
@@ -208,16 +245,53 @@ const features = ref([]);
 const isaccountAllSelected = ref(false);
 const isfeatureAllSelected = ref(false);
 
+
+// Show TOTP Modal with action
+const showTotpModalWithAction = (action,data) => {
+  modalAction.value = {"action":action,"data":data};
+  showTotpModal.value = true;
+  totpCode.value = "";
+  totpError.value = "";
+};
+
+// Cancel TOTP Modal
+const cancelTotpModal = () => { 
+  showTotpModal.value = false;
+  modalAction.value = "";
+  totpCode.value = "";
+  totpError.value = "";
+};
+
+
+// TOTP Submit Handler
+const handleTotpSubmit = async () => {
+
+  try {
+  switch (modalAction.value['action']) {
+    case "deleteid":
+      await deleteUser(modalAction.value['data']);
+      break;
+    }
+  } catch (error) {
+    console.error("TOTP submission error:", error);
+    totpError.value = "An unexpected error occurred. Please try again.";
+  } finally {
+
+  }
+};
+
+
 // Sync percentages & dates with selected accounts
 function updateAccountPercentages() {
   accountPercentages.value = accountPercentages.value.filter(item =>
     selectedAccounts.value.includes(item.name)
   );
-  selectedAccounts.value.forEach(acc => {
-    if (!accountPercentages.value.find(i => i.name === acc)) {
-      accountPercentages.value.push({ name: acc, percentage: 100, startDate: '', endDate: '' });
-    }
-  });
+  // selectedAccounts.value.forEach(acc => {
+  //   if (!accountPercentages.value.find(i => i.name === acc)) {
+  //     accountPercentages.value.push({ name: acc, percentage: 100, startDate: '', endDate: '' });
+  //   }
+  // });
+  accountPercentages.value=editingUser.value['account_percentages']
 }
 
 const accountOptionsWithAll = computed(() => [
@@ -348,7 +422,7 @@ const deleteUser = async user => {
     const res = await fetch('https://production2.swancapital.in/deleteUser', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(user)
+      body: JSON.stringify({"user":user,"totpCode":totpCode.value})
     });
     if (!res.ok) throw new Error(await res.text());
     alert(`User ${user.email} deleted successfully.`);
@@ -368,7 +442,34 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.submit-button {
+  padding: 12px 24px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
 
+.submit-button:hover:not(:disabled) {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
 .percentage-section {
   border: 1px solid #d1d5db;
   border-radius: 6px;
