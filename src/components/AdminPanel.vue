@@ -47,8 +47,7 @@
                 </button>
               </td>
               <td class="icon-cell">
-                <i 
-                    class="icon ph-bold ph-trash" 
+               <i class="fas fa-trash-alt"
                     @click="deleteUser(user)"
                     style="cursor: pointer;" 
                     title="Delete User"
@@ -380,7 +379,8 @@ const saveChanges = async () => {
     const updatedUser = {
       ...editingUser.value,
       'account_access': selectedAccounts.value,
-      'features': selectedFeatures.value, // Add this line
+      'features': selectedFeatures.value, // Add this line,
+      'account_percentages': accountPercentages.value
     };
 
     const response = await fetch('https://production2.swancapital.in/editUser', {

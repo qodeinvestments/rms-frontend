@@ -2,7 +2,7 @@
   <div class="container">
     <div class="sidebar " :class="sidebarState ? 'active' : ''" ref="targetElement">
       <div class="menu-btn" @click="toggleSideBar()">
-        <i class="ph-bold ph-caret-left"></i>
+        <i class="fas fa-chevron-left"></i>
       </div>
       <div class="sidebar-content">
         <div class="head">
@@ -17,9 +17,9 @@
           <div class="menu">
             <p class="title" :class="sidebarState === true ? 'aligncenter' : ''">main</p>
             <ul>
-              <li :class="selected == 'Dashboard' ? 'active' : ''" @click="changeSelected('Dashboard')">
+              <li :class="selected=='Dashboard'?'active':''" @click="changeSelected('Dashboard')">
                 <a href="#">
-                  <i class="icon ph-bold ph-house-simple"></i>
+                  <i class="icon fas fa-home"></i>
                   <span class="text">Dashboard</span>
                 </a>
               </li>
@@ -45,73 +45,73 @@
             </li> -->
               <li :class="selected == 'Errors' ? 'active' : ''" @click="changeSelected('Errors')">
                 <a href="#">
-                  <i class="icon ph-bold ph-file-text"></i>
+                  <i class="icon fas fa-exclamation-triangle"></i>
                   <span class="text">Errors</span>
                 </a>
               </li>
               <li :class="selected == 'KeyDBLogs' ? 'active' : ''" @click="changeSelected('KeyDBLogs')">
                 <a href="#">
-                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <i class="icon fas fa-database"></i>
                   <span class="text">KeyDBLogs</span>
                 </a>
               </li>
               <li :class="selected == 'DataVisualizer' ? 'active' : ''" @click="changeSelected('DataVisualizer')">
                 <a href="#">
-                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <i class="icon fas fa-chart-bar"></i>
                   <span class="text">Data Visualizer</span>
                 </a>
               </li>
               <li :class="selected == 'SignalBook' ? 'active' : ''" @click="changeSelected('SignalBook')">
                 <a href="#">
-                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <i class="icon fas fa-book-open"></i>
                   <span class="text">SignalBook</span>
                 </a>
               </li>
               <li :class="selected == 'ServerData' ? 'active' : ''" @click="changeSelected('ServerData')">
                 <a href="#">
-                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <i class="icon fas fa-server"></i>
                   <span class="text">Server Data</span>
                 </a>
               </li>
               <li :class="selected == 'LivePositions' ? 'active' : ''" @click="changeSelected('LivePositions')">
                 <a href="#">
-                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <i class="icon fas fa-chart-line"></i>
                   <span class="text">Live Positions </span>
                 </a>
               </li>
               <li :class="selected == 'OpenTrades' ? 'active' : ''" @click="changeSelected('OpenTrades')">
                 <a href="#">
-                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <i class="icon fas fa-exchange-alt"></i>
                   <span class="text">Overnight Trades </span>
                 </a>
               </li>
               <li :class="selected == 'SlippageUserPage' ? 'active' : ''" @click="changeSelected('SlippageUserPage')">
                 <a href="#">
-                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <i class="icon fas fa-percent"></i>
                   <span class="text">Slippage User Page </span>
                 </a>
               </li>
               <li :class="selected == 'UserStrategyVar' ? 'active' : ''" @click="changeSelected('UserStrategyVar')">
                 <a href="#">
-                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <i class="icon fas fa-calculator"></i>
                   <span class="text"> User Strategy Var </span>
                 </a>
               </li>
               <li :class="selected == 'DailyLogsTable' ? 'active' : ''" @click="changeSelected('DailyLogsTable')">
                 <a href="#">
-                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <i class="icon fas fa-calendar-day"></i>
                   <span class="text"> Daily Logs Table </span>
                 </a>
               </li>
               <li :class="selected == ' VarSimulator' ? 'active' : ''" @click="changeSelected('VarSimulator')">
                 <a href="#">
-                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <i class="icon fas fa-sliders-h"></i>
                   <span class="text">  Var Simulator </span>
                 </a>
               </li>
               <li :class="selected == 'ClientPage' ? 'active' : ''" @click="changeSelected('ClientPage')">
                 <a href="#">
-                  <i class="icon ph-bold ph-calendar-blank"></i>
+                  <i class="icon fas fa-user-friends"></i>
                   <span class="text">  Clients Page </span>
                 </a>
               </li>
@@ -155,19 +155,19 @@
             <ul>
               <li>
                 <a href="#">
-                  <i class="icon ph-bold ph-gear"></i>
+                  <i class="icon fas fa-cog"></i>
                   <span class="text">Settings</span>
                 </a>
               </li>
               <li :class="selected == 'AdminPanel' ? 'active' : ''" @click="changeSelected('AdminPanel')">
                 <a href="#">
-                  <i class="icon ph-bold ph-gear"></i>
+                  <i class="icon fas fa-user-shield"></i>
                   <span class="text">Admin Panel</span>
                 </a>
               </li>
               <li :class="selected == 'MarginUpdate' ? 'active' : ''" @click="changeSelected('MarginUpdate')">
                 <a href="#">
-                  <i class="icon ph-bold ph-gear"></i>
+                  <i class="icon fas fa-balance-scale"></i>
                   <span class="text">Margin Update</span>
                 </a>
               </li>
@@ -180,13 +180,13 @@
           <ul>
             <li>
               <a href="#">
-                <i class="icon ph-bold ph-info"></i>
+                <i class="icon fas fa-question-circle"></i>
                 <span class="text">Help</span>
               </a>
             </li>
             <li>
               <a href="#" @click="logout">
-                <i class="icon ph-bold ph-sign-out"></i>
+                <i class="icon fas fa-sign-out-alt"></i>
                 <span class="text">Logout</span>
               </a>
             </li>
@@ -493,5 +493,19 @@ export default {
 
 .account-menu {
   margin-top: auto;
+}
+/* restore the FA font for any element using the FA classes */
+.fas,
+.fa-solid,
+.far,
+.fa-regular,
+.fab,
+.fa-brands {
+  font-family: "Font Awesome 6 Free" !important;
+  font-weight: 900; /* for solid icons (.fas / .fa-solid) */
+}
+.icon.fas {
+  font-family: "Font Awesome 6 Free" !important;
+  font-weight: 900;
 }
 </style>
