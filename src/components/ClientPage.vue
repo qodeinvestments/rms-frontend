@@ -8,7 +8,7 @@ import {
 } from '@tanstack/vue-table'
 import { inject } from 'vue'
 import TanStackTestTable from './TanStackTestTable.vue'
-import { columns } from '../components/TableVariables/HomePageTable.js'; 
+import { columns } from '../components/TableVariables/ClientPage.js'; 
 
 
 const defaultData = []
