@@ -121,6 +121,45 @@
                     :disabled="updateLoading" 
                 ></a-select>
             </div>
+            <div v-if="editingUser.role === 'Client'" class="form-group">
+              <label>Account Percentages</label>
+
+              <!-- Search box -->
+              <input
+                v-model="percentageSearch"
+                type="text"
+                placeholder="Search accounts..."
+                class="percentage-search"
+                :disabled="updateLoading"
+              />
+
+              <!-- Scrollable list in column -->
+              <div class="percentage-list">
+                <div
+                  v-for="item in filteredAccountPercentages"
+                  :key="item.name"
+                  class="percentage-item"
+                >
+                  <span class="percentage-label">{{ item.name }}</span>
+                  <input
+                    type="number"
+                    v-model.number="item.percentage"
+                    min="0"
+                    max="100"
+                    class="percentage-input"
+                    :disabled="updateLoading"
+                  />
+                  <button
+                    type="button"
+                    @click="removeAccountPercentage(item.name)"
+                    class="remove-percentage-button"
+                    :disabled="updateLoading"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
             <div class="form-group" v-if="editingUser.role != 'Admin'">
                 <label>Features</label>
                 <a-select
@@ -160,6 +199,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 
+
+
+
 // State management
 const users = ref([]);
 const loading = ref(false);
@@ -171,12 +213,28 @@ const updateLoading = ref(false);
 const updateError = ref(null);
 const accounts = ref([]);
 const selectedAccounts = ref([]);
+const accountPercentages = ref([]);
+const percentageSearch = ref('');
 const selectedFeatures = ref([]);
 const roles = ref([])
 const features = ref([])
 // "All" Label State
 const isaccountAllSelected = ref(false);
 const isfeatureAllSelected = ref(false);
+
+// whenever selectedAccounts changes, keep percentages in sync
+function updateAccountPercentages() {
+  // 1. remove any percentage-entry for an unselected account
+  accountPercentages.value = accountPercentages.value.filter(item =>
+    selectedAccounts.value.includes(item.name)
+  );
+  // 2. add any newly selected account with default 100%
+  selectedAccounts.value.forEach(acc => {
+    if (!accountPercentages.value.find(item => item.name === acc)) {
+      accountPercentages.value.push({ name: acc, percentage: 100 });
+    }
+  });
+}
 
 // Add "All" or "Remove All" option dynamically
 const accountOptionsWithAll = computed(() => [
@@ -213,7 +271,14 @@ const handleAccountChange = (value) => {
     selectedAccounts.value = value.filter(account => account !== 'all');
     isaccountAllSelected.value = selectedAccounts.value.length === accounts.value.length;
   }
+  updateAccountPercentages();
 };
+
+// if user clicks “Remove” beside an account:
+function removeAccountPercentage(name) {
+  selectedAccounts.value = selectedAccounts.value.filter(a => a !== name);
+  updateAccountPercentages();
+}
 
 
 const handleFeatureChange = (value) => {
@@ -235,15 +300,26 @@ const handleFeatureChange = (value) => {
   }
 };
 
-
-
+// filter computed
+const filteredAccountPercentages = computed(() =>
+  accountPercentages.value
+    .filter(item =>
+      item.name.toLowerCase().includes(percentageSearch.value.toLowerCase())
+    )
+);
 const openEditModal = (user) => {
   editingUser.value = { ...user };
   editingIndex.value = users.value.findIndex(u => u.email === user.email);
+
+  // 1️⃣ pre‐fill the multi‐select…
+  selectedAccounts.value = user.account_access ? [...user.account_access] : [];
+  // 2️⃣ …then sync your percentages so you see A 100 / B 100 immediately
+  updateAccountPercentages();
+
+  // features, errors, show modal etc.
+  selectedFeatures.value = user.features || [];
   updateError.value = null;
   showModal.value = true;
-  selectedAccounts.value = user['account_access'] || []; // Pre-fill selected accounts in modal
-  selectedFeatures.value= user['features'] || []; // Pre-fill selected features in modal
 };
 
 // Close modal
@@ -383,6 +459,58 @@ onMounted(async () => {
 
   
 <style scoped>
+/* Search input styling */
+.percentage-search {
+  width: 100%;
+  padding: 6px 8px;
+  margin: 8px 0;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Column layout with fixed height */
+.percentage-list {
+  max-height: 100px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+}
+
+/* Each row: full width */
+.percentage-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.percentage-label {
+  flex: 3;
+}
+
+.percentage-input {
+  flex: 2;
+  min-width: 80px;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  text-align: right;
+}
+
+.remove-percentage-button {
+  flex: 1;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.remove-percentage-button:hover {
+  background-color: #dc2626;
+}
 .admin-container {
   padding: 24px;
 }
