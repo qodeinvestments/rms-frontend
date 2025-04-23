@@ -121,7 +121,8 @@
                     :disabled="updateLoading" 
                 ></a-select>
             </div>
-            <div v-if="editingUser.role === 'Client'" class="form-group">
+            <!-- Account Percentages Section -->
+            <div v-if="editingUser.role === 'Client'" class="percentage-section">
               <label>Account Percentages</label>
 
               <!-- Search box -->
@@ -459,11 +460,20 @@ onMounted(async () => {
 
   
 <style scoped>
+
+.percentage-section {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 16px 0;
+  background-color: #fafafa;
+}
+
 /* Search input styling */
 .percentage-search {
   width: 100%;
-  padding: 6px 8px;
-  margin: 8px 0;
+  padding: 8px 12px;
+  margin-bottom: 12px;
   border: 1px solid #d1d5db;
   border-radius: 4px;
   font-size: 14px;
@@ -471,7 +481,7 @@ onMounted(async () => {
 
 /* Column layout with fixed height */
 .percentage-list {
-  max-height: 100px;
+  max-height: 150px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -484,10 +494,15 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  background-color: #fff;
 }
 
 .percentage-label {
   flex: 3;
+  font-weight: 500;
 }
 
 .percentage-input {
