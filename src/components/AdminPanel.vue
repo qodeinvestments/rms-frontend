@@ -1,206 +1,193 @@
 <template>
-    <div class="admin-container">
-      <h1 class="admin-title">User Management</h1>
-  
-      <!-- Loading State -->
-      <div v-if="loading" class="loading-state">
-        <div class="loader"></div>
-        <p>Loading users...</p>
-      </div>
-  
-      <!-- Error State -->
-      <div v-if="error" class="error-message">
-        {{ error }}
-        <button @click="fetchUsers" class="retry-button">Retry</button>
-      </div>
-  
-      <!-- Users Table -->
-      <div v-if="!loading && !error" class="table-container">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Username</th>
-              <th>Password</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Account Access</th>
-              <th>Features</th>
-              <th>Actions</th>
-              <th>Delete</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(user, index) in users" :key="index">
-              <td>{{ user.username }}</td>
-              <td>{{ user.password }}</td>
-              <td>{{ user.email }}</td>
-              <td>{{ user.role }}</td>
-              <td>{{ user['account_access'].join(', ') }}</td>
-              <td>{{ user['features'].join(', ') }}</td>
-              <td>
-                <button 
-                  @click="openEditModal(user)"
-                  class="edit-button"
-                  :disabled="updateLoading"
-                >
-                  {{ updateLoading && editingIndex === index ? 'Saving...' : 'Edit' }}
-                </button>
-              </td>
-              <td class="icon-cell">
-               <i class="fas fa-trash-alt"
-                    @click="deleteUser(user)"
-                    style="cursor: pointer;" 
-                    title="Delete User"
-                ></i>
-                </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-  
-      <!-- Edit Modal -->
-      <div v-if="showModal" class="modal-overlay">
-        <div class="modal-content">
-          <h2 class="modal-title">Edit User</h2>
-          
-          <!-- Edit Form Error -->
-          <div v-if="updateError" class="error-message">
-            {{ updateError }}
+  <div class="admin-container">
+    <h1 class="admin-title">User Management</h1>
+
+    <!-- Loading State -->
+    <div v-if="loading" class="loading-state">
+      <div class="loader"></div>
+      <p>Loading users...</p>
+    </div>
+
+    <!-- Error State -->
+    <div v-if="error" class="error-message">
+      {{ error }}
+      <button @click="fetchUsers" class="retry-button">Retry</button>
+    </div>
+
+    <!-- Users Table -->
+    <div v-if="!loading && !error" class="table-container">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Account Access</th>
+            <th>Features</th>
+            <th>Actions</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(user, index) in users" :key="index">
+            <td>{{ user.username }}</td>
+            <td>{{ user.password }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            <td>{{ user.account_access.join(', ') }}</td>
+            <td>{{ user.features.join(', ') }}</td>
+            <td>
+              <button
+                @click="openEditModal(user)"
+                class="edit-button"
+                :disabled="updateLoading"
+              >
+                {{ updateLoading && editingIndex === index ? 'Saving...' : 'Edit' }}
+              </button>
+            </td>
+            <td class="icon-cell">
+              <i class="fas fa-trash-alt"
+                 @click="deleteUser(user)"
+                 title="Delete User"
+                 style="cursor: pointer;"
+              ></i>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Edit Modal -->
+    <div v-if="showModal" class="modal-overlay">
+      <div class="modal-content">
+        <h2 class="modal-title">Edit User</h2>
+
+        <!-- Edit Form Error -->
+        <div v-if="updateError" class="error-message">
+          {{ updateError }}
+        </div>
+
+        <div class="form-container">
+          <div class="form-group">
+            <label>Username</label>
+            <input v-model="editingUser.username" type="text" disabled />
           </div>
-  
-          <div class="form-container">
-            <div class="form-group">
-              <label>Username</label>
-              <input 
-                v-model="editingUser.username"
-                type="text"
-                disabled
-              >
-            </div>
-            <div class="form-group">
-              <label>Password</label>
-              <input 
-                v-model="editingUser.password"
-                type="text"
-                :disabled="updateLoading"
-              >
-            </div>
-            
-  
-            <div class="form-group">
-              <label>Email</label>
-              <input 
-                v-model="editingUser.email"
-                type="email"
-                :disabled="updateLoading"
-              >
-            </div>
-            <div class="form-group">
-                <label>Role</label>
-                <select 
-                    v-model="editingUser.role" 
-                    :disabled="updateLoading" 
-                    class="form-select"
-                >
-                    <option v-for="role in roles" :key="role" :value="role">
-                    {{ role }}
-                    </option>
-                </select>
-            </div>
-            <div class="form-group" v-if="editingUser.role != 'Admin'">
-                <label>Account Access</label>
-                <a-select
-                    v-model:value="selectedAccounts"
-                    mode="multiple"
-                    placeholder="Select Accounts"
-                    style="width: 100%"
-                    :options="accountOptionsWithAll"
-                    :maxTagCount="3"
-                    @change="handleAccountChange"
-                    :disabled="updateLoading" 
-                ></a-select>
-            </div>
-            <!-- Account Percentages Section -->
-            <div v-if="editingUser.role === 'Client'" class="percentage-section">
-              <label>Account Percentages</label>
+          <div class="form-group">
+            <label>Password</label>
+            <input v-model="editingUser.password" type="text" :disabled="updateLoading" />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input v-model="editingUser.email" type="email" :disabled="updateLoading" />
+          </div>
+          <div class="form-group">
+            <label>Role</label>
+            <select v-model="editingUser.role" :disabled="updateLoading" class="form-select">
+              <option v-for="role in roles" :key="role" :value="role">{{ role }}</option>
+            </select>
+          </div>
+          <div class="form-group" v-if="editingUser.role !== 'Admin'">
+            <label>Account Access</label>
+            <a-select
+              v-model:value="selectedAccounts"
+              mode="multiple"
+              placeholder="Select Accounts"
+              style="width: 100%"
+              :options="accountOptionsWithAll"
+              :maxTagCount="3"
+              @change="handleAccountChange"
+              :disabled="updateLoading"
+            />
+          </div>
 
-              <!-- Search box -->
-              <input
-                v-model="percentageSearch"
-                type="text"
-                placeholder="Search accounts..."
-                class="percentage-search"
-                :disabled="updateLoading"
-              />
+          <!-- Account Percentages Section -->
+          <div v-if="editingUser.role === 'Client'" class="percentage-section">
+            <label>Account Percentages</label>
 
-              <!-- Scrollable list in column -->
-              <div class="percentage-list">
-                <div
-                  v-for="item in filteredAccountPercentages"
-                  :key="item.name"
-                  class="percentage-item"
-                >
-                  <span class="percentage-label">{{ item.name }}</span>
-                  <input
-                    type="number"
-                    v-model.number="item.percentage"
-                    min="0"
-                    max="100"
-                    class="percentage-input"
-                    :disabled="updateLoading"
-                  />
-                  <button
-                    type="button"
-                    @click="removeAccountPercentage(item.name)"
-                    class="remove-percentage-button"
-                    :disabled="updateLoading"
-                  >
-                    Remove
-                  </button>
+            <!-- Search box -->
+            <input
+              v-model="percentageSearch"
+              type="text"
+              placeholder="Search accounts..."
+              class="percentage-search"
+              :disabled="updateLoading"
+            />
+
+            <!-- Scrollable list -->
+            <div class="percentage-list">
+              <div
+                v-for="item in filteredAccountPercentages"
+                :key="item.name"
+                class="percentage-item"
+              >
+                <span class="percentage-label">{{ item.name }}</span>
+                <div class="percentage-inner-list">
+                    <input
+                      v-model.number="item.percentage"
+                      type="number"
+                      min="0"
+                      max="100"
+                      class="percentage-input"
+                      :disabled="updateLoading"
+                    />
+                    <input
+                      v-model="item.startDate"
+                      type="date"
+                      class="date-input"
+                      :disabled="updateLoading"
+                    />
+                    <input
+                      v-model="item.endDate"
+                      type="date"
+                      class="date-input"
+                      :disabled="updateLoading"
+                    />
+                    <button
+                        type="button"
+                        @click="removeAccountPercentage(item.name)"
+                        class="remove-percentage-button"
+                        :disabled="updateLoading"
+                      >
+                        Remove
+                    </button>
                 </div>
+               
+               
               </div>
             </div>
-            <div class="form-group" v-if="editingUser.role != 'Admin'">
-                <label>Features</label>
-                <a-select
-                    v-model:value="selectedFeatures"
-                    mode="multiple"
-                    placeholder="Select Features"
-                    style="width: 100%"
-                    :options="featuresOptionsWithAll"
-                    :maxTagCount="3"
-                    @change="handleFeatureChange"
-                    :disabled="updateLoading" 
-                ></a-select>
-            </div>
+          </div>
 
-          </div>
-  
-          <div class="modal-actions">
-            <button 
-              @click="closeModal"
-              class="cancel-button"
+          <div class="form-group" v-if="editingUser.role !== 'Admin'">
+            <label>Features</label>
+            <a-select
+              v-model:value="selectedFeatures"
+              mode="multiple"
+              placeholder="Select Features"
+              style="width: 100%"
+              :options="featuresOptionsWithAll"
+              :maxTagCount="3"
+              @change="handleFeatureChange"
               :disabled="updateLoading"
-            >
-              Cancel
-            </button>
-            <button 
-              @click="saveChanges"
-              class="save-button"
-              :disabled="updateLoading"
-            >
-              {{ updateLoading ? 'Saving...' : 'Save Changes' }}
-            </button>
+            />
           </div>
+        </div>
+
+        <div class="modal-actions">
+          <button @click="closeModal" class="cancel-button" :disabled="updateLoading">
+            Cancel
+          </button>
+          <button @click="saveChanges" class="save-button" :disabled="updateLoading">
+            {{ updateLoading ? 'Saving...' : 'Save Changes' }}
+          </button>
         </div>
       </div>
     </div>
-  </template>
+  </div>
+</template>
+
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-
-
-
 
 // State management
 const users = ref([]);
@@ -216,239 +203,161 @@ const selectedAccounts = ref([]);
 const accountPercentages = ref([]);
 const percentageSearch = ref('');
 const selectedFeatures = ref([]);
-const roles = ref([])
-const features = ref([])
-// "All" Label State
+const roles = ref([]);
+const features = ref([]);
 const isaccountAllSelected = ref(false);
 const isfeatureAllSelected = ref(false);
 
-// whenever selectedAccounts changes, keep percentages in sync
+// Sync percentages & dates with selected accounts
 function updateAccountPercentages() {
-  // 1. remove any percentage-entry for an unselected account
   accountPercentages.value = accountPercentages.value.filter(item =>
     selectedAccounts.value.includes(item.name)
   );
-  // 2. add any newly selected account with default 100%
   selectedAccounts.value.forEach(acc => {
-    if (!accountPercentages.value.find(item => item.name === acc)) {
-      accountPercentages.value.push({ name: acc, percentage: 100 });
+    if (!accountPercentages.value.find(i => i.name === acc)) {
+      accountPercentages.value.push({ name: acc, percentage: 100, startDate: '', endDate: '' });
     }
   });
 }
 
-// Add "All" or "Remove All" option dynamically
 const accountOptionsWithAll = computed(() => [
   { label: isaccountAllSelected.value ? 'Remove All' : 'All', value: 'all' },
-  ...accounts.value.map(account => ({
-    label: account,
-    value: account,
-  })),
+  ...accounts.value.map(a => ({ label: a, value: a }))
 ]);
-
-
 const featuresOptionsWithAll = computed(() => [
   { label: isfeatureAllSelected.value ? 'Remove All' : 'All', value: 'all' },
-  ...features.value.map(account => ({
-    label: account,
-    value: account,
-  })),
+  ...features.value.map(f => ({ label: f, value: f }))
 ]);
 
-// Handle selection change
-const handleAccountChange = (value) => {
+const handleAccountChange = value => {
   if (value.includes('all')) {
     if (isaccountAllSelected.value) {
-      // Deselect all accounts
       selectedAccounts.value = [];
       isaccountAllSelected.value = false;
     } else {
-      // Select all accounts
-      selectedAccounts.value = accounts.value;
+      selectedAccounts.value = [...accounts.value];
       isaccountAllSelected.value = true;
     }
   } else {
-    // Normal selection handling
-    selectedAccounts.value = value.filter(account => account !== 'all');
+    selectedAccounts.value = value.filter(v => v !== 'all');
     isaccountAllSelected.value = selectedAccounts.value.length === accounts.value.length;
   }
   updateAccountPercentages();
 };
 
-// if user clicks “Remove” beside an account:
 function removeAccountPercentage(name) {
   selectedAccounts.value = selectedAccounts.value.filter(a => a !== name);
   updateAccountPercentages();
 }
 
-
-const handleFeatureChange = (value) => {
+const handleFeatureChange = value => {
   if (value.includes('all')) {
     if (isfeatureAllSelected.value) {
-      // Deselect all accounts
       selectedFeatures.value = [];
       isfeatureAllSelected.value = false;
     } else {
-      // Select all accounts
-      selectedFeatures.value = features.value;
+      selectedFeatures.value = [...features.value];
       isfeatureAllSelected.value = true;
     }
   } else {
-    // Normal selection handling
-    selectedFeatures.value = value.filter(account => account !== 'all');
+    selectedFeatures.value = value.filter(v => v !== 'all');
     isfeatureAllSelected.value = selectedFeatures.value.length === features.value.length;
-
   }
 };
 
-// filter computed
 const filteredAccountPercentages = computed(() =>
-  accountPercentages.value
-    .filter(item =>
-      item.name.toLowerCase().includes(percentageSearch.value.toLowerCase())
-    )
+  accountPercentages.value.filter(item => item.name.toLowerCase().includes(percentageSearch.value.toLowerCase()))
 );
-const openEditModal = (user) => {
+
+const openEditModal = user => {
   editingUser.value = { ...user };
   editingIndex.value = users.value.findIndex(u => u.email === user.email);
-
-  // 1️⃣ pre‐fill the multi‐select…
-  selectedAccounts.value = user.account_access ? [...user.account_access] : [];
-  // 2️⃣ …then sync your percentages so you see A 100 / B 100 immediately
+  selectedAccounts.value = [...(user.account_access || [])];
   updateAccountPercentages();
-
-  // features, errors, show modal etc.
-  selectedFeatures.value = user.features || [];
+  selectedFeatures.value = [...(user.features || [])];
   updateError.value = null;
   showModal.value = true;
 };
 
-// Close modal
 const closeModal = () => {
   showModal.value = false;
   editingUser.value = null;
   editingIndex.value = -1;
-  updateError.value = null;
   selectedAccounts.value = [];
+  updateError.value = null;
 };
-
-
 
 const fetchData = async (endpoint, stateRef) => {
   try {
-    const access_token = localStorage.getItem('access_token');
-    if (!access_token) throw new Error('User not authenticated');
-    const token = access_token;
-
-    const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`, // Include the Bearer token
-        'Content-Type': 'application/json',
-      },
+    const token = localStorage.getItem('access_token');
+    if (!token) throw new Error('User not authenticated');
+    const res = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
     });
-    if (response.ok) {
-      const data = await response.json();
-      stateRef.value = endpoint === 'getAccounts' ? Object.keys(data) : (data || []);
-    } else {
-      const errorMessage = await response.text();
-      console.error("API Error:", errorMessage);
-      throw new Error(`Error fetching ${endpoint}: ${errorMessage}`);
-    }
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    stateRef.value = endpoint === 'getAccounts' ? Object.keys(data) : data || [];
   } catch (err) {
     console.error(`Error fetching ${endpoint}:`, err.message);
   }
 };
 
-
-// Save Changes
 const saveChanges = async () => {
-  if (selectedAccounts.value.length === 0 && editingUser.value.role != 'Admin') {
-    alert("Accounts cannot be empty");
+  if (selectedAccounts.value.length === 0 && editingUser.value.role !== 'Admin') {
+    alert('Accounts cannot be empty');
     return;
   }
-
   updateLoading.value = true;
   updateError.value = null;
-
   try {
-    // Retrieve the access token from localStorage
     const token = localStorage.getItem('access_token');
     if (!token) throw new Error('User not authenticated');
-
-    // Prepare data for API
     const updatedUser = {
       ...editingUser.value,
-      'account_access': selectedAccounts.value,
-      'features': selectedFeatures.value, // Add this line,
-      'account_percentages': accountPercentages.value
+      account_access: selectedAccounts.value,
+      features: selectedFeatures.value,
+      account_percentages: accountPercentages.value
     };
-
-    const response = await fetch('https://production2.swancapital.in/editUser', {
+    const res = await fetch('https://production2.swancapital.in/editUser', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`, // Include the Bearer token
-      },
-      body: JSON.stringify(updatedUser),
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedUser)
     });
-
-    if (response.ok) {
-      users.value[editingIndex.value] = { ...updatedUser }; // Update local table
-      closeModal();
-      alert('User updated successfully!');
-      window.location.reload(); // Refresh the page on success
-    } else {
-      const errorMessage = await response.text(); // Get detailed error message
-      updateError.value = `Error updating user: ${errorMessage}`;
-      alert(updateError.value); // Optional: Alert the error message
-    }
-  } catch (error) {
-    updateError.value = `An error occurred: ${error.message}`;
-    alert(updateError.value); // Optional: Alert the error message
+    if (!res.ok) throw new Error(await res.text());
+    users.value[editingIndex.value] = updatedUser;
+    closeModal();
+    alert('User updated successfully!');
+    window.location.reload();
+  } catch (err) {
+    updateError.value = `Error updating user: ${err.message}`;
+    alert(updateError.value);
   } finally {
     updateLoading.value = false;
   }
 };
 
-
-// Usage:
 const fetchUsers = () => fetchData('users', users);
 const fetchAccounts = () => fetchData('getAccounts', accounts);
 const fetchRoles = () => fetchData('getRoles', roles);
-const fetchFeatures= () => fetchData('getFeatures', features);
+const fetchFeatures = () => fetchData('getFeatures', features);
 
-
-
-const deleteUser = async (user) => {
+const deleteUser = async user => {
   try {
-    // Retrieve the access token from localStorage
     const token = localStorage.getItem('access_token');
     if (!token) throw new Error('User not authenticated');
-
-    const response = await fetch('https://production2.swancapital.in/deleteUser', {
+    const res = await fetch('https://production2.swancapital.in/deleteUser', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`, // Include the Bearer token
-      },
-      body: JSON.stringify(user), // Serialize the user object
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(user)
     });
-
-    if (response.ok) {
-      console.log(`User ${user.email} deleted successfully.`);
-      alert(`User ${user.email} deleted successfully.`);
-      location.reload(); // Reload the page on success
-    } else {
-      const errorMessage = await response.text(); // Get the detailed error message
-      alert(`Error deleting user: ${errorMessage}`);
-      console.error('Error deleting user:', response.statusText);
-    }
-  } catch (error) {
-    alert("Error deleting user. Please try again.");
-    console.error('Error deleting user:', error.message);
+    if (!res.ok) throw new Error(await res.text());
+    alert(`User ${user.email} deleted successfully.`);
+    window.location.reload();
+  } catch (err) {
+    alert(`Error deleting user: ${err.message}`);
+    console.error(err);
   }
 };
-
 
 onMounted(async () => {
   await fetchUsers();
@@ -458,7 +367,6 @@ onMounted(async () => {
 });
 </script>
 
-  
 <style scoped>
 
 .percentage-section {
@@ -489,6 +397,12 @@ onMounted(async () => {
   padding-right: 4px;
 }
 
+.percentage-inner-list{
+  display: flex;
+  gap: 20px;
+  padding-right: 4px;
+}
+
 /* Each row: full width */
 .percentage-item {
   display: flex;
@@ -498,6 +412,7 @@ onMounted(async () => {
   border: 1px solid #e5e7eb;
   border-radius: 4px;
   background-color: #fff;
+  
 }
 
 .percentage-label {
@@ -655,7 +570,7 @@ onMounted(async () => {
   padding: 24px;
   border-radius: 8px;
   width: 100%;
-  max-width: 600px;
+  max-width: 1200px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
