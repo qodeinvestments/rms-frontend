@@ -23,6 +23,7 @@ import NewDailyLog from '../components/NewDailyLog.vue'
 import UpdateLog from '../components/UpdateLog.vue'
 import VarSimulator from '../components/VarSimulator.vue'
 import ClientPage from '../components/ClientPage.vue'
+import FundSummaryClient from '../components/FundSummaryClient.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -35,6 +36,11 @@ const router = createRouter({
       path: '/user/:username',
       name: 'userPage',
       component: UserPage,
+    },
+    {
+      path:'/fundsummary/:username',
+      name:'fundSummaryClient',
+      component:FundSummaryClient
     },
     {
       path: '/user/lag/:username',
