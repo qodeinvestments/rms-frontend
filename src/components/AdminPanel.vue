@@ -291,7 +291,7 @@ function updateAccountPercentages() {
   //     accountPercentages.value.push({ name: acc, percentage: 100, startDate: '', endDate: '' });
   //   }
   // });
-  accountPercentages.value=editingUser.value['account_percentages']
+  accountPercentages.value=editingUser.value['account_percentages'] || [];
 }
 
 const accountOptionsWithAll = computed(() => [
@@ -340,6 +340,7 @@ const handleFeatureChange = value => {
 };
 
 const filteredAccountPercentages = computed(() =>
+
   accountPercentages.value.filter(item => item.name.toLowerCase().includes(percentageSearch.value.toLowerCase()))
 );
 
