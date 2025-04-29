@@ -119,7 +119,7 @@
 
 
         <!-- Put Protection  -->
-        <div v-if="putProtection" class="portfolio-field">
+        <div v-if="putProtection!=null" class="portfolio-field">
           <label class="portfolio-label">Put Protection</label>
           <div class="portfolio-input-group">
             <input
@@ -135,6 +135,26 @@
             {{ putProtectionError }}
           </span>
         </div>
+
+        <!-- Cash Alert Percentage  -->
+        <div  class="portfolio-field">
+          <label class="portfolio-label">Cash Alert Percentage</label>
+          <div class="portfolio-input-group">
+            <input
+              type="number"
+              v-model="cashalertpercentage"
+              class="portfolio-input"
+              @input="validatecashalertpercentage"
+              :class="{ 'error-input': cashalertpercentageError }"
+            />
+            <span class="currency-symbol">₹</span>
+          </div>
+          <span v-if="cashalertpercentageError" class="error-text text-sm text-red-500 mt-1">
+            {{ cashalertpercentageError }}
+          </span>
+        </div>
+
+        
 
       </div> <!-- End of .portfolio-row -->
 
@@ -437,6 +457,8 @@ const ddMarginPercent = ref("");
 const ddMarginPercentError = ref("");
 const putProtection = ref(null);
 const putProtectionError = ref("");
+const cashalertpercentage=ref(0);
+const cashalertpercentageError=ref("");
 
 // UI & Modal states
 const isSaving = ref(false);
@@ -904,6 +926,21 @@ const validateputProtection = () => {
   return true;
 };
 
+const validatecashalertpercentage = () => {
+  const value = Number(cashalertpercentage.value);
+  if (isNaN(value)) {
+    cashalertpercentageError.value = "Please enter a valid number for Cash Alert Percentage";
+    return false;
+  }
+  if (value < 0) {
+    cashalertpercentageError.value = "Cash Alert Percentage cannot be negative";
+    return false;
+  }
+  cashalertpercentageError.value = "";
+  hasUnsavedChanges.value = true;
+  return true;
+}
+
 const validateMultiplier = (key) => {
   const value = Number(client_multiplier.value[key]);
   multiplierErrors.value[key] = "";
@@ -988,6 +1025,7 @@ const updatePortfolioValue = async () => {
           minMargin: Number(minMargin.value),
           ddMarginPercent: Number(ddMarginPercent.value),
           putProtection: Number(putProtection.value),
+          cashalertpercentage: Number(cashalertpercentage.value),
           limits: limits.value,
           params: filteredArr,
         }),
