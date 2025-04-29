@@ -283,15 +283,15 @@ const handleTotpSubmit = async () => {
 
 // Sync percentages & dates with selected accounts
 function updateAccountPercentages() {
-  accountPercentages.value = accountPercentages.value.filter(item =>
-    selectedAccounts.value.includes(item.name)
-  );
-  // selectedAccounts.value.forEach(acc => {
-  //   if (!accountPercentages.value.find(i => i.name === acc)) {
-  //     accountPercentages.value.push({ name: acc, percentage: 100, startDate: '', endDate: '' });
-  //   }
-  // });
-  accountPercentages.value=editingUser.value['account_percentages'] || [];
+  // accountPercentages.value = accountPercentages.value.filter(item =>
+  //   selectedAccounts.value.includes(item.name)
+  // );
+  selectedAccounts.value.forEach(acc => {
+    if (!accountPercentages.value.find(i => i.name === acc)) {
+      accountPercentages.value.push({ name: acc, percentage: 100, startDate: '', endDate: '' });
+    }
+  });
+  // accountPercentages.value=editingUser.value['account_percentages'] || [];
 }
 
 const accountOptionsWithAll = computed(() => [
