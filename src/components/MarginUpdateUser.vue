@@ -800,6 +800,9 @@ const fetchMarginData = async () => {
     if (data.value?.putProtection && data.value.putProtection[account.value] !== undefined) {
       putProtection.value=data.value[ "putProtection" ][ account.value ]
     }
+    if(data.value?.cashalertinputs && data.value.cashalertinputs[account.value] !== undefined) {
+      cashalertpercentage.value=data.value["cashalertinputs"][account.value]
+    }
 
 
 
