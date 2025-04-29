@@ -137,7 +137,7 @@
         </div>
 
         <!-- Cash Alert Percentage  -->
-        <div  class="portfolio-field">
+        <div v-if="cashalertpercentage!=null"   class="portfolio-field">
           <label class="portfolio-label">Cash Alert Percentage</label>
           <div class="portfolio-input-group">
             <input
@@ -457,7 +457,7 @@ const ddMarginPercent = ref("");
 const ddMarginPercentError = ref("");
 const putProtection = ref(null);
 const putProtectionError = ref("");
-const cashalertpercentage=ref(0);
+const cashalertpercentage=ref(null);
 const cashalertpercentageError=ref("");
 
 // UI & Modal states
