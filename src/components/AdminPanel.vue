@@ -281,18 +281,31 @@ const handleTotpSubmit = async () => {
 };
 
 
-// Sync percentages & dates with selected accounts
 function updateAccountPercentages() {
-  // accountPercentages.value = accountPercentages.value.filter(item =>
-  //   selectedAccounts.value.includes(item.name)
-  // );
-  selectedAccounts.value.forEach(acc => {
-    if (!accountPercentages.value.find(i => i.name === acc)) {
-      accountPercentages.value.push({ name: acc, percentage: 100, startDate: '', endDate: '' });
+  // 1️⃣ Take the saved percentages (or empty array if none)
+  const existing = Array.isArray(editingUser.value.account_percentages)
+    ? editingUser.value.account_percentages.slice()
+    : [];
+
+  // 2️⃣ Keep only those that are still selected
+  accountPercentages.value = existing.filter(item =>
+    selectedAccounts.value.includes(item.name)
+  );
+
+  // 3️⃣ Add new selections with defaults
+  selectedAccounts.value.forEach(name => {
+    const alreadyThere = accountPercentages.value.some(item => item.name === name);
+    if (!alreadyThere) {
+      accountPercentages.value.push({
+        name,
+        percentage: 100,
+        startDate:  '',
+        endDate:    ''
+      });
     }
   });
-  // accountPercentages.value=editingUser.value['account_percentages'] || [];
 }
+
 
 const accountOptionsWithAll = computed(() => [
   { label: isaccountAllSelected.value ? 'Remove All' : 'All', value: 'all' },
