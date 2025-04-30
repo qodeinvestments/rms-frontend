@@ -112,7 +112,7 @@
               <li :class="selected == 'ClientPage' ? 'active' : ''" @click="changeSelected('ClientPage')">
                 <a href="#">
                   <i class="icon fas fa-user-friends"></i>
-                  <span class="text">  Clients Page </span>
+                  <span class="text">  PNL Summary </span>
                 </a>
               </li>
              
