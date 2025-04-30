@@ -391,7 +391,13 @@ const client_holdings=[
       id: 'Peak Margin',
       cell: info => info.getValue(),
       header: () => 'Peak Margin',
+    }),
+    columnHelper.accessor(row => row['portfolio_value'], {
+      id: 'Portfolio Value',
+      cell: info => info.getValue(),
+      header: () => 'Portfolio Value',
     })
+    
   ]
 
   export const live_order_book_columns_xts = [

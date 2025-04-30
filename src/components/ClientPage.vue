@@ -13,7 +13,7 @@ import { columns } from '../components/TableVariables/ClientPage.js';
 
 const defaultData = []
 const NavigationMap = {
-  "AccountName": "/clientpage/"
+  "AccountName": "/fundsummary/"
 }
 
 const data = ref(defaultData)

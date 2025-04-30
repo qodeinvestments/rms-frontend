@@ -1,62 +1,67 @@
 <script setup>
 import { onMounted, onUnmounted, computed } from 'vue'
-import {
-    FlexRender,
-    getCoreRowModel,
-    useVueTable,
-    createColumnHelper,
-} from '@tanstack/vue-table'
-
-import { MyEnum } from '../Enums/Prefix.js';
 import { ref, watch } from 'vue'
 import TanStackTestTable from './TanStackTestTable.vue'
-import Histogram from './Histogram.vue';
-import { columns } from '../components/TableVariables/SignalBook.js'; 
+import { columns } from '../components/TableVariables/FundSummaryClient.js'; 
+import { useRoute } from 'vue-router';
 
-const fetchData = async (endpoint, stateRef) => {
+const route = useRoute();
+const error = ref(null);
+const name=ref("");
+const fundsummary=ref([]);
+
+// API Functions
+async function postData(endpoint, payload, stateRef) {
   try {
-    const token = localStorage.getItem('access_token');
-    if (!token) throw new Error('User not authenticated');
-    const res = await fetch(`https://production2.swancapital.in/${endpoint}`, {
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const data = await res.json();
-    stateRef.value = endpoint === 'getAccounts' ? Object.keys(data) : data || [];
+    const token = localStorage.getItem('access_token')
+    if (!token) throw new Error('User not authenticated')
+  
+    const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+  
+    if (!response.ok) {
+      const errorMessage = await response.text()
+      throw new Error(`Error posting to ${endpoint}: ${errorMessage}`)
+    }
+  
+    const data = await response.json()
+    if (stateRef) {
+      stateRef.value = data || []
+    }
+      
+    return data
   } catch (err) {
-    console.error(`Error fetching ${endpoint}:`, err.message);
+    error.value = err.message
+    console.error(`Error posting to ${endpoint}:`, err.message)
+    throw err
   }
-};
+}
 
 
-const fetchUsers = () => fetchData('users', users);
+const fetchFundSummary = () => postData('fundsummary', {"name":name.value},fundsummary);
  
 onMounted(() => {
-    connectClientDetailsWebSocket();
+    name.value = route.params.username;
+    fetchFundSummary();
 })
 
 onUnmounted(() => {
 
 })
 
-// Watch for changes in selectedBasketItems
-watch(selectedBasketItems, (newSelectedBasketItems) => {
-    console.log('Selected Basket items changed:', newSelectedBasketItems);
-    // Reset UID selection when basket selection changes
-    selectedUids.value = [];
-});
 
-// Toggle function for the checker filter
-const toggleCheckerFilter = () => {
-    showOnlyUnchecked.value = !showOnlyUnchecked.value;
-}
 </script>
-
 
 <template>
     <div class="px-8 py-8 pageContainer">
-        <div class="my-8" v-if="filteredSignalBookData.length">
-            <TanStackTestTable title="PsarTable" :data="filteredSignalBookData" :columns="columns" :hasColor="[]"
+        <div class="my-8" v-if="fundsummary.length">
+            <TanStackTestTable title="Fund Summary" :data="fundsummary" :columns="columns" :hasColor="['Actual MTM']"
                 :navigateTo="[]" :showPagination=true :showPin="true"/>
         </div>
        
