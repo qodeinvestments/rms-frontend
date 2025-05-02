@@ -120,7 +120,8 @@ const updateData = () => {
       API_NET_PNL: item['API NET PNL'] !== undefined ? item['API NET PNL'] : 0,
       API_DAY_PNL: item['API DAY PNL'] !== undefined ? item['API DAY PNL'] : 0,
       Portfolio_Value:item['Portfolio Value'] !== undefined ? item['Portfolio Value'] : 0,
-      Cashperpf :Number(item['Cashperpf'] !== undefined ? item['Cashperpf'] : 0,  ['Cashperpf']) 
+      Cashperpf :Number(item['Cashperpf'] !== undefined ? item['Cashperpf'] : 0,  ['Cashperpf']) ,
+      ob_cnt:item.ob_cnt !== undefined ? item.ob_cnt : 0,
 
     }))
   }

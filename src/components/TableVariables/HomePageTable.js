@@ -146,6 +146,12 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'Cash/PF',
     }),
+    columnHelper.accessor(row => row. ob_cnt, {
+      id: 'OB Count',
+      cell: info => info.getValue(),
+      header: () => 'OB Count',
+    }),
+   
     
 
     columnHelper.accessor(row => row.openOrderCount, {
