@@ -61,6 +61,14 @@
           <span v-if="portfolioError" class="error-text text-sm text-red-500 mt-1">
             {{ portfolioError }}
           </span>
+          <span
+            v-if="portfolioChangeError"
+            class="error-text text-sm text-red-500 mt-1"
+          >
+            {{ portfolioChangeError }}
+            <br />
+            <small>(Previous: ₹{{ Number(prevportfoliovalue).toLocaleString() }})</small>
+          </span>
         </div>
 
         <!-- Excess Margin -->
@@ -151,6 +159,24 @@
           </div>
           <span v-if="cashalertpercentageError" class="error-text text-sm text-red-500 mt-1">
             {{ cashalertpercentageError }}
+          </span>
+        </div>
+
+         <!-- Portfolio Change Percentage   -->
+         <div v-if="portfoliochangepercentage!=null"   class="portfolio-field">
+          <label class="portfolio-label">Portfolio Change Percentage</label>
+          <div class="portfolio-input-group">
+            <input
+              type="number"
+              v-model="portfoliochangepercentage"
+              class="portfolio-input"
+              @input="validateportfoliochangepercentage"
+              :class="{ 'error-input': portfoliochangepercentageError }"
+            />
+            <span class="currency-symbol">%</span>
+          </div>
+          <span v-if="portfoliochangepercentageError" class="error-text text-sm text-red-500 mt-1">
+            {{ portfoliochangepercentageError }}
           </span>
         </div>
 
@@ -318,7 +344,7 @@
     <button 
       @click="showTotpModalWithAction('portfolio')" 
       class="save-button"
-      :disabled="hasErrors || isSaving"
+      :disabled="hasErrors || !!portfolioChangeError || isSaving"
     >
       <span class="button-icon">{{ isSaving ? '⌛' : '💾' }}</span>
       {{ isSaving ? 'Saving...' : 'Save Changes' }}
@@ -423,7 +449,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed ,watch} from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
@@ -447,6 +473,9 @@ const fetchedDict = ref(null);
 // Existing Portfolio Value
 const portfolioValue = ref("");
 const portfolioError = ref("");
+const prevportfoliovalue = ref("");
+const portfolioChangeError = ref('')
+
 
 // New margin-related fields
 const excessMargin = ref("");
@@ -459,6 +488,8 @@ const putProtection = ref(null);
 const putProtectionError = ref("");
 const cashalertpercentage=ref(null);
 const cashalertpercentageError=ref("");
+const portfoliochangepercentage=ref(1);
+const portfoliochangepercentageError=ref("");
 
 // UI & Modal states
 const isSaving = ref(false);
@@ -792,6 +823,7 @@ const fetchMarginData = async () => {
       limits.value = data.value.limits[account.value];
     }
     portfolioValue.value = data.value["pf"][account.value];
+    prevportfoliovalue.value = data.value["pf"][account.value];
 
     excessMargin.value=data.value[ "margininfo" ][ account.value ]["excessMargin"];
     minMargin.value=data.value[ "margininfo" ][ account.value ]["minimumMargin"];
@@ -802,6 +834,9 @@ const fetchMarginData = async () => {
     }
     if(data.value?.cashalertinputs && data.value.cashalertinputs[account.value] !== undefined) {
       cashalertpercentage.value=data.value["cashalertinputs"][account.value]
+    }
+    if(data.value?.portfoliochangepercentage && data.value.portfoliochangepercentage[account.value] !== undefined) {
+      portfoliochangepercentage.value=data.value["portfoliochangepercentage"][account.value]
     }
 
 
@@ -845,29 +880,46 @@ const fetchMarginData = async () => {
 // --------------------
 // Validation
 // --------------------
+// Update your validator…
 const validatePortfolioValue = () => {
-  const value = Number(portfolioValue.value);
-  if (isNaN(value)) {
-    portfolioError.value = "Please enter a valid number for Portfolio Value";
-    return false;
+  const newVal = Number(portfolioValue.value)
+  const oldVal = Number(prevportfoliovalue.value)
+
+  // 1) basic numeric checks
+  if (isNaN(newVal)) {
+    portfolioError.value = "Please enter a valid number"
+    portfolioChangeError.value = ''
+    return false
   }
-  if (value < 0) {
-    portfolioError.value = "Portfolio Value cannot be negative";
-    return false;
+  if (newVal < 0) {
+    portfolioError.value = "Cannot be negative"
+    portfolioChangeError.value = ''
+    return false
   }
-  
-  if(value<limits.value.lower){
-    portfolioError.value = "Portfolio Value cannot be less than Minimum Portfolio Value"; 
-    return false;
+  portfolioError.value = ''
+
+  // 2) %-change check
+  if (oldVal > 0) {
+    const rawPct = Math.abs((newVal - oldVal) / oldVal * 100)
+    const actualPct = rawPct > 10000 ? Infinity : rawPct
+    const allowedPct = Number(portfoliochangepercentage.value)
+
+    if (actualPct > allowedPct) {
+      // choose display string
+      const pctDisplay = actualPct === Infinity
+        ? '∞'
+        : actualPct.toFixed(2)
+
+      portfolioChangeError.value =
+        `Change of ${pctDisplay}% exceeds allowed ${allowedPct}%`
+      return false
+    }
   }
-  if(value>limits.value.upper){
-    portfolioError.value = "Portfolio Value cannot be greater than Maximum Portfolio Value";  
-    return false;
-  }
-  portfolioError.value = "";
-  hasUnsavedChanges.value = true;
-  return true;
-};
+  // no violation
+  portfolioChangeError.value = ''
+  hasUnsavedChanges.value = true
+  return true
+}
 
 const validateExcessMargin = () => {
   const value = Number(excessMargin.value);
@@ -940,6 +992,21 @@ const validatecashalertpercentage = () => {
     return false;
   }
   cashalertpercentageError.value = "";
+  hasUnsavedChanges.value = true;
+  return true;
+}
+
+const validateportfoliochangepercentage = () => {
+  const value = Number(portfoliochangepercentage.value);
+  if (isNaN(value)) {
+    portfoliochangepercentageError.value = "Please enter a valid number for Portfolio Change Percentage";
+    return false;
+  }
+  if (value < 0) {
+    portfoliochangepercentageError.value = "Portfolio Change Percentage cannot be negative";
+    return false;
+  }
+  portfoliochangepercentageError.value = "";
   hasUnsavedChanges.value = true;
   return true;
 }
@@ -1149,6 +1216,13 @@ const computeStat = (field) => {
       return "-";
   }
 };
+
+watch(
+  [ portfolioValue, portfoliochangepercentage ],
+  () => {
+    validatePortfolioValue()
+  }
+)
 
 // Lifecycle
 onMounted(() => {
@@ -1636,4 +1710,12 @@ onMounted(() => {
   background: #1d4ed8;
 }
 
+/* fade out any button when it’s disabled */
+.save-button:disabled,
+.cancel-button:disabled,
+.fetch-button:disabled,
+.submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 </style>
