@@ -90,7 +90,6 @@ const max_client_details_latency = ref(0)
 const max_client_latency = ref(0)
 const mix_real_ideal_mtm_table = ref({})
 const signal_position_tables = ref({})
-const ob_count=ref(0)
 const book = ref([])
 const position_sum = ref(0)
 const handleColumnClick = ({ item, index }) => {
@@ -281,7 +280,6 @@ const connectBasketWebSocket = () => {
     let ar2 = data["time"];
     mix_real_ideal_mtm_table.value = { "real": data['MTMTable'], "ideal": data['ideal_MTMTable'] }
     signal_position_tables.value = data.signalPosition
-    ob_count.value=data.ob_cnt
     if (past_time_basket.value === 0) past_time_basket.value = ar2;
     if (past_time_basket.value != 0) {
       let date1 = new Date(past_time_basket.value.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
@@ -491,9 +489,6 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
       <p> Strategy Detail Latency :<span class="latencyvalue"> {{ strategy_latency }}</span></p>
       <p> Max Strategy Latency :<span class="latencyvalue"> {{ strategy_max_latency }}</span></p>
     </div>
-    <div>
-      <p class="table-heading">Ob Count: {{ ob_count }}</p>
-    </div>
     <div class="navContainer">
       <NavBar
         :navColumns="['Positions', 'Order', 'Combined DF', 'Combined Orders', 'Combined Trades', 'Fund Summary',
@@ -557,7 +552,6 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     </div>
 
     <div class="my-8" v-if="book && showOnPage === 'EOD'">
-   
       <TanStackTestTable title="EOD" :data="book" :columns="rms_prev_day"
         :hasColor="['Quantity']" :navigateTo="[]" :showPagination=true />
     </div>
