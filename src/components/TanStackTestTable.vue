@@ -32,28 +32,33 @@ watch(globalStatType, (newValue) => {
     }
 })
 
-// Function to calculate column statistics
-const calculateColumnStats = (column) => {
-    const values = props.data
-        .map(row => row[column])
-        .filter(val => typeof val === 'number' && !isNaN(val))
-    
-    if (values.length === 0) return null
+// Function to calculate column statistics **on the filtered rows**
+const calculateColumnStats = (columnId) => {
+  // grab only the rows that survived your filters
+  const filteredRows = table.getFilteredRowModel().rows
 
-    return {
-        sum: values.reduce((a, b) => a + b, 0),
-        avg: values.reduce((a, b) => a + b, 0) / values.length,
-        min: Math.min(...values),
-        max: Math.max(...values)
-    }
+  // pull out the numeric value for each row
+  const values = filteredRows
+    .map(row => row.getValue(columnId))
+    .filter(v => typeof v === 'number' && !isNaN(v))
+
+  if (values.length === 0) return null
+
+  const sum = values.reduce((a, b) => a + b, 0)
+  return {
+    sum,
+    avg: sum / values.length,
+    min: Math.min(...values),
+    max: Math.max(...values),
+  }
 }
 
 // Get formatted stat value for a column
-const getColumnStat = (column) => {
-    const stats = calculateColumnStats(column)
-    if (!stats || !columnStats.value[column]) return null
+const getColumnStat = (columnId) => {
+    const stats = calculateColumnStats(columnId)
+    if (!stats || !columnStats.value[columnId]) return null
     
-    const stat = columnStats.value[column]
+    const stat = columnStats.value[columnId]
     return formatIndianNumber(stats[stat])
 }
 
