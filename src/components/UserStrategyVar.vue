@@ -21,6 +21,7 @@
       </div>
 
       <!-- FIRST TABLE (PSAR TABLE) -->
+       
       <div class="my-8" v-if="var_calculation_data.length">
         <!-- The existing category selector -->
         <a-select 
@@ -39,11 +40,20 @@
             style="width: 100%; margin-bottom: 10px;"
             :options="additionColumnOptions">
         </a-select>
-            
+
+        <a-select
+          v-model:value="selectedAggregateUsers"
+          mode="multiple"
+          placeholder="Select users to aggregate"
+          style="width: 100%; margin-bottom: 1rem;"
+          :options="userOptions"
+        />
+          
+        
         <TanStackTestTable
           :key="`${varcalculation.join('-')}-${columnsForAddition.length}`" 
           title="All User Var Table"
-          :data="processedVarCalculationData"
+          :data="tableDataWithAggregate"
           :columns="updatedFilteredColumns"
           :hasColor="[...new Set([...Object.keys(var_calculation_data[0]), 'customUpside','customDownside'])]"
           :navigateTo="[]"
@@ -143,6 +153,55 @@ const error = ref(null)
 const loading = ref(false)
 const varcalculation = ref(['Broker','System','Basket'])
 const uservarcalculation = ref(['Broker','System','Basket'])
+
+// 1. Track which users to aggregate
+const selectedAggregateUsers = ref([])
+
+// 2. Build the dropdown options from your raw data
+const userOptions = computed(() => 
+  var_calculation_data.value.map(row => ({
+    label: row.User,
+    value: row.User
+  }))
+)
+
+// 3. Compute the summed-up row
+const aggregatedRow = computed(() => {
+  const sel = selectedAggregateUsers.value
+  if (!sel.length) return null
+
+  // find all raw rows for these users
+  const rows = var_calculation_data.value.filter(r => sel.includes(r.User))
+
+  // assume every row has same keys; pull all except 'User'
+  const keys = Object.keys(var_calculation_data.value[0]).filter(k => k !== 'User')
+
+  // start with a label
+  const sumRow = { User: 'Aggregate' }
+
+  // sum each column
+  keys.forEach(key => {
+    sumRow[key] = rows.reduce((acc, r) => {
+      const v = parseFloat(r[key]) 
+      return acc + (isNaN(v) ? 0 : v)
+    }, 0)
+  })
+
+  return sumRow
+})
+
+// 4. Merge into your existing processed data
+const tableDataWithAggregate = computed(() => {
+  // copy your processed rows
+  const base = processedVarCalculationData.value.slice()
+  // if there is an aggregate, return it + the rest
+  if (aggregatedRow.value) {
+    return [ aggregatedRow.value, ...base ]
+  }
+  // otherwise just the regular rows
+  return base
+})
+
 // New ref for columns to be added
 const columnsForAddition = ref([])
 
