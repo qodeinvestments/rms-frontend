@@ -344,7 +344,7 @@
     <button 
       @click="showTotpModalWithAction('portfolio')" 
       class="save-button"
-      :disabled="hasErrors || !!portfolioChangeError || isSaving"
+      :disabled="hasErrors || isSaving ||  !!portfolioError"
     >
       <span class="button-icon">{{ isSaving ? '⌛' : '💾' }}</span>
       {{ isSaving ? 'Saving...' : 'Save Changes' }}
@@ -896,6 +896,17 @@ const validatePortfolioValue = () => {
     portfolioChangeError.value = ''
     return false
   }
+  if(newVal<limits.value.lower){
+    portfolioError.value = "Portfolio Value cannot be less than Minimum Portfolio Value"; 
+    portfolioChangeError.value = ''
+    return false;
+  }
+  if(newVal>limits.value.upper){
+    portfolioError.value = "Portfolio Value cannot be greater than Maximum Portfolio Value"; 
+    portfolioChangeError.value = '' 
+    return false;
+  }
+  
   portfolioError.value = ''
 
   // 2) %-change check
