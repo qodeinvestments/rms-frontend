@@ -551,8 +551,10 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
         :hasColor="['pnl']" :navigateTo="[]" :showPagination=true />
     </div>
 
-    <div class="my-8" v-if="book && showOnPage === 'EOD'">
-      <TanStackTestTable title="EOD" :data="book" :columns="rms_prev_day"
+    <div class="my-8" v-if="book.length>0 && showOnPage === 'EOD'">
+   
+      <p class="table-heading">OB count:{{ book[1] }}</p>
+      <TanStackTestTable title="EOD" :data="book[0]" :columns="rms_prev_day"
         :hasColor="['Quantity']" :navigateTo="[]" :showPagination=true />
     </div>
 
