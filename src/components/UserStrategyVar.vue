@@ -165,28 +165,31 @@ const userOptions = computed(() =>
   }))
 )
 
-// 3. Compute the summed-up row
+// 3. Compute the averaged/summed row from the *processed* data
 const aggregatedRow = computed(() => {
   const sel = selectedAggregateUsers.value
   if (!sel.length) return null
 
-  // 1) pick only the selected rows
-  const rows = var_calculation_data.value.filter(r => sel.includes(r.User))
+  // 1) pull the rows that are actually going into the table
+  const baseRows = processedVarCalculationData.value
+  const rows = baseRows.filter(r => sel.includes(r.User))
   const count = rows.length
 
-  // 2) all column keys except User
-  const keys = Object.keys(var_calculation_data.value[0]).filter(k => k !== 'User')
+  if (!count) return null
 
-  // 3) build the aggregate object
+  // 2) build the list of keys to aggregate (everything except "User")
+  const keys = Object.keys(baseRows[0]).filter(k => k !== 'User')
+
+  // 3) reduce them into one row
   const sumRow = { User: 'Aggregate' }
   keys.forEach(key => {
-    // sum up the column
+    // total up
     const total = rows.reduce((acc, r) => {
       const v = parseFloat(r[key])
       return acc + (isNaN(v) ? 0 : v)
     }, 0)
 
-    // if the key ends with '%', average it; otherwise leave it summed
+    // if it's a "%" column, average it; otherwise keep the sum
     sumRow[key] = key.endsWith('%') 
       ? total / count 
       : total
@@ -197,14 +200,10 @@ const aggregatedRow = computed(() => {
 
 // 4. Merge into your existing processed data
 const tableDataWithAggregate = computed(() => {
-  // copy your processed rows
   const base = processedVarCalculationData.value.slice()
-  // if there is an aggregate, return it + the rest
-  if (aggregatedRow.value) {
-    return [ aggregatedRow.value, ...base ]
-  }
-  // otherwise just the regular rows
-  return base
+  return aggregatedRow.value
+    ? [aggregatedRow.value, ...base]
+    : base
 })
 
 // New ref for columns to be added
