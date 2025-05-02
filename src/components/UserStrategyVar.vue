@@ -170,21 +170,26 @@ const aggregatedRow = computed(() => {
   const sel = selectedAggregateUsers.value
   if (!sel.length) return null
 
-  // find all raw rows for these users
+  // 1) pick only the selected rows
   const rows = var_calculation_data.value.filter(r => sel.includes(r.User))
+  const count = rows.length
 
-  // assume every row has same keys; pull all except 'User'
+  // 2) all column keys except User
   const keys = Object.keys(var_calculation_data.value[0]).filter(k => k !== 'User')
 
-  // start with a label
+  // 3) build the aggregate object
   const sumRow = { User: 'Aggregate' }
-
-  // sum each column
   keys.forEach(key => {
-    sumRow[key] = rows.reduce((acc, r) => {
-      const v = parseFloat(r[key]) 
+    // sum up the column
+    const total = rows.reduce((acc, r) => {
+      const v = parseFloat(r[key])
       return acc + (isNaN(v) ? 0 : v)
     }, 0)
+
+    // if the key ends with '%', average it; otherwise leave it summed
+    sumRow[key] = key.endsWith('%') 
+      ? total / count 
+      : total
   })
 
   return sumRow
