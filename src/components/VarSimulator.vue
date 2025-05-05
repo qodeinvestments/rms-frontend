@@ -50,6 +50,7 @@
               type="checkbox" 
               v-model="basketToggle" 
               class="form-checkbox h-5 w-5 text-blue-600"
+              @change="handleBasketToggleChange"
             />
             <span class="ml-2 text-gray-700">Enable Basket Selection</span>
           </label>
@@ -299,6 +300,19 @@ const userBasketsMulti = reactive({})
 // Toggle to show/hide the multi-select
 const basketToggle = ref(false)
 
+// Handle basket toggle change
+const handleBasketToggleChange = (event) => {
+  if (event.target.checked) {
+    // When checkbox is checked, select all baskets
+    selectedBaskets.value = [...baskets.value]
+    isbasketAllSelected.value = true
+  } else {
+    // When checkbox is unchecked, clear selections
+    selectedBaskets.value = []
+    isbasketAllSelected.value = false
+  }
+}
+
 // New flag for "Select All" functionality in basket selection
 const isbasketAllSelected = ref(false)
 
@@ -479,7 +493,8 @@ const submitTrades = async () => {
       userName: selectedUser.value.name,
       trades: [...trades.value],
       percentage: percentage.value,
-      baskets: [...selectedBaskets.value]
+      // If basket selection is disabled, send all baskets, otherwise send selected baskets
+      baskets: basketToggle.value ? [...selectedBaskets.value] : [...baskets.value]
     }
 
     // POST trades with token
