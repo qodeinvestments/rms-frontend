@@ -19,73 +19,76 @@
       <!-- User selection dropdown -->
       <div v-if="users.length && !loading" class="mb-8">
         <label for="user-select" class="block text-sm font-medium text-gray-700 mb-2">
-          Select a User
+          Select Users
         </label>
-        <select 
+        <a-select 
           id="user-select"
-          v-model="selectedUser"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          v-model:value="selectedUserIds"
+          mode="multiple"
+          style="width: 100%"
+          placeholder="Select one or more users"
+          :options="userOptions"
+          @change="handleUserChange"
         >
-          <option disabled value="">Please select a user</option>
-          <option
-            v-for="user in users"
-            :key="user.id"
-            :value="user"
-          >
-            {{ user.name }}
-          </option>
-        </select>
+        </a-select>
+      </div>
+
+      <!-- Individual User Settings -->
+      <div v-if="selectedUsers.length" class="mb-8">
+        <div class="bg-white shadow overflow-hidden rounded-lg">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  User Name
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Basket Selection
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Percentage
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-for="user in selectedUsers" :key="user.id">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {{ user.name }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <a-select 
+                    v-model:value="userSettings[user.id].selectedBaskets"
+                    mode="multiple"
+                    style="width: 100%"
+                    :max-tag-count="3"
+                    :max-tag-placeholder="() => '...'"
+                    placeholder="Select baskets for this user"
+                    :options="getBasketOptions(user.id)"
+                    :default-value="baskets.value"
+                    @change="(value) => handleBasketChange(value, user.id)"
+                  />
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <input 
+                    type="number"
+                    :id="'percentage-' + user.id"
+                    v-model="userSettings[user.id].percentage"
+                    class="w-24 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter %"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Trade form -->
-      <form v-if="selectedUser" @submit.prevent="submitTrades" class="space-y-6">
+      <form v-if="selectedUsers.length" @submit.prevent="submitTrades" class="space-y-6">
         <h2 class="text-xl font-semibold text-gray-700">
-          Add Trades for {{ selectedUser.name }}
+          Add Trades for Selected Users ({{ selectedUsers.length }} selected)
         </h2>
         
-        <!-- Toggle for Basket Multi-Select Visibility -->
-        <div class="mb-8">
-          <label class="inline-flex items-center">
-            <input 
-              type="checkbox" 
-              v-model="basketToggle" 
-              class="form-checkbox h-5 w-5 text-blue-600"
-              @change="handleBasketToggleChange"
-            />
-            <span class="ml-2 text-gray-700">Enable Basket Selection</span>
-          </label>
-        </div>
-
-        <!-- Multi-select Basket selection (only shown if toggle is enabled) -->
-        <div v-if="basketToggle" class="mb-8">
-          <label for="basket-select" class="block text-sm font-medium text-gray-700 mb-2">
-            Select Basket(s)
-          </label>
-          <a-select 
-            id="basket-select"
-            v-model:value="selectedBaskets"
-            mode="multiple"
-            class="w-full"
-            placeholder="Select one or more baskets"
-            :options="basketOptionsWithAll"
-            @change="handleBasketChange"
-          />
-        </div>
-
-        <!-- Single "Percentage" input -->
-        <div>
-          <label for="percentage" class="block text-sm font-medium text-gray-700 mb-2">
-            Percentage
-          </label>
-          <input 
-            type="number"
-            id="percentage"
-            v-model="percentage"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Enter percentage"
-          />
-        </div>
-
         <div
           v-for="(trade, index) in trades" 
           :key="index"
@@ -282,16 +285,16 @@ import { ref, reactive, onMounted, watch, computed } from 'vue'
 import ParentOptionChain from './ParentOptionChain.vue'
 // State variables
 const users = ref([])
-const selectedUser = ref('')
+const selectedUserIds = ref([])
+const selectedUsers = ref([])
 const loading = ref(true)
 const error = ref(null)
 const isSubmitting = ref(false)
-const responseData = ref(null)  // Store the response data
+const responseData = ref(null)
 const optionsDetails = ref({})
+const baskets = ref([])
 
 // --- Multi-Select Basket State ---
-// Define your basket options
-const baskets = ref([])
 // Store the selected baskets for the current user (as an array)
 const selectedBaskets = ref([])
 // Object to maintain basket selections per user
@@ -299,6 +302,24 @@ const userBasketsMulti = reactive({})
 
 // Toggle to show/hide the multi-select
 const basketToggle = ref(false)
+
+// New flag for "Select All" functionality in basket selection
+const isbasketAllSelected = ref(false)
+
+// Computed property for basket options with Select All/Deselect All
+const getBasketOptions = (userId) => {
+  const allSelected = userSettings[userId]?.selectedBaskets.length === baskets.value.length
+  return [
+    {
+      label: allSelected ? 'Deselect All' : 'Select All',
+      value: 'all'
+    },
+    ...baskets.value.map(basket => ({
+      label: basket,
+      value: basket
+    }))
+  ]
+}
 
 // Handle basket toggle change
 const handleBasketToggleChange = (event) => {
@@ -313,38 +334,23 @@ const handleBasketToggleChange = (event) => {
   }
 }
 
-// New flag for "Select All" functionality in basket selection
-const isbasketAllSelected = ref(false)
-
-// Computed property to add "All"/"Remove All" option dynamically
-const basketOptionsWithAll = computed(() => [
-  { label: isbasketAllSelected.value ? 'Deselect All' : 'Select All', value: 'all' },
-  ...baskets.value.map(basket => ({
-    label: basket,
-    value: basket
-  }))
-])
-
-const handleBasketChange = (value) => {
-  console.log("handleBasketChange triggered, value:", value);
+// Handle basket change for a specific user
+const handleBasketChange = (value, userId) => {
+  
+  // Check if "all" option was clicked
   if (value.includes('all')) {
-    if (isbasketAllSelected.value) {
-      // Deselect all baskets
-      selectedBaskets.value = [];
-      isbasketAllSelected.value = false;
-      console.log("Deselect all triggered");
+    const allSelected = userSettings[userId].selectedBaskets.length === baskets.value.length
+    if (allSelected) {
+      // If all were selected, deselect all
+      userSettings[userId].selectedBaskets = []
     } else {
-      // Select all baskets
-      selectedBaskets.value = [...baskets.value];
-      isbasketAllSelected.value = true;
-      console.log("Select all triggered");
+      // If not all were selected, select all
+      userSettings[userId].selectedBaskets = [...baskets.value]
     }
   } else {
-    // Normal selection handling: update selected baskets
-    selectedBaskets.value = value.filter(basket => basket !== 'all');
-    isbasketAllSelected.value = selectedBaskets.value.length === baskets.value.length;
+    // Normal selection handling
+    userSettings[userId].selectedBaskets = value
   }
-  console.log("Final selectedBaskets:", selectedBaskets.value);
 }
 
 // Additional input at the top
@@ -353,6 +359,89 @@ const percentage = ref(10)
 // "trades" array for the currently selected user
 const trades = ref([])
 const userTrades = reactive({})
+
+// User Settings store
+const userSettings = reactive({})
+
+// Fetch Options Details
+const fetchOptionsDetails = async () => {
+  loading.value = true
+  error.value = null
+  try {
+    const data = await fetchData('optionexpirydetails')
+    optionsDetails.value = data || {}
+    if (data && Array.isArray(data["BASKETS"])) {
+      baskets.value = data["BASKETS"]
+    } else {
+      console.error('Invalid BASKETS data:', data["BASKETS"])
+      baskets.value = []
+    }
+  } catch (err) {
+    console.error('Error fetching options details:', err)
+    error.value = err.message || 'Failed to load options details. Please try again later.'
+    baskets.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+// Initialize settings for a user
+const initializeUserSettings = (userId) => {
+  if (!userSettings[userId]) {
+    userSettings[userId] = {
+      selectedBaskets: [...baskets.value],
+      percentage: 10
+    }
+  }
+}
+
+// Handle user selection change
+const handleUserChange = (newSelectedIds) => {
+  selectedUserIds.value = newSelectedIds
+  selectedUsers.value = users.value.filter(user => newSelectedIds.includes(user.id))
+  
+  // Initialize settings for newly selected users
+  selectedUsers.value.forEach(user => {
+    if (!userSettings[user.id]) {
+      initializeUserSettings(user.id)
+    }
+  })
+}
+
+// Watch for basket changes to update all user settings
+watch(baskets, (newBaskets) => {
+  if (newBaskets && newBaskets.length > 0) {
+    // Update all existing users with the new baskets
+    Object.keys(userSettings).forEach(userId => {
+      userSettings[userId] = {
+        ...userSettings[userId],
+        selectedBaskets: [...newBaskets]
+      }
+    })
+  }
+}, { immediate: true })
+
+// Watch for user changes to save/load trades
+watch(selectedUsers, (newUsers, oldUsers) => {
+  // Clear the response data when users change
+  responseData.value = null
+  
+  // Save trades for old users
+  if (oldUsers.length > 0) {
+    oldUsers.forEach(user => {
+      if (user.id) {
+        userTrades[user.id] = trades.value
+      }
+    })
+  }
+  
+  // Load trades for new users or initialize empty
+  if (newUsers.length > 0) {
+    trades.value = userTrades[newUsers[0].id] || []
+  } else {
+    trades.value = []
+  }
+})
 
 // Utility function for authenticated fetch
 const fetchData = async (endpoint, method = 'GET', body = null) => {
@@ -426,46 +515,10 @@ const fetchUsers = async () => {
   }
 }
 
-// Fetch Users
-const fetchOptionsDetails = async () => {
-  loading.value = true
-  error.value = null
-  try {
-    const data = await fetchData('optionexpirydetails')
-    optionsDetails.value = data || {}
-    baskets.value = data["BASKETS"]
-  } catch (err) {
-    error.value = err.message || 'Failed to load users. Please try again later.'
-  } finally {
-    loading.value = false
-  }
-}
-
-// Watch for user changes to save/load trades and basket selections
-watch(selectedUser, (newUser, oldUser) => {
-  // Clear the response data when a new user is selected
-  responseData.value = null;
-  
-  // Save the old user's trades and basket selection if applicable
-  if (oldUser && oldUser.id) {
-    userTrades[oldUser.id] = trades.value
-    userBasketsMulti[oldUser.id] = selectedBaskets.value
-  }
-  
-  // Load new user's trades and baskets; use an empty array as default for baskets
-  if (newUser && newUser.id) {
-    trades.value = userTrades[newUser.id] || []
-    selectedBaskets.value = userBasketsMulti[newUser.id] || []
-  } else {
-    trades.value = []
-    selectedBaskets.value = []
-  }
-})
-
 // Computed: isFormValid
 const isFormValid = computed(() => {
   if (trades.value.length == 0) return true
-  if (!selectedUser.value) return false
+  if (!selectedUsers.value.length) return false
   if (!percentage.value) return false
   if (!trades.value.length) return false
   return trades.value.every(trade => trade.symbol && trade.quantity !== '')
@@ -489,18 +542,16 @@ const submitTrades = async () => {
 
   try {
     const payload = {
-      userId: selectedUser.value.id,
-      userName: selectedUser.value.name,
-      trades: [...trades.value],
-      percentage: percentage.value,
-      // If basket selection is disabled, send all baskets, otherwise send selected baskets
-      baskets: basketToggle.value ? [...selectedBaskets.value] : [...baskets.value]
+      users: selectedUsers.value.map(user => ({
+        userId: user.id,
+        userName: user.name,
+        percentage: userSettings[user.id].percentage,
+        baskets: userSettings[user.id].selectedBaskets
+      })),
+      trades: [...trades.value]
     }
 
-    // POST trades with token
     const data = await fetchData('varsimulator', 'POST', payload)
-
-    // Store response data for display
     responseData.value = data
 
   } catch (err) {
@@ -509,6 +560,14 @@ const submitTrades = async () => {
     isSubmitting.value = false
   }
 }
+
+// Computed property for user options
+const userOptions = computed(() => 
+  users.value.map(user => ({
+    label: user.name,
+    value: user.id
+  }))
+)
 
 // onMounted
 onMounted(() => {
