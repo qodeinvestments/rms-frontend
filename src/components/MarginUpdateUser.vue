@@ -1107,6 +1107,7 @@ const updatePortfolioValue = async () => {
           ddMarginPercent: Number(ddMarginPercent.value),
           putProtection: Number(putProtection.value),
           cashalertpercentage: Number(cashalertpercentage.value),
+          portfoliochangepercentage:Number(portfoliochangepercentage.value),
           limits: limits.value,
           params: filteredArr,
         }),
