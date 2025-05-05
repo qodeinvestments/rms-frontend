@@ -716,9 +716,23 @@ const handleTotpSubmit = async () => {
 // Check if any table row has errors
 const hasErrors = computed(() => {
   if (!filteredData.value) return false;
-  return filteredData.value.some(
+  
+  // Check table errors
+  const tableErrors = filteredData.value.some(
     (row) => row.errors && Object.keys(row.errors).length > 0
   );
+  
+  // Check validation errors (excluding portfoliochangepercentageError)
+  const validationErrors = !!(
+    portfolioError.value ||
+    excessMarginError.value ||
+    minMarginError.value ||
+    ddMarginPercentError.value ||
+    putProtectionError.value ||
+    cashalertpercentageError.value
+  );
+  
+  return tableErrors || validationErrors;
 });
 
 // --------------------
@@ -909,7 +923,7 @@ const validatePortfolioValue = () => {
   
   portfolioError.value = ''
 
-  // 2) %-change check
+  // 2) %-change check - now just a warning, not blocking
   if (oldVal > 0) {
     const rawPct = Math.abs((newVal - oldVal) / oldVal * 100)
     const actualPct = rawPct > 10000 ? Infinity : rawPct
@@ -922,12 +936,11 @@ const validatePortfolioValue = () => {
         : actualPct.toFixed(2)
 
       portfolioChangeError.value =
-        `Change of ${pctDisplay}% exceeds allowed ${allowedPct}%`
-      return false
+        `Warning: Change of ${pctDisplay}% exceeds allowed ${allowedPct}%`
+      // Not returning false anymore, allowing submission to proceed
     }
   }
-  // no violation
-  portfolioChangeError.value = ''
+  
   hasUnsavedChanges.value = true
   return true
 }
@@ -1072,9 +1085,10 @@ const updatePortfolioValue = async () => {
     validatePortfolioValue() &&
     validateExcessMargin() &&
     validateMinMargin() &&
-    validateDDMarginPercent();
-    validateputProtection();
-    validateLimits(); 
+    validateDDMarginPercent() &&
+    validateputProtection() &&
+    validatecashalertpercentage() &&
+    validateLimits();
   if (!allValid) return;
 
   // Get the structure for 'params'
@@ -1722,7 +1736,7 @@ onMounted(() => {
   background: #1d4ed8;
 }
 
-/* fade out any button when it’s disabled */
+/* fade out any button when it's disabled */
 .save-button:disabled,
 .cancel-button:disabled,
 .fetch-button:disabled,
