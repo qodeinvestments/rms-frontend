@@ -59,13 +59,14 @@
                   <a-select 
                     v-model:value="userSettings[user.id].selectedBaskets"
                     mode="multiple"
-                    style="width: 100%"
+                    style="width: 100%; min-width: 200px;"
                     :max-tag-count="3"
                     :max-tag-placeholder="() => '...'"
                     placeholder="Select baskets for this user"
                     :options="getBasketOptions(user.id)"
                     :default-value="baskets.value"
                     @change="(value) => handleBasketChange(value, user.id)"
+                    class="basket-select"
                   />
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -308,11 +309,11 @@ const isbasketAllSelected = ref(false)
 
 // Computed property for basket options with Select All/Deselect All
 const getBasketOptions = (userId) => {
-  const allSelected = userSettings[userId]?.selectedBaskets.length === baskets.value.length
+  const allSelected = userSettings[userId]?.selectedBaskets?.length === baskets.value.length
   return [
     {
       label: allSelected ? 'Deselect All' : 'Select All',
-      value: 'all'
+      value: 'SELECT_ALL_OPTION'
     },
     ...baskets.value.map(basket => ({
       label: basket,
@@ -336,12 +337,18 @@ const handleBasketToggleChange = (event) => {
 
 // Handle basket change for a specific user
 const handleBasketChange = (value, userId) => {
+  // Find if SELECT_ALL_OPTION is in the new selection
+  const selectAllIndex = value.indexOf('SELECT_ALL_OPTION')
   
-  // Check if "all" option was clicked
-  if (value.includes('all')) {
-    const allSelected = userSettings[userId].selectedBaskets.length === baskets.value.length
-    if (allSelected) {
-      // If all were selected, deselect all
+  if (selectAllIndex !== -1) {
+    // Remove the SELECT_ALL_OPTION from the value array
+    value.splice(selectAllIndex, 1)
+    
+    const currentlySelectedCount = userSettings[userId].selectedBaskets.length
+    const totalBaskets = baskets.value.length
+    
+    if (currentlySelectedCount === totalBaskets) {
+      // If all baskets were selected, deselect all
       userSettings[userId].selectedBaskets = []
     } else {
       // If not all were selected, select all
@@ -583,5 +590,11 @@ onMounted(() => {
 
 .negative {
   color: red;
+}
+
+.basket-select {
+  :deep(.ant-select-selector) {
+    min-width: 200px !important;
+  }
 }
 </style>
