@@ -94,119 +94,179 @@
     <!-- Edit Modal -->
     <div v-if="showModal" class="modal-overlay">
       <div class="modal-content">
-        <h2 class="modal-title">Edit User</h2>
+        <div class="modal-header">
+          <h2 class="modal-title">Edit User</h2>
+          <button @click="closeModal" class="close-button" :disabled="updateLoading">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
 
         <!-- Edit Form Error -->
         <div v-if="updateError" class="error-message">
           {{ updateError }}
         </div>
 
-        <div class="form-container">
-          <div class="form-group">
-            <label>Username</label>
-            <input v-model="editingUser.username" type="text" disabled />
-          </div>
-          <div class="form-group">
-            <label>Password</label>
-            <input v-model="editingUser.password" type="text" :disabled="updateLoading" />
-          </div>
-          <div class="form-group">
-            <label>Email</label>
-            <input v-model="editingUser.email" type="email" :disabled="updateLoading" />
-          </div>
-          <div class="form-group">
-            <label>Role</label>
-            <select v-model="editingUser.role" :disabled="updateLoading" class="form-select">
-              <option v-for="role in roles" :key="role" :value="role">{{ role }}</option>
-            </select>
-          </div>
-          <div class="form-group" v-if="editingUser.role !== 'Admin'">
-            <label>Account Access</label>
-            <a-select
-              v-model:value="selectedAccounts"
-              mode="multiple"
-              placeholder="Select Accounts"
-              style="width: 100%"
-              :options="accountOptionsWithAll"
-              :maxTagCount="3"
-              @change="handleAccountChange"
-              :disabled="updateLoading"
-            />
-          </div>
-
-          <!-- Account Percentages Section -->
-          <div v-if="editingUser.role === 'Client'" class="percentage-section">
-            <label>Account Percentages</label>
-
-            <!-- Search box -->
-            <input
-              v-model="percentageSearch"
-              type="text"
-              placeholder="Search accounts..."
-              class="percentage-search"
-              :disabled="updateLoading"
-            />
-
-            <!-- Scrollable list -->
-            <div class="percentage-list">
-              <div
-                v-for="item in filteredAccountPercentages"
-                :key="item.name"
-                class="percentage-item"
-              >
-                <span class="percentage-label">{{ item.name }}</span>
-                <div class="percentage-inner-list">
-                    <input
-                      v-model.number="item.percentage"
-                      type="number"
-                      min="0"
-                      max="100"
-                      class="percentage-input"
-                      :disabled="updateLoading"
-                    />
-                    <input
-                      v-model="item.startDate"
-                      type="date"
-                      class="date-input"
-                      :disabled="updateLoading"
-                    />
-                    <input
-                      v-model="item.endDate"
-                      type="date"
-                      class="date-input"
-                      :disabled="updateLoading"
-                    />
-                    <button
-                        type="button"
-                        @click="removeAccountPercentage(item.name)"
-                        class="remove-percentage-button"
-                        :disabled="updateLoading"
-                      >
-                        Remove
-                    </button>
-                </div>
-               
-               
-              </div>
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Username</label>
+              <input v-model="editingUser.username" type="text" disabled />
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input v-model="editingUser.password" type="text" :disabled="updateLoading" />
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input v-model="editingUser.email" type="email" :disabled="updateLoading" />
+            </div>
+            <div class="form-group">
+              <label>Role</label>
+              <select v-model="editingUser.role" :disabled="updateLoading" class="form-select">
+                <option v-for="role in roles" :key="role" :value="role">{{ role }}</option>
+              </select>
             </div>
           </div>
 
-          <div class="form-group" v-if="editingUser.role !== 'Admin'">
-            <label>Features</label>
-            <a-select
-              v-model:value="selectedFeatures"
-              mode="multiple"
-              placeholder="Select Features"
-              style="width: 100%"
-              :options="featuresOptionsWithAll"
-              :maxTagCount="3"
-              @change="handleFeatureChange"
-              :disabled="updateLoading"
-            />
+          <div class="form-section" v-if="editingUser.role !== 'Admin'">
+            <div class="form-group">
+              <label>Account Access</label>
+              <a-select
+                v-model:value="selectedAccounts"
+                mode="multiple"
+                placeholder="Select Accounts"
+                style="width: 100%"
+                :options="accountOptionsWithAll"
+                :maxTagCount="3"
+                @change="handleAccountChange"
+                :disabled="updateLoading"
+              />
+            </div>
+
+            <!-- Account Percentages Section -->
+            <div v-if="editingUser.role === 'Client'" class="percentage-section">
+              <div class="percentage-header-main">
+                <h3 class="percentage-title">Account Percentages</h3>
+                <div class="percentage-search-container">
+                  <i class="fas fa-search search-icon"></i>
+                  <input
+                    v-model="percentageSearch"
+                    type="text"
+                    placeholder="Search accounts..."
+                    class="percentage-search"
+                    :disabled="updateLoading"
+                  />
+                </div>
+              </div>
+
+              <!-- Scrollable list -->
+              <div class="percentage-list">
+                <div
+                  v-for="item in filteredAccountPercentages"
+                  :key="item.name"
+                  class="percentage-item"
+                >
+                  <div class="percentage-header">
+                    <div class="account-info">
+                      <i class="fas fa-building account-icon"></i>
+                      <span class="percentage-label">{{ item.name }}</span>
+                    </div>
+                    <button
+                      type="button"
+                      @click="addDateRange(item)"
+                      class="add-range-button"
+                      :disabled="updateLoading"
+                    >
+                      <i class="fas fa-plus"></i>
+                      Add Range
+                    </button>
+                  </div>
+                  
+                  <div class="ranges-container">
+                    <div 
+                      v-for="(range, rangeIndex) in item.dateRanges" 
+                      :key="rangeIndex"
+                      class="date-range-item"
+                    >
+                      <div class="range-inputs">
+                        <div class="input-group">
+                          <label>Percentage</label>
+                          <input
+                            v-model.number="range.percentage"
+                            type="number"
+                            min="0"
+                            max="100"
+                            class="percentage-input"
+                            placeholder="Enter percentage"
+                            :disabled="updateLoading"
+                          />
+                          <span class="percentage-suffix">%</span>
+                        </div>
+                        <div class="input-group">
+                          <label>Start Date</label>
+                          <input
+                            v-model="range.startDate"
+                            type="date"
+                            class="date-input"
+                            :disabled="updateLoading"
+                            :min="getMinDate(item, rangeIndex)"
+                            @change="validateAndAdjustDates(item, rangeIndex)"
+                          />
+                        </div>
+                        <div class="range-actions">
+                          <button
+                            type="button"
+                            @click="addRangeAtIndex(item, rangeIndex)"
+                            class="insert-range-button"
+                            :disabled="updateLoading"
+                            title="Insert range after this one"
+                          >
+                            <i class="fas fa-plus"></i>
+                          </button>
+                          <button
+                            type="button"
+                            @click="removeDateRange(item, rangeIndex)"
+                            class="remove-range-button"
+                            :disabled="updateLoading"
+                            title="Remove this range"
+                          >
+                            <i class="fas fa-times"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <button
+                    type="button"
+                    @click="removeAccountPercentage(item.name)"
+                    class="remove-account-button"
+                    :disabled="updateLoading"
+                  >
+                    <i class="fas fa-trash-alt"></i>
+                    Remove Account
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Features</label>
+              <a-select
+                v-model:value="selectedFeatures"
+                mode="multiple"
+                placeholder="Select Features"
+                style="width: 100%"
+                :options="featuresOptionsWithAll"
+                :maxTagCount="3"
+                @change="handleFeatureChange"
+                :disabled="updateLoading"
+              />
+            </div>
           </div>
         </div>
 
-        <div class="modal-actions">
+        <div class="modal-footer">
           <button @click="closeModal" class="cancel-button" :disabled="updateLoading">
             Cancel
           </button>
@@ -298,14 +358,103 @@ function updateAccountPercentages() {
     if (!alreadyThere) {
       accountPercentages.value.push({
         name,
-        percentage: 100,
-        startDate:  '',
-        endDate:    ''
+        dateRanges: [{
+          percentage: 100,
+          startDate: ''
+        }]
       });
     }
   });
 }
 
+// Add new function to validate and adjust dates
+const validateAndAdjustDates = (item, changedIndex) => {
+  const changedRange = item.dateRanges[changedIndex];
+  if (!changedRange.startDate) return;
+
+  // Check and adjust all subsequent ranges
+  for (let i = changedIndex + 1; i < item.dateRanges.length; i++) {
+    const currentRange = item.dateRanges[i];
+    const previousRange = item.dateRanges[i - 1];
+    
+    if (!currentRange.startDate || new Date(currentRange.startDate) <= new Date(previousRange.startDate)) {
+      // Set the date to one day after the previous range
+      const newDate = new Date(previousRange.startDate);
+      newDate.setDate(newDate.getDate() + 1);
+      currentRange.startDate = newDate.toISOString().split('T')[0];
+    }
+  }
+};
+
+// Update getMinDate to be more strict
+const getMinDate = (item, currentIndex) => {
+  if (currentIndex === 0) return ''; // No minimum date for first range
+  
+  const previousRange = item.dateRanges[currentIndex - 1];
+  if (!previousRange || !previousRange.startDate) return '';
+  
+  // Add one day to the previous date
+  const date = new Date(previousRange.startDate);
+  date.setDate(date.getDate() + 1);
+  return date.toISOString().split('T')[0];
+};
+
+// Update addRangeAtIndex to handle date validation
+const addRangeAtIndex = (item, index) => {
+  const newRange = {
+    percentage: 100,
+    startDate: ''
+  };
+  
+  // Insert the new range after the current index
+  item.dateRanges.splice(index + 1, 0, newRange);
+  
+  // If there's a next range, validate and adjust dates
+  if (index + 2 < item.dateRanges.length) {
+    validateAndAdjustDates(item, index + 1);
+  }
+};
+
+// Update addDateRange to handle date validation
+const addDateRange = (item) => {
+  if (!item.dateRanges) {
+    item.dateRanges = [];
+  }
+  
+  const newRange = {
+    percentage: 100,
+    startDate: ''
+  };
+
+  // If there are existing ranges, set the minimum date
+  if (item.dateRanges.length > 0) {
+    const lastRange = item.dateRanges[item.dateRanges.length - 1];
+    if (lastRange.startDate) {
+      const date = new Date(lastRange.startDate);
+      date.setDate(date.getDate() + 1);
+      newRange.startDate = date.toISOString().split('T')[0];
+    }
+  }
+  
+  item.dateRanges.push(newRange);
+};
+
+// Update removeDateRange to handle date validation
+const removeDateRange = (item, rangeIndex) => {
+  if (item.dateRanges.length > 1) {
+    item.dateRanges.splice(rangeIndex, 1);
+    // Validate and adjust dates after removal
+    if (rangeIndex > 0) {
+      validateAndAdjustDates(item, rangeIndex - 1);
+    }
+  } else {
+    // If it's the last range, just reset it instead of removing
+    item.dateRanges[0] = {
+      percentage: 100,
+      startDate: ''
+    };
+  }
+};
 
 const accountOptionsWithAll = computed(() => [
   { label: isaccountAllSelected.value ? 'Remove All' : 'All', value: 'all' },
@@ -395,22 +544,38 @@ const saveChanges = async () => {
     alert('Accounts cannot be empty');
     return;
   }
+
+  // Validate date ranges
+  const hasInvalidRanges = accountPercentages.value.some(account => 
+    account.dateRanges.some(range => 
+      !range.startDate || range.percentage === null || range.percentage === undefined
+    )
+  );
+
+  if (hasInvalidRanges) {
+    alert('Please fill in all date ranges with valid dates and percentages');
+    return;
+  }
+
   updateLoading.value = true;
   updateError.value = null;
   try {
     const token = localStorage.getItem('access_token');
     if (!token) throw new Error('User not authenticated');
+    
     const updatedUser = {
       ...editingUser.value,
       account_access: selectedAccounts.value,
       features: selectedFeatures.value,
       account_percentages: accountPercentages.value
     };
+
     const res = await fetch('https://production2.swancapital.in/editUser', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedUser)
     });
+    
     if (!res.ok) throw new Error(await res.text());
     users.value[editingIndex.value] = updatedUser;
     closeModal();
@@ -485,77 +650,259 @@ onMounted(async () => {
   transform: none;
 }
 .percentage-section {
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
   margin: 16px 0;
-  background-color: #fafafa;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Search input styling */
+.percentage-header-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.percentage-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.percentage-search-container {
+  position: relative;
+  width: 300px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
 .percentage-search {
   width: 100%;
-  padding: 8px 12px;
-  margin-bottom: 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
+  padding: 10px 12px 10px 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
   font-size: 14px;
+  transition: all 0.2s;
+  background-color: #f9fafb;
 }
 
-/* Column layout with fixed height */
+.percentage-search:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background-color: #ffffff;
+}
+
 .percentage-list {
-  max-height: 150px;
+  max-height: 400px;
   overflow-y: auto;
+  padding-right: 8px;
+}
+
+.percentage-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.percentage-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.percentage-list::-webkit-scrollbar-thumb {
+  background: #c5c5c5;
+  border-radius: 4px;
+}
+
+.percentage-list::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.percentage-item {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding-right: 4px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #ffffff;
+  margin-bottom: 16px;
+  transition: all 0.2s;
 }
 
-.percentage-inner-list{
+.percentage-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.percentage-header {
   display: flex;
-  gap: 20px;
-  padding-right: 4px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
-/* Each row: full width */
-.percentage-item {
+.account-info {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 8px;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
-  background-color: #fff;
-  
+}
+
+.account-icon {
+  color: #3b82f6;
+  font-size: 1.25rem;
 }
 
 .percentage-label {
-  flex: 3;
+  font-size: 1.1rem;
   font-weight: 500;
+  color: #1f2937;
+}
+
+.ranges-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.date-range-item {
+  background-color: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.date-range-item:hover {
+  background-color: #f3f4f6;
+}
+
+.range-inputs {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+}
+
+.input-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563;
 }
 
 .percentage-input {
-  flex: 2;
-  min-width: 80px;
-  padding: 6px 8px;
+  width: 120px;
+  padding: 8px 12px;
   border: 1px solid #d1d5db;
-  border-radius: 4px;
+  border-radius: 6px;
+  font-size: 14px;
   text-align: right;
+  transition: all 0.2s;
 }
 
-.remove-percentage-button {
-  flex: 1;
-  background-color: #ef4444;
+.percentage-suffix {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.date-input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.percentage-input:focus,
+.date-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.add-range-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #10b981;
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s;
 }
-.remove-percentage-button:hover {
-  background-color: #dc2626;
+
+.add-range-button:hover:not(:disabled) {
+  background-color: #059669;
+  transform: translateY(-1px);
 }
+
+.remove-range-button {
+  background-color: #fee2e2;
+  color: #ef4444;
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.remove-range-button:hover:not(:disabled) {
+  background-color: #fecaca;
+  color: #dc2626;
+}
+
+.remove-account-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #fee2e2;
+  color: #ef4444;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 16px;
+  align-self: flex-end;
+}
+
+.remove-account-button:hover:not(:disabled) {
+  background-color: #fecaca;
+  color: #dc2626;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
 .admin-container {
   padding: 24px;
 }
@@ -678,29 +1025,158 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 20px;
 }
 
 .modal-content {
   background-color: white;
-  padding: 24px;
-  border-radius: 8px;
+  border-radius: 12px;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1000px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.modal-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 20px;
-  text-align: center;
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.modal-actions {
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.close-button:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.form-group input,
+.form-select {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #1f2937;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.form-group input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input:disabled,
+.form-select:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e5e7eb;
   display: flex;
   justify-content: flex-end;
-  margin-top: 24px;
+  gap: 12px;
+}
+
+.save-button,
+.cancel-button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-button {
+  background-color: #10b981;
+  color: white;
+  border: none;
+}
+
+.save-button:hover:not(:disabled) {
+  background-color: #059669;
+  transform: translateY(-1px);
+}
+
+.cancel-button {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border: none;
+}
+
+.cancel-button:hover:not(:disabled) {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+
+.percentage-section {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #ffffff;
+}
+
+.percentage-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 8px;
 }
 
 /* Error Message */
@@ -727,52 +1203,6 @@ onMounted(async () => {
   background-color: #b91c1c;
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Form Styles */
-.form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.form-group label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #4b5563;
-}
-
-.form-group input, .form-select {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  font-size: 14px;
-  color: #1f2937;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  width: 100%;
-}
-
-.form-group input:focus, .form-select:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-}
-
-.form-group input:disabled, .form-select:disabled {
-  background-color: #f3f4f6;
-  color: #9ca3af;
-  cursor: not-allowed;
-}
-
 /* Loading State */
 .loading-state {
   text-align: center;
@@ -795,6 +1225,29 @@ button:disabled {
   100% { transform: rotate(360deg); }
 }
 
+.range-actions {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
 
+.insert-range-button {
+  background-color: #e0f2fe;
+  color: #0284c7;
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
 
-  </style>
+.insert-range-button:hover:not(:disabled) {
+  background-color: #bae6fd;
+  color: #0369a1;
+}
+</style>
