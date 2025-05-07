@@ -545,16 +545,18 @@ const saveChanges = async () => {
     return;
   }
 
-  // Validate date ranges
-  const hasInvalidRanges = accountPercentages.value.some(account => 
-    account.dateRanges.some(range => 
-      !range.startDate || range.percentage === null || range.percentage === undefined
-    )
-  );
+  // Only validate date ranges if role is Client
+  if (editingUser.value.role === 'Client') {
+    const hasInvalidRanges = accountPercentages.value.some(account => 
+      account.dateRanges.some(range => 
+        !range.startDate || range.percentage === null || range.percentage === undefined
+      )
+    );
 
-  if (hasInvalidRanges) {
-    alert('Please fill in all date ranges with valid dates and percentages');
-    return;
+    if (hasInvalidRanges) {
+      alert('Please fill in all date ranges with valid dates and percentages');
+      return;
+    }
   }
 
   updateLoading.value = true;
@@ -567,7 +569,7 @@ const saveChanges = async () => {
       ...editingUser.value,
       account_access: selectedAccounts.value,
       features: selectedFeatures.value,
-      account_percentages: accountPercentages.value
+      account_percentages: editingUser.value.role === 'Client' ? accountPercentages.value : []
     };
 
     const res = await fetch('https://production2.swancapital.in/editUser', {
