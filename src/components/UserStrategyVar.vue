@@ -15,8 +15,11 @@
           size="large"
           style="width: 200px; margin-right: 8px;"
         />
-        <Button size="large" @click="applyPercentage">
+        <Button size="large" @click="applyPercentage" style="margin-right: 8px;">
           Apply Percentage
+        </Button>
+        <Button size="large" @click="refreshVarCalculationData" style="margin-right: 8px;" >
+          🔄 Refresh
         </Button>
       </div>
 
@@ -285,6 +288,8 @@ const updatedFilteredColumns = computed(() => {
       header: () => 'Custom Downside',
     }
   );
+
+
   
   // Find the "User" column and separate it from the other base columns.
   const userColumn = baseColumns.find(col => col.id === 'User');
@@ -316,6 +321,17 @@ const filteredUserVarColumns = computed(() => {
 
 
 
+
+const refreshVarCalculationData= async()=> {
+    try {
+      loading.value = true;
+      await var_calculations(inputPercentage.value);
+    } catch (err) {
+      console.error("Error refreshing data:", err);
+    } finally {
+      loading.value = false;
+    }
+  }
 
 const filterColumns = (masterObj, options) => {
   const result = [];

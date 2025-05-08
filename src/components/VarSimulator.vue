@@ -570,10 +570,13 @@ const submitTrades = async () => {
 
 // Computed property for user options
 const userOptions = computed(() => 
-  users.value.map(user => ({
-    label: user.name,
-    value: user.id
-  }))
+  users.value
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(user => ({
+      label: user.name,
+      value: user.id
+    }))
 )
 
 // onMounted
