@@ -187,6 +187,7 @@ const calculate_broker_position_mismatch = () => {
 };
 const give_key_map=(key)=>{
     if (key==='signalbook_position_checker')return 'Signalbook Position Checker';
+    else if(key=='var_alert')return 'Var Alert';
 }
 const calculate_custom_pulse = () => {
 
