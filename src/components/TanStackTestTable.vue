@@ -234,7 +234,15 @@ const checkNavigate = (data) => {
     }
 }
 
-const sorting = ref([])
+// Custom pagination state (default‐sort by 0th column asc)
+const sorting = ref([
+  {
+    // grab the id (or accessorKey) of the first column
+    id: props.columns[0].id || props.columns[0].accessorKey,
+    desc: false
+  }
+])
+
 const filter = ref('')
 const toggleAllColumns = (value) => {
     table.toggleAllColumnsVisible(value)
