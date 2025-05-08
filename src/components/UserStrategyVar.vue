@@ -164,11 +164,14 @@ const selectedAggregateUsers = ref([])
 
 // 2. Build the dropdown options from your raw data
 const userOptions = computed(() => 
-  var_calculation_data.value.map(row => ({
-    label: row.User,
-    value: row.User
-  }))
-)
+  var_calculation_data.value
+    .map(row => ({
+      label: row.User,
+      value: row.User
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label))
+);
+
 
 // 3. Compute the averaged/summed row from the *processed* data
 const aggregatedRow = computed(() => {
@@ -237,11 +240,14 @@ const additionColumnOptions = computed(() => {
     }
   });
 
-  return Array.from(prefixSet).map(prefix => ({
-    label: prefix,
-    value: prefix
-  }));
+  return Array.from(prefixSet)
+    .sort() // sort alphabetically in ascending order
+    .map(prefix => ({
+      label: prefix,
+      value: prefix
+    }));
 });
+
 
 
 
