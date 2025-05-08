@@ -509,7 +509,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
       <p class="table-heading">Live MTM : <span :class="position_sum > 0 ? 'green' : 'red'">{{ position_sum }}</span>
       </p>
       <TanStackTestTable title="Position" :data="book" :columns="rms_df_columns" :hasColor="['pnl']" :navigateTo="[]"
-        :showPagination=true />
+        :showPagination=true  :defaultSortFirstColumn="true"/>
     </div>
 <!-- 
     <div class="my-8" v-if="book && showOnPage === 'TradeBook'">
@@ -521,7 +521,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     <div class="my-8" v-if="book && showOnPage === 'Order'">
       <TanStackTestTable title="Complete Order Book" :data="book"
         :columns="broker === 'xts' ? live_order_book_columns_xts : live_order_book_columns_zerodha" :hasColor="[]"
-        :navigateTo="[]" :showPagination=true />
+        :navigateTo="[]" :showPagination=true  :defaultSortFirstColumn="true"/>
     </div>
     <div class="my-8" v-if="book && showOnPage === 'Fund Summary'">
       <TanStackTestTable title="Fund Summary" :data="book" :columns="fund_summary_columns"
