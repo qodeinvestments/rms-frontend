@@ -15,16 +15,20 @@ const props = defineProps({
 const userSelectOptions = computed(() => {
   const totalUsers = filteredUsers.value.length;
   const allSelected = selectedUsers.value.length === totalUsers;
-  
-  // Special "select all/deselect all" item:
+
   const selectAllOption = {
     label: allSelected ? 'Deselect All' : 'Select All',
     value: '__ALL__'
   };
 
-  // Return an array with the special item + the real user options
-  return [selectAllOption, ...filteredUsers.value];
+  // Sort filteredUsers alphabetically by label before combining
+  const sortedUsers = [...filteredUsers.value].sort((a, b) =>
+    a.label.localeCompare(b.label)
+  );
+
+  return [selectAllOption, ...sortedUsers];
 });
+
 function handleSelectChange(newValue) {
   // 1. Check if user clicked the special item
   if (newValue.includes('__ALL__')) {
