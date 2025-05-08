@@ -214,7 +214,7 @@ onUnmounted(() => {
         <div v-else-if="Object.keys(data).length > 0" class="mx-auto px-8 py-8">
             <!-- <p class="table-heading">Position MisMatch : {{ user }}</p> -->
             <TanStackTestTable title="Position MisMatch" :data="data" :columns="columns" :hasColor="[]" :navigateTo="{}"
-                :showPagination="true" :hasRowcolor="{}" />
+                :showPagination="true" :hasRowcolor="{}"  :defaultSortFirstColumn="true"/>
         </div>
 
         <div v-else class="mx-auto px-8 py-8">

@@ -321,6 +321,7 @@ onUnmounted(() => {
           :hasColor="['IdealMTM', 'Day_PL', 'Slippage','SlippagePer','PNL_PER_UM', 'HoldingsDayPL','PNL_PER_M','Slippage2','API DAY PNL','API NET PNL']" :navigateTo="NavigationMap"
           :showPagination=true :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }"
           :compareRules="[ { primary: 'Cash', secondary: 'Portfolio Value', percentage: 3 } ]"
+          :defaultSortFirstColumn="true"
         />
       </div>
     </div>

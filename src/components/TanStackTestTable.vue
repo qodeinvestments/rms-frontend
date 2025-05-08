@@ -188,6 +188,10 @@ const props = defineProps({
         type: Object,
         required: false
     },
+    defaultSortFirstColumn: {
+        type: Boolean,
+        default: false
+    },
     // New prop: an array of rules in which each rule defines
     // the primary column to check, the secondary column to compare,
     // and the percentage threshold.
@@ -235,13 +239,14 @@ const checkNavigate = (data) => {
 }
 
 // Custom pagination state (default‐sort by 0th column asc)
-const sorting = ref([
-  {
-    // grab the id (or accessorKey) of the first column
-    id: props.columns[0].id || props.columns[0].accessorKey,
-    desc: false
-  }
-])
+const sorting = ref(
+  props.defaultSortFirstColumn
+    ? [{
+        id: props.columns[0].id || props.columns[0].accessorKey,
+        desc: false
+      }]
+    : []
+)
 
 const filter = ref('')
 const toggleAllColumns = (value) => {

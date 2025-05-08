@@ -468,7 +468,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     <div class="my-8">
       <TanStackTestTable title="Account Details" :data="data" :columns="columns"
         :hasColor="['IdealMTM', 'Day_PL', 'Slippage', 'PNL_PER_UM', 'PNL_PER_M','Slippage1','Slippage2']" :navigateTo="[]" :showPagination=false
-        :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }" />
+        :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }"  :defaultSortFirstColumn="true" />
     </div>
     <!--  <input type="date" v-model="date" /> -->
     <div class="chartContainer">

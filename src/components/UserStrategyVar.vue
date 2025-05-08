@@ -58,6 +58,7 @@
           :hasColor="[...new Set([...Object.keys(var_calculation_data[0]), 'customUpside','customDownside'])]"
           :navigateTo="[]"
           :showPagination="true"
+          :defaultSortFirstColumn="true"
         />
       </div>
 
@@ -127,6 +128,7 @@
           :hasColor="Object.keys(elmcalculatordata[0])"
           :navigateTo="[]"
           :showPagination="true"
+          :defaultSortFirstColumn="true"
         />
       </div>
     </div>

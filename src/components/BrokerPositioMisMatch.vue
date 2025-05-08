@@ -342,13 +342,13 @@ onUnmounted(() => {
             <!-- <p class="table-heading">Position MisMatch : {{ user }}</p> -->
              <div v-if="Object.keys(fulldata[user]).length > 0">
                 <TanStackTestTable title="Broker Position MisMatch" :data="fulldata[user]" :columns="columns" :hasColor="[]" :navigateTo="{}"
-                :showPagination="true" :hasRowcolor="{}" />
+                :showPagination="true" :hasRowcolor="{}"  :defaultSortFirstColumn="true"/>
 
              </div>
              <div v-if="Object.keys(posdata[user]).length > 0">
 
                 <TanStackTestTable title="Position Broker MisMatch" :data="posdata[user]" :columns="columns" :hasColor="[]" :navigateTo="{}"
-                :showPagination="true" :hasRowcolor="{}" />
+                :showPagination="true" :hasRowcolor="{}"  :defaultSortFirstColumn="true"/>
 
              </div>
            
