@@ -8,11 +8,46 @@ import Signup from './components/Signup.vue'
 
 
 const sideBarState = ref(false)
+const sidebarfeatures = ref([])
 const toastConfig = ref({
   show: false,
   message: '',
   type: 'info'
 })
+
+const fetchData = async (endpoint, stateRef) => {
+  try {
+    const token = localStorage.getItem('access_token');
+    if (!token) throw new Error('User not authenticated');
+    const res = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    if (endpoint === 'sidebar-features') {
+      // If data is an array, convert it to the expected format
+      if (Array.isArray(data)) {
+        // Determine the role based on the features
+        const role = data.includes('Admin Panel') ? 'Admin' :
+                    data.includes('Client Page') ? 'Client' :
+                    data.includes('Monitor') ? 'Monitor' : 'Default';
+        
+        // Create the role-based object
+        stateRef.value = {
+          [role]: data
+        };
+      } else {
+        // If data is already in the correct format, use it as is
+        stateRef.value = data;
+      }
+      console.log('Processed sidebar features:', stateRef.value);
+    } else {
+      stateRef.value = endpoint === 'getAccounts' ? Object.keys(data) : data || [];
+    }
+  } catch (err) {
+    console.error(`Error fetching ${endpoint}:`, err.message);
+  }
+};
 
 const ChangeSideBarState = (data) => {
   sideBarState.value = data
@@ -140,9 +175,12 @@ const connectToSSE = () => {
   }
 };
 
+const fetchSidebarFeatures = () => fetchData('sidebar-features', sidebarfeatures);
+
 onMounted(() => {
   connectToSSE();
   checkLoginStatus();
+  fetchSidebarFeatures();
 
   // triggerToast('New Error in Order', 'error')
 })
@@ -160,7 +198,7 @@ provide('book', book.value)
     <Login v-if="!isLoggedIn && !showloginorSignup" @toggleForm="toggleForm" />
 
 
-    <SideBar v-if="isLoggedIn" @State="ChangeSideBarState" class="sideBar" />
+    <SideBar v-if="isLoggedIn" @State="ChangeSideBarState" :sidebarfeatures="sidebarfeatures" class="sideBar" />
     <Toast v-if="toastConfig.show && isLoggedIn" :message="toastConfig.message" :type="toastConfig.type" @close="hideToast" />
    
     <RouterView v-if="isLoggedIn" :class="sideBarState ? 'content' : 'content2'" />
