@@ -29,105 +29,72 @@
                   <span class="text">Errors</span>
                 </a>
               </li>
-              <li :class="selected == 'KeyDBLogs' ? 'active' : ''" @click="changeSelected('KeyDBLogs')" v-if="sidebarfeatures['pages'].includes('KeyDB Logs')">
+              <li :class="selected == 'KeyDBLogs' ? 'active' : ''" @click="changeSelected('KeyDBLogs')" v-if="sidebarfeatures['pages'].includes('KeyDBLogs')">
                 <a href="#">
                   <i class="icon fas fa-database"></i>
                   <span class="text">KeyDBLogs</span>
                 </a>
               </li>
-              <li :class="selected == 'DataVisualizer' ? 'active' : ''" @click="changeSelected('DataVisualizer')" v-if="sidebarfeatures['pages'].includes('Data Visualizer')">
+              <li :class="selected == 'DataVisualizer' ? 'active' : ''" @click="changeSelected('DataVisualizer')" v-if="sidebarfeatures['pages'].includes('DataVisualizer')">
                 <a href="#">
                   <i class="icon fas fa-chart-bar"></i>
                   <span class="text">Data Visualizer</span>
                 </a>
               </li>
-              <li :class="selected == 'SignalBook' ? 'active' : ''" @click="changeSelected('SignalBook')" v-if="sidebarfeatures['pages'].includes('Signal Book')">
+              <li :class="selected == 'SignalBook' ? 'active' : ''" @click="changeSelected('SignalBook')" v-if="sidebarfeatures['pages'].includes('SignalBook')">
                 <a href="#">
                   <i class="icon fas fa-book-open"></i>
                   <span class="text">SignalBook</span>
                 </a>
               </li>
-              <li :class="selected == 'ServerData' ? 'active' : ''" @click="changeSelected('ServerData')" v-if="sidebarfeatures['pages'].includes('Server Data')">
+              <li :class="selected == 'ServerData' ? 'active' : ''" @click="changeSelected('ServerData')" v-if="sidebarfeatures['pages'].includes('ServerData')">
                 <a href="#">
                   <i class="icon fas fa-server"></i>
                   <span class="text">Server Data</span>
                 </a>
               </li>
-              <li :class="selected == 'LivePositions' ? 'active' : ''" @click="changeSelected('LivePositions')" v-if="sidebarfeatures['pages'].includes('Live Positions')">
+              <li :class="selected == 'LivePositions' ? 'active' : ''" @click="changeSelected('LivePositions')" v-if="sidebarfeatures['pages'].includes('LivePositions')">
                 <a href="#">
                   <i class="icon fas fa-chart-line"></i>
                   <span class="text">Live Positions </span>
                 </a>
               </li>
-              <li :class="selected == 'OpenTrades' ? 'active' : ''" @click="changeSelected('OpenTrades')" v-if="sidebarfeatures['pages'].includes('Open Trades')">
+              <li :class="selected == 'OpenTrades' ? 'active' : ''" @click="changeSelected('OpenTrades')" v-if="sidebarfeatures['pages'].includes('OpenTrades')">
                 <a href="#">
                   <i class="icon fas fa-exchange-alt"></i>
                   <span class="text">Overnight Trades </span>
                 </a>
               </li>
-              <li :class="selected == 'SlippageUserPage' ? 'active' : ''" @click="changeSelected('SlippageUserPage')" v-if="sidebarfeatures['pages'].includes('Slippage User Page')">
+              <li :class="selected == 'SlippageUserPage' ? 'active' : ''" @click="changeSelected('SlippageUserPage')" v-if="sidebarfeatures['pages'].includes('SlippageUserPage')">
                 <a href="#">
                   <i class="icon fas fa-percent"></i>
                   <span class="text">Slippage User Page </span>
                 </a>
               </li>
-              <li :class="selected == 'UserStrategyVar' ? 'active' : ''" @click="changeSelected('UserStrategyVar')" v-if="sidebarfeatures['pages'].includes('User Strategy Var')">
+              <li :class="selected == 'UserStrategyVar' ? 'active' : ''" @click="changeSelected('UserStrategyVar')" v-if="sidebarfeatures['pages'].includes('UserStrategyVar')">
                 <a href="#">
                   <i class="icon fas fa-calculator"></i>
                   <span class="text"> User Strategy Var </span>
                 </a>
               </li>
-              <li :class="selected == 'DailyLogsTable' ? 'active' : ''" @click="changeSelected('DailyLogsTable')" v-if="sidebarfeatures['pages'].includes('Daily Logs Table')">
+              <li :class="selected == 'DailyLogsTable' ? 'active' : ''" @click="changeSelected('DailyLogsTable')" v-if="sidebarfeatures['pages'].includes('DailyLogsTable')">
                 <a href="#">
                   <i class="icon fas fa-calendar-day"></i>
                   <span class="text"> Daily Logs Table </span>
                 </a>
               </li>
-              <li :class="selected == ' VarSimulator' ? 'active' : ''" @click="changeSelected('VarSimulator')" v-if="sidebarfeatures['pages'].includes('Var Simulator')">
+              <li :class="selected == ' VarSimulator' ? 'active' : ''" @click="changeSelected('VarSimulator')" v-if="sidebarfeatures['pages'].includes('VarSimulator')">
                 <a href="#">
                   <i class="icon fas fa-sliders-h"></i>
                   <span class="text">  Var Simulator </span>
                 </a>
               </li>
-              <li :class="selected == 'ClientPage' ? 'active' : ''" @click="changeSelected('ClientPage')" v-if="sidebarfeatures['pages'].includes('Client Page')">
+              <li :class="selected == 'ClientPage' ? 'active' : ''" @click="changeSelected('ClientPage')" v-if="sidebarfeatures['pages'].includes('ClientPage')">
                 <a href="#">
                   <i class="icon fas fa-user-friends"></i>
                   <span class="text">  PNL Summary </span>
                 </a>
               </li>
-             
-             
-            
-            <!-- <li>
-              <a href="#" :class="selected == 'Income' ? 'active' : ''" @click="changeSelected('Income')">
-                <i class="icon ph-bold ph-chart-bar"></i>
-                <span class="text">Income</span>
-                <i class="arrow ph-bold ph-caret-down"></i>
-              </a>
-              <ul class="sub-menu" v-show="selected === 'Income' && showoptions">
-                <li :class="selectedsubCat == 'Earnings' ? 'active' : ''" @click="changeSelectedSubCat('Earnings')">
-                  <a href="#">
-                    <span class="text">Earnings</span>
-                  </a>
-                </li>
-                <li :class="selectedsubCat == 'Funds' ? 'active' : ''" @click="changeSelectedSubCat('Funds')">
-                  <a href="#">
-                    <span class="text">Funds</span>
-                  </a>
-                </li>
-                <li :class="selectedsubCat == 'Declines' ? 'active' : ''" @click="changeSelectedSubCat('Declines')">
-                  <a href="#">
-                    <span class="text">Declines</span>
-                  </a>
-                </li>
-                <li :class="selectedsubCat == 'Payouts' ? 'active' : ''" @click="changeSelectedSubCat('Payouts')">
-                  <a href="#">
-                    <span class="text">Payouts</span>
-                  </a>
-                </li>
-              </ul>
-            </li> -->
-
             </ul>
           </div>
           <div  v-if="sidebarfeatures['role']=='Admin'"
@@ -144,7 +111,7 @@
                 </a>
               </li>
               <li
-              v-if="sidebarfeatures['pages'].includes('Admin Panel')"
+              v-if="sidebarfeatures['pages'].includes('AdminPanel')"
               :class="selected == 'AdminPanel' ? 'active' : ''" @click="changeSelected('AdminPanel')">
                 <a href="#">
                   <i class="icon fas fa-user-shield"></i>
@@ -152,7 +119,7 @@
                 </a>
               </li>
               <li 
-               v-if="sidebarfeatures['pages'].includes('Margin Update')"
+               v-if="sidebarfeatures['pages'].includes('MarginUpdate')"
               :class="selected == 'MarginUpdate' ? 'active' : ''" @click="changeSelected('MarginUpdate')">
                 <a href="#">
                   <i class="icon fas fa-balance-scale"></i>
