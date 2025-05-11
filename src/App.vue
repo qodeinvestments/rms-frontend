@@ -14,6 +14,7 @@ const toastConfig = ref({
   message: '',
   type: 'info'
 })
+const isLoading = ref(true)
 
 const fetchData = async (endpoint, stateRef) => {
   try {
@@ -105,8 +106,12 @@ const toggleForm = () => {
   showloginorSignup.value = !showloginorSignup.value;
 }
 const checkLoginStatus = async () => {
-  const isValid = await validateToken();
-  isLoggedIn.value = isValid;
+  try {
+    const isValid = await validateToken();
+    isLoggedIn.value = isValid;
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const validateToken = async () => {
@@ -238,15 +243,18 @@ provide('book', book.value)
 
 <template>
   <div class="pageLayout">
-    <Signup v-if="!isLoggedIn && showloginorSignup" @toggleForm="toggleForm" />
-    <Login v-if="!isLoggedIn && !showloginorSignup" @toggleForm="toggleForm" />
+    <div v-if="isLoading" class="loading-container">
+      <div class="loading-spinner"></div>
+    </div>
+    <template v-else>
+      <Signup v-if="!isLoggedIn && showloginorSignup" @toggleForm="toggleForm" />
+      <Login v-if="!isLoggedIn && !showloginorSignup" @toggleForm="toggleForm" />
 
-
-    <SideBar v-if="isLoggedIn" @State="ChangeSideBarState" :sidebarfeatures="sidebarfeatures" class="sideBar" />
-    <Toast v-if="toastConfig.show && isLoggedIn" :message="toastConfig.message" :type="toastConfig.type" @close="hideToast" />
-   
-    <RouterView v-if="isLoggedIn" :class="sideBarState ? 'content' : 'content2'" />
-
+      <SideBar v-if="isLoggedIn" @State="ChangeSideBarState" :sidebarfeatures="sidebarfeatures" class="sideBar" />
+      <Toast v-if="toastConfig.show && isLoggedIn" :message="toastConfig.message" :type="toastConfig.type" @close="hideToast" />
+     
+      <RouterView v-if="isLoggedIn" :class="sideBarState ? 'content' : 'content2'" />
+    </template>
   </div>
 </template>
 
@@ -283,5 +291,28 @@ body {
   width: calc(100% - 250px);
   height: 100%;
   transition: all 0.3s;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: #ffffff;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>
