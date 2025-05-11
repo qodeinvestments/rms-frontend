@@ -18,10 +18,21 @@ const toastConfig = ref({
 const fetchData = async (endpoint, stateRef) => {
   try {
     const token = localStorage.getItem('access_token');
-    if (!token) throw new Error('User not authenticated');
+    if (!token) {
+      isLoggedIn.value = false;
+      return;
+    }
     const res = await fetch(`https://production2.swancapital.in/${endpoint}`, {
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
     });
+    
+    if (res.status === 401) {
+      // Token is invalid or expired
+      localStorage.removeItem('access_token');
+      isLoggedIn.value = false;
+      return;
+    }
+    
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
     if (endpoint === 'sidebar-features') {
@@ -46,6 +57,9 @@ const fetchData = async (endpoint, stateRef) => {
     }
   } catch (err) {
     console.error(`Error fetching ${endpoint}:`, err.message);
+    if (err.message.includes('401')) {
+      isLoggedIn.value = false;
+    }
   }
 };
 
@@ -90,11 +104,41 @@ const isLoggedIn = ref(false) // Add a ref to track login state
 const toggleForm = () => {
   showloginorSignup.value = !showloginorSignup.value;
 }
-const checkLoginStatus = () => {
-  const token = localStorage.getItem('access_token'); // Check if the access token is stored
-  isLoggedIn.value = !!token; // Set isLoggedIn to true if token exists, false otherwise
+const checkLoginStatus = async () => {
+  const isValid = await validateToken();
+  isLoggedIn.value = isValid;
 };
 
+const validateToken = async () => {
+  try {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      isLoggedIn.value = false;
+      return false;
+    }
+
+    const response = await fetch('https://production2.swancapital.in/validate-token', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      // Token is invalid or expired
+      localStorage.removeItem('access_token');
+      isLoggedIn.value = false;
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Token validation error:', error);
+    localStorage.removeItem('access_token');
+    isLoggedIn.value = false;
+    return false;
+  }
+};
 
 const book = ref({})
 const past_time_client = ref(0)
@@ -177,12 +221,12 @@ const connectToSSE = () => {
 
 const fetchSidebarFeatures = () => fetchData('sidebar-features', sidebarfeatures);
 
-onMounted(() => {
-  connectToSSE();
-  checkLoginStatus();
-  fetchSidebarFeatures();
-
-  // triggerToast('New Error in Order', 'error')
+onMounted(async () => {
+  await checkLoginStatus(); // Make this async
+  if (isLoggedIn.value) {
+    connectToSSE();
+    fetchSidebarFeatures();
+  }
 })
 
 provide('triggerToast', triggerToast)
