@@ -1,6 +1,7 @@
 <template>
-  <div class="container" v-if="sidebarfeatures['pages']">
-    <div class="sidebar " :class="sidebarState ? 'active' : ''" ref="targetElement">
+  <div class="container">
+    <!-- Show sidebar only if we have features or if we're logged in -->
+    <div class="sidebar" :class="sidebarState ? 'active' : ''" ref="targetElement" v-if="isLoggedIn">
       <div class="menu-btn" @click="toggleSideBar()">
         <i class="fas fa-chevron-left"></i>
       </div>
@@ -13,7 +14,9 @@
           <p class="name"> Swan Capital</p>
         </div> -->
         </div>
-        <div class="nav">
+        
+        <!-- Show navigation menu only if we have features -->
+        <div class="nav" v-if="sidebarfeatures && sidebarfeatures.pages && sidebarfeatures.pages.length > 0">
           <div class="menu">
             <p class="title" :class="sidebarState === true ? 'aligncenter' : ''">main</p>
             <ul>
@@ -97,9 +100,8 @@
               </li>
             </ul>
           </div>
-          <div  v-if="sidebarfeatures['role']=='Admin'"
           
-          class="menu">
+          <div v-if="sidebarfeatures.role === 'Admin'" class="menu">
             <p class="title">Settings</p>
             <ul>
               <li 
@@ -128,8 +130,24 @@
               </li>
             </ul>
           </div>
-        
         </div>
+        
+        <!-- Show message if features aren't loaded -->
+        <div v-else class="nav">
+          <div class="menu">
+            <p class="title">Loading...</p>
+            <ul>
+              <li>
+                <a href="#">
+                  <i class="icon fas fa-spinner fa-spin"></i>
+                  <span class="text">Loading navigation...</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Account menu - always visible -->
         <div class="menu account-menu">
           <p class="title">Account</p>
           <ul>
@@ -140,7 +158,7 @@
               </a>
             </li>
             <li>
-              <a href="#" @click="logout">
+              <a href="#" @click.prevent="logout">
                 <i class="icon fas fa-sign-out-alt"></i>
                 <span class="text">Logout</span>
               </a>
@@ -172,6 +190,7 @@ export default {
       selected: '',
       selectedsubCat: '',
       showoptions: false,
+      isLoggedIn: true,
       togglesubCategory: ['Audience', 'Income'],
       navigateMap: {
         'Dashboard': '/',
@@ -197,8 +216,8 @@ export default {
     logout() {
       // Clear the session or localStorage data
       localStorage.removeItem('access_token');
-      alert('You have been logged out.');
-      window.location.reload(); // Refresh the page after login success
+      this.isLoggedIn = false;
+      window.location.href = '/'; // Redirect to home/login page
     },
     toggleSideBar() {
       this.sidebarState = !this.sidebarState;

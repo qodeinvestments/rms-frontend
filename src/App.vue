@@ -18,11 +18,25 @@ const toastConfig = ref({
 const fetchData = async (endpoint, stateRef) => {
   try {
     const token = localStorage.getItem('access_token');
-    if (!token) throw new Error('User not authenticated');
+    if (!token) {
+      isLoggedIn.value = false;
+      throw new Error('User not authenticated');
+    }
+    
     const res = await fetch(`https://production2.swancapital.in/${endpoint}`, {
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
     });
-    if (!res.ok) throw new Error(await res.text());
+    
+    if (!res.ok) {
+      if (res.status === 401) {
+        // Token expired or invalid
+        localStorage.removeItem('access_token');
+        isLoggedIn.value = false;
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error(await res.text());
+    }
+    
     const data = await res.json();
     if (endpoint === 'sidebar-features') {
       // If data is an array, convert it to the expected format
@@ -34,7 +48,8 @@ const fetchData = async (endpoint, stateRef) => {
         
         // Create the role-based object
         stateRef.value = {
-          [role]: data
+          pages: data,
+          role: role
         };
       } else {
         // If data is already in the correct format, use it as is
@@ -46,6 +61,10 @@ const fetchData = async (endpoint, stateRef) => {
     }
   } catch (err) {
     console.error(`Error fetching ${endpoint}:`, err.message);
+    if (err.message.includes('Session expired')) {
+      // Show a toast notification about session expiration
+      triggerToast('Your session has expired. Please login again.', 'error');
+    }
   }
 };
 
@@ -90,9 +109,32 @@ const isLoggedIn = ref(false) // Add a ref to track login state
 const toggleForm = () => {
   showloginorSignup.value = !showloginorSignup.value;
 }
-const checkLoginStatus = () => {
-  const token = localStorage.getItem('access_token'); // Check if the access token is stored
-  isLoggedIn.value = !!token; // Set isLoggedIn to true if token exists, false otherwise
+const checkLoginStatus = async () => {
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    isLoggedIn.value = false;
+    return;
+  }
+
+  try {
+    // Validate token by making a request to a protected endpoint
+    const res = await fetch('https://production2.swancapital.in/sidebar-features', {
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+    });
+    
+    if (!res.ok) {
+      // If token is invalid/expired, clear it and redirect to login
+      localStorage.removeItem('access_token');
+      isLoggedIn.value = false;
+      return;
+    }
+    
+    isLoggedIn.value = true;
+  } catch (error) {
+    console.error('Error validating token:', error);
+    localStorage.removeItem('access_token');
+    isLoggedIn.value = false;
+  }
 };
 
 
