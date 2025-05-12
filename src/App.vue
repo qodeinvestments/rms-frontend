@@ -37,22 +37,9 @@ const fetchData = async (endpoint, stateRef) => {
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
     if (endpoint === 'sidebar-features') {
-      // If data is an array, convert it to the expected format
-      if (Array.isArray(data)) {
-        // Determine the role based on the features
-        const role = data.includes('Admin Panel') ? 'Admin' :
-                    data.includes('Client Page') ? 'Client' :
-                    data.includes('Monitor') ? 'Monitor' : 'Default';
-        
-        // Create the role-based object
-        stateRef.value = {
-          [role]: data
-        };
-      } else {
-        // If data is already in the correct format, use it as is
-        stateRef.value = data;
-      }
-      console.log('Processed sidebar features:', stateRef.value);
+      // Use the role and pages directly from the response
+      stateRef.value = data;
+      console.log('Sidebar features (role and pages):', stateRef.value);
     } else {
       stateRef.value = endpoint === 'getAccounts' ? Object.keys(data) : data || [];
     }
