@@ -201,10 +201,9 @@ onUnmounted(() => {
         <div class="userSelectContainer" v-if="users">
             <label class="table-heading" for="options">Select an User:</label>
             <select class="table-heading" id="options" v-model="user">
-                <option v-for="option in users" :key="option" :value="option"
+                <option v-for="option in [...users].sort()" :key="option" :value="option"
                     :class="fulldata[option].length > 0 ? 'negativecolor' : ''">
                     {{ option }}
-
                 </option>
             </select>
         </div>
