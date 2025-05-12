@@ -110,6 +110,13 @@
                 <i class="fas fa-exchange-alt"></i>
                 Square Off Broker Positions
               </button>
+              <button
+                @click="goToMarginUpdate(user)"
+                class="action-button margin-update-button"
+              >
+                <i class="fas fa-balance-scale"></i>
+                Margin Update
+              </button>
             </td>
           </tr>
         </tbody>
@@ -120,6 +127,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
 // State management
 const users = ref([]);
@@ -201,11 +209,7 @@ const handleSquareOff = async () => {
     const token = localStorage.getItem('access_token');
     if (!token) throw new Error('User not authenticated');
 
-    const endpoint = modalType.value === 'position' 
-      ? 'squareOffPositions' 
-      : 'squareOffBrokerPositions';
-
-    const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+    const response = await fetch(`https://production2.swancapital.in/squareOffPositions`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -214,7 +218,8 @@ const handleSquareOff = async () => {
       body: JSON.stringify({
         username: selectedUser.value.username,
         first_password: firstPassword.value,
-        second_password: secondPassword.value
+        second_password: secondPassword.value,
+        type:modalType.value
       })
     });
 
@@ -257,6 +262,14 @@ const fetchUsers = async () => {
     console.error('Error fetching users:', err);
   } finally {
     loading.value = false;
+  }
+};
+
+const router = useRouter();
+
+const goToMarginUpdate = (user) => {
+  if (user && user.username) {
+    router.push(`/marginupdatecheck/${user.username}`);
   }
 };
 
@@ -364,6 +377,11 @@ onMounted(() => {
 .action-buttons {
   display: flex;
   gap: 12px;
+  justify-content: flex-end;
+}
+
+.admin-table td.action-buttons {
+  text-align: right;
 }
 
 .action-button {
@@ -396,6 +414,16 @@ onMounted(() => {
 
 .broker-button:hover:not(:disabled) {
   background-color: #059669;
+  transform: translateY(-1px);
+}
+
+.margin-update-button {
+  background-color: #f59e42;
+  color: white;
+}
+
+.margin-update-button:hover:not(:disabled) {
+  background-color: #d97706;
   transform: translateY(-1px);
 }
 

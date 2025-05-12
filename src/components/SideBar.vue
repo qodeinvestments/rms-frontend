@@ -98,7 +98,7 @@
               
             </ul>
           </div>
-          <div  v-if="sidebarfeatures['role']=='Admin'"
+          <div  v-if="sidebarfeatures['role']=='Admin' || sidebarfeatures['role']=='Super Admin'"
           
           class="menu">
             <p class="title">Settings</p>

@@ -128,7 +128,7 @@
             </div>
           </div>
 
-          <div class="form-section" v-if="editingUser.role !== 'Admin'">
+          <div class="form-section" v-if="editingUser.role !== 'Admin' && editingUser.role !== 'Super Admin'">
             <div class="form-group">
               <label>Account Access</label>
               <a-select
@@ -522,7 +522,7 @@ const fetchData = async (endpoint, stateRef) => {
 };
 
 const saveChanges = async () => {
-  if (selectedAccounts.value.length === 0 && editingUser.value.role !== 'Admin') {
+  if (selectedAccounts.value.length === 0 && editingUser.value.role !== 'Admin' && editingUser.value.role !== 'Super Admin') {
     alert('Accounts cannot be empty');
     return;
   }

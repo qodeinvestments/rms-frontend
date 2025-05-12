@@ -25,6 +25,8 @@ import VarSimulator from '../components/VarSimulator.vue'
 import ClientPage from '../components/ClientPage.vue'
 import FundSummaryClient from '../components/FundSummaryClient.vue'
 import PositionManagement from '../components/PositionManagement.vue'
+import MarginUpdateCheck from '../components/MarginUpdateCheck.vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -159,6 +161,12 @@ const router = createRouter({
       path:'/positionmanagement',
       name:'PositionManagement',
       component:PositionManagement
+    },
+    {
+      path: '/marginupdatecheck/:username',
+      name: 'MarginUpdateCheck',
+      component: MarginUpdateCheck,
+      props: true
     }
     // {
     //   path: '/about',
