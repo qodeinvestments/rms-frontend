@@ -24,6 +24,7 @@ import UpdateLog from '../components/UpdateLog.vue'
 import VarSimulator from '../components/VarSimulator.vue'
 import ClientPage from '../components/ClientPage.vue'
 import FundSummaryClient from '../components/FundSummaryClient.vue'
+import PositionManagement from '../components/PositionManagement.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -153,6 +154,11 @@ const router = createRouter({
       name: 'ClientPage' ,
       component: ClientPage 
       
+    },
+    {
+      path:'/positionmanagement',
+      name:'PositionManagement',
+      component:PositionManagement
     }
     // {
     //   path: '/about',

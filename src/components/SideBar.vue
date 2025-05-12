@@ -95,6 +95,7 @@
                   <span class="text">  PNL Summary </span>
                 </a>
               </li>
+              
             </ul>
           </div>
           <div  v-if="sidebarfeatures['role']=='Admin'"
@@ -124,6 +125,16 @@
                 <a href="#">
                   <i class="icon fas fa-balance-scale"></i>
                   <span class="text">Margin Update</span>
+                </a>
+              </li>
+              <li 
+                v-if="sidebarfeatures['pages'].includes('PositionManagement')"
+                :class="selected == 'PositionManagement' ? 'active' : ''"
+                @click="changeSelected('PositionManagement')"
+              >
+                <a href="#">
+                  <i class="icon fas fa-chart-line"></i>
+                  <span class="text">Position Management</span>
                 </a>
               </li>
             </ul>
@@ -182,6 +193,7 @@ export default {
         'ServerData': '/serverData',
         'AdminPanel': '/adminPanel',
         'MarginUpdate':'/marginUpdate',
+        'PositionManagement':'/positionmanagement',
         'LivePositions': '/livepositions',
         'OpenTrades':'/opentrades',
         'SlippageUserPage':'/slippageUserPage',
