@@ -372,34 +372,31 @@ const validateAndAdjustDates = (item, changedIndex) => {
   const changedRange = item.dateRanges[changedIndex];
   if (!changedRange.startDate) return;
 
-  // Check and adjust all subsequent ranges
-  for (let i = changedIndex + 1; i < item.dateRanges.length; i++) {
+  // Check if dates are in ascending order
+  for (let i = 1; i < item.dateRanges.length; i++) {
     const currentRange = item.dateRanges[i];
     const previousRange = item.dateRanges[i - 1];
     
-    if (!currentRange.startDate || new Date(currentRange.startDate) <= new Date(previousRange.startDate)) {
-      // Set the date to one day after the previous range
-      const newDate = new Date(previousRange.startDate);
-      newDate.setDate(newDate.getDate() + 1);
-      currentRange.startDate = newDate.toISOString().split('T')[0];
+    if (currentRange.startDate && previousRange.startDate) {
+      const currentDate = new Date(currentRange.startDate);
+      const previousDate = new Date(previousRange.startDate);
+      
+      if (currentDate <= previousDate) {
+        alert(`Warning: Dates must be in ascending order. Please correct the date at index ${i + 1} to be after ${previousRange.startDate}`);
+        // Reset the changed date to empty to force user correction
+        changedRange.startDate = '';
+        return;
+      }
     }
   }
 };
 
-// Update getMinDate to be more strict
+// Update getMinDate to return empty string (no minimum date restriction)
 const getMinDate = (item, currentIndex) => {
-  if (currentIndex === 0) return ''; // No minimum date for first range
-  
-  const previousRange = item.dateRanges[currentIndex - 1];
-  if (!previousRange || !previousRange.startDate) return '';
-  
-  // Add one day to the previous date
-  const date = new Date(previousRange.startDate);
-  date.setDate(date.getDate() + 1);
-  return date.toISOString().split('T')[0];
+  return ''; // Allow any date to be selected
 };
 
-// Update addRangeAtIndex to handle date validation
+// Update addRangeAtIndex to not auto-adjust dates
 const addRangeAtIndex = (item, index) => {
   const newRange = {
     percentage: 100,
@@ -408,14 +405,9 @@ const addRangeAtIndex = (item, index) => {
   
   // Insert the new range after the current index
   item.dateRanges.splice(index + 1, 0, newRange);
-  
-  // If there's a next range, validate and adjust dates
-  if (index + 2 < item.dateRanges.length) {
-    validateAndAdjustDates(item, index + 1);
-  }
 };
 
-// Update addDateRange to handle date validation
+// Update addDateRange to not auto-adjust dates
 const addDateRange = (item) => {
   if (!item.dateRanges) {
     item.dateRanges = [];
@@ -425,16 +417,6 @@ const addDateRange = (item) => {
     percentage: 100,
     startDate: ''
   };
-
-  // If there are existing ranges, set the minimum date
-  if (item.dateRanges.length > 0) {
-    const lastRange = item.dateRanges[item.dateRanges.length - 1];
-    if (lastRange.startDate) {
-      const date = new Date(lastRange.startDate);
-      date.setDate(date.getDate() + 1);
-      newRange.startDate = date.toISOString().split('T')[0];
-    }
-  }
   
   item.dateRanges.push(newRange);
 };
@@ -547,6 +529,7 @@ const saveChanges = async () => {
 
   // Only validate date ranges if role is Client
   if (editingUser.value.role === 'Client') {
+    // Check for empty or invalid dates/percentages
     const hasInvalidRanges = accountPercentages.value.some(account => 
       account.dateRanges.some(range => 
         !range.startDate || range.percentage === null || range.percentage === undefined
@@ -555,6 +538,23 @@ const saveChanges = async () => {
 
     if (hasInvalidRanges) {
       alert('Please fill in all date ranges with valid dates and percentages');
+      return;
+    }
+
+    // Check for ascending order in all accounts
+    const hasInvalidOrder = accountPercentages.value.some(account => {
+      for (let i = 1; i < account.dateRanges.length; i++) {
+        const currentDate = new Date(account.dateRanges[i].startDate);
+        const previousDate = new Date(account.dateRanges[i - 1].startDate);
+        if (currentDate <= previousDate) {
+          alert(`Warning: Dates for account "${account.name}" must be in ascending order. Please correct the dates before saving.`);
+          return true;
+        }
+      }
+      return false;
+    });
+
+    if (hasInvalidOrder) {
       return;
     }
   }
