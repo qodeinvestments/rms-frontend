@@ -2,6 +2,23 @@
   <div class="admin-container">
     <h1 class="admin-title">Position Management</h1>
 
+    <!-- Mode Toggle -->
+    <div class="mode-toggle-container">
+      <span class="mode-label">Mode:</span>
+      <div class="toggle-switch">
+        <input 
+          type="checkbox" 
+          id="mode-toggle" 
+          v-model="isMarginUpdateMode"
+          class="toggle-input"
+        />
+        <label for="mode-toggle" class="toggle-label">
+          <span class="toggle-text" :class="{ active: isMarginUpdateMode }">Margin Update</span>
+          <span class="toggle-text" :class="{ active: !isMarginUpdateMode }">Square Off</span>
+        </label>
+      </div>
+    </div>
+
     <!-- Actions Section -->
     <div class="actions-section">
       <div class="search-container">
@@ -94,23 +111,28 @@
           <tr v-for="(user, index) in sortedUsers" :key="index">
             <td>{{ user.username }}</td>
             <td class="action-buttons">
-              <button 
-                @click="openPasswordModal('position', user)"
-                class="action-button position-button"
-                :disabled="updateLoading"
-              >
-                <i class="fas fa-chart-line"></i>
-                Square Off Positions
-              </button>
-              <button 
-                @click="openPasswordModal('broker', user)"
-                class="action-button broker-button"
-                :disabled="updateLoading"
-              >
-                <i class="fas fa-exchange-alt"></i>
-                Square Off Broker Positions
-              </button>
+              <!-- Square Off Buttons -->
+              <template v-if="!isMarginUpdateMode">
+                <button 
+                  @click="openPasswordModal('position', user)"
+                  class="action-button position-button"
+                  :disabled="updateLoading"
+                >
+                  <i class="fas fa-chart-line"></i>
+                  Square Off Positions
+                </button>
+                <button 
+                  @click="openPasswordModal('broker', user)"
+                  class="action-button broker-button"
+                  :disabled="updateLoading"
+                >
+                  <i class="fas fa-exchange-alt"></i>
+                  Square Off Broker Positions
+                </button>
+              </template>
+              <!-- Margin Update Button -->
               <button
+                v-if="isMarginUpdateMode"
                 @click="goToMarginUpdate(user)"
                 class="action-button margin-update-button"
               >
@@ -145,6 +167,9 @@ const selectedUser = ref(null);
 // Sorting state
 const sortKey = ref('username');
 const sortOrder = ref('asc');
+
+// Add mode toggle state
+const isMarginUpdateMode = ref(true); // Default to Margin Update mode
 
 // Sort function
 const sortByUsername = () => {
@@ -378,6 +403,7 @@ onMounted(() => {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+  min-width: 300px; /* Ensure consistent width */
 }
 
 .admin-table td.action-buttons {
@@ -395,6 +421,7 @@ onMounted(() => {
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap; /* Prevent button text from wrapping */
 }
 
 .position-button {
@@ -613,6 +640,73 @@ onMounted(() => {
   background-color: #b91c1c;
 }
 
+.mode-toggle-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.mode-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+}
+
+.toggle-input {
+  display: none;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  background: #e5e7eb;
+  border-radius: 20px;
+  padding: 4px;
+  cursor: pointer;
+  position: relative;
+  width: 240px;
+  height: 40px;
+  transition: all 0.3s ease;
+}
+
+.toggle-label::before {
+  content: '';
+  position: absolute;
+  width: 116px;
+  height: 32px;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  transform: translateX(4px);
+}
+
+.toggle-input:checked + .toggle-label::before {
+  transform: translateX(120px);
+}
+
+.toggle-text {
+  flex: 1;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  z-index: 1;
+  transition: color 0.3s ease;
+}
+
+.toggle-text.active {
+  color: #1f2937;
+}
+
+/* Responsive adjustments */
 @media (max-width: 640px) {
   .admin-container {
     padding: 16px;
@@ -633,6 +727,25 @@ onMounted(() => {
 
   .modal-actions button {
     width: 100%;
+  }
+
+  .toggle-label {
+    width: 200px;
+    height: 36px;
+  }
+
+  .toggle-label::before {
+    width: 96px;
+    height: 28px;
+  }
+
+  .toggle-input:checked + .toggle-label::before {
+    transform: translateX(100px);
+  }
+
+  .action-buttons {
+    min-width: auto;
+    flex-direction: column;
   }
 }
 </style> 
