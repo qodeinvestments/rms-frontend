@@ -13,8 +13,8 @@
           class="toggle-input"
         />
         <label for="mode-toggle" class="toggle-label">
-          <span class="toggle-text" :class="{ active: isMarginUpdateMode }">Margin Update</span>
-          <span class="toggle-text" :class="{ active: !isMarginUpdateMode }">Square Off</span>
+          <span class="toggle-text" :class="{ active: isMarginUpdateMode }">Square Off</span>
+          <span class="toggle-text" :class="{ active: !isMarginUpdateMode }">Margin Update</span>
         </label>
       </div>
     </div>
