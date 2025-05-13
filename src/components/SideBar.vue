@@ -137,6 +137,17 @@
                   <span class="text">Position Management</span>
                 </a>
               </li>
+
+              <li 
+                v-if="sidebarfeatures['pages'].includes('MarketHoliday')"
+                :class="selected == 'MarketHoliday' ? 'active' : ''"
+                @click="changeSelected('MarketHoliday')"
+              >
+                <a href="#">
+                  <i class="icon fas fa-calendar-xmark"></i>
+                  <span class="text">Market Holidays</span>
+                </a>
+              </li>
             </ul>
           </div>
         
@@ -194,6 +205,7 @@ export default {
         'AdminPanel': '/adminPanel',
         'MarginUpdate':'/marginUpdate',
         'PositionManagement':'/positionmanagement',
+        'MarketHoliday':'/market-holidays',
         'LivePositions': '/livepositions',
         'OpenTrades':'/opentrades',
         'SlippageUserPage':'/slippageUserPage',

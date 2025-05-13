@@ -27,6 +27,7 @@ import FundSummaryClient from '../components/FundSummaryClient.vue'
 import PositionManagement from '../components/PositionManagement.vue'
 import MarginUpdateCheck from '../components/MarginUpdateCheck.vue'
 import UserAllocation from '../components/UserAllocation.vue'
+import MarketHoliday from '../components/MarketHoliday.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -173,7 +174,12 @@ const router = createRouter({
       path: '/allocation',
       name: 'UserAllocation',
       component: UserAllocation,
-    }
+    },
+    {
+      path: '/market-holidays',
+      name: 'MarketHoliday',
+      component: MarketHoliday,
+    },
     // {
     //   path: '/about',
     //   name: 'about',
