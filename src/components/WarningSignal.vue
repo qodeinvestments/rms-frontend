@@ -179,7 +179,7 @@ const calculate_broker_position_mismatch = () => {
         const now = new Date();
         const minutes = now.getMinutes();
         const seconds = now.getSeconds();
-        if (minutes % 5 === 0 && seconds === 0) {
+        if (minutes % 5 === 0 && seconds > 30) {
             triggerToast('Broker Position Mismatch', 'warning')
         } 
     }
