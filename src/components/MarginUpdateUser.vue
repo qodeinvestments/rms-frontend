@@ -355,9 +355,15 @@
     </button>
   </div>
 </div>
-{{  marginUpdateCheckerError }}
+
     <!-- Client Multiplier Table -->
     <div v-if="!loading && !error" class="content-wrapper">
+      <!-- Add error message container -->
+      <div v-if="marginUpdateCheckerError && marginUpdateCheckerError !== 'No Error'" class="margin-checker-error">
+        <div class="error-icon">⚠️</div>
+        <div class="error-message">{{ marginUpdateCheckerError }}</div>
+      </div>
+
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-semibold text-gray-700">
           Client Multiplier Settings
@@ -680,6 +686,7 @@ const handleFeatureChange = (value) => {
 
 // Add the new validateFeatures function
 const validateFeatures = (selectedValues) => {
+  marginUpdateCheckerError.value="";
   const user_name=data.value['id_to_name_map'][account.value]
   const compulsory_basket=data.value['margin_update_check'][user_name];
   const next_trading_day=data.value['next_trading_day'];
@@ -1798,5 +1805,41 @@ onMounted(() => {
 .submit-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Add new styles for margin checker error */
+.margin-checker-error {
+  background-color: #fee2e2;
+  border: 2px solid #ef4444;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.error-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.error-message {
+  color: #dc2626;
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
