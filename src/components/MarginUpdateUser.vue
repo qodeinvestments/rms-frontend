@@ -355,6 +355,7 @@
     </button>
   </div>
 </div>
+{{  marginUpdateCheckerError }}
     <!-- Client Multiplier Table -->
     <div v-if="!loading && !error" class="content-wrapper">
       <div class="flex items-center justify-between mb-4">
@@ -501,6 +502,9 @@ const totpError = ref("");
 const modalAction = ref("");
 const isProcessing = ref(false);
 
+const holidayDates = ref([])
+const marginUpdateCheckerError=ref("No Error");
+
 // Data for multipliers
 const live_clients = ref({});
 const client_multiplier = ref({});
@@ -638,6 +642,10 @@ const featuresOptionsWithAll = computed(() => {
 // Handle multi-select feature changes
 const handleFeatureChange = (value) => {
   if (!data.value || !data.value.baskets) return;
+  
+  // Call validateFeatures before proceeding with the change
+  validateFeatures(value);
+  
   if (value.includes("all")) {
     if (isAllSelected.value) {
       // Deselect all features
@@ -668,6 +676,50 @@ const handleFeatureChange = (value) => {
     client_multiplier.value = updatedMultiplier;
   }
   hasUnsavedChanges.value = true;
+};
+
+// Add the new validateFeatures function
+const validateFeatures = (selectedValues) => {
+  const user_name=data.value['id_to_name_map'][account.value]
+  const compulsory_basket=data.value['margin_update_check'][user_name];
+  const next_trading_day=data.value['next_trading_day'];
+  const startDate = new Date(next_trading_day);
+
+  Object.keys(compulsory_basket).forEach(key => {
+    console.log(key, compulsory_basket[key]," ",compulsory_basket[key]['type']);
+    if(compulsory_basket[key]['type']==='specific_days'){
+        const day_to_run=compulsory_basket[key]['value'];
+        let count=1;
+        for (let i = 0; i < 6; i++) {
+          const newDate = new Date(startDate);
+          newDate.setDate(startDate.getDate() + i);
+          const dayName = newDate.toLocaleDateString('en-US', { weekday: 'long' });
+          const dateStr = newDate.toISOString().split('T')[0];
+          if(holidayDates.value.includes(dateStr))break;
+          if(day_to_run.includes(dayName)){
+            count+=1;
+            break;
+          }
+        }
+        if(count==1)
+        {
+          if(!selectedValues.includes(key)){
+            marginUpdateCheckerError.value=`${key} should be present`;
+          }
+        } 
+        else{
+          if(selectedValues.includes(key)){
+             marginUpdateCheckerError.value=`${key} should not be present`;
+          }
+        }
+    }
+    else if(compulsory_basket[key]['type']==='all'){
+        if(!selectedValues.includes(key)){
+             marginUpdateCheckerError.value=`${key} should be present`;
+        }
+    }
+  });
+
 };
 
 // Show TOTP Modal with action
@@ -825,6 +877,7 @@ const fetchMarginData = async () => {
 
   try {
     await fetchData("MarginData", data);
+    holidayDates.value=data.value['market_holiday'].map(h => h.date);
     if (!data.value) throw new Error("Failed to fetch margin data");
 
     // Fill in local data from response
@@ -1191,6 +1244,7 @@ const updateMultiplier = async () => {
 
     // Optionally refresh data
     await fetchMarginData();
+    validateFeatures();
   } catch (err) {
     alert(`Error updating client multiplier: ${err.message}`);
     totpError.value = err.message;
@@ -1253,6 +1307,7 @@ watch(
 // Lifecycle
 onMounted(() => {
   fetchMarginData();
+
 });
 </script>
 <style scoped>
