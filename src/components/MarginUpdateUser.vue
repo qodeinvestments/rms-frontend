@@ -573,7 +573,7 @@ const selectStrategyMainTable=(basket)=>{
 // Handle strategy selection changes
 const handleStrategyChange = (value) => {
   if (!filteredData.value) return;
-  console.log("value is:",value);
+
   
   // Store original data if not stored yet
   if (!originalFilteredData.value) {
@@ -691,9 +691,14 @@ const validateFeatures = (selectedValues) => {
   const compulsory_basket=data.value['margin_update_check'][user_name];
   const next_trading_day=data.value['next_trading_day'];
   const startDate = new Date(next_trading_day);
+  Object.keys(selectedValues).forEach(key => {
+    if (!(selectedValues[key] in compulsory_basket)) {// ✅ acts like 'continue' in forEach
+      marginUpdateCheckerError.value = `${selectedValues[key]} should not be present`;
+      return;
+    }
+  });
 
   Object.keys(compulsory_basket).forEach(key => {
-    console.log(key, compulsory_basket[key]," ",compulsory_basket[key]['type']);
     if(compulsory_basket[key]['type']==='specific_days'){
         const day_to_run=compulsory_basket[key]['value'];
         let count=1;
