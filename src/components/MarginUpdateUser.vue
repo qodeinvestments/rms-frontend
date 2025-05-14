@@ -660,8 +660,7 @@ const featuresOptionsWithAll = computed(() => {
 const handleFeatureChange = (value) => {
   if (!data.value || !data.value.baskets) return;
   
-  // Call validateFeatures before proceeding with the change
-  validateFeatures(value);
+
   
   if (value.includes("all")) {
     if (isAllSelected.value) {
@@ -693,10 +692,13 @@ const handleFeatureChange = (value) => {
     client_multiplier.value = updatedMultiplier;
   }
   hasUnsavedChanges.value = true;
+  validateFeatures();
 };
 
 // Add the new validateFeatures function
-const validateFeatures = (selectedValues) => {
+const validateFeatures = () => {
+  let selectedValues=selectedFeatures.value;
+  console.log("running validateFeatures");
   marginUpdateCheckerError.value="";
   const user_name=data.value['id_to_name_map'][account.value]
   const compulsory_basket=data.value['margin_update_check'][user_name];
@@ -963,6 +965,8 @@ const fetchMarginData = async () => {
     console.error("Error fetching margin data:", err);
   } finally {
     loading.value = false;
+    validateFeatures();
+    validateMainDataTable();
   }
 };
 
@@ -1266,8 +1270,7 @@ const updateMultiplier = async () => {
 
     // Optionally refresh data
     await fetchMarginData();
-    validateFeatures();
-    validateMainDataTable();
+  
   } catch (err) {
     alert(`Error updating client multiplier: ${err.message}`);
     totpError.value = err.message;
@@ -1330,7 +1333,8 @@ watch(
 
 
 // Add new validation function for main data table
-const validateMainDataTable = (selectedValues) => {
+const validateMainDataTable = () => {
+  let selectedValues=selectedStrategies.value;
   mainDataTableError.value = "";
   const user_name=data.value['id_to_name_map'][account.value]
   const compulsory_basket=data.value['margin_update_check'][user_name];
