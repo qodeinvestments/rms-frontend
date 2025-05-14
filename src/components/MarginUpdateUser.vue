@@ -720,10 +720,8 @@ const validateFeatures = (selectedValues) => {
           const dateStr = newDate.toISOString().split('T')[0];
           if(dayName=='Saturday' || dayName=='Sunday')continue;
           else if(holidayDates.value.includes(dateStr))break;
-          else if(day_to_run.includes(dayName)){
-            count+=1;
-            break;
-          }
+          else if(day_to_run.includes(dayName))break;
+          count+=1;
         }
         if(count==1)
         {
