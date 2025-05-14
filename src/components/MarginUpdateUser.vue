@@ -1336,13 +1336,19 @@ const validateMainDataTable = (selectedValues) => {
   mainDataTableError.value = "";
   const user_name=data.value['id_to_name_map'][account.value]
   const compulsory_basket=data.value['margin_update_check'][user_name];
-  
-  const keysToCheck = Object.values(selectedValues);
+  const swan_baskets=data.value.swan_baskets;
+ 
 
-  keysToCheck.forEach(key => {
+  selectedValues.forEach(key => {
     if (!(key in compulsory_basket)) {
       mainDataTableError.value =  key + " should not be present.";
     } 
+  });
+  Object.keys(compulsory_basket).forEach(key => {
+    if(swan_baskets.includes(key) && !selectedValues.includes(key)){
+      mainDataTableError.value =  key + " should be present.";
+    }
+   
   });
 
 };
