@@ -709,7 +709,6 @@ const how_many_days_to_start=(startDate,day_to_run)=>{
         }
         return count;
 }
-
 // Helper function to validate basket selections
 const validateBasketSelections = (selectedValues, basketType, errorRef) => {
   errorRef.value = "";
@@ -749,7 +748,7 @@ const validateBasketSelections = (selectedValues, basketType, errorRef) => {
   });
 };
 
-// Replace the existing validation functions
+// Replace both validation functions with calls to the helper
 const validateFeatures = () => {
   validateBasketSelections(selectedFeatures.value, 'feature', marginUpdateCheckerError);
 };
