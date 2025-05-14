@@ -242,6 +242,12 @@
     
 <!-- Main Data Table -->
 <div v-if="filteredData  && !loading && !error" class="content-wrapper">
+  <!-- Add error message container for main data table validation -->
+  <div v-if="mainDataTableError && mainDataTableError !== ''" class="margin-checker-error">
+    <div class="error-icon">⚠️</div>
+    <div class="error-message">{{ mainDataTableError }}</div>
+  </div>
+
   <!-- Existing content structure -->
   <div class="flex items-center justify-between mb-4">
     <!-- Add title here similar to other sections -->
@@ -510,6 +516,8 @@ const isProcessing = ref(false);
 
 const holidayDates = ref([])
 const marginUpdateCheckerError=ref("No Error");
+// Add new ref for main data table validation
+const mainDataTableError = ref("");
 
 // Data for multipliers
 const live_clients = ref({});
@@ -596,6 +604,9 @@ const handleStrategyChange = (value) => {
     }
     selectStrategyMainTable(selectedStrategies.value)
   }
+  
+  // Add validation call
+  validateMainDataTable(selectedStrategies.value);
 };
 
 
@@ -707,8 +718,9 @@ const validateFeatures = (selectedValues) => {
           newDate.setDate(startDate.getDate() + i);
           const dayName = newDate.toLocaleDateString('en-US', { weekday: 'long' });
           const dateStr = newDate.toISOString().split('T')[0];
-          if(holidayDates.value.includes(dateStr))break;
-          if(day_to_run.includes(dayName)){
+          if(dayName=='Saturday' || dayName=='Sunday')continue;
+          else if(holidayDates.value.includes(dateStr))break;
+          else if(day_to_run.includes(dayName)){
             count+=1;
             break;
           }
@@ -1257,6 +1269,7 @@ const updateMultiplier = async () => {
     // Optionally refresh data
     await fetchMarginData();
     validateFeatures();
+    validateMainDataTable();
   } catch (err) {
     alert(`Error updating client multiplier: ${err.message}`);
     totpError.value = err.message;
@@ -1315,6 +1328,24 @@ watch(
     validatePortfolioValue()
   }
 )
+
+
+
+// Add new validation function for main data table
+const validateMainDataTable = (selectedValues) => {
+  mainDataTableError.value = "";
+  const user_name=data.value['id_to_name_map'][account.value]
+  const compulsory_basket=data.value['margin_update_check'][user_name];
+  
+  const keysToCheck = Object.values(selectedValues);
+
+  keysToCheck.forEach(key => {
+    if (!(key in compulsory_basket)) {
+      mainDataTableError.value =  key + " should not be present.";
+    } 
+  });
+
+};
 
 // Lifecycle
 onMounted(() => {
