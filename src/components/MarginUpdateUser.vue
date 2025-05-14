@@ -695,25 +695,7 @@ const handleFeatureChange = (value) => {
   validateFeatures();
 };
 
-// Add the new validateFeatures function
-const validateFeatures = () => {
-  let selectedValues=selectedFeatures.value;
-  console.log("running validateFeatures");
-  marginUpdateCheckerError.value="";
-  const user_name=data.value['id_to_name_map'][account.value]
-  const compulsory_basket=data.value['margin_update_check'][user_name];
-  const next_trading_day=data.value['next_trading_day'];
-  const startDate = new Date(next_trading_day);
-  Object.keys(selectedValues).forEach(key => {
-    if (!(selectedValues[key] in compulsory_basket)) {// ✅ acts like 'continue' in forEach
-      marginUpdateCheckerError.value = `${selectedValues[key]} should not be present`;
-      return;
-    }
-  });
-
-  Object.keys(compulsory_basket).forEach(key => {
-    if(compulsory_basket[key]['type']==='specific_days'){
-        const day_to_run=compulsory_basket[key]['value'];
+const how_many_days_to_start=(startDate,day_to_run)=>{
         let count=1;
         for (let i = 0; i < 6; i++) {
           const newDate = new Date(startDate);
@@ -721,29 +703,59 @@ const validateFeatures = () => {
           const dayName = newDate.toLocaleDateString('en-US', { weekday: 'long' });
           const dateStr = newDate.toISOString().split('T')[0];
           if(dayName=='Saturday' || dayName=='Sunday')continue;
-          else if(holidayDates.value.includes(dateStr))break;
+          else if(holidayDates.value.includes(dateStr))continue;
           else if(day_to_run.includes(dayName))break;
           count+=1;
         }
-        if(count==1)
-        {
-          if(!selectedValues.includes(key)){
-            marginUpdateCheckerError.value=`${key} should be present`;
-          }
-        } 
-        else{
-          if(selectedValues.includes(key)){
-             marginUpdateCheckerError.value=`${key} should not be present`;
-          }
-        }
-    }
-    else if(compulsory_basket[key]['type']==='all'){
-        if(!selectedValues.includes(key)){
-             marginUpdateCheckerError.value=`${key} should be present`;
-        }
+        return count;
+}
+
+// Helper function to validate basket selections
+const validateBasketSelections = (selectedValues, basketType, errorRef) => {
+  errorRef.value = "";
+  const user_name = data.value['id_to_name_map'][account.value];
+  const compulsory_basket = data.value['margin_update_check'][user_name];
+  const available_baskets = data.value[basketType === 'swan' ? 'swan_baskets' : 'baskets'];
+  const next_trading_day = data.value['next_trading_day'];
+  const startDate = new Date(next_trading_day);
+
+  // Check if any selected value is not in compulsory basket
+  Object.keys(selectedValues).forEach(key => {
+    if (!(selectedValues[key] in compulsory_basket)) {
+      errorRef.value = `${selectedValues[key]} should not be present`;
+      return;
     }
   });
 
+  // Check compulsory basket requirements
+  Object.keys(compulsory_basket).forEach(key => {
+    if (compulsory_basket[key]['type'] === 'specific_days' && available_baskets.includes(key)) {
+      const day_to_run = compulsory_basket[key]['value'];
+      let count = how_many_days_to_start(startDate, day_to_run);
+      if (count === 1) {
+        if (!selectedValues.includes(key)) {
+          errorRef.value = `${key} should be present`;
+        }
+      } else {
+        if (selectedValues.includes(key)) {
+          errorRef.value = `${key} should not be present`;
+        }
+      }
+    } else if (compulsory_basket[key]['type'] === 'all') {
+      if (available_baskets.includes(key) && !selectedValues.includes(key)) {
+        errorRef.value = `${key} should be present`;
+      }
+    }
+  });
+};
+
+// Replace the existing validation functions
+const validateFeatures = () => {
+  validateBasketSelections(selectedFeatures.value, 'feature', marginUpdateCheckerError);
+};
+
+const validateMainDataTable = () => {
+  validateBasketSelections(selectedStrategies.value, 'swan', mainDataTableError);
 };
 
 // Show TOTP Modal with action
@@ -1331,29 +1343,6 @@ watch(
 )
 
 
-
-// Add new validation function for main data table
-const validateMainDataTable = () => {
-  let selectedValues=selectedStrategies.value;
-  mainDataTableError.value = "";
-  const user_name=data.value['id_to_name_map'][account.value]
-  const compulsory_basket=data.value['margin_update_check'][user_name];
-  const swan_baskets=data.value.swan_baskets;
- 
-
-  selectedValues.forEach(key => {
-    if (!(key in compulsory_basket)) {
-      mainDataTableError.value =  key + " should not be present.";
-    } 
-  });
-  Object.keys(compulsory_basket).forEach(key => {
-    if(swan_baskets.includes(key) && !selectedValues.includes(key)){
-      mainDataTableError.value =  key + " should be present.";
-    }
-   
-  });
-
-};
 
 // Lifecycle
 onMounted(() => {
