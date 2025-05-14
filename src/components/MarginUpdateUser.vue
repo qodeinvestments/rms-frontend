@@ -721,7 +721,7 @@ const validateBasketSelections = (selectedValues, basketType, errorRef) => {
   // Check if any selected value is not in compulsory basket
   Object.keys(selectedValues).forEach(key => {
     if (!(selectedValues[key] in compulsory_basket)) {
-      errorRef.value = `${selectedValues[key]} should not be present`;
+      errorRef.value = `${selectedValues[key]} should not be present Tomorrow`;
       return;
     }
   });
@@ -733,16 +733,16 @@ const validateBasketSelections = (selectedValues, basketType, errorRef) => {
       let count = how_many_days_to_start(startDate, day_to_run);
       if (count === 1) {
         if (!selectedValues.includes(key)) {
-          errorRef.value = `${key} should be present`;
+          errorRef.value = `${key} should be present Tomorrow`;
         }
       } else {
         if (selectedValues.includes(key)) {
-          errorRef.value = `${key} should not be present`;
+          errorRef.value = `${key} should not be present Tomorrow`;
         }
       }
     } else if (compulsory_basket[key]['type'] === 'all') {
       if (available_baskets.includes(key) && !selectedValues.includes(key)) {
-        errorRef.value = `${key} should be present`;
+        errorRef.value = `${key} should be present Tomorrow`;
       }
     }
   });
