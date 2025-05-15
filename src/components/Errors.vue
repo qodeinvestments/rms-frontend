@@ -194,10 +194,9 @@ watch(data, (newValue) => {
             console.log('Updating book for New Order Errors, selected option:', selectedNewOrderOption.value)
             if (selectedNewOrderOption.value === 'ALL') {
                 book.value = allNewOrderErrors.value
-                console.log('Set all data:', book.value.length, 'items')
             } else {
                 book.value = allNewOrderErrors.value.filter(item => item.Account === selectedNewOrderOption.value)
-                console.log('Set filtered data:', book.value.length, 'items')
+              
             }
         }
     }
@@ -242,7 +241,7 @@ watch(showOnPage, (newValue) => {
             console.log('Set all data on page change:', book.value.length, 'items')
         } else {
             book.value = allNewOrderErrors.value.filter(item => item.Account === selectedNewOrderOption.value)
-            console.log('Set filtered data on page change:', book.value.length, 'items')
+           
         }
     }
 })
