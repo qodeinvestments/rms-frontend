@@ -396,7 +396,14 @@ const client_holdings=[
       id: 'Portfolio Value',
       cell: info => info.getValue(),
       header: () => 'Portfolio Value',
+    }),
+    columnHelper.accessor(row => row['Settlement Price'], {
+      id: 'Settlement Price',
+      cell: info => info.getValue(),
+      header: () => 'Settlement Price',
     })
+    
+
     
   ]
 
