@@ -20,7 +20,7 @@ import MultiLineChart from './HighCharts.vue'
 
 import LightWeightChart from './LightWeightChart.vue';
 
-import { order_errors_columns } from '../components/TableVariables/ErrorPageTable.js'; 
+import { order_errors_columns,new_order_errors_columns } from '../components/TableVariables/ErrorPageTable.js'; 
 
 
 
@@ -159,7 +159,6 @@ watch(data, (newValue) => {
         options.value.push("ALL")
     }
 
-
     if (showOnPage.value === 'Order_Errors') {
         if (selectedOption.value == 'ALL') {
             if (data['Order_Errors']) {
@@ -169,18 +168,21 @@ watch(data, (newValue) => {
         }
         else if (selectedOption.value != '')
             book.value = data['Order_Errors'][selectedOption.value]
-
+    }
+    else if (showOnPage.value === 'New_Order_Errors') {
+        console.log("i am here eee"," ",data)
+        if (data['New_Order_Errors']) {
+            book.value = data['New_Order_Errors']
+        } else {
+            book.value = []
+        }
     }
     else {
-
         if (map[showOnPage.value]) {
             book.value = newValue['Pulse_Errors'][map[showOnPage.value]] || []
         }
-
         else book.value = []
     }
-
-
 }, { immediate: true });
 
 onMounted(() => {
@@ -210,7 +212,7 @@ onUnmounted(() => {
 
         <div class="navContainer">
             <NavBar
-                :navColumns="['Order_Errors', 'Testing', 'Run_Strats', 'Web_Sockets', 'XTS_Trader', 'Zerodha_Trader', 'PosMis Generator']"
+                :navColumns="['Order_Errors', 'Testing', 'Run_Strats', 'Web_Sockets', 'XTS_Trader', 'Zerodha_Trader', 'PosMis Generator','New_Order_Errors']"
                 @column-clicked="handleColumnClick" :colorColumns="colorColumns" />
         </div>
         <div class="userSelectContainer" v-if="book && showOnPage === 'Order_Errors'">
@@ -226,6 +228,11 @@ onUnmounted(() => {
         <div class="my-8" v-if="book && showOnPage === 'Order_Errors'">
             <!-- <p class="table-heading">{{ showOnPage }}</p> -->
             <TanStackTestTable :title="showOnPage" :data="book" :columns="order_errors_columns" :hasColor="[]"
+                :navigateTo="[]" :showPagination=true />
+        </div>
+        <div class="my-8" v-if="book && showOnPage === 'New_Order_Errors'">
+            <!-- <p class="table-heading">{{ showOnPage }}</p> -->
+            <TanStackTestTable :title="showOnPage" :data="book" :columns="new_order_errors_columns" :hasColor="[]"
                 :navigateTo="[]" :showPagination=true />
         </div>
         <div class="my-8" v-else-if="book">

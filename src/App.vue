@@ -149,7 +149,6 @@ const handleMessage = (message) => {
         }
       }
     }
-
     book.value['Order_Errors'] = message['Order_Errors']
 
     if (book.value['Pulse_Errors']) {
@@ -158,9 +157,13 @@ const handleMessage = (message) => {
           triggerToast('New Error in ' + key, 'error')
         }
       }
-
     }
     book.value['Pulse_Errors'] = message['Pulse_Errors']
+
+    // Add handling for New_Order_Errors
+    if (message['New_Order_Errors']) {
+      book.value['New_Order_Errors'] = message['New_Order_Errors']
+    }
 
   } catch (error) {
     console.error('Error parsing event data or updating data:', error);

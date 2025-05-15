@@ -30,3 +30,28 @@ return columnHelper.accessor(row => row[column], {
     header: () => column,
 });
 });
+
+
+const new_order_errors_ob_columns = [
+   'Account',
+   'Reason',
+   'Order Id',
+   'Status',
+    'Time',
+    'Symbol',
+    'Order Type',
+    'Transaction Type',
+    'Quantity',
+    'Price',
+    'Average Price',
+    'Filled Quantity',
+    'Pending Quantity'
+  ];
+  
+export const  new_order_errors_columns  = new_order_errors_ob_columns.map(column => {
+return columnHelper.accessor(row => row[column], {
+    id: column,
+    cell: info => info.getValue(),
+    header: () => column,
+});
+});
