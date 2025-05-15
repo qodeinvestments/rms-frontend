@@ -276,17 +276,16 @@ onUnmounted(() => {
                 :navColumns="['Order_Errors', 'Testing', 'Run_Strats', 'Web_Sockets', 'XTS_Trader', 'Zerodha_Trader', 'PosMis Generator','New_Order_Errors']"
                 @column-clicked="handleColumnClick" :colorColumns="colorColumns" />
         </div>
-        <div class="userSelectContainer" v-if="book && showOnPage === 'Order_Errors'">
+        <div class="userSelectContainer" v-if="showOnPage === 'Order_Errors'">
             <label class="table-heading" for="options">Select an User:</label>
             <select class="table-heading" id="options" v-model="selectedOption">
                 <option v-for="option in options" :key="option" :value="option">
                     {{ option }}
                 </option>
             </select>
-
         </div>
 
-        <div class="userSelectContainer" v-if="book && showOnPage === 'New_Order_Errors'">
+        <div class="userSelectContainer" v-if="showOnPage === 'New_Order_Errors'">
             <label class="table-heading" for="newOrderOptions">Select an Account:</label>
             <select class="table-heading" id="newOrderOptions" v-model="selectedNewOrderOption">
                 <option v-for="option in newOrderOptions" :key="option" :value="option">
@@ -295,22 +294,18 @@ onUnmounted(() => {
             </select>
         </div>
 
-        <div class="my-8" v-if="book && showOnPage === 'Order_Errors'">
-            <!-- <p class="table-heading">{{ showOnPage }}</p> -->
+        <div class="my-8" v-if="showOnPage === 'Order_Errors' && book">
             <TanStackTestTable :title="showOnPage" :data="book" :columns="order_errors_columns" :hasColor="[]"
                 :navigateTo="[]" :showPagination=true />
         </div>
-        <div class="my-8" v-if="book && showOnPage === 'New_Order_Errors'">
-            <!-- <p class="table-heading">{{ showOnPage }}</p> -->
+        <div class="my-8" v-else-if="showOnPage === 'New_Order_Errors' && book">
             <TanStackTestTable :title="showOnPage" :data="book" :columns="new_order_errors_columns" :hasColor="[]"
                 :navigateTo="[]" :showPagination=true />
         </div>
         <div class="my-8" v-else-if="book">
-            <!-- <p class="table-heading">{{ showOnPage }}</p> -->
             <TanStackTestTable :title="showOnPage" :data="book" :columns="columns_testing" :hasColor="[]"
                 :navigateTo="[]" :showPagination=true />
         </div>
-
 
     </div>
 
