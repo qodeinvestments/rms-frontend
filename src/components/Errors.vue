@@ -114,6 +114,9 @@ const past_time_client = ref(0)
 const max_client_latency = ref(0)
 const book = ref([])
 const selectedOption = ref("ALL")
+const selectedNewOrderOption = ref("ALL")
+const newOrderOptions = ref([])
+const allNewOrderErrors = ref([])  // Add this to store the complete dataset
 
 const handleColumnClick = ({ item, index }) => {
     showOnPage.value = item;
@@ -139,7 +142,23 @@ const map = {
 
 const showOnPage = ref('Order_Errors')
 
+// Add watch for selectedNewOrderOption
+watch(selectedNewOrderOption, (newValue) => {
+    console.log('Selected New Order Option changed:', newValue)
+    if (showOnPage.value === 'New_Order_Errors' && allNewOrderErrors.value.length > 0) {
+        console.log('Filtering New Order Errors for account:', newValue)
+        if (newValue === 'ALL') {
+            book.value = allNewOrderErrors.value
+            console.log('Setting all data:', book.value.length, 'items')
+        } else {
+            book.value = allNewOrderErrors.value.filter(item => item.Account === newValue)
+            console.log('Filtered data:', book.value.length, 'items')
+        }
+    }
+})
+
 watch(data, (newValue) => {
+    console.log('Data changed:', newValue)
     updateColorColumns(newValue, newValue['time'])
     if (newValue['time']) {
         let ar2 = newValue["time"];
@@ -159,6 +178,30 @@ watch(data, (newValue) => {
         options.value.push("ALL")
     }
 
+    if ('New_Order_Errors' in data) {
+        console.log('Processing New Order Errors data')
+        // Store the complete dataset
+        allNewOrderErrors.value = data['New_Order_Errors']
+        
+        // Get unique accounts from New_Order_Errors array
+        const accounts = [...new Set(data['New_Order_Errors'].map(item => item.Account))]
+        console.log('Found accounts:', accounts)
+        newOrderOptions.value = accounts
+        newOrderOptions.value.push("ALL")
+        
+        // Apply current filter to new data
+        if (showOnPage.value === 'New_Order_Errors') {
+            console.log('Updating book for New Order Errors, selected option:', selectedNewOrderOption.value)
+            if (selectedNewOrderOption.value === 'ALL') {
+                book.value = allNewOrderErrors.value
+                console.log('Set all data:', book.value.length, 'items')
+            } else {
+                book.value = allNewOrderErrors.value.filter(item => item.Account === selectedNewOrderOption.value)
+                console.log('Set filtered data:', book.value.length, 'items')
+            }
+        }
+    }
+
     if (showOnPage.value === 'Order_Errors') {
         if (selectedOption.value == 'ALL') {
             if (data['Order_Errors']) {
@@ -170,9 +213,13 @@ watch(data, (newValue) => {
             book.value = data['Order_Errors'][selectedOption.value]
     }
     else if (showOnPage.value === 'New_Order_Errors') {
-        console.log("i am here eee"," ",data)
-        if (data['New_Order_Errors']) {
-            book.value = data['New_Order_Errors']
+        // Apply current filter to the complete dataset
+        if (allNewOrderErrors.value.length > 0) {
+            if (selectedNewOrderOption.value === 'ALL') {
+                book.value = allNewOrderErrors.value
+            } else {
+                book.value = allNewOrderErrors.value.filter(item => item.Account === selectedNewOrderOption.value)
+            }
         } else {
             book.value = []
         }
@@ -184,6 +231,21 @@ watch(data, (newValue) => {
         else book.value = []
     }
 }, { immediate: true });
+
+// Also add a watch for showOnPage to handle page changes
+watch(showOnPage, (newValue) => {
+    console.log('Page changed to:', newValue)
+    if (newValue === 'New_Order_Errors' && allNewOrderErrors.value.length > 0) {
+        console.log('Updating book for page change to New Order Errors')
+        if (selectedNewOrderOption.value === 'ALL') {
+            book.value = allNewOrderErrors.value
+            console.log('Set all data on page change:', book.value.length, 'items')
+        } else {
+            book.value = allNewOrderErrors.value.filter(item => item.Account === selectedNewOrderOption.value)
+            console.log('Set filtered data on page change:', book.value.length, 'items')
+        }
+    }
+})
 
 onMounted(() => {
     name.value = route.params.username;
@@ -225,6 +287,15 @@ onUnmounted(() => {
 
         </div>
 
+        <div class="userSelectContainer" v-if="book && showOnPage === 'New_Order_Errors'">
+            <label class="table-heading" for="newOrderOptions">Select an Account:</label>
+            <select class="table-heading" id="newOrderOptions" v-model="selectedNewOrderOption">
+                <option v-for="option in newOrderOptions" :key="option" :value="option">
+                    {{ option }}
+                </option>
+            </select>
+        </div>
+
         <div class="my-8" v-if="book && showOnPage === 'Order_Errors'">
             <!-- <p class="table-heading">{{ showOnPage }}</p> -->
             <TanStackTestTable :title="showOnPage" :data="book" :columns="order_errors_columns" :hasColor="[]"
@@ -250,6 +321,9 @@ onUnmounted(() => {
 <style scoped>
 .userSelectContainer {
     margin-top: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .pageContainer {
