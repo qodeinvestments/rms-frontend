@@ -49,7 +49,12 @@
                   :key="'sum-' + column"
                   :class="column !== 'Date' ? (columnSums[column] > 0 ? 'positive-value' : (columnSums[column] < 0 ? 'negative-value' : '')) : ''"
                 >
-                  {{ column === 'Date' ? '' : formatPercentage(columnSums[column] || 0) }}
+                  <template v-if="column === 'Date'">
+                    Weight Sum
+                  </template>
+                  <template v-else>
+                    {{ formatWeightSum(columnSums[`${column}_weight_sum`] || 0) }}
+                  </template>
                 </th>
               </tr>
               <!-- Header Row (clickable for sorting) -->
@@ -122,10 +127,13 @@
   ];
   
   // ----- Computed Properties -----
-  // allColumns: Build header with "Date" first then the other keys.
+  // allColumns: Build header with "Date" first then the other keys (excluding weight columns)
   const allColumns = computed(() => {
     if (performanceData.value.length === 0) return [];
-    return ['Date', ...Object.keys(performanceData.value[0]).filter(key => key !== 'date')];
+    const columns = ['Date'];
+    const nonWeightColumns = Object.keys(performanceData.value[0])
+      .filter(key => key !== 'date' && !key.endsWith('weight'));
+    return [...columns, ...nonWeightColumns];
   });
   
   // Add this function to your script setup section
@@ -149,7 +157,7 @@ const sortByColumn = (column) => {
 
 
 
-  // columnSums: Sum numeric values for each column (skip date)
+  // columnSums: Calculate sums for both regular and weight columns
   const columnSums = computed(() => {
     const sums = {};
     filteredPerformanceData.value.forEach(row => {
@@ -157,7 +165,15 @@ const sortByColumn = (column) => {
         if (key === 'date') continue;
         const num = parseFloat(row[key]);
         if (!isNaN(num)) {
-          sums[key] = (sums[key] || 0) + num;
+          // For regular columns
+          if (!key.endsWith('weight')) {
+            sums[key] = (sums[key] || 0) + num;
+          }
+          // For weight columns
+          if (key.endsWith('weight')) {
+            const baseKey = key.replace('weight', '');
+            sums[`${baseKey}_weight_sum`] = (sums[`${baseKey}_weight_sum`] || 0) + num;
+          }
         }
       }
     });
@@ -335,6 +351,13 @@ const sortByColumn = (column) => {
     const numericValue = parseFloat(value);
     if (isNaN(numericValue)) return '0.0000%';
     return numericValue.toFixed(4) + '%';
+  };
+  
+  // Add this new formatting function after formatPercentage
+  const formatWeightSum = (value) => {
+    const numericValue = parseFloat(value);
+    if (isNaN(numericValue)) return '0.0000';
+    return numericValue.toFixed(4);
   };
   
   // Return a CSS class based on value.
