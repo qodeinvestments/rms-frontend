@@ -1,22 +1,27 @@
 <template>
   <div class="payoff-chart-container">
-    <div class="chart-toolbar">
-      <button @click="zoomIn" class="toolbar-btn" title="Zoom In">
-        <span>+</span>
-      </button>
-      <button @click="zoomOut" class="toolbar-btn" title="Zoom Out">
-        <span>−</span>
-      </button>
-      <button @click="resetZoom" class="toolbar-btn" title="Reset Zoom">
-        <span>↺</span>
-      </button>
+    <div v-if="!data || !data.length" class="no-data-message">
+      Select an account and strategy, then click "Generate Payoff Chart" to view the data
     </div>
-    <canvas ref="chartCanvas"></canvas>
+    <template v-else>
+      <div class="chart-toolbar">
+        <button @click="zoomIn" class="toolbar-btn" title="Zoom In">
+          <span>+</span>
+        </button>
+        <button @click="zoomOut" class="toolbar-btn" title="Zoom Out">
+          <span>−</span>
+        </button>
+        <button @click="resetZoom" class="toolbar-btn" title="Reset Zoom">
+          <span>↺</span>
+        </button>
+      </div>
+      <canvas ref="chartCanvas"></canvas>
+    </template>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { ref, onMounted, watch, onUnmounted, nextTick } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import zoomPlugin from 'chartjs-plugin-zoom'
 
@@ -71,165 +76,249 @@ const resetZoom = () => {
 }
 
 const initChart = () => {
-  const transformedData = props.data
-  
-  // Calculate the min and max x values
-  const xValues = transformedData.map(item => parseFloat(item.Percentage))
-  const minX = Math.min(...xValues)
-  const maxX = Math.max(...xValues)
-  const xAxisMin = Math.floor(minX * 1.1) // 10% padding
-  const xAxisMax = Math.ceil(maxX * 1.1)  // 10% padding
-
-  // Destroy existing chart if it exists
-  if (chart.value) {
-    chart.value.destroy()
-  }
-
-  const ctx = chartCanvas.value.getContext('2d')
-  
-  chart.value = new Chart(ctx, {
-    type: 'line',
-    data: {
-      datasets: [{
-        label: 'Payoff',
-        data: transformedData.map(item => ({
-          x: parseFloat(item.Percentage),
-          y: item.Value
-        })),
-        borderColor: '#2196F3',
-        backgroundColor: 'rgba(33, 150, 243, 0.1)',
-        borderWidth: 2.5,
-        pointRadius: 5,
-        pointHoverRadius: 7,
-        pointBackgroundColor: '#2196F3',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-        tension: 0, // Straight lines
-        fill: false
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        mode: 'index',
-        intersect: false
-      },
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          callbacks: {
-            label: (context) => {
-              return new Intl.NumberFormat('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-                maximumFractionDigits: 0
-              }).format(context.parsed.y)
-            },
-            title: (context) => {
-              return `${context[0].parsed.x}%`
-            }
-          }
-        },
-        zoom: {
-          pan: {
-            enabled: true,
-            mode: 'x',
-            modifierKey: null
-          },
-          zoom: {
-            wheel: {
-              enabled: true,
-              modifierKey: null
-            },
-            pinch: {
-              enabled: true
-            },
-            mode: 'x',
-            drag: {
-              enabled: false
-            },
-            limits: {
-              min: 0.5,
-              max: 10
-            }
-          },
-          limits: {
-            x: {
-              min: xAxisMin,
-              max: xAxisMax
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          type: 'linear',
-          min: xAxisMin,
-          max: xAxisMax,
-          title: {
-            display: true,
-            text: 'Percentage (%)',
-            font: {
-              size: 14,
-              weight: 'bold'
-            }
-          },
-          ticks: {
-            callback: (value) => `${value}%`
-          },
-          grid: {
-            color: '#e7e7e7'
-          }
-        },
-        y: {
-          title: {
-            display: true,
-            text: 'Value (₹)',
-            font: {
-              size: 14,
-              weight: 'bold'
-            }
-          },
-          ticks: {
-            callback: (value) => new Intl.NumberFormat('en-IN', {
-              style: 'currency',
-              currency: 'INR',
-              maximumFractionDigits: 0
-            }).format(value)
-          },
-          grid: {
-            color: '#e7e7e7'
-          }
-        }
-      }
-    }
+  // Add detailed debugging logs
+  console.log('Chart initialization attempt:', {
+    hasData: !!props.data,
+    dataLength: props.data?.length,
+    hasCanvas: !!chartCanvas.value,
+    data: props.data
   })
 
-  // Add zoom level change listener
-  chart.value.options.plugins.zoom.zoom.onZoom = () => {
-    const currentMin = chart.value.scales.x.min
-    const currentMax = chart.value.scales.x.max
-    const totalRange = xAxisMax - xAxisMin
-    const currentRange = currentMax - currentMin
-    currentZoomLevel.value = totalRange / currentRange
+  // Check if we have valid data and canvas
+  if (!props.data || !props.data.length || !chartCanvas.value) {
+    console.warn('Chart initialization skipped:', {
+      missingData: !props.data,
+      emptyData: !props.data?.length,
+      missingCanvas: !chartCanvas.value
+    })
+    return
+  }
+
+  try {
+    const transformedData = props.data
+    
+    // Validate data structure
+    if (!transformedData.every(item => 
+      typeof item.Percentage === 'string' && 
+      typeof item.Value === 'number'
+    )) {
+      console.error('Invalid data structure:', transformedData)
+      return
+    }
+
+    // Calculate the min and max x values
+    const xValues = transformedData.map(item => parseFloat(item.Percentage))
+    if (xValues.some(isNaN)) {
+      console.error('Invalid percentage values in data:', xValues)
+      return
+    }
+
+    const minX = Math.min(...xValues)
+    const maxX = Math.max(...xValues)
+    const xAxisMin = Math.floor(minX * 1.1) // 10% padding
+    const xAxisMax = Math.ceil(maxX * 1.1)  // 10% padding
+
+    // Destroy existing chart if it exists
+    if (chart.value) {
+      chart.value.destroy()
+      chart.value = null
+    }
+
+    // Ensure canvas context is available
+    const ctx = chartCanvas.value.getContext('2d')
+    if (!ctx) {
+      console.error('Could not get canvas context')
+      return
+    }
+    
+    // Create new chart with error handling
+    try {
+      chart.value = new Chart(ctx, {
+        type: 'line',
+        data: {
+          datasets: [{
+            label: 'Payoff',
+            data: transformedData.map(item => ({
+              x: parseFloat(item.Percentage),
+              y: item.Value
+            })),
+            borderColor: '#2196F3',
+            backgroundColor: 'rgba(33, 150, 243, 0.1)',
+            borderWidth: 2.5,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            pointBackgroundColor: '#2196F3',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            tension: 0, // Straight lines
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  return new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    maximumFractionDigits: 0
+                  }).format(context.parsed.y)
+                },
+                title: (context) => {
+                  return `${context[0].parsed.x}%`
+                }
+              }
+            },
+            zoom: {
+              pan: {
+                enabled: true,
+                mode: 'x',
+                modifierKey: null
+              },
+              zoom: {
+                wheel: {
+                  enabled: true,
+                  modifierKey: null
+                },
+                pinch: {
+                  enabled: true
+                },
+                mode: 'x',
+                drag: {
+                  enabled: false
+                },
+                limits: {
+                  min: 0.5,
+                  max: 10
+                }
+              },
+              limits: {
+                x: {
+                  min: xAxisMin,
+                  max: xAxisMax
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              type: 'linear',
+              min: xAxisMin,
+              max: xAxisMax,
+              title: {
+                display: true,
+                text: 'Percentage (%)',
+                font: {
+                  size: 14,
+                  weight: 'bold'
+                }
+              },
+              ticks: {
+                callback: (value) => `${value}%`
+              },
+              grid: {
+                color: '#e7e7e7'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Value (₹)',
+                font: {
+                  size: 14,
+                  weight: 'bold'
+                }
+              },
+              ticks: {
+                callback: (value) => new Intl.NumberFormat('en-IN', {
+                  style: 'currency',
+                  currency: 'INR',
+                  maximumFractionDigits: 0
+                }).format(value)
+              },
+              grid: {
+                color: '#e7e7e7'
+              }
+            }
+          }
+        }
+      })
+
+      // Add zoom level change listener
+      chart.value.options.plugins.zoom.zoom.onZoom = () => {
+        if (chart.value) {
+          const currentMin = chart.value.scales.x.min
+          const currentMax = chart.value.scales.x.max
+          const totalRange = xAxisMax - xAxisMin
+          const currentRange = currentMax - currentMin
+          currentZoomLevel.value = totalRange / currentRange
+        }
+      }
+    } catch (chartError) {
+      console.error('Error creating chart:', chartError)
+      if (chart.value) {
+        chart.value.destroy()
+        chart.value = null
+      }
+    }
+  } catch (error) {
+    console.error('Error in chart initialization:', error)
+    if (chart.value) {
+      chart.value.destroy()
+      chart.value = null
+    }
   }
 }
 
-// Watch for data changes
-watch(() => props.data, () => {
-  initChart()
+// Update the watch to handle data changes more safely
+watch(() => props.data, (newData) => {
+  console.log('Data prop changed:', {
+    hasNewData: !!newData,
+    newDataLength: newData?.length,
+    newData: newData
+  })
+  
+  // Only initialize if we have actual data
+  if (newData && newData.length > 0) {
+    console.log('Attempting to initialize chart with new data')
+    nextTick(() => {
+      console.log('nextTick callback executing, canvas state:', !!chartCanvas.value)
+      initChart()
+    })
+  } else {
+    console.log('No data available yet, skipping chart initialization')
+    // If we have an existing chart, destroy it
+    if (chart.value) {
+      chart.value.destroy()
+      chart.value = null
+    }
+  }
 }, { deep: true })
 
+// Remove the onMounted initialization since we don't want to initialize without data
 onMounted(() => {
-  initChart()
+  console.log('Component mounted, waiting for data...')
 })
 
+// Update onUnmounted to safely destroy chart
 onUnmounted(() => {
   if (chart.value) {
-    chart.value.destroy()
+    try {
+      chart.value.destroy()
+    } catch (error) {
+      console.error('Error destroying chart:', error)
+    }
+    chart.value = null
   }
 })
 </script>
@@ -286,5 +375,19 @@ onUnmounted(() => {
 canvas {
   width: 100% !important;
   height: 100% !important;
+}
+
+.no-data-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+  font-size: 1.1rem;
+  text-align: center;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px dashed #ddd;
 }
 </style> 

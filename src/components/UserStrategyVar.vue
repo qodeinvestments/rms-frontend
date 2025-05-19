@@ -67,7 +67,9 @@
         />
       </div>
       <!-- Add PayoffChart component -->
-      <div class="my-8" v-if="user_var_calculation_data.length">
+      <div class="my-8 payoff-chart-section">
+        <h2 class="payoff-chart-title">Payoff Chart Analysis</h2>
+        
         <!-- Account selection dropdown -->
         <a-select 
           v-model:value="selectedPayoffAccounts"
@@ -88,11 +90,10 @@
 
         <!-- Submit button for payoff chart -->
         <Button 
-          
           size="large"
           @click="fetchPayoffChartData"
           :loading="payoffChartLoading"
-          style="margin-bottom: 10px;"
+          style="margin-bottom: 20px;"
         >
           Generate Payoff Chart
         </Button>
@@ -174,7 +175,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { createColumnHelper } from '@tanstack/vue-table'
 import { Select, Button, InputNumber } from 'ant-design-vue'
 import TanStackTestTable from './TanStackTestTable.vue'
@@ -715,28 +716,43 @@ const payoffChartLoading = ref(false)
 // Add this new function to fetch payoff chart data
 async function fetchPayoffChartData() {
   if (!selectedPayoffAccounts.value.length) {
-    // You might want to use a proper notification system instead of alert
+    console.warn('No accounts selected for payoff chart')
     alert('Please select at least one account')
     return
   }
 
   try {
+    console.log('Fetching payoff chart data:', {
+      accounts: selectedPayoffAccounts.value,
+      strategies: selectedPayoffStrategies.value
+    })
+    
     payoffChartLoading.value = true
     const response = await postData('payoffchart', {
       clients: selectedPayoffAccounts.value,
       strategies: selectedPayoffStrategies.value
     }, payoffChartData)
     
-    // You can add additional handling here if needed
-    console.log('Payoff chart data received:', response)
+    console.log('Payoff chart data received:', {
+      response,
+      transformedData: payoffChartData.value
+    })
   } catch (err) {
     console.error('Error fetching payoff chart data:', err)
-    // You might want to use a proper notification system instead of alert
     alert('Error fetching payoff chart data')
   } finally {
     payoffChartLoading.value = false
   }
 }
+
+// Add a watch to monitor payoffChartData changes
+watch(() => payoffChartData.value, (newData) => {
+  console.log('Payoff chart data updated:', {
+    hasData: !!newData,
+    dataLength: newData?.length,
+    data: newData
+  })
+}, { deep: true })
 </script>
 
 <style scoped>
@@ -757,5 +773,18 @@ async function fetchPayoffChartData() {
 .percentage-section {
   display: flex;
   align-items: center;
+}
+
+.payoff-chart-section {
+  margin: 2rem 0 4rem 0; /* Increased bottom margin */
+}
+
+.payoff-chart-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e8e8e8;
 }
 </style>
