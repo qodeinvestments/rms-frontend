@@ -66,9 +66,38 @@
           :defaultSortFirstColumn="true"
         />
       </div>
-          <!-- Add PayoffChart component -->
+      <!-- Add PayoffChart component -->
       <div class="my-8" v-if="user_var_calculation_data.length">
-        <PayoffChart :data="user_var_calculation_data" />
+        <!-- Account selection dropdown -->
+        <a-select 
+          v-model:value="selectedPayoffAccounts"
+          mode="multiple"
+          placeholder="Select accounts for payoff chart"
+          style="width: 100%; margin-bottom: 10px;"
+          :options="accountNames.map(account => ({ label: account, value: account }))"
+        />
+        
+        <!-- Strategy selection dropdown -->
+        <a-select 
+          v-model:value="selectedPayoffStrategies"
+          mode="multiple"
+          placeholder="Select strategies for payoff chart"
+          style="width: 100%; margin-bottom: 10px;"
+          :options="payoffStrategyOptions"
+        />
+
+        <!-- Submit button for payoff chart -->
+        <Button 
+          
+          size="large"
+          @click="fetchPayoffChartData"
+          :loading="payoffChartLoading"
+          style="margin-bottom: 10px;"
+        >
+          Generate Payoff Chart
+        </Button>
+
+        <PayoffChart :data="payoffChartData" />
       </div>
 
       <!-- DROPDOWN + APPLY BUTTON FOR CLIENT SELECTION -->
@@ -253,6 +282,38 @@ const additionColumnOptions = computed(() => {
       label: prefix,
       value: prefix
     }));
+});
+
+// Add this new computed property after additionColumnOptions
+const payoffStrategyOptions = computed(() => {
+  if (!var_calculation_data.value.length) return [];
+  
+  // Start with the 'Normal' option
+  const options = [{ label: 'Normal', value: 'Normal' }];
+  
+  // Get unique strategy prefixes (similar to additionColumnOptions but as a separate computation)
+  const prefixSet = new Set();
+  const keys = Object.keys(var_calculation_data.value[0]);
+  
+  keys.forEach(key => {
+    if (key.endsWith('Upside')) {
+      const prefix = key.slice(0, -'Upside'.length);
+      if (prefix) prefixSet.add(prefix);
+    } else if (key.endsWith('Downside')) {
+      const prefix = key.slice(0, -'Downside'.length);
+      if (prefix) prefixSet.add(prefix);
+    }
+  });
+
+  // Add other strategy options
+  const strategyOptions = Array.from(prefixSet)
+    .sort()
+    .map(prefix => ({
+      label: prefix,
+      value: prefix
+    }));
+
+  return [...options, ...strategyOptions];
 });
 
 
@@ -642,6 +703,37 @@ async function applyelmpercentage() {
     console.error(err)
   } finally {
     loading.value = false
+  }
+}
+
+// Add these refs in the script section with other refs
+const selectedPayoffAccounts = ref([])
+const selectedPayoffStrategies = ref([])
+const payoffChartData = ref([])
+const payoffChartLoading = ref(false)
+
+// Add this new function to fetch payoff chart data
+async function fetchPayoffChartData() {
+  if (!selectedPayoffAccounts.value.length) {
+    // You might want to use a proper notification system instead of alert
+    alert('Please select at least one account')
+    return
+  }
+
+  try {
+    payoffChartLoading.value = true
+    const response = await postData('payoffchart', {
+      clients: selectedPayoffAccounts.value
+    }, payoffChartData)
+    
+    // You can add additional handling here if needed
+    console.log('Payoff chart data received:', response)
+  } catch (err) {
+    console.error('Error fetching payoff chart data:', err)
+    // You might want to use a proper notification system instead of alert
+    alert('Error fetching payoff chart data')
+  } finally {
+    payoffChartLoading.value = false
   }
 }
 </script>
