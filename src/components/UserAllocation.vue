@@ -20,7 +20,7 @@
                 title="User Allocation" 
                 :data="allocationData" 
                 :columns="columns" 
-                :hasColor="['Actual MTM','Abhinav','Ashwin','Darshana','Nilesh','Prahlad']"
+                :hasColor="['Actual MTM','Abhinav','Ashwin','Darshana','Nilesh','Prahlad','Settlement Price']"
                 :navigateTo="[]" 
                 :showPagination="true"
                 :showPin="true"
@@ -57,6 +57,13 @@ const columns = [
     }),
     columnHelper.accessor('Actual MTM', {
         header: 'Actual MTM',
+        cell: info => {
+            const value = info.getValue();
+            return typeof value === 'number' ? value.toFixed(2) : value;
+        },
+    }),
+    columnHelper.accessor('Settlement Price', {
+        header: 'Settlement Price',
         cell: info => {
             const value = info.getValue();
             return typeof value === 'number' ? value.toFixed(2) : value;
@@ -123,6 +130,7 @@ const fetchAllocationData = async () => {
         allocationData.value = Array.isArray(data) ? data.map(item => ({
             'Date': item.Date || item.date || item.timestamp,
             'Actual MTM': item['Actual MTM'] || item.actual_mtm || 0,
+            'Settlement Price': item['Settlement Price'] || item.settlement_price || 0, 
             'Abhinav': item.Abhinav || 0,
             'Ashwin': item.Ashwin || 0,
             'Darshana': item.Darshana || 0,
