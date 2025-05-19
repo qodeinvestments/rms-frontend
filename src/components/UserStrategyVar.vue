@@ -5,6 +5,8 @@
     <div v-else-if="error">{{ error }}</div>
     <!-- MAIN CONTENT -->
     <div v-else>
+  
+
       <!-- Percentage Input Section Above the First Table -->
       <div class="my-4 percentage-section">
         <InputNumber
@@ -63,6 +65,10 @@
           :showPagination="true"
           :defaultSortFirstColumn="true"
         />
+      </div>
+          <!-- Add PayoffChart component -->
+      <div class="my-8" v-if="user_var_calculation_data.length">
+        <PayoffChart :data="user_var_calculation_data" />
       </div>
 
       <!-- DROPDOWN + APPLY BUTTON FOR CLIENT SELECTION -->
@@ -143,6 +149,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { createColumnHelper } from '@tanstack/vue-table'
 import { Select, Button, InputNumber } from 'ant-design-vue'
 import TanStackTestTable from './TanStackTestTable.vue'
+import PayoffChart from './PayoffChart.vue'
 
 // -------------------------------------------------------
 // REACTIVE STATE
