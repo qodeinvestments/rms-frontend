@@ -34,38 +34,6 @@ const chartCanvas = ref(null)
 const chart = ref(null)
 const currentZoomLevel = ref(1)
 
-const transformData = (rawData) => {
-  const transformed = []
-  
-  // Process each data point
-  rawData.forEach(item => {
-    // Create a new object with Percentage instead of User
-    const transformedItem = {
-      Percentage: item.User, // Transform User to Percentage
-      Upside: item.Upside,
-      Downside: item.Downside
-    }
-    
-    // Add downside point
-    transformed.push({
-      Percentage: `-${transformedItem.Percentage.replace('%', '')}%`,
-      Value: transformedItem.Downside
-    })
-    
-    // Add upside point
-    transformed.push({
-      Percentage: transformedItem.Percentage,
-      Value: transformedItem.Upside
-    })
-  })
-  
-  // Sort by percentage
-  return transformed.sort((a, b) => {
-    const aVal = parseFloat(a.Percentage)
-    const bVal = parseFloat(b.Percentage)
-    return aVal - bVal
-  })
-}
 
 const zoomIn = () => {
   if (chart.value) {
@@ -103,7 +71,7 @@ const resetZoom = () => {
 }
 
 const initChart = () => {
-  const transformedData = transformData(props.data)
+  const transformedData = props.data
   
   // Calculate the min and max x values
   const xValues = transformedData.map(item => parseFloat(item.Percentage))

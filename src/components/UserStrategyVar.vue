@@ -723,7 +723,8 @@ async function fetchPayoffChartData() {
   try {
     payoffChartLoading.value = true
     const response = await postData('payoffchart', {
-      clients: selectedPayoffAccounts.value
+      clients: selectedPayoffAccounts.value,
+      strategies: selectedPayoffStrategies.value
     }, payoffChartData)
     
     // You can add additional handling here if needed
