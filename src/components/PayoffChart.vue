@@ -1,12 +1,27 @@
 <template>
   <div class="payoff-chart-container">
-    <div id="payoff-chart"></div>
+    <div class="chart-toolbar">
+      <button @click="zoomIn" class="toolbar-btn" title="Zoom In">
+        <span>+</span>
+      </button>
+      <button @click="zoomOut" class="toolbar-btn" title="Zoom Out">
+        <span>−</span>
+      </button>
+      <button @click="resetZoom" class="toolbar-btn" title="Reset Zoom">
+        <span>↺</span>
+      </button>
+    </div>
+    <canvas ref="chartCanvas"></canvas>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch, onUnmounted } from 'vue'
-import ApexCharts from 'apexcharts'
+import { Chart, registerables } from 'chart.js'
+import zoomPlugin from 'chartjs-plugin-zoom'
+
+// Register Chart.js components
+Chart.register(...registerables, zoomPlugin)
 
 const props = defineProps({
   data: {
@@ -15,7 +30,9 @@ const props = defineProps({
   }
 })
 
+const chartCanvas = ref(null)
 const chart = ref(null)
+const currentZoomLevel = ref(1)
 
 const transformData = (rawData) => {
   const transformed = []
@@ -50,158 +67,187 @@ const transformData = (rawData) => {
   })
 }
 
+const zoomIn = () => {
+  if (chart.value) {
+    const zoomOptions = chart.value.options.plugins.zoom.zoom
+    const currentMin = chart.value.scales.x.min
+    const currentMax = chart.value.scales.x.max
+    const range = currentMax - currentMin
+    const newRange = range * 0.5 // Zoom in by 50%
+    const center = (currentMin + currentMax) / 2
+    
+    chart.value.zoom(1.5)
+    chart.value.update('none')
+  }
+}
+
+const zoomOut = () => {
+  if (chart.value) {
+    const zoomOptions = chart.value.options.plugins.zoom.zoom
+    const currentMin = chart.value.scales.x.min
+    const currentMax = chart.value.scales.x.max
+    const range = currentMax - currentMin
+    const newRange = range * 2 // Zoom out by 100%
+    const center = (currentMin + currentMax) / 2
+    
+    chart.value.zoom(0.5)
+    chart.value.update('none')
+  }
+}
+
+const resetZoom = () => {
+  if (chart.value) {
+    chart.value.resetZoom()
+    currentZoomLevel.value = 1
+  }
+}
+
 const initChart = () => {
   const transformedData = transformData(props.data)
   
-  const options = {
-    series: [{
-      name: 'Payoff',
-      data: transformedData.map(item => ({
-        x: parseFloat(item.Percentage),
-        y: item.Value
-      }))
-    }],
-    chart: {
-      type: 'line',
-      height: 400,
-      toolbar: {
-        show: true
-      },
-      zoom: {
-        enabled: true
-      },
-      animations: {
-        enabled: true,
-        easing: 'easeinout',
-        speed: 800,
-        animateGradually: {
-          enabled: true,
-          delay: 150
-        },
-        dynamicAnimation: {
-          enabled: true,
-          speed: 350
-        }
-      }
-    },
-    stroke: {
-      curve: 'smooth',
-      width: 3,
-      colors: ['#2196F3']
-    },
-    grid: {
-      borderColor: '#e7e7e7',
-      row: {
-        colors: ['#f3f3f3', 'transparent'],
-        opacity: 0.5
-      },
-      padding: {
-        top: 20,
-        right: 20,
-        bottom: 20,
-        left: 20
-      }
-    },
-    markers: {
-      size: 6,
-      colors: ['#2196F3'],
-      strokeColors: '#fff',
-      strokeWidth: 2,
-      hover: {
-        size: 8
-      }
-    },
-    xaxis: {
-      title: {
-        text: 'Percentage (%)',
-        style: {
-          fontSize: '14px',
-          fontWeight: 600,
-          color: '#263238'
-        }
-      },
-      labels: {
-        formatter: (value) => `${value}%`,
-        style: {
-          colors: '#263238'
-        }
-      },
-      axisBorder: {
-        show: true,
-        color: '#e7e7e7'
-      },
-      axisTicks: {
-        show: true,
-        color: '#e7e7e7'
-      }
-    },
-    yaxis: {
-      title: {
-        text: 'Value (₹)',
-        style: {
-          fontSize: '14px',
-          fontWeight: 600,
-          color: '#263238'
-        }
-      },
-      labels: {
-        formatter: (value) => {
-          return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 0
-          }).format(value)
-        },
-        style: {
-          colors: '#263238'
-        }
-      },
-      axisBorder: {
-        show: true,
-        color: '#e7e7e7'
-      },
-      axisTicks: {
-        show: true,
-        color: '#e7e7e7'
-      }
-    },
-    tooltip: {
-      theme: 'light',
-      x: {
-        formatter: (value) => `${value}%`
-      },
-      y: {
-        formatter: (value) => new Intl.NumberFormat('en-IN', {
-          style: 'currency',
-          currency: 'INR',
-          maximumFractionDigits: 0
-        }).format(value)
-      }
-    },
-    theme: {
-      mode: 'light',
-      palette: 'palette1'
-    },
-    annotations: {
-      points: [{
-        x: 0,
-        y: 0,
-        marker: {
-          size: 4,
-          fillColor: '#fff',
-          strokeColor: '#2196F3',
-          radius: 2
-        }
-      }]
-    }
-  }
+  // Calculate the min and max x values
+  const xValues = transformedData.map(item => parseFloat(item.Percentage))
+  const minX = Math.min(...xValues)
+  const maxX = Math.max(...xValues)
+  const xAxisMin = Math.floor(minX * 1.1) // 10% padding
+  const xAxisMax = Math.ceil(maxX * 1.1)  // 10% padding
 
+  // Destroy existing chart if it exists
   if (chart.value) {
     chart.value.destroy()
   }
 
-  chart.value = new ApexCharts(document.querySelector("#payoff-chart"), options)
-  chart.value.render()
+  const ctx = chartCanvas.value.getContext('2d')
+  
+  chart.value = new Chart(ctx, {
+    type: 'line',
+    data: {
+      datasets: [{
+        label: 'Payoff',
+        data: transformedData.map(item => ({
+          x: parseFloat(item.Percentage),
+          y: item.Value
+        })),
+        borderColor: '#2196F3',
+        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: '#2196F3',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        tension: 0, // Straight lines
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 0
+              }).format(context.parsed.y)
+            },
+            title: (context) => {
+              return `${context[0].parsed.x}%`
+            }
+          }
+        },
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: 'x',
+            modifierKey: null
+          },
+          zoom: {
+            wheel: {
+              enabled: true,
+              modifierKey: null
+            },
+            pinch: {
+              enabled: true
+            },
+            mode: 'x',
+            drag: {
+              enabled: false
+            },
+            limits: {
+              min: 0.5,
+              max: 10
+            }
+          },
+          limits: {
+            x: {
+              min: xAxisMin,
+              max: xAxisMax
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          type: 'linear',
+          min: xAxisMin,
+          max: xAxisMax,
+          title: {
+            display: true,
+            text: 'Percentage (%)',
+            font: {
+              size: 14,
+              weight: 'bold'
+            }
+          },
+          ticks: {
+            callback: (value) => `${value}%`
+          },
+          grid: {
+            color: '#e7e7e7'
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Value (₹)',
+            font: {
+              size: 14,
+              weight: 'bold'
+            }
+          },
+          ticks: {
+            callback: (value) => new Intl.NumberFormat('en-IN', {
+              style: 'currency',
+              currency: 'INR',
+              maximumFractionDigits: 0
+            }).format(value)
+          },
+          grid: {
+            color: '#e7e7e7'
+          }
+        }
+      }
+    }
+  })
+
+  // Add zoom level change listener
+  chart.value.options.plugins.zoom.zoom.onZoom = () => {
+    const currentMin = chart.value.scales.x.min
+    const currentMax = chart.value.scales.x.max
+    const totalRange = xAxisMax - xAxisMin
+    const currentRange = currentMax - currentMin
+    currentZoomLevel.value = totalRange / currentRange
+  }
 }
 
 // Watch for data changes
@@ -228,10 +274,49 @@ onUnmounted(() => {
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   margin: 20px 0;
+  height: 400px;
+  position: relative;
 }
 
-#payoff-chart {
-  width: 100%;
-  height: 400px;
+.chart-toolbar {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  display: flex;
+  gap: 4px;
+  background: white;
+  padding: 4px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e0e0e0;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #2196F3;
+  transition: all 0.2s ease;
+}
+
+.toolbar-btn:hover {
+  background: #f5f5f5;
+  border-color: #2196F3;
+}
+
+.toolbar-btn:active {
+  background: #e3f2fd;
+}
+
+canvas {
+  width: 100% !important;
+  height: 100% !important;
 }
 </style> 
