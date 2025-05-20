@@ -1667,3 +1667,16 @@ const client_holdings=[
       header: () => 'Type',
     }),
   ]
+
+  export const system_tag_pnl=[
+    columnHelper.accessor(row => row.SystemTag, {
+      id: 'SystemTag',
+      cell: info => info.getValue(),
+      header: () => 'System Tag',
+    }),
+    columnHelper.accessor(row => row.PNL, {
+      id: 'PNL',
+      cell: info => info.getValue(),
+      header: () => 'PNL',
+    }),
+  ]

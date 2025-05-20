@@ -29,7 +29,7 @@ const basket = ref([])
 import { live_trade_book_columns_zerodha,live_trade_book_columns_xts,live_order_book_columns_zerodha
   ,fund_summary_columns,live_order_book_columns_xts,signal_position,columns,combined_df_columns_zerodha,
   combined_df_columns_xts,rms_df_columns,combined_order_zerodha,combined_order_xts,combined_trades_zerodha,
-  curr_strategy_mtm,curr_basket_mtm,combined_trades_xts,zerodha_order_book_columns,holding_book_columns,zerodha_position_book_columns,rms_prev_day,xts_order_book,xts_pos_book
+  curr_strategy_mtm,system_tag_pnl,curr_basket_mtm,combined_trades_xts,zerodha_order_book_columns,holding_book_columns,zerodha_position_book_columns,rms_prev_day,xts_order_book,xts_pos_book
  } from '../components/TableVariables/UserPageTable.js'; 
 
 
@@ -613,6 +613,10 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     <div class="my-8" v-if="Object.keys(strategyData).length > 0">
       <TanStackTestTable title="Current Strategy Ideal MTM" :data="filteredData" :columns="curr_strategy_mtm"
         :hasColor="['MTM']" :navigateTo="[]" :showPagination=true />
+    </div>
+    <div class="my-8" v-if="Object.keys(strategyData).length > 0">
+      <TanStackTestTable title="System Tag PNL" :data="strategyData['systemTagPnl']" :columns="system_tag_pnl"
+        :hasColor="['PNL']" :navigateTo="[]" :showPagination=true />
     </div>
     <div v-if="histogram_order_fill_lag.length > 0 && showOnPage === 'Combined DF'" class="histogram-container">
       <p class="table-heading">Histogram Of Order Fill Lag Combined DF</p>
