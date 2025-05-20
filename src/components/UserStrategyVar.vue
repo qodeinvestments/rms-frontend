@@ -70,6 +70,18 @@
       <div class="my-8 payoff-chart-section">
         <h2 class="payoff-chart-title">Payoff Chart Analysis</h2>
         
+        <!-- Percentage Input for Payoff Chart -->
+        <div class="payoff-percentage-input" style="margin-bottom: 1rem;">
+          <InputNumber
+            v-model:value="payoffPercentage"
+            :min="10"
+            :max="100"
+            placeholder="Enter percentage (10-100)"
+            size="large"
+            style="width: 200px; margin-right: 8px;"
+          />
+        </div>
+        
         <!-- Account selection dropdown -->
         <a-select 
           v-model:value="selectedPayoffAccounts"
@@ -712,8 +724,9 @@ const selectedPayoffAccounts = ref([])
 const selectedPayoffStrategies = ref([])
 const payoffChartData = ref([])
 const payoffChartLoading = ref(false)
+const payoffPercentage = ref(10) // Default value of 10
 
-// Add this new function to fetch payoff chart data
+// Update the fetchPayoffChartData function
 async function fetchPayoffChartData() {
   if (!selectedPayoffAccounts.value.length) {
     console.warn('No accounts selected for payoff chart')
@@ -721,16 +734,24 @@ async function fetchPayoffChartData() {
     return
   }
 
+  // Validate percentage
+  if (payoffPercentage.value < 10 || payoffPercentage.value > 100) {
+    alert('Please enter a percentage between 10 and 100')
+    return
+  }
+
   try {
     console.log('Fetching payoff chart data:', {
       accounts: selectedPayoffAccounts.value,
-      strategies: selectedPayoffStrategies.value
+      strategies: selectedPayoffStrategies.value,
+      percentage: payoffPercentage.value
     })
     
     payoffChartLoading.value = true
     const response = await postData('payoffchart', {
       clients: selectedPayoffAccounts.value,
-      strategies: selectedPayoffStrategies.value
+      strategies: selectedPayoffStrategies.value,
+      percentage: payoffPercentage.value
     }, payoffChartData)
     
     console.log('Payoff chart data received:', {
