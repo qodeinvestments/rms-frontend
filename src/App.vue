@@ -140,16 +140,7 @@ const max_client_latency = ref(0)
 const handleMessage = (message) => {
   try {
     if (message === undefined) return;
-    book.value['time'] = message["time"]
-
-    if (book.value['Order_Errors']) {
-      for (const key in book.value['Order_Errors']) {
-        if (book.value['Order_Errors'][key].length != message['Order_Errors'][key].length) {
-          triggerToast('New Error in Order', 'error')
-        }
-      }
-    }
-    book.value['Order_Errors'] = message['Order_Errors']
+    book.value['time'] = message['time'];
 
     if (book.value['Pulse_Errors']) {
       for (const key in book.value['Pulse_Errors']) {

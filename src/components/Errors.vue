@@ -20,7 +20,7 @@ import MultiLineChart from './HighCharts.vue'
 
 import LightWeightChart from './LightWeightChart.vue';
 
-import { order_errors_columns,new_order_errors_columns } from '../components/TableVariables/ErrorPageTable.js'; 
+import { new_order_errors_columns } from '../components/TableVariables/ErrorPageTable.js'; 
 
 
 
@@ -80,18 +80,6 @@ const updateColorColumns = (data, time) => {
     }
     const newColorColumns = []
 
-    // Check Order_Errors
-    let orderErrorsMatch = false
-    for (const key in data['Order_Errors']) {
-        for (const order of data['Order_Errors'][key]) {
-            if (tell_time_match(order['OrderGeneratedDateTime'], time) || tell_time_match(order['order_timestamp'], time)) {
-                orderErrorsMatch = true
-                break
-            }
-        }
-        if (orderErrorsMatch) break
-    }
-    if (orderErrorsMatch) newColorColumns.push('Order_Errors')
 
     // Check Pulse_Errors
     for (const key in data['Pulse_Errors']) {
@@ -124,10 +112,6 @@ const handleColumnClick = ({ item, index }) => {
 
 }
 
-// watch(selectedOption, (newValue) => {
-//     console.log(newValue, " is the new value")
-//     book.value = data['Order_Errors'][newValue]
-// })
 
 
 const map = {
@@ -140,7 +124,7 @@ const map = {
 }
 
 
-const showOnPage = ref('Order_Errors')
+const showOnPage = ref('New_Order_Errors')
 
 // Add watch for selectedNewOrderOption
 watch(selectedNewOrderOption, (newValue) => {
@@ -173,10 +157,6 @@ watch(data, (newValue) => {
             past_time_client.value = ar2;
         }
     }
-    if ('Order_Errors' in data) {
-        options.value = Object.keys(data['Order_Errors'])
-        options.value.push("ALL")
-    }
 
     if ('New_Order_Errors' in data) {
         console.log('Processing New Order Errors data')
@@ -201,33 +181,13 @@ watch(data, (newValue) => {
         }
     }
 
-    if (showOnPage.value === 'Order_Errors') {
-        if (selectedOption.value == 'ALL') {
-            if (data['Order_Errors']) {
-                const combinedArray = Object.values(data['Order_Errors']).flat();
-                book.value = combinedArray
-            }
-        }
-        else if (selectedOption.value != '')
-            book.value = data['Order_Errors'][selectedOption.value]
-    }
-    else if (showOnPage.value === 'New_Order_Errors') {
-        // Apply current filter to the complete dataset
-        if (allNewOrderErrors.value.length > 0) {
-            if (selectedNewOrderOption.value === 'ALL') {
-                book.value = allNewOrderErrors.value
-            } else {
-                book.value = allNewOrderErrors.value.filter(item => item.Account === selectedNewOrderOption.value)
-            }
+    // Handle other error types
+    if (showOnPage.value !== 'New_Order_Errors') {
+        if (map[showOnPage.value]) {
+            book.value = newValue['Pulse_Errors'][map[showOnPage.value]] || []
         } else {
             book.value = []
         }
-    }
-    else {
-        if (map[showOnPage.value]) {
-            book.value = newValue['Pulse_Errors'][map[showOnPage.value]] || []
-        }
-        else book.value = []
     }
 }, { immediate: true });
 
@@ -241,7 +201,13 @@ watch(showOnPage, (newValue) => {
             console.log('Set all data on page change:', book.value.length, 'items')
         } else {
             book.value = allNewOrderErrors.value.filter(item => item.Account === selectedNewOrderOption.value)
-           
+        }
+    } else if (newValue !== 'New_Order_Errors') {
+        // Handle other error types
+        if (map[newValue]) {
+            book.value = data.value['Pulse_Errors'][map[newValue]] || []
+        } else {
+            book.value = []
         }
     }
 })
@@ -273,17 +239,11 @@ onUnmounted(() => {
 
         <div class="navContainer">
             <NavBar
-                :navColumns="['Order_Errors', 'Testing', 'Run_Strats', 'Web_Sockets', 'XTS_Trader', 'Zerodha_Trader', 'PosMis Generator','New_Order_Errors']"
-                @column-clicked="handleColumnClick" :colorColumns="colorColumns" />
+                :navColumns="['New_Order_Errors', 'Testing', 'Run_Strats', 'Web_Sockets', 'XTS_Trader', 'Zerodha_Trader', 'PosMis Generator']"
+                @column-clicked="handleColumnClick" 
+                :colorColumns="colorColumns" />
         </div>
-        <div class="userSelectContainer" v-if="showOnPage === 'Order_Errors'">
-            <label class="table-heading" for="options">Select an User:</label>
-            <select class="table-heading" id="options" v-model="selectedOption">
-                <option v-for="option in options" :key="option" :value="option">
-                    {{ option }}
-                </option>
-            </select>
-        </div>
+
 
         <div class="userSelectContainer" v-if="showOnPage === 'New_Order_Errors'">
             <label class="table-heading" for="newOrderOptions">Select an Account:</label>
@@ -294,17 +254,23 @@ onUnmounted(() => {
             </select>
         </div>
 
-        <div class="my-8" v-if="showOnPage === 'Order_Errors' && book">
-            <TanStackTestTable :title="showOnPage" :data="book" :columns="order_errors_columns" :hasColor="[]"
-                :navigateTo="[]" :showPagination=true />
-        </div>
-        <div class="my-8" v-else-if="showOnPage === 'New_Order_Errors' && book">
-            <TanStackTestTable :title="showOnPage" :data="book" :columns="new_order_errors_columns" :hasColor="[]"
-                :navigateTo="[]" :showPagination=true />
+        <div class="my-8" v-if="showOnPage === 'New_Order_Errors' && book">
+            <TanStackTestTable 
+                :title="showOnPage" 
+                :data="book" 
+                :columns="new_order_errors_columns" 
+                :hasColor="[]"
+                :navigateTo="[]" 
+                :showPagination="true" />
         </div>
         <div class="my-8" v-else-if="book">
-            <TanStackTestTable :title="showOnPage" :data="book" :columns="columns_testing" :hasColor="[]"
-                :navigateTo="[]" :showPagination=true />
+            <TanStackTestTable 
+                :title="showOnPage" 
+                :data="book" 
+                :columns="columns_testing" 
+                :hasColor="[]"
+                :navigateTo="[]" 
+                :showPagination="true" />
         </div>
 
     </div>
