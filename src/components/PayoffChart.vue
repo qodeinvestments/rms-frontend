@@ -15,7 +15,11 @@
           <span>↺</span>
         </button>
       </div>
-      <canvas ref="chartCanvas"></canvas>
+      <canvas
+        v-if="data && data.length"
+        ref="chartCanvas"
+        :key="data.length + '-' + (data[0]?.Percentage ?? '')"
+      ></canvas>
     </template>
   </div>
 </template>
@@ -39,6 +43,17 @@ const chartCanvas = ref(null)
 const chart = ref(null)
 const currentZoomLevel = ref(1)
 
+// Helper to safely destroy the chart
+function destroyChart() {
+  if (chart.value) {
+    try {
+      chart.value.destroy();
+    } catch (e) {
+      // ignore
+    }
+    chart.value = null;
+  }
+}
 
 const zoomIn = () => {
   if (chart.value) {
@@ -94,6 +109,13 @@ const initChart = () => {
     return
   }
 
+  // Defensive: get context
+  const ctx = chartCanvas.value && chartCanvas.value.getContext('2d');
+  if (!ctx) {
+    console.error('No canvas context');
+    return;
+  }
+
   try {
     const transformedData = props.data
     
@@ -119,18 +141,8 @@ const initChart = () => {
     const xAxisMax = Math.ceil(maxX * 1.1)  // 10% padding
 
     // Destroy existing chart if it exists
-    if (chart.value) {
-      chart.value.destroy()
-      chart.value = null
-    }
+    destroyChart();
 
-    // Ensure canvas context is available
-    const ctx = chartCanvas.value.getContext('2d')
-    if (!ctx) {
-      console.error('Could not get canvas context')
-      return
-    }
-    
     // Create new chart with error handling
     try {
       chart.value = new Chart(ctx, {
@@ -266,42 +278,32 @@ const initChart = () => {
       }
     } catch (chartError) {
       console.error('Error creating chart:', chartError)
-      if (chart.value) {
-        chart.value.destroy()
-        chart.value = null
-      }
+      destroyChart();
     }
   } catch (error) {
     console.error('Error in chart initialization:', error)
-    if (chart.value) {
-      chart.value.destroy()
-      chart.value = null
-    }
+    destroyChart();
   }
 }
 
 // Update the watch to handle data changes more safely
-watch(() => props.data, (newData) => {
+watch(() => props.data, async (newData) => {
+  destroyChart();
   console.log('Data prop changed:', {
     hasNewData: !!newData,
     newDataLength: newData?.length,
     newData: newData
   })
-  
   // Only initialize if we have actual data
   if (newData && newData.length > 0) {
     console.log('Attempting to initialize chart with new data')
-    nextTick(() => {
-      console.log('nextTick callback executing, canvas state:', !!chartCanvas.value)
-      initChart()
-    })
+    await nextTick();
+    console.log('nextTick callback executing, canvas state:', !!chartCanvas.value)
+    initChart();
   } else {
     console.log('No data available yet, skipping chart initialization')
     // If we have an existing chart, destroy it
-    if (chart.value) {
-      chart.value.destroy()
-      chart.value = null
-    }
+    destroyChart();
   }
 }, { deep: true })
 
@@ -312,14 +314,7 @@ onMounted(() => {
 
 // Update onUnmounted to safely destroy chart
 onUnmounted(() => {
-  if (chart.value) {
-    try {
-      chart.value.destroy()
-    } catch (error) {
-      console.error('Error destroying chart:', error)
-    }
-    chart.value = null
-  }
+  destroyChart();
 })
 </script>
 
