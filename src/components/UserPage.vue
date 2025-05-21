@@ -440,15 +440,21 @@ const filteredStrategyOptions = computed(() => {
 
 const showOnPage = ref('Positions')
 const strategyChartData = ref({})
+const strategyChartDataWithoutNumber = ref({})
 const availableSystemTags = ref([])
-const selectedSystemTags = ref([])
+const availableSystemTagsWithoutNumber = ref([])
 const systemTagNeeded = ref([])
-const isChartLoading = ref(false)
+const systemTagWithNumberNeeded = ref([])
+const isStrategyChartLoading = ref(false)
+const isSystemTagChartLoading = ref(false)
 const chartKey = ref(0)
+const systemTagChartData = ref({})
+const selectedSystemTags = ref([])
+const systemTagChartKey = ref(0)
 
 const fetchStrategyChartData = async () => {
   try {
-    isChartLoading.value = true
+    isStrategyChartLoading.value = true
     const response = await fetch('https://production2.swancapital.in/stratcharts', {
       method: 'POST',
       headers: {
@@ -466,14 +472,40 @@ const fetchStrategyChartData = async () => {
     chartKey.value++
     
     if (data && data.availableSystemTagList) {
-      console.log("the available system tag list is initialized", data);
       availableSystemTags.value = data.availableSystemTagList
-      console.log("availableSystemTags", availableSystemTags.value);
+    }
+    if(data && data.availableSystemTagWithoutNumberList) {
+      availableSystemTagsWithoutNumber.value = data.availableSystemTagWithoutNumberList;
     }
   } catch (error) {
     console.error('Error fetching strategy chart data:', error)
   } finally {
-    isChartLoading.value = false
+    isStrategyChartLoading.value = false
+  }
+}
+
+const fetchSystemTagChartData = async () => {
+  try {
+    isSystemTagChartLoading.value = true
+    const response = await fetch('https://production2.swancapital.in/stratchartswithoutnumbers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      },
+      body: JSON.stringify({
+        client: name.value,
+        systemTagNeeded: selectedSystemTags.value
+      })
+    })
+    const data = await response.json()
+    
+    systemTagChartData.value = data.chartData
+    systemTagChartKey.value++
+  } catch (error) {
+    console.error('Error fetching system tag chart data:', error)
+  } finally {
+    isSystemTagChartLoading.value = false
   }
 }
 
@@ -635,29 +667,56 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
 
     <div class="chartContainer">
       <p class="table-heading">Strategy Charts</p>
-      <div class="selectContainer">
+      <div class="selectContainer" style="margin-top: 20px;">
         <a-select
           v-model:value="systemTagNeeded"
           mode="multiple"
           placeholder="Select Strategies"
           style="width: 100%"
           :options="availableSystemTags.map(tag => ({ value: tag, label: tag }))"
-          :loading="isChartLoading"
+          :loading="isStrategyChartLoading"
         />
         <a-button 
           type="primary" 
           @click="fetchStrategyChartData" 
           class="submit-button"
-          :loading="isChartLoading"
-          :disabled="isChartLoading || systemTagNeeded.length === 0"
+          :loading="isStrategyChartLoading"
+          :disabled="isStrategyChartLoading || systemTagNeeded.length === 0"
         >
-          {{ isChartLoading ? 'Loading...' : 'Generate Chart' }}
+          {{ isStrategyChartLoading ? 'Loading...' : 'Generate Chart' }}
         </a-button>
       </div>
     </div>
 
     <div class="my-8" v-if="Object.keys(strategyChartData).length > 0" >
       <LightWeightChart :key="chartKey" :Chartdata="strategyChartData" />
+    </div>
+
+    <div class="chartContainer">
+      <p class="table-heading">Strategy System Tag Charts</p>
+      <div class="selectContainer" style="margin-top: 20px;">
+        <a-select
+          v-model:value="selectedSystemTags"
+          mode="multiple"
+          placeholder="Select System Tags"
+          style="width: 100%"
+          :options="availableSystemTagsWithoutNumber.map(tag => ({ value: tag, label: tag }))"
+          :loading="isSystemTagChartLoading"
+        />
+        <a-button 
+          type="primary" 
+          @click="fetchSystemTagChartData" 
+          class="submit-button"
+          :loading="isSystemTagChartLoading"
+          :disabled="isSystemTagChartLoading || selectedSystemTags.length === 0"
+        >
+          {{ isSystemTagChartLoading ? 'Loading...' : 'Generate System Tag Chart' }}
+        </a-button>
+      </div>
+    </div>
+
+    <div class="my-8" v-if="Object.keys(systemTagChartData).length > 0" >
+      <LightWeightChart :key="systemTagChartKey" :Chartdata="systemTagChartData" />
     </div>
 
     <div class="my-8" v-if="Object.keys(basketData).length > 0">
