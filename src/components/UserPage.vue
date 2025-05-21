@@ -439,12 +439,51 @@ const filteredStrategyOptions = computed(() => {
 
 
 const showOnPage = ref('Positions')
+const strategyChartData = ref({})
+const availableSystemTags = ref([])
+const selectedSystemTags = ref([])
+const systemTagNeeded = ref([])
+const isChartLoading = ref(false)
+const chartKey = ref(0)
+
+const fetchStrategyChartData = async () => {
+  try {
+    isChartLoading.value = true
+    const response = await fetch('https://production2.swancapital.in/stratcharts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      },
+      body: JSON.stringify({
+        client: name.value,
+        systemTagNeeded: systemTagNeeded.value
+      })
+    })
+    const data = await response.json()
+    
+    strategyChartData.value = data.chartData
+    chartKey.value++
+    
+    if (data && data.availableSystemTagList) {
+      console.log("the available system tag list is initialized", data);
+      availableSystemTags.value = data.availableSystemTagList
+      console.log("availableSystemTags", availableSystemTags.value);
+    }
+  } catch (error) {
+    console.error('Error fetching strategy chart data:', error)
+  } finally {
+    isChartLoading.value = false
+  }
+}
+
 onMounted(() => {
   connectToSSE();
   name.value = route.params.username;
   connectClientDetailsWebSocket();
   connectBasketWebSocket();
   connectStrategyWebSocket();
+  fetchStrategyChartData();
 })
 onUnmounted(() => {
   if (eventSource) {
@@ -595,10 +634,31 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     </div>
 
     <div class="chartContainer">
-      <p class="table-heading">Strategy WISE IDEAL MTM</p>
-      <LightWeightChart v-if="Object.keys(strategy_chart_data).length > 0" :Chartdata="strategy_chart_data" />
+      <p class="table-heading">Strategy Charts</p>
+      <div class="selectContainer">
+        <a-select
+          v-model:value="systemTagNeeded"
+          mode="multiple"
+          placeholder="Select Strategies"
+          style="width: 100%"
+          :options="availableSystemTags.map(tag => ({ value: tag, label: tag }))"
+          :loading="isChartLoading"
+        />
+        <a-button 
+          type="primary" 
+          @click="fetchStrategyChartData" 
+          class="submit-button"
+          :loading="isChartLoading"
+          :disabled="isChartLoading || systemTagNeeded.length === 0"
+        >
+          {{ isChartLoading ? 'Loading...' : 'Generate Chart' }}
+        </a-button>
+      </div>
     </div>
 
+    <div class="my-8" v-if="Object.keys(strategyChartData).length > 0" >
+      <LightWeightChart :key="chartKey" :Chartdata="strategyChartData" />
+    </div>
 
     <div class="my-8" v-if="Object.keys(basketData).length > 0">
       <TanStackTestTable title="Current Basket Ideal MTM" :data="basketData['curr']" :columns="curr_basket_mtm"
@@ -662,6 +722,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
 .chartContainer {
   width: 100%;
   margin-top: 50px;
+  margin-bottom: 30px;
 }
 
 .multiselectContainer {
@@ -678,8 +739,7 @@ p {
   display: flex;
   flex-direction: column;
   gap: 20px;
-
-  margin-top: 50px;
+  margin-bottom: 30px;
 }
 
 .histogram-container {
@@ -752,5 +812,54 @@ html {
 .headingContainer {
   font-size: 30px;
   font-weight: bold;
+}
+
+.submit-button {
+  margin-top: 10px;
+  width: 100%;
+  background-color: #1890ff !important;
+  border-color: #1890ff !important;
+  color: white !important;
+  height: 40px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #40a9ff !important;
+  border-color: #40a9ff !important;
+}
+
+.submit-button:disabled {
+  background-color: #d9d9d9 !important;
+  border-color: #d9d9d9 !important;
+  color: rgba(0, 0, 0, 0.25) !important;
+  cursor: not-allowed;
+}
+
+.submit-button.ant-btn-loading {
+  background-color: #1890ff !important;
+  border-color: #1890ff !important;
+  color: white !important;
+  opacity: 0.8;
+}
+
+.chart-wrapper {
+  width: 100%;
+  height: 400px;
+  margin-bottom: 50px;
+}
+
+.tableContainer {
+  width: 100%;
+  position: relative;
+  z-index: 0;
+  margin-top: 50px;
+}
+
+.my-8 {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  width: 100%;
 }
 </style>
