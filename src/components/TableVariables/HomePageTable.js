@@ -124,23 +124,12 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'OpenQuantity',
     }),
-
-
-    
-  
-
-
-  
-  
   
     columnHelper.accessor(row => row.IdealTurnover, {
       id: 'IdealTurnover',
       cell: info => info.getValue(),
       header: () => 'Ideal Turnover',
     }),
-
-  
-
     columnHelper.accessor(row => row.Cashperpf, {
       id: 'Cash/pf',
       cell: info => info.getValue(),
@@ -151,9 +140,6 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'OB Count',
     }),
-   
-    
-
     columnHelper.accessor(row => row.openOrderCount, {
       id: 'OpenOrderCount',
       cell: info => info.getValue(),
@@ -173,6 +159,16 @@ export const columns = [
       id: 'PendingOrderCount',
       cell: info => info.getValue(),
       header: () => 'PendingOrderCount',
-    })
+    }),
+    columnHelper.accessor(row => row.PendingOrderCount, {
+      id: 'PendingOrderCount',
+      cell: info => info.getValue(),
+      header: () => 'PendingOrderCount',
+    }),
+    columnHelper.accessor(row => row.cashalertper, {
+      id: 'cashalertper',
+      cell: info => info.getValue(),
+      header: () => 'Cash Alert Percentage',
+    }),
   
   ]

@@ -209,6 +209,7 @@ const getComparisonClass = (row, colId) => {
     // Get the values for the primary and secondary columns in the row.
     const primaryVal = row.getValue(rule.primary)
     const secondaryVal = row.getValue(rule.secondary)
+    const percentage=row.getValue('cashalertper');
 
     // Check that both values are numbers (and avoid division by zero)
     if (
@@ -217,7 +218,7 @@ const getComparisonClass = (row, colId) => {
         secondaryVal !== 0
     ) {
         // Calculate the threshold
-        const threshold = (rule.percentage / 100) * secondaryVal
+        const threshold = (percentage / 100) * secondaryVal
         // Return "red" if primary is above the threshold and "green" otherwise
         return primaryVal < threshold ? 'red' : 'green'
     }

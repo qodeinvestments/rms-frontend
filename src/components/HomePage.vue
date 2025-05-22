@@ -122,7 +122,7 @@ const updateData = () => {
       Portfolio_Value:item['Portfolio Value'] !== undefined ? item['Portfolio Value'] : 0,
       Cashperpf :Number(item['Cashperpf'] !== undefined ? item['Cashperpf'] : 0,  ['Cashperpf']) ,
       ob_cnt:item.ob_cnt !== undefined ? item.ob_cnt : 0,
-
+      cashalertper:item['cashalertper']!== undefined ? item['cashalertper'] : 0
     }))
   }
 
@@ -446,7 +446,7 @@ onUnmounted(() => {
         <TanStackTestTable title="Accounts" :data="data" :columns="columns"
           :hasColor="['IdealMTM', 'Day_PL', 'Slippage','SlippagePer','PNL_PER_UM', 'HoldingsDayPL','PNL_PER_M','Slippage2','API DAY PNL','API NET PNL']" :navigateTo="NavigationMap"
           :showPagination=true :hasRowcolor="{ 'columnName': 'AccountName', 'arrayValues': [] }"
-          :compareRules="[ { primary: 'Cash', secondary: 'Portfolio Value', percentage: 3 } ]"
+          :compareRules="[ { primary: 'Cash', secondary: 'Portfolio Value' } ]"
           :defaultSortFirstColumn="true"
           />
 
