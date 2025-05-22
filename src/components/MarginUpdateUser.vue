@@ -40,7 +40,7 @@
 
     <!-- Header & Margin Row -->
     <div class="header">
-      <h1 class="account-heading">Account: {{ account }}</h1>
+      <h1 class="account-heading">Account: {{ userIdToUsernameMap[account] || account }}</h1>
 
       <!-- Row container for Portfolio & Margins -->
       <div class="portfolio-row">
@@ -521,6 +521,7 @@ const mainDataTableError = ref("");
 
 // Data for multipliers
 const live_clients = ref({});
+const userIdToUsernameMap=ref({})
 const client_multiplier = ref({});
 const multiplierErrors = ref({});
 const isUpdatingMultiplier = ref(false);
@@ -947,6 +948,7 @@ const fetchMarginData = async () => {
 
 
     live_clients.value = data.value["live_clients"];
+    userIdToUsernameMap.value = data.value["userNameToUserIdDict"];
 
     // Identify the correct user key in live_clients
     const matchingKey = Object.keys(live_clients.value).find(
