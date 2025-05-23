@@ -170,5 +170,14 @@ export const columns = [
       cell: info => info.getValue(),
       header: () => 'Cash Alert Percentage',
     }),
-  
+    columnHelper.accessor(row => row.squareOffFlag, {
+      id: 'squareOffFlag',
+      cell: info => info.getValue(),
+      header: () => 'Square Off Flag',
+    }),
+    columnHelper.accessor(row => row.squareOffMode, {
+      id: 'squareOffMode',
+      cell: info => info.getValue(),
+      header: () => 'Square Off Mode',
+    })
   ]

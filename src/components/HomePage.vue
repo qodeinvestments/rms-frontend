@@ -122,7 +122,9 @@ const updateData = () => {
       Portfolio_Value:item['Portfolio Value'] !== undefined ? item['Portfolio Value'] : 0,
       Cashperpf :Number(item['Cashperpf'] !== undefined ? item['Cashperpf'] : 0,  ['Cashperpf']) ,
       ob_cnt:item.ob_cnt !== undefined ? item.ob_cnt : 0,
-      cashalertper:item['cashalertper']!== undefined ? item['cashalertper'] : 0
+      cashalertper:item['cashalertper']!== undefined ? item['cashalertper'] : 0,
+      squareOffFlag:item['squareOffFlag'],
+      squareOffMode:item['squareOffMode']
     }))
   }
 
