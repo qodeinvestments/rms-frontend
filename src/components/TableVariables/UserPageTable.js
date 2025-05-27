@@ -259,6 +259,12 @@ const client_holdings=[
         cell: info => info.getValue(),
         header: () => 'status',
     }),
+    columnHelper.accessor(row => row.order_id, {
+        id: '"order_id"',
+        cell: info => info.getValue(),
+        header: () => 'Order Id',
+    }),
+    
     columnHelper.accessor(row => row.order_timestamp, {
         id: 'order_timestamp',
         cell: info => info.getValue(),
