@@ -15,7 +15,6 @@ import WarningSignal from './WarningSignal.vue'
 import { MyEnum } from '../Enums/Prefix.js'
 import Histogram from './Histogram.vue'
 import { columns } from '../components/TableVariables/HomePageTable.js'; 
-import webSocketService from '../services/websocketService';
 import OHLCChart from './OHLCCHART.vue'
 
 import LightWeightChart from './LightWeightChart.vue';
