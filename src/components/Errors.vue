@@ -236,9 +236,11 @@ onUnmounted(() => {
 
         <div class="navContainer">
             <NavBar
-                :navColumns="['New_Order_Errors', 'Testing', 'Run_Strats', 'Web_Sockets', 'XTS_Trader', 'Zerodha_Trader', 'PosMis Generator']"
+             
+                :navColumns="['New_Order_Errors']"
                 @column-clicked="handleColumnClick" 
                 :colorColumns="colorColumns" />
+                   <!-- :navColumns="['New_Order_Errors', 'Testing', 'Run_Strats', 'Web_Sockets', 'XTS_Trader', 'Zerodha_Trader', 'PosMis Generator']" -->
         </div>
 
 
