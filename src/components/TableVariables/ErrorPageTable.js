@@ -43,8 +43,8 @@ const new_order_errors_ob_columns = [
     'Transaction Type',
     'Quantity',
     'Price',
-    'Average Price',
-    'Filled Quantity',
+    // 'Average Price',
+    // 'Filled Quantity',
     'Pending Quantity'
   ];
   

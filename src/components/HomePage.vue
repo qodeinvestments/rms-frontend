@@ -7,7 +7,6 @@ import {
   createColumnHelper,
 } from '@tanstack/vue-table'
 import { inject } from 'vue'
-import SignalForTable from './SignalForTable.vue'
 import TanStackTestTable from './TanStackTestTable.vue'
 import Chart from './Chart.vue'
 import MultiLineChart from './HighCharts.vue'
