@@ -18,7 +18,6 @@ import { columns } from '../components/TableVariables/HomePageTable.js';
 import OHLCChart from './OHLCCHART.vue'
 
 import LightWeightChart from './LightWeightChart.vue';
-import CustomSelect from './CustomSelect.vue'
 
 const defaultData = []
 const NavigationMap = {
