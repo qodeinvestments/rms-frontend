@@ -749,12 +749,23 @@ const validateBasketSelections = (selectedValues, basketType, errorRef) => {
   });
 };
 
-// Replace both validation functions with calls to the helper
+// Add this function before the validateFeatures function
+const isAfterThreeThirty = () => {
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  return hours > 15 || (hours === 15 && minutes >= 30);
+};
+
+// Replace the validateFeatures function
 const validateFeatures = () => {
+  if (!isAfterThreeThirty()) return;
   validateBasketSelections(selectedFeatures.value, 'feature', marginUpdateCheckerError);
 };
 
+// Replace the validateMainDataTable function
 const validateMainDataTable = () => {
+  if (!isAfterThreeThirty()) return;
   validateBasketSelections(selectedStrategies.value, 'swan', mainDataTableError);
 };
 
