@@ -128,9 +128,8 @@ const showOnPage = ref('New_Order_Errors')
 
 // Add watch for selectedNewOrderOption
 watch(selectedNewOrderOption, (newValue) => {
-    console.log('Selected New Order Option changed:', newValue)
     if (showOnPage.value === 'New_Order_Errors' && allNewOrderErrors.value.length > 0) {
-        console.log('Filtering New Order Errors for account:', newValue)
+
         if (newValue === 'ALL') {
             book.value = allNewOrderErrors.value
             console.log('Setting all data:', book.value.length, 'items')
@@ -142,7 +141,7 @@ watch(selectedNewOrderOption, (newValue) => {
 })
 
 watch(data, (newValue) => {
-    console.log('Data changed:', newValue)
+
     updateColorColumns(newValue, newValue['time'])
     if (newValue['time']) {
         let ar2 = newValue["time"];
@@ -159,19 +158,18 @@ watch(data, (newValue) => {
     }
 
     if ('New_Order_Errors' in data) {
-        console.log('Processing New Order Errors data')
         // Store the complete dataset
         allNewOrderErrors.value = data['New_Order_Errors']
         
         // Get unique accounts from New_Order_Errors array
         const accounts = [...new Set(data['New_Order_Errors'].map(item => item.Account))]
-        console.log('Found accounts:', accounts)
+ 
         newOrderOptions.value = accounts
         newOrderOptions.value.push("ALL")
         
         // Apply current filter to new data
         if (showOnPage.value === 'New_Order_Errors') {
-            console.log('Updating book for New Order Errors, selected option:', selectedNewOrderOption.value)
+
             if (selectedNewOrderOption.value === 'ALL') {
                 book.value = allNewOrderErrors.value
             } else {
@@ -193,9 +191,8 @@ watch(data, (newValue) => {
 
 // Also add a watch for showOnPage to handle page changes
 watch(showOnPage, (newValue) => {
-    console.log('Page changed to:', newValue)
+    
     if (newValue === 'New_Order_Errors' && allNewOrderErrors.value.length > 0) {
-        console.log('Updating book for page change to New Order Errors')
         if (selectedNewOrderOption.value === 'ALL') {
             book.value = allNewOrderErrors.value
             console.log('Set all data on page change:', book.value.length, 'items')
