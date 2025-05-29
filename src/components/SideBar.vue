@@ -23,10 +23,14 @@
                   <span class="text">Dashboard</span>
                 </a>
               </li>
-              <li :class="selected == 'Errors' ? 'active' : ''" @click="changeSelected('Errors')" v-if="sidebarfeatures['pages'].includes('Errors')">
+              <li :class="[
+                selected === 'Errors' ? 'active' : '',
+                hasNewOrderErrors ? 'has-errors' : ''
+              ]" @click="changeSelected('Errors')" v-if="sidebarfeatures['pages'].includes('Errors')">
                 <a href="#">
                   <i class="icon fas fa-exclamation-triangle"></i>
                   <span class="text">Errors</span>
+                  <span v-if="hasNewOrderErrors" class="error-indicator"></span>
                 </a>
               </li>
               <li :class="selected == 'KeyDBLogs' ? 'active' : ''" @click="changeSelected('KeyDBLogs')" v-if="sidebarfeatures['pages'].includes('KeyDBLogs')">
@@ -176,6 +180,7 @@
 
 <script>
 import { useRouter } from 'vue-router';
+import { inject, computed } from 'vue';
 
 export default {
   props: {
@@ -186,6 +191,17 @@ export default {
         pages: [],
         role: ''
       })
+    }
+  },
+  setup() {
+    const newOrderErrors = inject('newOrderErrors')
+    
+    const hasNewOrderErrors = computed(() => {
+      return newOrderErrors.value && newOrderErrors.value.length > 0
+    })
+
+    return {
+      hasNewOrderErrors
     }
   },
   data() {
@@ -496,5 +512,47 @@ export default {
 .icon.fas {
   font-family: "Font Awesome 6 Free" !important;
   font-weight: 900;
+}
+
+/* Add new styles for error indicator */
+.has-errors .nav-link {
+  position: relative;
+}
+
+.error-indicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Adjust the collapsed state to show the indicator */
+.sidebar.active .error-indicator {
+  right: 4px;
+  top: 4px;
+}
+
+/* Make sure the indicator is visible in both expanded and collapsed states */
+.sidebar.active .nav-link {
+  padding-right: 24px;
 }
 </style>

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, provide, watch } from 'vue'
+import { onMounted, ref, provide, watch, computed } from 'vue'
 import { RouterView } from 'vue-router'
 import SideBar from './components/SideBar.vue'
 import Toast from './components/Toast.vue'
@@ -151,7 +151,7 @@ const handleMessage = (message) => {
     }
     book.value['Pulse_Errors'] = message['Pulse_Errors']
 
-    // Add handling for New_Order_Errors
+    // Update New_Order_Errors handling
     if (message['New_Order_Errors']) {
       book.value['New_Order_Errors'] = message['New_Order_Errors']
     }
@@ -217,6 +217,7 @@ onMounted(async () => {
 
 provide('triggerToast', triggerToast)
 provide('book', book.value)
+provide('newOrderErrors', computed(() => book.value?.New_Order_Errors || []))
 
 
 
