@@ -7,7 +7,6 @@ import BarChart from './Barchart.vue';
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router';
 import Chart from './Chart.vue';
-import MultiLineChart from './HighCharts.vue'
 
 import LightWeightChart from './LightWeightChart.vue';
 

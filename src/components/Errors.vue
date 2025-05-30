@@ -16,7 +16,6 @@ import { useRoute } from 'vue-router';
 import TanStackTestTable from './TanStackTestTable.vue'
 import Chart from './Chart.vue';
 import NavBar from './NavBar.vue';
-import MultiLineChart from './HighCharts.vue'
 
 import LightWeightChart from './LightWeightChart.vue';
 

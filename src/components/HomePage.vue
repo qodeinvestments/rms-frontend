@@ -9,7 +9,6 @@ import {
 import { inject } from 'vue'
 import TanStackTestTable from './TanStackTestTable.vue'
 import Chart from './Chart.vue'
-import MultiLineChart from './HighCharts.vue'
 import WarningSignal from './WarningSignal.vue'
 import { MyEnum } from '../Enums/Prefix.js'
 import Histogram from './Histogram.vue'

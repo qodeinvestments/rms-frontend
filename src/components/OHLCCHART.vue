@@ -419,10 +419,16 @@ const updateChartData = () => {
   if (!Array.isArray(props.data) || props.data.length === 0) return
 
   // Transform and set candlestick data
-  // "o", "h", "l", "c" from each data item
   const transformedData = props.data.map(item => {
+    // Convert timestamp to Unix seconds if it's a string or Date object
+    const timestamp = typeof item.timestamp === 'string' 
+      ? new Date(item.timestamp).getTime() / 1000
+      : item.timestamp instanceof Date 
+        ? item.timestamp.getTime() / 1000
+        : item.timestamp
+
     return {
-      time: new Date(item.timestamp).getTime() / 1000,
+      time: timestamp,
       open: item.o,
       high: item.h,
       low: item.l,
@@ -445,15 +451,22 @@ const updateChartData = () => {
     // Create new PSAR series for the selected line
     psarSeries = chart.addLineSeries({
       color: '#2962FF',
-      lineWidth: 2,
-      pointsVisible: true,
-      pointSize: 4,
+      lineWidth: 1, // Changed to match your Python plot
+      pointsVisible: false, // Changed to match your Python plot
       title: psarKey.toUpperCase()
     })
-    const psarData = props.data.map(item => ({
-      time: new Date(item.timestamp).getTime() / 1000,
-      value: item[psarKey], 
-    }))
+    const psarData = props.data.map(item => {
+      const timestamp = typeof item.timestamp === 'string' 
+        ? new Date(item.timestamp).getTime() / 1000
+        : item.timestamp instanceof Date 
+          ? item.timestamp.getTime() / 1000
+          : item.timestamp
+
+      return {
+        time: timestamp,
+        value: item[psarKey]
+      }
+    })
     psarSeries.setData(psarData)
   } else if (psarSeries) {
     // Remove PSAR series if no psar data or psar not enabled
@@ -473,10 +486,18 @@ const updateChartData = () => {
         title: 'MA'
       })
     }
-    const maData = props.data.map(item => ({
-      time: new Date(item.timestamp).getTime() / 1000,
-      value: item.ma
-    }))
+    const maData = props.data.map(item => {
+      const timestamp = typeof item.timestamp === 'string' 
+        ? new Date(item.timestamp).getTime() / 1000
+        : item.timestamp instanceof Date 
+          ? item.timestamp.getTime() / 1000
+          : item.timestamp
+
+      return {
+        time: timestamp,
+        value: item.ma
+      }
+    })
     maSeries.setData(maData)
   } else if (maSeries) {
     // Remove MA series if none found or MA not enabled
