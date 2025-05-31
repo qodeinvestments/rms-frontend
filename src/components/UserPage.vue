@@ -206,6 +206,15 @@ const connectStrategyWebSocket = () => {
 
   clientStrategySocket.onmessage = function (event) {
     const data = JSON.parse(event.data);
+
+
+
+    if (data.error === "Access denied") {
+      clientStrategySocket.close();
+      return;
+    }
+
+
     let ar2 = data["time"];
     if (past_time_strategy.value === 0) past_time_strategy.value = ar2;
     if (past_time_strategy.value != 0) {
@@ -246,7 +255,8 @@ const connectStrategyWebSocket = () => {
     if (clientStrategySocket && clientStrategySocket.readyState === WebSocket.OPEN) {
       let client_data = {
         "name": name.value,
-        "basket": ['ALL']
+        "basket": ['ALL'],
+        "token": token
       };
       clientStrategySocket.send(JSON.stringify(client_data));
     } else {
@@ -276,6 +286,13 @@ const connectBasketWebSocket = () => {
 
   clientBasketSocket.onmessage = function (event) {
     const data = JSON.parse(event.data);
+
+    
+    if (data.error === "Access denied") {
+      clientStrategySocket.close();
+      return;
+    }
+
     let ar2 = data["time"];
     mix_real_ideal_mtm_table.value = { "real": data['MTMTable'], "ideal": data['ideal_MTMTable'] }
     signal_position_tables.value = data.signalPosition
@@ -320,7 +337,8 @@ const connectBasketWebSocket = () => {
     if (clientBasketSocket && clientBasketSocket.readyState === WebSocket.OPEN) {
       let client_data = {
         "name": name.value,
-        "basket": ['ALL']
+        "basket": ['ALL'],
+        "token": token
       };
       clientBasketSocket.send(JSON.stringify(client_data));
     } else {
