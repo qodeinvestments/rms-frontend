@@ -469,6 +469,34 @@ const systemTagChartData = ref({})
 const selectedSystemTags = ref([])
 const systemTagChartKey = ref(0)
 
+// Add new refs for date filtering
+const dateRange = ref([])
+
+// Add computed property for filtered fund summary data
+const filteredFundSummaryData = computed(() => {
+  if (!book.value || showOnPage.value !== 'Fund Summary') return book.value;
+  
+  if (!dateRange.value || dateRange.value.length !== 2) return book.value;
+  
+  const [start, end] = dateRange.value;
+  if (!start && !end) return book.value;
+  
+  return book.value.filter(item => {
+    const itemDate = new Date(item.Date);
+    const startDate = start ? new Date(start) : null;
+    const endDate = end ? new Date(end) : null;
+    
+    if (startDate && endDate) {
+      return itemDate >= startDate && itemDate <= endDate;
+    } else if (startDate) {
+      return itemDate >= startDate;
+    } else if (endDate) {
+      return itemDate <= endDate;
+    }
+    return true;
+  });
+});
+
 const fetchStrategyChartData = async () => {
   try {
     isStrategyChartLoading.value = true
@@ -612,8 +640,27 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
         :navigateTo="[]" :showPagination=true  :defaultSortFirstColumn="true"/>
     </div>
     <div class="my-8" v-if="book && showOnPage === 'Fund Summary'">
-      <TanStackTestTable title="Fund Summary" :data="book" :columns="fund_summary_columns"
-        :hasColor="['Actual MTM','Ideal MTM','Settlement Price']" :navigateTo="[]" :showPagination=true />
+      <div class="date-filter-container">
+        <div class="date-headers">
+          <span class="date-label">Start Date</span>
+          <span class="date-label">End Date</span>
+        </div>
+        <a-range-picker
+          v-model:value="dateRange"
+          :show-time="false"
+          format="YYYY-MM-DD"
+          :placeholder="['Start Date', 'End Date']"
+          style="width: 100%; margin-bottom: 20px;"
+        />
+      </div>
+      <TanStackTestTable 
+        title="Fund Summary" 
+        :data="filteredFundSummaryData" 
+        :columns="fund_summary_columns"
+        :hasColor="['Actual MTM','Ideal MTM','Settlement Price']" 
+        :navigateTo="[]" 
+        :showPagination=true 
+      />
     </div>
     <div class="my-8" v-if="book && showOnPage === 'Zerodha Order Book'">
       <TanStackTestTable title="Zerodha Order Book" :data="book" :columns="zerodha_order_book_columns"
@@ -937,5 +984,24 @@ html {
   margin-top: 2rem;
   margin-bottom: 2rem;
   width: 100%;
+}
+
+.date-filter-container {
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 0 30px;
+}
+
+.date-headers {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 0 12px;
+}
+
+.date-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
 }
 </style>
