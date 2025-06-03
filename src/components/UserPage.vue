@@ -657,7 +657,7 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
         title="Fund Summary" 
         :data="filteredFundSummaryData" 
         :columns="fund_summary_columns"
-        :hasColor="['Actual MTM','Ideal MTM','Settlement Price']" 
+        :hasColor="['Actual MTM','Ideal MTM','Settlement Price','Holdings Day PNL']" 
         :navigateTo="[]" 
         :showPagination=true 
       />

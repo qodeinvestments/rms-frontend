@@ -407,7 +407,13 @@ const client_holdings=[
       id: 'Settlement Price',
       cell: info => info.getValue(),
       header: () => 'Settlement Price',
-    })
+    }),
+    columnHelper.accessor(row => row['holdingsdaypl'], {
+      id: 'Holdings Day PNL',
+      cell: info => info.getValue(),
+      header: () => 'Holdings Day PNL',
+    }),
+   
     
 
     
