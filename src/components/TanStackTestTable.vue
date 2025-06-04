@@ -312,6 +312,12 @@ const table = useVueTable({
     },
 })
 
+// Expose the table instance and columnVisibility to parent component
+defineExpose({
+    table,
+    columnVisibility
+})
+
 // Computed properties for pagination
 const pageCount = ref(0)
 const rows = ref([])

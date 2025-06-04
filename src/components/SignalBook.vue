@@ -113,9 +113,46 @@ const connectClientDetailsWebSocket = () => {
 };
 
 const showOnPage = ref('Positions')
+const tableRef = ref(null)
+
+// Add preset views for columns
+const presetViews = {
+    concise: [
+        'timestamp',
+        'system_timestamp',
+        'system_tag',
+        'action',
+        'symbol',
+        'note',
+    ]
+}
+
+// Add function to set column visibility based on preset view
+const setPresetView = (viewType) => {
+    if (!tableRef.value) return
+    
+    const newVisibility = {}
+    
+    // Set visibility for all columns
+    tableRef.value.table.getAllLeafColumns().forEach(column => {
+        // For overall view, set all columns to true
+        if (viewType === 'overall') {
+            newVisibility[column.id] = true
+        } else {
+            // For concise view, only show specified columns
+            newVisibility[column.id] = presetViews.concise.includes(column.id)
+        }
+    })
+    
+    tableRef.value.columnVisibility = newVisibility
+}
 
 onMounted(() => {
     connectClientDetailsWebSocket();
+    // Set initial view to concise after a short delay to ensure table is mounted
+    setTimeout(() => {
+        setPresetView('concise')
+    }, 100)
 })
 
 onUnmounted(() => {
@@ -144,6 +181,20 @@ const toggleCheckerFilter = () => {
         </div>
 
         <div class="filter-controls">
+            <!-- Add preset view buttons -->
+            <div class="preset-views mb-4">
+                <button 
+                    @click="setPresetView('concise')" 
+                    class="preset-view-btn">
+                    Concise View
+                </button>
+                <button 
+                    @click="setPresetView('overall')" 
+                    class="preset-view-btn">
+                    Overall View
+                </button>
+            </div>
+
             <!-- Basket multi-select component -->
             <a-select v-model:value="selectedBasketItems" mode="multiple" placeholder="Select Basket Items"
                 style="width: 100%; margin-bottom: 10px;"
@@ -162,9 +213,16 @@ const toggleCheckerFilter = () => {
         </div>
 
         <div class="my-8" v-if="filteredSignalBookData.length">
-            <!-- <p class="table-heading">Signal Book</p> -->
-            <TanStackTestTable title="PsarTable" :data="filteredSignalBookData" :columns="columns" :hasColor="[]"
-                :navigateTo="[]" :showPagination=true :showPin="true"/>
+            <TanStackTestTable 
+                ref="tableRef"
+                title="PsarTable" 
+                :data="filteredSignalBookData" 
+                :columns="columns" 
+                :hasColor="[]"
+                :navigateTo="[]" 
+                :showPagination=true 
+                :showPin="true"
+            />
         </div>
         <div v-if="histogram.length > 0" class="histogram-container">
             <p class="table-heading">Histogram Of Time Difference</p>
@@ -244,5 +302,31 @@ const toggleCheckerFilter = () => {
 html {
     /* font-family: poppins; */
     font-size: 14px;
+}
+
+.preset-views {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.preset-view-btn {
+    padding: 8px 16px;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: white;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.85);
+}
+
+.preset-view-btn:hover {
+    border-color: #1890ff;
+    color: #1890ff;
+}
+
+.preset-view-btn:active {
+    background-color: #f0f0f0;
 }
 </style>
