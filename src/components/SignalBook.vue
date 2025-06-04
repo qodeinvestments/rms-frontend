@@ -12,6 +12,7 @@ import { ref, watch } from 'vue'
 import TanStackTestTable from './TanStackTestTable.vue'
 import Histogram from './Histogram.vue';
 import { columns } from '../components/TableVariables/SignalBook.js'; 
+import InfoIcon from './InfoIcon.vue'
 
 
 const signal_book_data = ref([])
@@ -183,16 +184,19 @@ const toggleCheckerFilter = () => {
         <div class="filter-controls">
             <!-- Add preset view buttons -->
             <div class="preset-views mb-4">
-                <button 
-                    @click="setPresetView('concise')" 
-                    class="preset-view-btn">
-                    Concise View
-                </button>
-                <button 
-                    @click="setPresetView('overall')" 
-                    class="preset-view-btn">
-                    Overall View
-                </button>
+                <div class="preset-views-buttons">
+                    <button 
+                        @click="setPresetView('concise')" 
+                        class="preset-view-btn">
+                        Concise View
+                    </button>
+                    <button 
+                        @click="setPresetView('overall')" 
+                        class="preset-view-btn">
+                        Overall View
+                    </button>
+                    <InfoIcon message="Press 'Concise View' to show only essential columns. Press 'Overall View' to show all available columns." />
+                </div>
             </div>
 
             <!-- Basket multi-select component -->
@@ -328,5 +332,11 @@ html {
 
 .preset-view-btn:active {
     background-color: #f0f0f0;
+}
+
+.preset-views-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 </style>
