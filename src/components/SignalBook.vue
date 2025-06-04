@@ -115,6 +115,7 @@ const connectClientDetailsWebSocket = () => {
 
 const showOnPage = ref('Positions')
 const tableRef = ref(null)
+const initialColumnVisibility = ref({})
 
 // Add preset views for columns
 const presetViews = {
@@ -128,32 +129,33 @@ const presetViews = {
     ]
 }
 
+// Initialize column visibility immediately
+columns.forEach(column => {
+    initialColumnVisibility.value[column.id] = presetViews.concise.includes(column.id)
+})
+
 // Add function to set column visibility based on preset view
 const setPresetView = (viewType) => {
-    if (!tableRef.value) return
-    
     const newVisibility = {}
     
     // Set visibility for all columns
-    tableRef.value.table.getAllLeafColumns().forEach(column => {
-        // For overall view, set all columns to true
-        if (viewType === 'overall') {
-            newVisibility[column.id] = true
-        } else {
-            // For concise view, only show specified columns
-            newVisibility[column.id] = presetViews.concise.includes(column.id)
-        }
-    })
-    
-    tableRef.value.columnVisibility = newVisibility
+    if (tableRef.value) {
+        tableRef.value.table.getAllLeafColumns().forEach(column => {
+            // For overall view, set all columns to true
+            if (viewType === 'overall') {
+                newVisibility[column.id] = true
+            } else {
+                // For concise view, only show specified columns
+                newVisibility[column.id] = presetViews.concise.includes(column.id)
+            }
+        })
+        
+        tableRef.value.columnVisibility = newVisibility
+    }
 }
 
 onMounted(() => {
     connectClientDetailsWebSocket();
-    // Set initial view to concise after a short delay to ensure table is mounted
-    setTimeout(() => {
-        setPresetView('concise')
-    }, 100)
     // Set the page title
     document.title = 'Signal Book'
 })
@@ -229,6 +231,7 @@ const toggleCheckerFilter = () => {
                 :navigateTo="[]" 
                 :showPagination=true 
                 :showPin="true"
+                :initialColumnVisibility="initialColumnVisibility"
             />
         </div>
         <div v-if="histogram.length > 0" class="histogram-container">

@@ -192,12 +192,13 @@ const props = defineProps({
         type: Boolean,
         default: false
     },
-    // New prop: an array of rules in which each rule defines
-    // the primary column to check, the secondary column to compare,
-    // and the percentage threshold.
     compareRules: {
         type: Array,
-        default: () => []  // for example: [ { primary: 'a', secondary: 'b', percentage: 2 } ]
+        default: () => []
+    },
+    initialColumnVisibility: {
+        type: Object,
+        default: () => ({})
     }
 })
 
@@ -404,7 +405,23 @@ const handleMouseWheel = (event) => {
     }
 }
 
+// Initialize column visibility from props
 onMounted(() => {
+    // Only set column visibility if initialColumnVisibility is provided and has values
+    if (props.initialColumnVisibility && Object.keys(props.initialColumnVisibility).length > 0) {
+        // Create a new object with all columns set to false by default
+        const newVisibility = {}
+        props.columns.forEach(column => {
+            newVisibility[column.id] = false
+        })
+        // Then set only the specified columns to true
+        Object.entries(props.initialColumnVisibility).forEach(([key, value]) => {
+            if (value) {
+                newVisibility[key] = true
+            }
+        })
+        columnVisibility.value = newVisibility
+    }
     const containers = document.querySelectorAll('.table-container');
     containers.forEach(container => {
         container.addEventListener('wheel', handleMouseWheel, { passive: false });
