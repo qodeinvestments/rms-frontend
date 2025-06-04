@@ -130,11 +130,12 @@ const downloadExcel = async () => {
 const showOnPage = ref('Positions')
 
 onMounted(() => {
+  document.title = 'Open Trades';
   fetchData()
 })
 
 onUnmounted(() => {
-  // cleanup if needed
+    document.title = 'Vite App'
 })
 
 watch(selectedBasketItems, (newSelectedBasketItems) => {

@@ -1,6 +1,6 @@
 <!-- TradingPositions.vue -->
 <script setup>
-import { ref, computed, onMounted ,watch} from 'vue';
+import { ref, computed, onMounted ,watch,onUnmounted} from 'vue';
 import * as XLSX from 'xlsx';
 
 // Add prop for number of sticky columns
@@ -315,10 +315,15 @@ watch(uniqueUsers, (newUsers) => {
 
 
 onMounted(() => {
+  document.title = 'Live Positions'
   fetchTradingData();
   // Initialize with all users selected by default
   selectedUsers.value = uniqueUsers.value;
 });
+onUnmounted(() => {
+    document.title = 'Vite App'
+
+})
 </script>
 
 <!-- Template Section -->

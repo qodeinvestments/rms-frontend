@@ -102,7 +102,7 @@
   </template>
   
   <script setup>
-  import { ref, computed, onMounted, watch } from 'vue';
+  import { ref, computed, onMounted, watch ,onUnmounted} from 'vue';
   import { createChart } from 'lightweight-charts';
   
   // ----- State Management -----
@@ -416,6 +416,7 @@ const sortByColumn = (column) => {
   // ----- Lifecycle -----
   
   onMounted(async () => {
+    document.title = 'Slippage User Page';
     await fetchSlippage();
     console.log('Slippage response:', otherdata.value);
     await fetchPerformanceData();
@@ -428,6 +429,10 @@ const sortByColumn = (column) => {
     }
     initChart();
   });
+  onUnmounted(() => {
+    document.title = 'Vite App'
+
+})
   </script>
   
   <style scoped>

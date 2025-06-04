@@ -154,10 +154,13 @@ onMounted(() => {
     setTimeout(() => {
         setPresetView('concise')
     }, 100)
+    // Set the page title
+    document.title = 'Signal Book'
 })
 
 onUnmounted(() => {
-
+    // Reset the title when component is unmounted
+    document.title = 'Vite App'
 })
 
 // Watch for changes in selectedBasketItems

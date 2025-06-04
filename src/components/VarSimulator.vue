@@ -282,7 +282,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch, computed } from 'vue'
+import { ref, reactive, onMounted, watch, computed,onUnmounted } from 'vue'
 import ParentOptionChain from './ParentOptionChain.vue'
 // State variables
 const users = ref([])
@@ -579,10 +579,15 @@ const userOptions = computed(() =>
     }))
 )
 
-// onMounted
+
 onMounted(() => {
+  document.title = 'Var Simulator';
   fetchUsers()
   fetchOptionsDetails()
+})
+onUnmounted(() => {
+    document.title = 'Vite App'
+
 })
 </script>
 

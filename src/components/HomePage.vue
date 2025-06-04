@@ -334,11 +334,13 @@ const getPercentageClass = (key) => {
 }
 
 onMounted(() => {
+  document.title = 'Home'
   connectWebSocket()
   // connectServerDataWebSocket()
 })
 
 onUnmounted(() => {
+  document.title = 'Vite App'
   if (socket) {
     socket.close()
   }

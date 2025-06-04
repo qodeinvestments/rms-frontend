@@ -645,6 +645,7 @@ const accountNames = computed(() => Object.keys(accounts.value))
 // LIFECYCLE HOOKS
 // -------------------------------------------------------
 onMounted(async () => {
+  document.title = 'Var Page';
   loading.value = true
   try {
     // Load initial data.
@@ -661,7 +662,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  // Cleanup if needed
+  document.title = 'Vite App'
 })
 
 

@@ -209,10 +209,12 @@ watch(showOnPage, (newValue) => {
 })
 
 onMounted(() => {
+    document.title = 'Error Page'
     name.value = route.params.username;
 })
 
 onUnmounted(() => {
+    document.title = 'Vite App'
     if (eventSource) {
         eventSource.close()
     }

@@ -1,6 +1,6 @@
 <!-- App.vue -->
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref ,onUnmounted} from 'vue';
 import Histogram from './Histogram.vue';
 import OHLCChart from './OHLCCHART.vue';
 import TanStackTestTable from './TanStackTestTable.vue'
@@ -74,9 +74,14 @@ const fetchDiffData = (data) => {
 }
 
 onMounted(() => {
+  document.title = 'Visualizer';
   fetchClientDetails();
   chartDatafetch({symbol: 'NIFTY', timeframe: '5m', indicators: []});
 });
+onUnmounted(() => {
+    document.title = 'Vite App'
+
+})
 </script>
 
 <template>

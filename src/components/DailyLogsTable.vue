@@ -163,7 +163,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted,onUnmounted } from 'vue'
 import { Select, Button, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 
@@ -425,7 +425,14 @@ async function fetchData(endpoint, stateRef) {
 const fetchLogs = () => fetchData('getdailylogs', logs)
 
 // Lifecycle Hook
-onMounted(fetchLogs)
+onMounted(()=>{
+  document.title = 'Daily Logs';
+  fetchLogs();
+})
+onUnmounted(() => {
+    document.title = 'Vite App'
+
+})
 </script>
 
 <style scoped>
