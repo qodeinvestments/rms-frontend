@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, computed } from 'vue'
+import { onMounted, onUnmounted, computed, nextTick } from 'vue'
 import BarChart from './Barchart.vue';
 import { useRouter } from 'vue-router';
 import Histogram from './Histogram.vue';
@@ -16,6 +16,7 @@ import TanStackTestTable from './TanStackTestTable.vue'
 import Chart from './Chart.vue';
 import NavBar from './NavBar.vue';
 import LightWeightChart from './LightWeightChart.vue';
+import InfoIcon from './InfoIcon.vue'
 const route = useRoute();
 const user_data = ref('')
 const name = ref('');
@@ -93,6 +94,16 @@ const book = ref([])
 const position_sum = ref(0)
 const handleColumnClick = ({ item, index }) => {
   showOnPage.value = item;
+  // If switching to Combined DF, initialize and set concise view
+  if (item === 'Combined DF') {
+    initializeColumnVisibility();
+    // Wait for next tick to ensure tableRef is available
+    nextTick(() => {
+      if (tableRef.value) {
+        setPresetView('concise');
+      }
+    });
+  }
 }
 const handleMessage = (message) => {
   try {
@@ -554,6 +565,82 @@ const fetchSystemTagChartData = async () => {
   }
 }
 
+// Add preset views for columns
+const presetViews = {
+    concise: {
+        xts: [
+            'system_timestamp',
+            'system_tag',
+            'action',
+            'TradingSymbol',
+            'note',
+            'price',
+            'OrderAverageTradedPrice',
+            'OrderQuantity'
+        ],
+        zerodha: [
+            'system_timestamp',
+            'system_tag',
+            'action',
+            'symbol',
+            'note',
+            'filled_quantity',
+            'average_price'
+        ]
+    }
+}
+
+const tableRef = ref(null)
+const initialColumnVisibility = ref({})
+
+// Initialize initialColumnVisibility with all columns hidden
+const initializeColumnVisibility = () => {
+    const columns = broker.value === 'xts' ? combined_df_columns_xts : combined_df_columns_zerodha;
+    const conciseColumns = broker.value === 'xts' ? presetViews.concise.xts : presetViews.concise.zerodha;
+    
+    columns.forEach(column => {
+        initialColumnVisibility.value[column.id] = conciseColumns.includes(column.id);
+    });
+}
+
+// Call initialization when broker changes
+watch(broker, () => {
+    initializeColumnVisibility();
+}, { immediate: true });
+
+// Watch for changes in showOnPage
+watch(showOnPage, (newView) => {
+    if (newView === 'Combined DF') {
+        // Wait for next tick to ensure tableRef is available
+        nextTick(() => {
+            if (tableRef.value) {
+                setPresetView('concise');
+            }
+        });
+    }
+});
+
+// Add function to set column visibility based on preset view
+const setPresetView = (viewType) => {
+    const newVisibility = {}
+    
+    // Set visibility for all columns
+    if (tableRef.value) {
+        tableRef.value.table.getAllLeafColumns().forEach(column => {
+            // For overall view, set all columns to true
+            if (viewType === 'overall') {
+                newVisibility[column.id] = true
+            } else {
+                // For concise view, only show specified columns based on broker type
+                const conciseColumns = broker.value === 'xts' ? presetViews.concise.xts : presetViews.concise.zerodha
+                newVisibility[column.id] = conciseColumns.includes(column.id)
+            }
+        })
+        
+        tableRef.value.columnVisibility = newVisibility
+    }
+}
+
 onMounted(() => {
   connectToSSE();
   name.value = route.params.username;
@@ -692,9 +779,33 @@ watch(selectedBasketItems, (newSelectedBasketItems) => {
     </div>
 
     <div class="my-8" v-if="book && showOnPage === 'Combined DF' && filteredSignalBookData.length">
-      <TanStackTestTable title="Combined DF" :data="filteredSignalBookData"
-        :columns="broker === 'xts' ? combined_df_columns_xts : combined_df_columns_zerodha" :hasColor="[]"
-        :navigateTo="[]" :showPagination=true />
+      <!-- Add preset view buttons -->
+      <div class="preset-views mb-4">
+          <div class="preset-views-buttons">
+              <button 
+                  @click="setPresetView('concise')" 
+                  class="preset-view-btn">
+                  Concise View
+              </button>
+              <button 
+                  @click="setPresetView('overall')" 
+                  class="preset-view-btn">
+                  Overall View
+              </button>
+              <InfoIcon message="Press 'Concise View' to show only essential columns. Press 'Overall View' to show all available columns." />
+          </div>
+      </div>
+
+      <TanStackTestTable 
+          ref="tableRef"
+          title="Combined DF" 
+          :data="filteredSignalBookData"
+          :columns="broker === 'xts' ? combined_df_columns_xts : combined_df_columns_zerodha" 
+          :hasColor="[]"
+          :navigateTo="[]" 
+          :showPagination=true 
+          :initialColumnVisibility="initialColumnVisibility"
+      />
     </div>
 
     <div class="my-8" v-if="book && showOnPage === 'Combined Orders'">
@@ -1003,5 +1114,38 @@ html {
   font-size: 14px;
   font-weight: 500;
   color: rgba(0, 0, 0, 0.85);
+}
+
+/* Add preset view button styles */
+.preset-views {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.preset-view-btn {
+    padding: 8px 16px;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: white;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.85);
+}
+
+.preset-view-btn:hover {
+    border-color: #1890ff;
+    color: #1890ff;
+}
+
+.preset-view-btn:active {
+    background-color: #f0f0f0;
+}
+
+.preset-views-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 </style>
