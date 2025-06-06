@@ -561,8 +561,8 @@ onUnmounted(() => {
                                                     : cell.getValue() > 0 && hasColor.includes(cell.id.split('_').slice(1).join('_'))
                                                     ? 'green'
                                                     : ''),
-                                            // Other conditions such as navigation:
-                                            tellnav(cell) ? 'cursorpointer' : ''
+                                            tellnav(cell) ? 'cursorpointer' : '',
+                                            typeof cell.getValue() === 'number' ? 'numeric-cell' : ''
                                         ]"
                                         @click="checkNavigate(cell)"
                                     >
@@ -688,6 +688,7 @@ onUnmounted(() => {
     font-size: 22px;
     font-weight: 600;
     margin-left: 30px;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 .green {
@@ -712,6 +713,7 @@ onUnmounted(() => {
 table {
     border-right: none;
     border-left: none;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 ::-webkit-scrollbar {
@@ -794,6 +796,65 @@ table {
     height: 1.5rem;
     color: #2563eb;
     font-weight: 500;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.numeric-cell {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-size: 0.95em;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+}
+
+/* Keep existing color classes */
+.red {
+    color: red;
+}
+
+.green {
+    color: rgb(80, 185, 80);
+}
+
+/* Add styles for positive and negative numbers */
+.numeric-cell.positive {
+    color: #0ea5e9;
+}
+
+.numeric-cell.negative {
+    color: #ef4444;
+}
+
+/* Update table styles */
+table {
+    border-right: none;
+    border-left: none;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Update header styles */
+th {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-weight: 600;
+}
+
+/* Update cell styles */
+td {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Update button styles */
+.preset-view-btn {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Update input styles */
+input, select {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Update pagination text */
+.mt-8 {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 </style>
