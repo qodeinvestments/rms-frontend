@@ -114,25 +114,7 @@
                   </label>
                   
                   <div v-if="indicators.psar.enabled" class="indicator-settings">
-                    <div class="setting-group">
-                      <label>Acceleration Factor</label>
-                      <input 
-                        type="number"
-                        v-model="indicators.psar.af"
-                        step="0.001"
-                        class="number-input"
-                      />
-                    </div>
-                    <div class="setting-group">
-                      <label>Maximum AF</label>
-                      <input 
-                        type="number"
-                        v-model="indicators.psar.maxAf"
-                        step="0.001"
-                        class="number-input"
-                      />
-                    </div>
-                    <!-- New: PSAR line selection dropdown -->
+                    <!-- PSAR Variation at the top -->
                     <div class="setting-group">
                       <label for="psarLine">PSAR Variation</label>
                       <select 
@@ -148,6 +130,28 @@
                           {{ line }}
                         </option>
                       </select>
+                    </div>
+
+                    <!-- AF Settings - only shown when custom is selected -->
+                    <div v-if="indicators.psar.selectedPsarLine === 'custom'" class="af-settings">
+                      <div class="setting-group">
+                        <label>Acceleration Factor</label>
+                        <input 
+                          type="number"
+                          v-model="indicators.psar.af"
+                          step="0.001"
+                          class="number-input"
+                        />
+                      </div>
+                      <div class="setting-group">
+                        <label>Maximum AF</label>
+                        <input 
+                          type="number"
+                          v-model="indicators.psar.maxAf"
+                          step="0.001"
+                          class="number-input"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -254,7 +258,6 @@ const indicators = ref({
     enabled: false,
     af: 0.001,
     maxAf: 0.001,
-    // which psar line is currently selected
     selectedPsarLine: 'psar1'
   },
   ma: {
@@ -1006,5 +1009,11 @@ watch(() => props.data, () => {
   .dropdown-container {
     width: 100%;
   }
+}
+
+.af-settings {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
 }
 </style>
