@@ -430,8 +430,21 @@ const updateIndicators = () => {
       setting: {
         af: Number(indicators.value.psar.af),
         'max-af': Number(indicators.value.psar.maxAf),
-        // Let our backend or other code know which psar line is selected
         psarLine: indicators.value.psar.selectedPsarLine
+      }
+    })
+  }
+  
+  if (indicators.value.long.enabled) {
+    config.value.indicators.push({
+      name: 'Long',
+      setting: {
+        system: indicators.value.long.system,
+        custom: indicators.value.long.system === 'custom' ? {
+          priceType: indicators.value.long.custom.priceType,
+          percentage: Number(indicators.value.long.custom.percentage),
+          dateTime: indicators.value.long.custom.dateTime
+        } : undefined
       }
     })
   }
