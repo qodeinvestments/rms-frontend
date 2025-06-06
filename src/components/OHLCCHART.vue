@@ -237,7 +237,8 @@ const psarLines = [
   'psar10',
   'psar11',
   'psar12',
-  'psar13'
+  'psar13',
+  'custom'
 ]
 
 // Configuration state
