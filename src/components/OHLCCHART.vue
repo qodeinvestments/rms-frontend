@@ -94,7 +94,7 @@
     <Teleport to="body">
       <Transition name="fade">
         <div v-if="isIndicatorModalOpen" class="modal-wrapper">
-          <div class="modal-backdrop" @click="closeIndicatorModal"></div>
+          <div class="modal-backdrop"></div>
           <div class="modal-container">
             <div class="modal-content">
               <div class="modal-header">
@@ -156,6 +156,80 @@
                   </div>
                 </div>
 
+                <!-- Long Options Settings -->
+                <div class="indicator-group">
+                  <label class="indicator-checkbox">
+                    <input 
+                      type="checkbox"
+                      v-model="indicators.long.enabled"
+                    />
+                    <span class="checkbox-label">Long Options</span>
+                  </label>
+                  
+                  <div v-if="indicators.long.enabled" class="indicator-settings">
+                    <div class="setting-group">
+                      <label for="longSystem">System</label>
+                      <select 
+                        id="longSystem" 
+                        v-model="indicators.long.system"
+                        class="number-input"
+                      >
+                        <option 
+                          v-for="system in longSystems" 
+                          :key="system" 
+                          :value="system"
+                        >
+                          {{ system }}
+                        </option>
+                        <option value="custom">Custom</option>
+                      </select>
+                    </div>
+
+                    <!-- Custom Long Settings -->
+                    <div v-if="indicators.long.system === 'custom'" class="custom-long-settings">
+                      <div class="setting-group">
+                        <label for="priceType">Price Type</label>
+                        <select 
+                          id="priceType" 
+                          v-model="indicators.long.custom.priceType"
+                          class="number-input"
+                        >
+                          <option 
+                            v-for="type in priceTypes" 
+                            :key="type" 
+                            :value="type"
+                          >
+                            {{ type }}
+                          </option>
+                        </select>
+                      </div>
+
+                      <div class="setting-group">
+                        <label for="percentage">Percentage</label>
+                        <input 
+                          id="percentage"
+                          type="number"
+                          v-model="indicators.long.custom.percentage"
+                          step="0.01"
+                          min="0"
+                          class="number-input"
+                        />
+                      </div>
+
+                      <div class="setting-group">
+                        <label for="dateTime">Date and Time</label>
+                        <input 
+                          id="dateTime"
+                          type="datetime-local"
+                          v-model="indicators.long.custom.dateTime"
+                          :max="maxDateTime"
+                          class="number-input"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- MA Settings -->
                 <div class="indicator-group">
                   <label class="indicator-checkbox">
@@ -192,7 +266,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
 import { createChart } from 'lightweight-charts'
 
 // Emits
@@ -245,6 +319,10 @@ const psarLines = [
   'custom'
 ]
 
+// Add to the script setup section, after psarLines:
+const longSystems = Array.from({ length: 24 }, (_, i) => `long${i + 1}`)
+const priceTypes = ['open', 'close']
+
 // Configuration state
 const config = ref({
   symbol: 'NIFTY',
@@ -260,10 +338,24 @@ const indicators = ref({
     maxAf: 0.001,
     selectedPsarLine: 'psar1'
   },
+  long: {
+    enabled: false,
+    system: 'long1',
+    custom: {
+      priceType: 'open',
+      percentage: 0,
+      dateTime: new Date().toISOString().slice(0, 16)
+    }
+  },
   ma: {
     enabled: false,
     period: 20
   }
+})
+
+// Add computed property for max date time
+const maxDateTime = computed(() => {
+  return new Date().toISOString().slice(0, 16)
 })
 
 // Dropdown handlers
@@ -1015,5 +1107,26 @@ watch(() => props.data, () => {
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px solid #e2e8f0;
+}
+
+.custom-long-settings {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+input[type="datetime-local"] {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+input[type="datetime-local"]:focus {
+  outline: none;
+  border-color: #2962FF;
+  box-shadow: 0 0 0 2px rgba(41, 98, 255, 0.1);
 }
 </style>
