@@ -287,9 +287,13 @@ let chart = null
 let candlestickSeries = null
 let psarSeries = null
 let maSeries = null
+let longOptionsDownSeries = null
+let longOptionsUpSeries = null
 let lastCandleData = null
 let lastPsarValue = null
 let lastMaValue = null
+let lastLongOptionsDownValue = null
+let lastLongOptionsUpValue = null
 
 // Loading and UI State
 const isLoading = ref(false)
@@ -394,7 +398,7 @@ const saveIndicatorSettings = () => {
   updateChartData()
 }
 // Price display updates
-const updatePriceDisplay = (candleData, psarValue, maValue) => {
+const updatePriceDisplay = (candleData, psarValue, maValue, longOptionsDownValue, longOptionsUpValue) => {
   const priceDisplay = document.querySelector('.price-display')
   if (!priceDisplay) return
 
@@ -416,6 +420,14 @@ const updatePriceDisplay = (candleData, psarValue, maValue) => {
   }
   if (indicators.value.ma.enabled && priceValues[5]) {
     priceValues[5].textContent = maValue?.value?.toFixed(2) || '-'
+  }
+  if (indicators.value.long.enabled) {
+    if (priceValues[6]) {
+      priceValues[6].textContent = longOptionsDownValue?.value?.toFixed(2) || '-'
+    }
+    if (priceValues[7]) {
+      priceValues[7].textContent = longOptionsUpValue?.value?.toFixed(2) || '-'
+    }
   }
 }
 
@@ -507,19 +519,23 @@ const createChartInstance = () => {
   // Subscribe to crosshair movement
   chart.subscribeCrosshairMove((param) => {
     if (!param || param.time === undefined) {
-      updatePriceDisplay(lastCandleData, lastPsarValue, lastMaValue)
+      updatePriceDisplay(lastCandleData, lastPsarValue, lastMaValue, lastLongOptionsDownValue, lastLongOptionsUpValue)
       return
     }
 
     const candleData = param.seriesData.get(candlestickSeries)
     const psarValue = psarSeries ? param.seriesData.get(psarSeries) : null
     const maValue = maSeries ? param.seriesData.get(maSeries) : null
+    const longOptionsDownValue = longOptionsDownSeries ? param.seriesData.get(longOptionsDownSeries) : null
+    const longOptionsUpValue = longOptionsUpSeries ? param.seriesData.get(longOptionsUpSeries) : null
 
     if (candleData) lastCandleData = candleData
     if (psarValue) lastPsarValue = psarValue
     if (maValue) lastMaValue = maValue
+    if (longOptionsDownValue) lastLongOptionsDownValue = longOptionsDownValue
+    if (longOptionsUpValue) lastLongOptionsUpValue = longOptionsUpValue
 
-    updatePriceDisplay(candleData, psarValue, maValue)
+    updatePriceDisplay(candleData, psarValue, maValue, longOptionsDownValue, longOptionsUpValue)
   })
 }
 
@@ -614,6 +630,66 @@ const updateChartData = () => {
     maSeries = null
   }
 
+  // Handle Long Options
+  if (
+    indicators.value.long.enabled &&
+    props.data.some(d => d.longoptionsdownSide !== undefined && d.longoptionsupSide !== undefined)
+  ) {
+    // Create or update down side series
+    if (!longOptionsDownSeries) {
+      longOptionsDownSeries = chart.addLineSeries({
+        color: '#FF0000',
+        lineWidth: 2,
+        lineStyle: 2, // Dashed line
+        title: 'Long Options Down'
+      })
+    }
+    
+    // Create or update up side series
+    if (!longOptionsUpSeries) {
+      longOptionsUpSeries = chart.addLineSeries({
+        color: '#00FF00',
+        lineWidth: 2,
+        lineStyle: 2, // Dashed line
+        title: 'Long Options Up'
+      })
+    }
+
+    const longOptionsData = props.data.map(item => {
+      const timestamp = typeof item.timestamp === 'string' 
+        ? new Date(item.timestamp).getTime() / 1000
+        : item.timestamp instanceof Date 
+          ? item.timestamp.getTime() / 1000
+          : item.timestamp
+
+      return {
+        time: timestamp,
+        downSide: item.longoptionsdownSide,
+        upSide: item.longoptionsupSide
+      }
+    })
+
+    longOptionsDownSeries.setData(longOptionsData.map(item => ({
+      time: item.time,
+      value: item.downSide
+    })))
+
+    longOptionsUpSeries.setData(longOptionsData.map(item => ({
+      time: item.time,
+      value: item.upSide
+    })))
+  } else {
+    // Remove series if long options are disabled or data is not available
+    if (longOptionsDownSeries) {
+      chart.removeSeries(longOptionsDownSeries)
+      longOptionsDownSeries = null
+    }
+    if (longOptionsUpSeries) {
+      chart.removeSeries(longOptionsUpSeries)
+      longOptionsUpSeries = null
+    }
+  }
+
   chart.timeScale().fitContent()
 }
 
@@ -648,6 +724,14 @@ onBeforeUnmount(() => {
     if (maSeries) {
       chart.removeSeries(maSeries)
       maSeries = null
+    }
+    if (longOptionsDownSeries) {
+      chart.removeSeries(longOptionsDownSeries)
+      longOptionsDownSeries = null
+    }
+    if (longOptionsUpSeries) {
+      chart.removeSeries(longOptionsUpSeries)
+      longOptionsUpSeries = null
     }
     chart.remove()
   window.removeEventListener('resize', handleResize)
@@ -1141,5 +1225,13 @@ input[type="datetime-local"]:focus {
   outline: none;
   border-color: #2962FF;
   box-shadow: 0 0 0 2px rgba(41, 98, 255, 0.1);
+}
+
+.long-down-dot {
+  background: #FF0000;
+}
+
+.long-up-dot {
+  background: #00FF00;
 }
 </style>
