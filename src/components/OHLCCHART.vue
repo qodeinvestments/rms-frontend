@@ -327,7 +327,7 @@ const psarLines = [
 ]
 
 // Add to the script setup section, after psarLines:
-const longSystems = Array.from({ length: 24 }, (_, i) => `long${i + 1}`)
+const longSystems = Array.from({ length: 24 }, (_, i) => `LONG${i + 1}`)
 const priceTypes = ['open', 'close']
 
 // Configuration state
