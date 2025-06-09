@@ -836,7 +836,7 @@ watch(() => props.data, () => {
 
 const handleIndicatorChange = (indicatorName) => {
   clearAllIndicators()
-
+  
   // Reset all indicators to false
   indicators.value.psar.enabled = false
   indicators.value.long.enabled = false
@@ -844,6 +844,13 @@ const handleIndicatorChange = (indicatorName) => {
   
   // Set only the selected indicator to true
   indicators.value[indicatorName].enabled = true
+
+  // Set timeframe based on selected indicator
+  if (indicatorName === 'long') {
+    config.value.timeframe = '1m'
+  } else if (indicatorName === 'psar') {
+    config.value.timeframe = '5m'
+  }
 }
 
 watch(() => props.title, (newTitle) => {
