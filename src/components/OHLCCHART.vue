@@ -400,8 +400,33 @@ const selectTimeframe = (tf) => {
   isTimeframeDropdownOpen.value = false
 }
 
+// Add this function before the modal handlers
+const clearAllIndicators = () => {
+  if (psarSeries) {
+    chart.removeSeries(psarSeries)
+    psarSeries = null
+  }
+  if (maSeries) {
+    chart.removeSeries(maSeries)
+    maSeries = null
+  }
+  if (longOptionsDownSeries) {
+    chart.removeSeries(longOptionsDownSeries)
+    longOptionsDownSeries = null
+  }
+  if (longOptionsUpSeries) {
+    chart.removeSeries(longOptionsUpSeries)
+    longOptionsUpSeries = null
+  }
+  // Clear markers
+  if (candlestickSeries) {
+    candlestickSeries.setMarkers([])
+  }
+}
+
 // Modal handlers
 const showIndicatorModal = () => {
+  clearAllIndicators()
   isIndicatorModalOpen.value = true
 }
 
@@ -697,12 +722,10 @@ const updateChartData = () => {
       value: item.upSide
     })))
 
-    // Add vertical line when long options is enabled
+    // Add entry marker only when long options is enabled
     const targetDateTime = indicators.value.long.system === 'custom' && indicators.value.long.custom.dateTime
       ? indicators.value.long.custom.dateTime
       : props.verticalLineTime
-    
-    // Use the overlay method (recommended)
 
     const matchCandle = props.data.find(d =>
       Math.floor(new Date(d.timestamp).getTime() / 1000) === Math.floor(new Date(targetDateTime).getTime() / 1000)
@@ -721,13 +744,7 @@ const updateChartData = () => {
       ])
     }
   } else {
-    // Remove vertical line when long options are disabled
-    if (targetTimeLine) {
-      targetTimeLine.remove()
-      targetTimeLine = null
-    }
-    
-    // Remove series if long options are disabled or data is not available
+    // Remove series and markers when long options are disabled
     if (longOptionsDownSeries) {
       chart.removeSeries(longOptionsDownSeries)
       longOptionsDownSeries = null
@@ -736,6 +753,8 @@ const updateChartData = () => {
       chart.removeSeries(longOptionsUpSeries)
       longOptionsUpSeries = null
     }
+    // Clear markers
+    candlestickSeries.setMarkers([])
   }
 
   chart.timeScale().fitContent()
@@ -812,6 +831,8 @@ watch(() => props.data, () => {
 }, { deep: true })
 
 const handleIndicatorChange = (indicatorName) => {
+  clearAllIndicators()
+
   // Reset all indicators to false
   indicators.value.psar.enabled = false
   indicators.value.long.enabled = false
