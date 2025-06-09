@@ -292,6 +292,7 @@ let psarSeries = null
 let maSeries = null
 let longOptionsDownSeries = null
 let longOptionsUpSeries = null
+let targetTimeLine = null
 let lastCandleData = null
 let lastPsarValue = null
 let lastMaValue = null
@@ -542,6 +543,62 @@ const createChartInstance = () => {
   })
 }
 
+// Better Solution: Using HTML overlay
+const createVerticalLineOverlay = (timestamp) => {
+  if (!chart || !chartContainer.value) return
+  
+  // Remove existing line
+  const existingLine = chartContainer.value.querySelector('#vertical-line')
+  if (existingLine) {
+    existingLine.remove()
+  }
+  
+  const targetTime = new Date(timestamp).getTime() / 1000
+  
+  // Create overlay line
+  const lineDiv = document.createElement('div')
+  lineDiv.id = 'vertical-line'
+  lineDiv.style.position = 'absolute'
+  lineDiv.style.top = '0'
+  lineDiv.style.bottom = '0'
+  lineDiv.style.width = '2px'
+  lineDiv.style.backgroundColor = '#FF6B6B'
+  lineDiv.style.pointerEvents = 'none'
+  lineDiv.style.zIndex = '4'
+  lineDiv.style.boxShadow = '0 0 4px rgba(255, 107, 107, 0.5)'
+  
+  // Function to update line position
+  const updateLinePosition = () => {
+    const timeScale = chart.timeScale()
+    const pixelPosition = timeScale.timeToCoordinate(targetTime)
+    
+    if (pixelPosition !== null && pixelPosition >= 0) {
+      lineDiv.style.left = `${pixelPosition}px`
+      lineDiv.style.display = 'block'
+    } else {
+      lineDiv.style.display = 'none'
+    }
+  }
+  
+  chartContainer.value.appendChild(lineDiv)
+  
+  // Update position initially
+  updateLinePosition()
+  
+  // Update position when chart is resized or scrolled
+  chart.timeScale().subscribeVisibleTimeRangeChange(updateLinePosition)
+  
+  // Store reference for cleanup
+  targetTimeLine = {
+    remove: () => {
+      if (chartContainer.value && chartContainer.value.contains(lineDiv)) {
+        chartContainer.value.removeChild(lineDiv)
+      }
+      chart.timeScale().unsubscribeVisibleTimeRangeChange(updateLinePosition)
+    }
+  }
+}
+
 // Update chart data to the new array-of-objects format
 const updateChartData = () => {
   if (!Array.isArray(props.data) || props.data.length === 0) return
@@ -681,7 +738,21 @@ const updateChartData = () => {
       time: item.time,
       value: item.upSide
     })))
+
+    // Add vertical line when long options is enabled
+    const targetDateTime = indicators.value.long.system === 'custom' && indicators.value.long.custom.dateTime
+      ? indicators.value.long.custom.dateTime
+      : '2025-06-09T14:45:00'
+    
+    // Use the overlay method (recommended)
+    createVerticalLineOverlay(targetDateTime)
   } else {
+    // Remove vertical line when long options are disabled
+    if (targetTimeLine) {
+      targetTimeLine.remove()
+      targetTimeLine = null
+    }
+    
     // Remove series if long options are disabled or data is not available
     if (longOptionsDownSeries) {
       chart.removeSeries(longOptionsDownSeries)
@@ -736,9 +807,13 @@ onBeforeUnmount(() => {
       chart.removeSeries(longOptionsUpSeries)
       longOptionsUpSeries = null
     }
+    if (targetTimeLine) {
+      targetTimeLine.remove()
+      targetTimeLine = null
+    }
     chart.remove()
-  window.removeEventListener('resize', handleResize)
-  document.removeEventListener('click', handleClickOutside)
+    window.removeEventListener('resize', handleResize)
+    document.removeEventListener('click', handleClickOutside)
   }
 })
 
