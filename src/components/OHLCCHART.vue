@@ -281,6 +281,10 @@ const props = defineProps({
     type: Array,
     required: true,
     default: () => [],
+  },
+  verticalLineTime: {
+    type: String,
+    default: '2025-06-09T14:45:00'
   }
 })
 
@@ -687,7 +691,7 @@ const updateChartData = () => {
     // Add vertical line when long options is enabled
     const targetDateTime = indicators.value.long.system === 'custom' && indicators.value.long.custom.dateTime
       ? indicators.value.long.custom.dateTime
-      : '2025-06-09T14:45:00'
+      : props.verticalLineTime
     
     // Use the overlay method (recommended)
 

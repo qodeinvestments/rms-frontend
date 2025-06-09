@@ -107,7 +107,11 @@ onUnmounted(() => {
         </div>
   
         <div class="dashboard-card">
-          <OHLCChart :data="chartData['Data']" @submit-config="fetchDiffData($event)" />
+          <OHLCChart 
+            :data="chartData['Data']" 
+            :verticalLineTime="chartData['verticalLineTime']"
+            @submit-config="fetchDiffData($event)" 
+          />
         </div>
         <div class="my-8" v-if="chartData['table']">
           
