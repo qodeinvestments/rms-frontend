@@ -294,6 +294,10 @@ const props = defineProps({
   verticalLineTime: {
     type: String,
     default: '2025-06-09T14:45:00'
+  },
+  title: {
+    type: String,
+    default: 'Hello'
   }
 })
 
@@ -684,7 +688,7 @@ const updateChartData = () => {
         color: '#FF0000',
         lineWidth: 2,
         lineStyle: 2, // Dashed line
-        title: 'Long Options Down'
+        title: `${props.title} Down`
       })
     }
     
@@ -694,7 +698,7 @@ const updateChartData = () => {
         color: '#00FF00',
         lineWidth: 2,
         lineStyle: 2, // Dashed line
-        title: 'Long Options Up'
+        title: `${props.title} Up`
       })
     }
 
@@ -841,6 +845,14 @@ const handleIndicatorChange = (indicatorName) => {
   // Set only the selected indicator to true
   indicators.value[indicatorName].enabled = true
 }
+
+watch(() => props.title, (newTitle) => {
+  if (longOptionsUpSeries) {
+    longOptionsUpSeries.applyOptions({
+      title: `Long Options ${newTitle}`
+    })
+  }
+}, { immediate: true })
 
 </script>
 <!-- OHLCChart.vue styles -->

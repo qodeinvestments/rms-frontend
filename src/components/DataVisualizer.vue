@@ -110,6 +110,7 @@ onUnmounted(() => {
           <OHLCChart 
             :data="chartData['Data']" 
             :verticalLineTime="chartData['verticalLineTime']"
+            :title="chartData['title']"
             @submit-config="fetchDiffData($event)" 
           />
         </div>
