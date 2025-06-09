@@ -47,6 +47,16 @@
           </div>
         </div>
 
+        <!-- Selected Indicators Display -->
+        <div class="selected-indicators">
+          <span v-if="indicators.psar.enabled" class="indicator-tag psar-tag">
+            {{ indicators.psar.selectedPsarLine.toUpperCase() }}
+          </span>
+          <span v-if="indicators.long.enabled" class="indicator-tag long-tag">
+            {{ indicators.long.system.toUpperCase() }}
+          </span>
+        </div>
+
         <!-- Indicator Settings Button -->
         <button 
           @click="showIndicatorModal"
@@ -55,7 +65,6 @@
           <span class="settings-icon">⚙</span>
           Indicators
         </button>
-
 
         <!-- Apply config -->
         <button 
@@ -1283,5 +1292,29 @@ input[type="datetime-local"]:focus {
 
 .long-up-dot {
   background: #00FF00;
+}
+
+.selected-indicators {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.indicator-tag {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.psar-tag {
+  background-color: #2962FF;
+  color: white;
+}
+
+.long-tag {
+  background-color: #FF9800;
+  color: white;
 }
 </style>
