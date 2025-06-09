@@ -743,7 +743,7 @@ const updateChartData = () => {
           position: 'aboveBar',
           color: '#FF6B6B',
           shape: 'arrowDown',
-          text: 'ENTRY'
+          text: 'START'
         }
       ])
     }
