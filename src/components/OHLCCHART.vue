@@ -109,6 +109,7 @@
                     <input 
                       type="checkbox"
                       v-model="indicators.psar.enabled"
+                      @change="handleIndicatorChange('psar')"
                     />
                     <span class="checkbox-label">Parabolic SAR</span>
                   </label>
@@ -162,6 +163,7 @@
                     <input 
                       type="checkbox"
                       v-model="indicators.long.enabled"
+                      @change="handleIndicatorChange('long')"
                     />
                     <span class="checkbox-label">Long Options</span>
                   </label>
@@ -236,6 +238,7 @@
                     <input 
                       type="checkbox"
                       v-model="indicators.ma.enabled"
+                      @change="handleIndicatorChange('ma')"
                     />
                     <span class="checkbox-label">Moving Average</span>
                   </label>
@@ -759,8 +762,15 @@ watch(() => props.data, () => {
     }
 }, { deep: true })
 
-
-
+const handleIndicatorChange = (indicatorName) => {
+  // Reset all indicators to false
+  indicators.value.psar.enabled = false
+  indicators.value.long.enabled = false
+  indicators.value.ma.enabled = false
+  
+  // Set only the selected indicator to true
+  indicators.value[indicatorName].enabled = true
+}
 
 </script>
 <!-- OHLCChart.vue styles -->
