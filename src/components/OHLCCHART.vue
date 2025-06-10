@@ -856,9 +856,7 @@ watch(() => props.data, () => {
         updateChartData()
       } finally {
       // Add a small delay to make the transition smoother
-        setTimeout(() => {
-          isLoading.value = false
-        }, 300)
+        isLoading.value = false
       }
     }
 }, { deep: true })
