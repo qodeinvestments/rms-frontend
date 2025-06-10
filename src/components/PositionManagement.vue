@@ -308,6 +308,15 @@ onMounted(() => {
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
+  margin-left: 256px; /* Add margin to account for sidebar width */
+  width: calc(100% - 256px); /* Adjust width to account for sidebar */
+  transition: all 0.3s ease-in-out; /* Add smooth transition */
+}
+
+/* Add styles for when sidebar is collapsed */
+.sidebar.active ~ .admin-container {
+  margin-left: 92px;
+  width: calc(100% - 92px);
 }
 
 .admin-title {

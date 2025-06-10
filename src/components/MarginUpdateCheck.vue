@@ -446,6 +446,14 @@ onMounted(async () => {
   margin: 0 auto;
   min-height: 100vh;
   background: linear-gradient(135deg, #f6f8fc 0%, #f1f4f9 100%);
+  margin-left: 256px;
+  width: calc(100% - 256px);
+  transition: all 0.3s ease-in-out;
+}
+
+.sidebar.active ~ .margin-update-container {
+  margin-left: 92px;
+  width: calc(100% - 92px);
 }
 
 .page-header {
