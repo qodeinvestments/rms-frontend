@@ -347,6 +347,21 @@ const psarLines = [
 // Add to the script setup section, after psarLines:
 const longSystems = computed(() => {
   const count = ['NIFTY', 'SENSEX'].includes(config.value.symbol) ? 24 : 12
+  const currentHour = new Date().getHours()
+  const isAfterNoon = currentHour >= 12
+
+  // For NIFTY and SENSEX
+  if (['NIFTY', 'SENSEX'].includes(config.value.symbol)) {
+    if (isAfterNoon) {
+      // Show all systems after noon
+      return Array.from({ length: count }, (_, i) => `LONG${i + 1}`)
+    } else {
+      // Show only LONG1-LONG12 before noon
+      return Array.from({ length: 12 }, (_, i) => `LONG${i + 1}`)
+    }
+  }
+  
+  // For other symbols (BANKNIFTY, FINNIFTY)
   return Array.from({ length: count }, (_, i) => `LONG${i + 1}`)
 })
 const priceTypes = ['open', 'close']
