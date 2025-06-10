@@ -323,8 +323,8 @@ const isTimeframeDropdownOpen = ref(false)
 const isIndicatorModalOpen = ref(false)
 
 // Available options
-const symbols = ['NIFTY', 'SENSEX' ,'BANKNIFTY' , 'MIDCAPNIFTY' ,'FINNIFTY']
-const timeframes = ['1m', '5m', '15m', '1h', '1d']
+const symbols = ['NIFTY', 'SENSEX' ,'BANKNIFTY' ,'FINNIFTY']
+const timeframes = ['1m', '5m']
 
 // For PSAR line selection:
 const psarLines = [
@@ -345,7 +345,10 @@ const psarLines = [
 ]
 
 // Add to the script setup section, after psarLines:
-const longSystems = Array.from({ length: 24 }, (_, i) => `LONG${i + 1}`)
+const longSystems = computed(() => {
+  const count = ['NIFTY', 'SENSEX'].includes(config.value.symbol) ? 24 : 12
+  return Array.from({ length: count }, (_, i) => `LONG${i + 1}`)
+})
 const priceTypes = ['open', 'close']
 
 // Configuration state
@@ -365,7 +368,7 @@ const indicators = ref({
   },
   long: {
     enabled: false,
-    system: 'long1',
+    system: 'LONG1',
     custom: {
       priceType: 'open',
       percentage: 0,
@@ -395,6 +398,17 @@ const toggleTimeframeDropdown = () => {
 }
 
 const selectSymbol = (symbol) => {
+  // Clear all indicators when symbol changes
+  clearAllIndicators()
+  
+  // Reset all indicators to false
+  indicators.value.psar.enabled = false
+  indicators.value.long.enabled = false
+  indicators.value.ma.enabled = false
+  
+  // Reset long system to default
+  indicators.value.long.system = 'LONG1'
+  
   config.value.symbol = symbol
   isSymbolDropdownOpen.value = false
 }
