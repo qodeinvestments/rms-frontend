@@ -354,7 +354,7 @@ const priceTypes = ['open', 'close']
 // Configuration state
 const config = ref({
   symbol: 'NIFTY',
-  timeframe: '5m',
+  timeframe: '1m',
   indicators: []
 })
 
