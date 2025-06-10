@@ -76,7 +76,7 @@ const fetchDiffData = (data) => {
 onMounted(() => {
   document.title = 'Visualizer';
   fetchClientDetails();
-  chartDatafetch({symbol: 'NIFTY', timeframe: '5m', indicators: []});
+  chartDatafetch({symbol: 'NIFTY', timeframe: '1m', indicators: []});
 });
 onUnmounted(() => {
     document.title = 'Vite App'
