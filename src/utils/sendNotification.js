@@ -15,9 +15,9 @@ export const requestNotificationPermission = async () => {
     }
     
     console.log("Notification permission:", permission);
-    if (permission !== "granted") {
-        alert("Please enable notifications in your browser settings.");
-    }
+    // if (permission !== "granted") {
+    //     alert("Please enable notifications in your browser settings.");
+    // }
 };
 
 export const sendNotification = async (title, message) => {
