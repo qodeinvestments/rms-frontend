@@ -1,0 +1,25 @@
+,NIFTYSENSEX,BANKNIFTYFINNIFTY
+long1,"{'time': '09:15:00', 'type': 'o', 'check': '09:30:00', 'percentage': 0.5}","{'time': '09:15:00', 'type': 'o', 'check': '09:30:00', 'percentage': 0.5}"
+long2,"{'time': '09:15:00', 'type': 'c', 'check': '09:30:00', 'percentage': 0.5}","{'time': '09:15:00', 'type': 'c', 'check': '10:00:00', 'percentage': 0.5}"
+long3,"{'time': '09:15:00', 'type': 'o', 'check': '10:00:00', 'percentage': 0.5}","{'time': '09:15:00', 'type': 'o', 'check': '10:30:00', 'percentage': 0.5}"
+long4,"{'time': '09:15:00', 'type': 'c', 'check': '10:00:00', 'percentage': 0.5}","{'time': '09:15:00', 'type': 'c', 'check': '11:00:00', 'percentage': 0.5}"
+long5,"{'time': '09:15:00', 'type': 'o', 'check': '10:30:00', 'percentage': 0.5}","{'time': '09:15:00', 'type': 'o', 'check': '11:30:00', 'percentage': 0.5}"
+long6,"{'time': '09:15:00', 'type': 'c', 'check': '10:30:00', 'percentage': 0.5}","{'time': '09:15:00', 'type': 'c', 'check': '12:00:00', 'percentage': 0.5}"
+long7,"{'time': '09:15:00', 'type': 'o', 'check': '11:00:00', 'percentage': 0.5}","{'time': '12:00:00', 'type': 'o', 'check': '12:00:00', 'percentage': 0.3}"
+long8,"{'time': '09:15:00', 'type': 'c', 'check': '11:00:00', 'percentage': 0.5}","{'time': '12:00:00', 'type': 'c', 'check': '12:30:00', 'percentage': 0.3}"
+long9,"{'time': '09:15:00', 'type': 'o', 'check': '11:30:00', 'percentage': 0.5}","{'time': '12:00:00', 'type': 'o', 'check': '13:00:00', 'percentage': 0.3}"
+long10,"{'time': '09:15:00', 'type': 'c', 'check': '11:30:00', 'percentage': 0.5}","{'time': '12:00:00', 'type': 'c', 'check': '13:30:00', 'percentage': 0.3}"
+long11,"{'time': '09:15:00', 'type': 'o', 'check': '12:00:00', 'percentage': 0.5}","{'time': '12:00:00', 'type': 'o', 'check': '14:00:00', 'percentage': 0.3}"
+long12,"{'time': '09:15:00', 'type': 'c', 'check': '12:00:00', 'percentage': 0.5}","{'time': '12:00:00', 'type': 'c', 'check': '14:30:00', 'percentage': 0.3}"
+long13,"{'time': '12:00:00', 'type': 'o', 'check': '12:00:00', 'percentage': 0.3}",
+long14,"{'time': '12:00:00', 'type': 'c', 'check': '12:00:00', 'percentage': 0.3}",
+long15,"{'time': '12:00:00', 'type': 'o', 'check': '12:30:00', 'percentage': 0.3}",
+long16,"{'time': '12:00:00', 'type': 'c', 'check': '12:30:00', 'percentage': 0.3}",
+long17,"{'time': '12:00:00', 'type': 'o', 'check': '13:00:00', 'percentage': 0.3}",
+long18,"{'time': '12:00:00', 'type': 'c', 'check': '13:00:00', 'percentage': 0.3}",
+long19,"{'time': '12:00:00', 'type': 'o', 'check': '13:30:00', 'percentage': 0.3}",
+long20,"{'time': '12:00:00', 'type': 'c', 'check': '13:30:00', 'percentage': 0.3}",
+long21,"{'time': '12:00:00', 'type': 'o', 'check': '14:00:00', 'percentage': 0.3}",
+long22,"{'time': '12:00:00', 'type': 'c', 'check': '14:00:00', 'percentage': 0.3}",
+long23,"{'time': '12:00:00', 'type': 'o', 'check': '14:30:00', 'percentage': 0.3}",
+long24,"{'time': '12:00:00', 'type': 'c', 'check': '14:30:00', 'percentage': 0.3}",
