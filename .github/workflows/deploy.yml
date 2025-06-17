@@ -1,4 +1,4 @@
-name: Vue.js App CI/CD
+name: Vue.js App CI/CD check
 
 on:
   push:
