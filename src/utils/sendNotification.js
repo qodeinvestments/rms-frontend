@@ -31,7 +31,7 @@ export const sendNotification = async (title, message) => {
             .then((reg) => {
                 reg.showNotification(title, {
                     body: message,
-                    icon: "/favicon.ico",
+                    icon: "/qodeicon.ico",
                     requireInteraction: true,
                     silent: true // No sound, only visual notification
                 });

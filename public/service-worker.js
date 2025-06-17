@@ -15,7 +15,7 @@ self.addEventListener("push", (event) => {
 
     self.registration.showNotification(data.title, {
         body: data.body,
-        icon: "/favicon.ico",
+        icon: "/qodeicon.ico",
         tag: data.tag || "default-tag",
         requireInteraction: false,
     });

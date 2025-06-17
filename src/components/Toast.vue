@@ -65,7 +65,7 @@ const showWindowsNotification = async () => {
         navigator.serviceWorker.ready.then((reg) => {
             reg.showNotification("New Alert!", {
                 body: props.message, // Use the toast message
-                icon: "/favicon.ico",
+                icon: "/qodeicon.ico",
                 requireInteraction: true,  // Keeps notification visible
                 silent: false, // Ensures sound plays
             });
