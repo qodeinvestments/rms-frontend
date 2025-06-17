@@ -31,8 +31,7 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    # Deploy the contents of the dist folder to the server
+    # Run build on the server and update dist (with NVM sourced)
     - name: Run build on server and update dist
       run: |
-        # Run the build on the server (after making sure npm is installed)
-        ssh -o StrictHostKeyChecking=no root@139.5.189.188 'cd /root/dashboardFrontend/monitor-frontend-new && npm run build'
+        ssh -o StrictHostKeyChecking=no root@139.5.189.188 'source ~/.nvm/nvm.sh && cd /root/dashboardFrontend/monitor-frontend-new && npm run build'
