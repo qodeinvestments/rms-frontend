@@ -1,4 +1,4 @@
-name: Vue.js App CI/CD 
+name: Vue.js App CI/CD
 
 on:
   push:
@@ -31,7 +31,8 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    # Run the build directly on the server to update the dist folder
-    - name: Run build on server
+    # Deploy the contents of the dist folder to the server
+    - name: Run build on server and update dist
       run: |
-        ssh -o StrictHostKeyChecking=no root@139.5.189.188 'cd /root/dashboardFrontend/monitor-frontend-new && npm install && npm run build'
+        # Run the build on the server (after making sure npm is installed)
+        ssh -o StrictHostKeyChecking=no root@139.5.189.188 'cd /root/dashboardFrontend/monitor-frontend-new && npm run build'
