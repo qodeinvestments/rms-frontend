@@ -23,7 +23,9 @@ jobs:
 
     # Run build command - this creates the dist folder
     - name: Build Vue.js app
-      run: npm run build
+      run: |
+        npm run build
+        ls -al ./dist  # Ensure dist folder is generated and list its contents
 
     # Set up SSH for deployment
     - name: Set up SSH
@@ -31,13 +33,13 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    # Copy dist folder to the server's /var/www/monitor-frontend
+    # Deploy dist folder to the server
     - name: Deploy dist folder to server
       run: |
         # Remove old content in /var/www/monitor-frontend
         ssh -o StrictHostKeyChecking=no root@139.5.189.188 'rm -rf /var/www/monitor-frontend/*'
 
         # Copy the dist folder to /var/www/monitor-frontend
-        scp -r ./monitor-frontend-new/dist/* root@139.5.189.188:/var/www/monitor-frontend/
+        scp -r ./dist/* root@139.5.189.188:/var/www/monitor-frontend/
       env:
         DEPLOY_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
