@@ -3,10 +3,10 @@ name: Vue.js App CI/CD
 on:
   push:
     branches:
-      - production # Trigger on push to the 'production' branch
+      - production  # Trigger on push to the 'production' branch
   pull_request:
     branches:
-      - production # Trigger on PR to 'production' branch
+      - production  # Trigger on PR to 'production' branch
 
 jobs:
   build:
@@ -25,10 +25,16 @@ jobs:
     - name: Build Vue.js app
       run: npm run build
 
-    # Optional: Deploy it here if needed
-    # - name: Deploy to GitHub Pages
-    #   uses: JamesIves/github-pages-deploy-action@4.1.0
-    #   with:
-    #     branch: gh-pages
-    #     folder: dist
-    #     token: ${{ secrets.GITHUB_TOKEN }}
+    # Set up SSH for deployment
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}  # Use the private key in GitHub Secrets
+
+    # Deploy to the server
+    - name: Deploy to server
+      run: |
+        ssh -o StrictHostKeyChecking=no root@139.5.189.188 'rm -rf /path/to/your/webroot/*'  # Clear the existing content
+        scp -r ./dist/* root@139.5.189.188:/path/to/your/webroot/  # Copy the dist folder to the server
+      env:
+        DEPLOY_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
