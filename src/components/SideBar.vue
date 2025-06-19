@@ -238,7 +238,8 @@ export default {
         'UserStrategyVar':'/userstrategyvar',
         'DailyLogsTable':'/dailylogs',
         'VarSimulator':'/varsimulator',
-        'ClientPage':'/clientpage'
+        'ClientPage':'/clientpage',
+        'ServerDrive':'/server-drive'
       }
 
     }
