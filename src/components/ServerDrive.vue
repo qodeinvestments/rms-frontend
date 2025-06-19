@@ -46,6 +46,7 @@ const toggleFolder = (folderName) => {
   }
 };
 
+// Updated handleFileUpload function
 const handleFileUpload = async (folderName, event) => {
   const files = Array.from(event.target.files);
   if (files.length === 0) return;
@@ -53,32 +54,32 @@ const handleFileUpload = async (folderName, event) => {
   uploadingFiles.value.add(folderName);
   
   try {
-        for (const file of files) {
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("folder_name", folderName);
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder_name", folderName);
 
-            const token = localStorage.getItem('access_token');
-            const res = await fetch(`https://production2.swancapital.in/UploadserveDrive`, {
-                method: 'POST',
-                headers: {
-                'Authorization': `Bearer ${token}`
-                // DO NOT set Content-Type manually for FormData
-                },
-                body: formData
-            });
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(`https://production2.swancapital.in/UploadserveDrive`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+          // DO NOT set Content-Type manually for FormData
+        },
+        body: formData
+      });
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(errorText);
-            }
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText);
+      }
 
-            // Add file to UI only after successful upload
-            if (!serverData.value[folderName]) {
-                serverData.value[folderName] = [];
-            }
-            serverData.value[folderName].push(file.name);
-        }
+      // Add file to UI only after successful upload
+      if (!serverData.value[folderName]) {
+        serverData.value[folderName] = [];
+      }
+      serverData.value[folderName].push(file.name);
+    }
   } catch (err) {
     console.error('Upload error:', err);
     error.value = 'Failed to upload file(s). Please try again.';
@@ -89,21 +90,25 @@ const handleFileUpload = async (folderName, event) => {
   }
 };
 
+// Updated downloadFile function
 const downloadFile = async (folderName, fileName) => {
   try {
     const token = localStorage.getItem('access_token');
-    const url = new URL('https://production2.swancapital.in/DownloadServerDriveFile');
-    url.searchParams.append('folder_name', folderName);
-    url.searchParams.append('file_name', fileName);
-
-    const response = await fetch(url, {
-    headers: {
-        'Authorization': `Bearer ${token}`
-    }
+    
+    const response = await fetch('https://production2.swancapital.in/DownloadServerDriveFile', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        folder_name: folderName,
+        file_name: fileName
+      })
     });
 
     if (!response.ok) {
-    throw new Error('Failed to download file');
+      throw new Error('Failed to download file');
     }
 
     const blob = await response.blob();
@@ -121,32 +126,36 @@ const downloadFile = async (folderName, fileName) => {
   }
 };
 
+
+// Updated deleteFile function
 const deleteFile = async (folderName, fileName) => {
   if (!confirm(`Are you sure you want to delete ${fileName}?`)) return;
   
   try {
     const token = localStorage.getItem('access_token');
-    const url = new URL('https://production2.swancapital.in/deleteFile');
-    url.searchParams.append('folder_name', folderName);
-    url.searchParams.append('file_name', fileName);
-
-    const response = await fetch(url, {
-    method: 'DELETE',
-    headers: {
-        'Authorization': `Bearer ${token}`
-    }
+    
+    const response = await fetch('https://production2.swancapital.in/deleteFile', {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        folder_name: folderName,
+        file_name: fileName
+      })
     });
 
     if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText);
+      const errorText = await response.text();
+      throw new Error(errorText);
     }
 
     // Remove file from UI
     const folderFiles = serverData.value[folderName];
     const fileIndex = folderFiles.indexOf(fileName);
     if (fileIndex > -1) {
-        folderFiles.splice(fileIndex, 1);
+      folderFiles.splice(fileIndex, 1);
     }
 
   } catch (err) {
