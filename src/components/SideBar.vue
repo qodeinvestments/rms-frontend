@@ -141,6 +141,16 @@
                   <span class="text">Position Management</span>
                 </a>
               </li>
+              <li 
+                v-if="sidebarfeatures['pages'].includes('ServerDrive')"
+                :class="selected == 'ServerDrive' ? 'active' : ''"
+                @click="changeSelected('ServerDrive')"
+              >
+                <a href="#">
+                  <i class="icon fas fa-chart-line"></i>
+                  <span class="text">Server Drive</span>
+                </a>
+              </li>
 
               <li 
                 v-if="sidebarfeatures['pages'].includes('MarketHoliday')"

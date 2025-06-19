@@ -28,6 +28,7 @@ import PositionManagement from '../components/PositionManagement.vue'
 import MarginUpdateCheck from '../components/MarginUpdateCheck.vue'
 import UserAllocation from '../components/UserAllocation.vue'
 import MarketHoliday from '../components/MarketHoliday.vue'
+import ServerDrive from '../components/ServerDrive.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -180,6 +181,11 @@ const router = createRouter({
       name: 'MarketHoliday',
       component: MarketHoliday,
     },
+    {
+      path:'/server-drive',
+      name:'ServerDrive',
+      component:ServerDrive
+    }
     // {
     //   path: '/about',
     //   name: 'about',
