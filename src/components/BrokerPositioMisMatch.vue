@@ -8,7 +8,7 @@ import {
 } from '@tanstack/vue-table'
 import TanStackTestTable from './TanStackTestTable.vue'
 import * as XLSX from 'xlsx'  // Add this import
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 
 const defaultData = {}
 
@@ -35,7 +35,7 @@ const handleFileUpload = async (event) => {
             const formData = new FormData();
             formData.append('file', file);
             
-            const response = await fetch('https://production2.swancapital.in/UpdateBrokerPositionMismatch', {
+            const response = await fetch(`${API_BASE_URL}UpdateBrokerPositionMismatch`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -74,7 +74,7 @@ const downloadCSV = async (type) => {
         }
         else isDownloading.value = true  // Start loading
 
-        const response = await fetch(`https://production2.swancapital.in/${url}`, {
+        const response = await fetch(`${API_BASE_URL}${url}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -207,7 +207,7 @@ const connectWebSocket = () => {
         alert('User not authenticated');
         return;
     }
-    const socket = new WebSocket('wss://production2.swancapital.in/ws');
+    const socket = new WebSocket(`${WS_BASE_URL}ws`);
 
     socket.onopen = () => {
         console.log('WebSocket connection opened')

@@ -3,6 +3,7 @@ import { onMounted, onUnmounted, computed, nextTick } from 'vue'
 import BarChart from './Barchart.vue';
 import { useRouter } from 'vue-router';
 import Histogram from './Histogram.vue';
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 import {
   FlexRender,
   getCoreRowModel,
@@ -162,7 +163,7 @@ const connectToSSE = () => {
   }
 
 
-  const socket = new WebSocket('wss://production2.swancapital.in/ws');
+  const socket = new WebSocket(`${WS_BASE_URL}ws`);
 
   socket.onmessage = (event) => {
     if (event.data === 'ping') {
@@ -204,7 +205,7 @@ const connectStrategyWebSocket = () => {
       return;
   }
     
-  const clientStrategySocket = new WebSocket('wss://production2.swancapital.in/chart/strategy');
+  const clientStrategySocket = new WebSocket(`${WS_BASE_URL}chart/strategy`);
 
   clientStrategySocket.onopen = function (e) {
      // Send the token as the first message for authentication
@@ -285,7 +286,7 @@ const connectBasketWebSocket = () => {
       return;
   }
     
-  const clientBasketSocket = new WebSocket('wss://production2.swancapital.in/chart/basket');
+  const clientBasketSocket = new WebSocket(`${WS_BASE_URL}chart/basket`);
   clientBasketSocket.onopen = function (e) {
      // Send the token as the first message for authentication
     // const authMessage = JSON.stringify({ token });
@@ -374,7 +375,7 @@ const connectClientDetailsWebSocket = () => {
       return;
   }
     
-  const clientDetailSocket = new WebSocket('wss://production2.swancapital.in/clientdetails');
+  const clientDetailSocket = new WebSocket(`${WS_BASE_URL}clientdetails`);
   clientDetailSocket.onopen = function (e) {
      // Send the token as the first message for authentication
     const authMessage = JSON.stringify({ token });
@@ -511,7 +512,7 @@ const filteredFundSummaryData = computed(() => {
 const fetchStrategyChartData = async () => {
   try {
     isStrategyChartLoading.value = true
-    const response = await fetch('https://production2.swancapital.in/stratcharts', {
+    const response = await fetch(`${API_BASE_URL}stratcharts`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -543,7 +544,7 @@ const fetchStrategyChartData = async () => {
 const fetchSystemTagChartData = async () => {
   try {
     isSystemTagChartLoading.value = true
-    const response = await fetch('https://production2.swancapital.in/stratchartswithoutnumbers', {
+    const response = await fetch(`${API_BASE_URL}stratchartswithoutnumbers`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

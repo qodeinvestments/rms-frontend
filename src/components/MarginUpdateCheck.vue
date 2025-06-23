@@ -166,7 +166,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 const route = useRoute();
 const username = computed(() => route.params.username);
 
@@ -331,7 +331,7 @@ const fetchStrategies = async () => {
     const token = localStorage.getItem('access_token');
     if (!token) throw new Error('User not authenticated');
 
-    const response = await fetch(`https://production2.swancapital.in/getBasket`, {
+    const response = await fetch(`${API_BASE_URL}getBasket`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -356,7 +356,7 @@ const fetchExistingSettings = async () => {
     const token = localStorage.getItem('access_token');
     if (!token) throw new Error('User not authenticated');
 
-    const response = await fetch(`https://production2.swancapital.in/marginUpdateCheckDetails`, {
+    const response = await fetch(`${API_BASE_URL}marginUpdateCheckDetails`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -403,7 +403,7 @@ const handleSave = async () => {
       strategies: transformedStrategies
     };
 
-    const response = await fetch('https://production2.swancapital.in/updateMarginSettings', {
+    const response = await fetch(`${API_BASE_URL}updateMarginSettings`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

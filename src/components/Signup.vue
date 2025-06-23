@@ -61,7 +61,7 @@
   
   <script setup>
   import { ref, computed, onMounted } from 'vue';
-
+  import { API_BASE_URL, WS_BASE_URL } from '../config/url'
   const username = ref('');
   const email = ref('');
   const password = ref('');
@@ -72,7 +72,7 @@
 
   const SignUpUser = async () => {
   try {
-    const response = await fetch('https://production2.swancapital.in/addUser', {
+    const response = await fetch(`${API_BASE_URL}addUser`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

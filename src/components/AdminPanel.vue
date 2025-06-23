@@ -281,6 +281,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
+
 
 // State management
 const showTotpModal = ref(false);
@@ -510,7 +512,7 @@ const fetchData = async (endpoint, stateRef) => {
   try {
     const token = localStorage.getItem('access_token');
     if (!token) throw new Error('User not authenticated');
-    const res = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
     });
     if (!res.ok) throw new Error(await res.text());
@@ -572,7 +574,7 @@ const saveChanges = async () => {
       account_percentages: editingUser.value.role === 'Client' ? accountPercentages.value : []
     };
 
-    const res = await fetch('https://production2.swancapital.in/editUser', {
+    const res = await fetch(`${API_BASE_URL}editUser`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedUser)
@@ -600,7 +602,7 @@ const deleteUser = async user => {
   try {
     const token = localStorage.getItem('access_token');
     if (!token) throw new Error('User not authenticated');
-    const res = await fetch('https://production2.swancapital.in/deleteUser', {
+    const res = await fetch(`${API_BASE_URL}deleteUser`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({"user":user,"totpCode":totpCode.value})

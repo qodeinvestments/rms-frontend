@@ -284,6 +284,7 @@
 <script setup>
 import { ref, reactive, onMounted, watch, computed,onUnmounted } from 'vue'
 import ParentOptionChain from './ParentOptionChain.vue'
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 // State variables
 const users = ref([])
 const selectedUserIds = ref([])
@@ -456,7 +457,7 @@ const fetchData = async (endpoint, method = 'GET', body = null) => {
     const token = localStorage.getItem('access_token')
     if (!token) throw new Error('User not authenticated')
 
-    const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method,
       headers: {
         'Authorization': `Bearer ${token}`,

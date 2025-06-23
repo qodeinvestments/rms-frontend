@@ -464,7 +464,7 @@
 <script setup>
 import { ref, onMounted, computed ,watch} from "vue";
 import { useRoute, useRouter } from "vue-router";
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 const route = useRoute();
 const router = useRouter();
 
@@ -843,7 +843,7 @@ const fetchData = async (endpoint, stateRef) => {
     if (!token) throw new Error("Authentication required. Please log in again.");
 
     const response = await fetch(
-      `https://production2.swancapital.in/${endpoint}`,
+      `${API_BASE_URL}${endpoint}`,
       {
         method: "GET",
         headers: {
@@ -878,7 +878,7 @@ const fetchNewDict = async () => {
     const token = localStorage.getItem("access_token");
     if (!token) throw new Error("Authentication required. Please log in again.");
 
-    const response = await fetch("https://production2.swancapital.in/fetchClientMultiplier", {
+    const response = await fetch(`${API_BASE_URL}fetchClientMultiplier`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -1208,7 +1208,7 @@ const updatePortfolioValue = async () => {
     if (!token) throw new Error("Authentication required");
 
     const response = await fetch(
-      `https://production2.swancapital.in/UpdatePortfolioValue`,
+      `${API_BASE_URL}UpdatePortfolioValue`,
       {
         method: "POST",
         headers: {
@@ -1266,7 +1266,7 @@ const updateMultiplier = async () => {
     if (!token) throw new Error("Authentication required");
 
     const response = await fetch(
-      `https://production2.swancapital.in/UpdateClientMultiplier`,
+      `${API_BASE_URL}UpdateClientMultiplier`,
       {
         method: "POST",
         headers: {

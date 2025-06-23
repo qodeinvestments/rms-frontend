@@ -5,6 +5,8 @@ import Histogram from './Histogram.vue';
 import OHLCChart from './OHLCCHART.vue';
 import TanStackTestTable from './TanStackTestTable.vue'
 import { columns } from '../components/TableVariables/DataVisualizer.js'; 
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
+
 
 const WS7L = ref([]);
 const WS8L = ref([]);
@@ -18,7 +20,7 @@ const fetchClientDetails = async () => {
   error.value = null;
   
   try {
-    const response = await fetch('https://production2.swancapital.in/lagsData');
+    const response = await fetch(`${API_BASE_URL}lagsData`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -40,7 +42,7 @@ const postData = async (endpoint, payload, stateRef) => {
     const token = localStorage.getItem('access_token');
     if (!token) throw new Error('User not authenticated');
 
-    const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

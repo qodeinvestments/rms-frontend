@@ -38,7 +38,7 @@
 import { ref, onMounted } from 'vue';
 import TanStackTestTable from './TanStackTestTable.vue';
 import { createColumnHelper } from '@tanstack/vue-table';
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 // State management
 const allocationData = ref([]);
 const loading = ref(false);
@@ -115,7 +115,7 @@ const fetchAllocationData = async () => {
         const token = localStorage.getItem('access_token');
         if (!token) throw new Error('User not authenticated');
 
-        const response = await fetch('https://production2.swancapital.in/userpnl', {
+        const response = await fetch(`${API_BASE_URL}userpnl`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'

@@ -37,10 +37,11 @@
   </template>
   
   <script setup>
+  import { API_BASE_URL, WS_BASE_URL } from '../config/url'
   import { ref } from 'vue';
   const loginUser = async (username, password) => {
   try {
-    const response = await fetch('https://production2.swancapital.in/login', {
+    const response = await fetch(`${API_BASE_URL}login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

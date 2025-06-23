@@ -9,7 +9,7 @@ import {
 import { MyEnum } from '../Enums/Prefix.js'
 import TanStackTestTable from './TanStackTestTable.vue'
 import { columns } from '../components/TableVariables/OpenTrades.js'
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 const signal_book_data = ref([])
 const uids = ref([])
 const basket = ref([])
@@ -63,7 +63,7 @@ const fetchData = async () => {
     const token = localStorage.getItem("access_token")
     if (!token) throw new Error("Authentication required. Please log in again.")
 
-    const response = await fetch(`https://production2.swancapital.in/get_open_trades`, {
+    const response = await fetch(`${API_BASE_URL}get_open_trades`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -99,7 +99,7 @@ const downloadExcel = async () => {
     const token = localStorage.getItem("access_token")
     if (!token) throw new Error("Authentication required. Please log in again.")
 
-    const response = await fetch('https://production2.swancapital.in/getmismatchpdf', {
+    const response = await fetch(`${API_BASE_URL}getmismatchpdf`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,

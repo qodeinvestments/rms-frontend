@@ -109,7 +109,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 const router = useRouter()
 const holidays = ref([])
 const error = ref('')
@@ -139,7 +139,7 @@ const fetchData = async (endpoint, stateRef) => {
     if (!token) throw new Error("Authentication required. Please log in again.");
 
     const response = await fetch(
-      `https://production2.swancapital.in/${endpoint}`,
+      `${API_BASE_URL}${endpoint}`,
       {
         method: "GET",
         headers: {
@@ -175,7 +175,7 @@ const postData = async (endpoint, data) => {
     if (!token) throw new Error("Authentication required. Please log in again.");
 
     const response = await fetch(
-      `https://production2.swancapital.in/${endpoint}`,
+      `${API_BASE_URL}${endpoint}`,
       {
         method: "POST",
         headers: {

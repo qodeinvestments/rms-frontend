@@ -104,7 +104,7 @@
   <script setup>
   import { ref, computed, onMounted, watch ,onUnmounted} from 'vue';
   import { createChart } from 'lightweight-charts';
-  
+  import { API_BASE_URL, WS_BASE_URL } from '../config/url'
   // ----- State Management -----
   const loading = ref(false);
   const error = ref(null);
@@ -392,7 +392,7 @@ const sortByColumn = (column) => {
     try {
       const token = localStorage.getItem('access_token');
       if (!token) throw new Error('User not authenticated');
-      const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,

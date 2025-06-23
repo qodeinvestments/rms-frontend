@@ -13,7 +13,7 @@ import TanStackTestTable from './TanStackTestTable.vue'
 import Histogram from './Histogram.vue';
 import { columns } from '../components/TableVariables/SignalBook.js'; 
 import InfoIcon from './InfoIcon.vue'
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 
 const signal_book_data = ref([])
 const uids = ref([])
@@ -73,7 +73,7 @@ const connectClientDetailsWebSocket = () => {
         return;
     }
     
-    const clientDetailSocket = new WebSocket('wss://production2.swancapital.in/signalbook');
+    const clientDetailSocket = new WebSocket(`${WS_BASE_URL}signalbook`);
 
     clientDetailSocket.onopen = function (e) {
             

@@ -4,6 +4,7 @@ import { ref, watch } from 'vue'
 import TanStackTestTable from './TanStackTestTable.vue'
 import { columns } from '../components/TableVariables/FundSummaryClient.js'; 
 import { useRoute } from 'vue-router';
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 
 const route = useRoute();
 const error = ref(null);
@@ -16,7 +17,7 @@ async function postData(endpoint, payload, stateRef) {
     const token = localStorage.getItem('access_token')
     if (!token) throw new Error('User not authenticated')
   
-    const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

@@ -56,7 +56,7 @@
   <script setup>
   import { ref, onMounted } from 'vue'
   import { useRoute } from 'vue-router'
-  
+  import { API_BASE_URL, WS_BASE_URL } from '../config/url'
   // Reactive State
   const logs = ref([])
   const error = ref(null)
@@ -80,7 +80,7 @@
       const token = localStorage.getItem('access_token')
       if (!token) throw new Error('User not authenticated')
   
-      const response = await fetch(`https://production2.swancapital.in/getspecificlog`, {
+      const response = await fetch(`${API_BASE_URL}getspecificlog`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

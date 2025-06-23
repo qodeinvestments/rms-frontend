@@ -150,6 +150,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 
 // State management
 const users = ref([]);
@@ -234,7 +235,7 @@ const handleSquareOff = async () => {
     const token = localStorage.getItem('access_token');
     if (!token) throw new Error('User not authenticated');
 
-    const response = await fetch(`https://production2.swancapital.in/squareOffPositions`, {
+    const response = await fetch(`${API_BASE_URL}squareOffPositions`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -268,7 +269,7 @@ const fetchUsers = async () => {
     const token = localStorage.getItem('access_token');
     if (!token) throw new Error('User not authenticated');
 
-    const response = await fetch('https://production2.swancapital.in/getUsers', {
+    const response = await fetch(`${API_BASE_URL}getUsers`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

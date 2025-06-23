@@ -14,7 +14,7 @@ import { MyEnum } from '../Enums/Prefix.js'
 import Histogram from './Histogram.vue'
 import { columns } from '../components/TableVariables/HomePageTable.js'; 
 import OHLCChart from './OHLCCHART.vue'
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 import LightWeightChart from './LightWeightChart.vue';
 
 const defaultData = []
@@ -163,7 +163,7 @@ const toggleChart = async (key) => {
   chartData.value = null
   
   // try {
-  //   const response = await fetch('https://production2.swancapital.in/Psar', {
+  //   const response = await fetch(`${API_BASE_URL}Psar`, {
   //     method: 'POST',
   //     headers: {
   //       'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
@@ -222,7 +222,7 @@ const connectServerDataWebSocket = () => {
       return;
   }
     
-  const socket = new WebSocket('wss://production2.swancapital.in/serverData');
+  const socket = new WebSocket(`${WS_BASE_URL}serverData`);
 
   socket.onopen = () => {
      // Send the token as the first message for authentication
@@ -261,7 +261,7 @@ const connectWebSocket = () => {
     return;
   }
 
-  const socket = new WebSocket('wss://production2.swancapital.in/ws');
+  const socket = new WebSocket(`${WS_BASE_URL}ws`);
 
   socket.onopen = () => {
     console.log('WebSocket connection opened');

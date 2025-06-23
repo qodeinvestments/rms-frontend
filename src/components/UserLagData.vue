@@ -15,7 +15,7 @@ import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router';
 import Chart from './Chart.vue';
 import MultiLineChart from './HighCharts.vue'
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 import LightWeightChart from './LightWeightChart.vue';
 
 
@@ -35,7 +35,7 @@ const mix_real_ideal_mtm_table = ref({})
 const userLagData = ref({})
 
 const connectClientLagsDataWebSocket = () => {
-    const clientLagDataDetailSocket = new WebSocket('wss://production2.swancapital.in/userLagData');
+    const clientLagDataDetailSocket = new WebSocket(`${WS_BASE_URL}userLagData`);
 
     clientLagDataDetailSocket.onopen = function (e) {
         console.log("ClientLagData details connection established");

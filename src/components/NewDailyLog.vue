@@ -139,7 +139,7 @@ import { message, Select } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
 const { Option: ASelectOption } = Select
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 const router = useRouter()
 
 // Form Data
@@ -197,7 +197,7 @@ async function submitLog() {
     if (!token) throw new Error('User not authenticated')
 
     // Send to API
-    const response = await fetch('https://production2.swancapital.in/appendlog', {
+    const response = await fetch(`${API_BASE_URL}appendlog`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -231,7 +231,7 @@ async function fetchData(endpoint, stateRef) {
     const token = localStorage.getItem('access_token')
     if (!token) throw new Error('User not authenticated')
 
-    const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

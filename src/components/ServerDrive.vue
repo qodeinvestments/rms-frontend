@@ -1,7 +1,7 @@
 <!-- ServerDrive.vue -->
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue';
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 const serverData = ref({});
 const isLoading = ref(false);
 const error = ref(null);
@@ -23,7 +23,7 @@ const fetchServerData = async () => {
   try {
     const token = localStorage.getItem('access_token');
     if (!token) throw new Error('User not authenticated');
-    const res = await fetch(`https://production2.swancapital.in/serverDrive`, {
+    const res = await fetch(`${API_BASE_URL}serverDrive`, {
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
     });
     if (!res.ok) throw new Error(await res.text());
@@ -60,7 +60,7 @@ const handleFileUpload = async (folderName, event) => {
       formData.append("folder_name", folderName);
 
       const token = localStorage.getItem('access_token');
-      const res = await fetch(`https://production2.swancapital.in/UploadserveDrive`, {
+      const res = await fetch(`${API_BASE_URL}UploadserveDrive`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -95,7 +95,7 @@ const downloadFile = async (folderName, fileName) => {
   try {
     const token = localStorage.getItem('access_token');
     
-    const response = await fetch('https://production2.swancapital.in/DownloadServerDriveFile', {
+    const response = await fetch(`${API_BASE_URL}DownloadServerDriveFile`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -134,7 +134,7 @@ const deleteFile = async (folderName, fileName) => {
   try {
     const token = localStorage.getItem('access_token');
     
-    const response = await fetch('https://production2.swancapital.in/deleteFile', {
+    const response = await fetch(`${API_BASE_URL}deleteFile`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,

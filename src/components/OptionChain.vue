@@ -278,6 +278,7 @@
   </template>
   
   <script setup>
+  import { API_BASE_URL, WS_BASE_URL } from '../config/url'
   import { ref, computed, onMounted } from 'vue'
   import { message, Select } from 'ant-design-vue'
   const { Option: ASelectOption } = Select
@@ -400,7 +401,7 @@
       const token = localStorage.getItem('access_token')
       if (!token) throw new Error('User not authenticated')
   
-      const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

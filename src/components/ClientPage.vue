@@ -9,7 +9,7 @@ import {
 import { inject } from 'vue'
 import TanStackTestTable from './TanStackTestTable.vue'
 import { columns } from '../components/TableVariables/ClientPage.js'; 
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 
 const defaultData = []
 const NavigationMap = {
@@ -180,7 +180,7 @@ const connectWebSocket = () => {
     return;
   }
 
-  const socket = new WebSocket('wss://production2.swancapital.in/clientData');
+  const socket = new WebSocket(`${WS_BASE_URL}clientData`);
 
   socket.onopen = () => {
     console.log('WebSocket connection opened');

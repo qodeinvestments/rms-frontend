@@ -104,7 +104,7 @@ import { ref, onMounted } from 'vue'
 import { message, Select } from 'ant-design-vue'
 import { useRouter, useRoute } from 'vue-router'
 const { Option: ASelectOption } = Select
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 const router = useRouter()
 const route = useRoute()
 const loading = ref(true)
@@ -185,7 +185,7 @@ async function updateLog() {
     if (!token) throw new Error('User not authenticated')
 
     // Send update request to the API
-    const response = await fetch('https://production2.swancapital.in/updatelog', {
+    const response = await fetch(`${API_BASE_URL}updatelog`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -226,7 +226,7 @@ async function fetchSpecificLog(index) {
     const token = localStorage.getItem('access_token')
     if (!token) throw new Error('User not authenticated')
 
-    const response = await fetch('https://production2.swancapital.in/getspecificlog', {
+    const response = await fetch(`${API_BASE_URL}getspecificlog`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -265,7 +265,7 @@ async function fetchData(endpoint, stateRef) {
     const token = localStorage.getItem('access_token')
     if (!token) throw new Error('User not authenticated')
 
-    const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

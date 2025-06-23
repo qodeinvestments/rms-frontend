@@ -15,7 +15,7 @@ import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router';
 import TanStackTestTable from './TanStackTestTable.vue'
 import Chart from './Chart.vue';
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 
 import LightWeightChart from './LightWeightChart.vue';
 
@@ -73,7 +73,7 @@ const connectToSSE = () => {
         return;
     }
     
-    const socket = new WebSocket('wss://production2.swancapital.in/keydblogs');
+    const socket = new WebSocket(`${WS_BASE_URL}keydblogs`);
 
     socket.onmessage = (event) => {
         if (event.data === 'ping') {

@@ -7,7 +7,7 @@ import BarChart from './Barchart.vue';
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router';
 import Chart from './Chart.vue';
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 import LightWeightChart from './LightWeightChart.vue';
 
 
@@ -29,7 +29,7 @@ const connectServerDataWebSocket = () => {
         alert('User not authenticated');
         return;
     }
-    const ServerDataSocket = new WebSocket('wss://production2.swancapital.in/serverData');
+    const ServerDataSocket = new WebSocket(`${WS_BASE_URL}serverData`);
 
     ServerDataSocket.onopen = function (e) {
         const authMessage = JSON.stringify({ token });

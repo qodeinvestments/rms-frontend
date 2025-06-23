@@ -192,6 +192,7 @@ import { createColumnHelper } from '@tanstack/vue-table'
 import { Select, Button, InputNumber } from 'ant-design-vue'
 import TanStackTestTable from './TanStackTestTable.vue'
 import PayoffChart from './PayoffChart.vue'
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 
 // -------------------------------------------------------
 // REACTIVE STATE
@@ -571,7 +572,7 @@ async function fetchData(endpoint, stateRef) {
     const token = localStorage.getItem('access_token')
     if (!token) throw new Error('User not authenticated')
 
-    const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -597,7 +598,7 @@ async function postData(endpoint, payload, stateRef) {
     const token = localStorage.getItem('access_token')
     if (!token) throw new Error('User not authenticated')
 
-    const response = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

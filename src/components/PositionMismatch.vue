@@ -7,7 +7,7 @@ import {
     createColumnHelper,
 } from '@tanstack/vue-table'
 import TanStackTestTable from './TanStackTestTable.vue'
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 const defaultData = {}
 
 
@@ -102,7 +102,7 @@ const connectWebSocket = () => {
         alert('User not authenticated');
         return;
     }
-    const socket = new WebSocket('wss://production2.swancapital.in/ws');
+    const socket = new WebSocket(`${WS_BASE_URL}ws`);
 
     socket.onopen = () => {
         console.log('WebSocket connection opened')

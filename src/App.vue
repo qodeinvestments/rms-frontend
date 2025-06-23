@@ -5,8 +5,7 @@ import SideBar from './components/SideBar.vue'
 import Toast from './components/Toast.vue'
 import Login from './components/Login.vue'
 import Signup from './components/Signup.vue'
-
-
+import { API_BASE_URL, WS_BASE_URL } from './config/url'
 const sideBarState = ref(false)
 const sidebarfeatures = ref([])
 const toastConfig = ref({
@@ -23,7 +22,7 @@ const fetchData = async (endpoint, stateRef) => {
       isLoggedIn.value = false;
       return;
     }
-    const res = await fetch(`https://production2.swancapital.in/${endpoint}`, {
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
     });
     
@@ -109,7 +108,7 @@ const validateToken = async () => {
       return false;
     }
 
-    const response = await fetch('https://production2.swancapital.in/validate-token', {
+    const response = await fetch(`${API_BASE_URL}validate-token`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -168,7 +167,7 @@ const connectToSSE = () => {
         return;
     }
     
-  const socket = new WebSocket('wss://production2.swancapital.in/errorLogs');
+  const socket = new WebSocket(`${WS_BASE_URL}errorLogs`);
 
   socket.onmessage = (event) => {
     if (event.data === 'ping') {

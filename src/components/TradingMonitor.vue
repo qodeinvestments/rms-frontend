@@ -2,7 +2,7 @@
 <script setup>
 import { ref, computed, onMounted ,watch,onUnmounted} from 'vue';
 import * as XLSX from 'xlsx';
-
+import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 // Add prop for number of sticky columns
 const props = defineProps({
   stickyColumns: {
@@ -135,7 +135,7 @@ const fetchTradingData = async () => {
     const token = localStorage.getItem('access_token');
     if (!token) throw new Error('User not authenticated');
 
-    const response = await fetch('https://production2.swancapital.in/live_strats', {
+    const response = await fetch(`${API_BASE_URL}live_strats`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
