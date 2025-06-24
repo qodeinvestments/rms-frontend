@@ -36,6 +36,8 @@ jobs:
     # Deploy dist folder to Test Server
     - name: Deploy dist folder to Test Server
       run: |
+        # Remove old content in /var/www/monitor-frontend on the Test Server
+        ssh -o StrictHostKeyChecking=no root@139.5.189.188 'rm -rf /var/www/monitor-frontend/*'
 
         # Copy the dist folder to the Test Server's /var/www/monitor-frontend
         scp -r ./dist/* root@139.5.189.188:/var/www/monitor-frontend/
@@ -51,6 +53,8 @@ jobs:
     # Deploy dist folder to Production Server
     - name: Deploy dist folder to Production Server
       run: |
+        # Remove old content in /var/www/monitor-frontend on the Production Server
+        ssh -o StrictHostKeyChecking=no root@139.5.188.147 'rm -rf /var/www/monitor-frontend/*'
 
         # Copy the dist folder to the Production Server's /var/www/monitor-frontend
         scp -r ./dist/* root@139.5.188.147:/var/www/monitor-frontend/
