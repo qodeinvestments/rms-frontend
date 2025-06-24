@@ -32,6 +32,12 @@
         <button @click="handleSignUp" class="signup-button">
           Don't have an account? Sign Up
         </button>
+        
+        <!-- Microsoft OAuth Button -->
+        <button @click="handleMicrosoftOAuth" class="microsoft-oauth-button">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;"><rect x="2" y="2" width="9" height="9" fill="#F35325"/><rect x="13" y="2" width="9" height="9" fill="#81BC06"/><rect x="2" y="13" width="9" height="9" fill="#05A6F0"/><rect x="13" y="13" width="9" height="9" fill="#FFBA08"/></svg>
+          Sign in with Microsoft
+        </button>
       </div>
     </div>
   </template>
@@ -39,6 +45,8 @@
   <script setup>
   import { API_BASE_URL, WS_BASE_URL } from '../config/url'
   import { ref } from 'vue';
+  import { msalInstance } from '../msal';
+
   const loginUser = async (username, password) => {
   try {
     const response = await fetch(`${API_BASE_URL}login`, {
@@ -58,7 +66,6 @@
       localStorage.setItem('access_token', data.access_token); // Store the token separately
       
       alert('Login successful!');
-      window.location.reload(); // Refresh the page after login success
     } else {
       alert(data.detail);
     }
@@ -93,6 +100,31 @@
   const handleSignUp = () => {
     emit('toggleForm');
   };
+  
+  const handleMicrosoftOAuth = async () => {
+    try {
+      await msalInstance.initialize();
+      const loginResponse = await msalInstance.loginPopup({
+        scopes: ["User.Read"],
+      });
+      const accounts = msalInstance.getAllAccounts();
+      if (accounts && accounts.length > 0) {
+        console.log('Microsoft User Details:', accounts[0]);
+        // Get access token
+        const tokenResponse = await msalInstance.acquireTokenSilent({
+          account: accounts[0],
+          scopes: ["User.Read"],
+        });
+        localStorage.setItem('access_token', tokenResponse.accessToken);
+        alert('Login successful!');
+      } else {
+        alert('Microsoft login failed: No account found.');
+      }
+    } catch (error) {
+      console.error('Microsoft OAuth error:', error);
+      alert('Microsoft login failed. Please try again.');
+    }
+  };
   </script>
   
   <style scoped>
@@ -113,6 +145,9 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
   
   h2 {
@@ -180,19 +215,52 @@
     background-color: #059669;
   }
   
+  .microsoft-oauth-button {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 0.375rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    background-color: #2F2F2F;
+    color: white;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background 0.15s;
+    box-sizing: border-box;
+  }
+  
+  .microsoft-oauth-button:hover {
+    background-color: #0078D4;
+  }
+  
+  .microsoft-oauth-button svg {
+    flex-shrink: 0;
+  }
+  
   @media (max-width: 640px) {
     .login-card {
-      padding: 1.5rem;
+      padding: 1.2rem;
+      max-width: 95vw;
     }
   
     input,
     .login-button,
-    .signup-button {
-      padding: 0.625rem;
+    .signup-button,
+    .microsoft-oauth-button {
+      padding: 0.65rem 0.7rem;
+      font-size: 0.95rem;
+    }
+  
+    h2 {
+      font-size: 1.2rem;
     }
   }
   
-  /* Additional enhancements */
   input::placeholder {
     color: #9ca3af;
   }
@@ -201,7 +269,6 @@
     margin-bottom: 1.5rem;
   }
   
-  /* Add smooth transition for all interactive elements */
   button, input {
     transition: all 0.2s ease-in-out;
   }
@@ -218,15 +285,11 @@
     transform: translateY(-2px);
   }
   
-  /* Add focus styles for better accessibility */
   button:focus {
     outline: none;
-    ring: 2px;
-    ring-offset: 2px;
-    ring-color: #3b82f6;
+    box-shadow: 0 0 0 2px #3b82f6;
   }
   
-  /* Error state styles */
   input.error {
     border-color: #ef4444;
   }
