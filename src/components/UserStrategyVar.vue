@@ -201,7 +201,7 @@ const var_calculation_data = ref([])
 const user_var_calculation_data = ref([])
 const elmcalculatordata = ref([])
 const accounts = ref({})       // Expected format: { "Account A": true, "Account B": true }
-const selectedClient = ref('Delthro Vega') // Default selected account
+const selectedClient = ref() // Default selected account
 const inputPercentage = ref(10)  // Default percentage value is 10
 const elmpercentage= ref(2)  // Default percentage value is 2
 const error = ref(null)
@@ -654,7 +654,7 @@ onMounted(async () => {
       var_calculations(inputPercentage.value),
       calculate_elm(elmpercentage.value),
       fetchAccounts(),
-      user_var_table('Delthro Vega'), // default client value
+      user_var_table(), // default client value
     ])
   } finally {
     loading.value = false
