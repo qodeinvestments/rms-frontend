@@ -66,6 +66,8 @@
       localStorage.setItem('access_token', data.access_token); // Store the token separately
       
       alert('Login successful!');
+      // Refresh the page after successful login
+      window.location.reload();
     } else {
       alert(data.detail);
     }
@@ -117,6 +119,8 @@
         });
         localStorage.setItem('access_token', tokenResponse.accessToken);
         alert('Login successful!');
+        // Refresh the page after successful Microsoft login
+        window.location.reload();
       } else {
         alert('Microsoft login failed: No account found.');
       }
