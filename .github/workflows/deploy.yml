@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - production  # Trigger on push to the 'production' branch
+      - development # Trigger on push to the 'development' branch
   pull_request:
     branches:
       - production  # Trigger on PR to 'production' branch
+      - development # Trigger on PR to 'development' branch
 
 jobs:
   build:
@@ -27,14 +29,16 @@ jobs:
         npm run build
         ls -al ./dist  # Ensure dist folder is generated and list its contents
 
-    # Set up SSH for deployment to Test Server
+    # Set up SSH for deployment to Test Server (only for development branch)
     - name: Set up SSH for Test Server
+      if: github.ref == 'refs/heads/development'
       uses: webfactory/ssh-agent@v0.5.3
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}  # Test server's SSH key
 
-    # Deploy dist folder to Test Server
+    # Deploy dist folder to Test Server (only for development branch)
     - name: Deploy dist folder to Test Server
+      if: github.ref == 'refs/heads/development'
       run: |
         # Remove old content in /var/www/monitor-frontend on the Test Server
         ssh -o StrictHostKeyChecking=no root@139.5.189.188 'rm -rf /var/www/monitor-frontend/*'
@@ -44,14 +48,16 @@ jobs:
       env:
         DEPLOY_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    # Set up SSH for deployment to Production Server
+    # Set up SSH for deployment to Production Server (only for production branch)
     - name: Set up SSH for Production Server
+      if: github.ref == 'refs/heads/production'
       uses: webfactory/ssh-agent@v0.5.3
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY_PROD }}  # Production server's SSH key
 
-    # Deploy dist folder to Production Server
+    # Deploy dist folder to Production Server (only for production branch)
     - name: Deploy dist folder to Production Server
+      if: github.ref == 'refs/heads/production'
       run: |
         # Remove old content in /var/www/monitor-frontend on the Production Server
         ssh -o StrictHostKeyChecking=no root@139.5.188.147 'rm -rf /var/www/monitor-frontend/*'
