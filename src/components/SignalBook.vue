@@ -7,7 +7,7 @@ import {
     createColumnHelper,
 } from '@tanstack/vue-table'
 
-import { MyEnum } from '../Enums/Prefix.js';
+
 import { ref, watch } from 'vue'
 import TanStackTestTable from './TanStackTestTable.vue'
 import Histogram from './Histogram.vue';

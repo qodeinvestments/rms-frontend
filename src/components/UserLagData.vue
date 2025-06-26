@@ -10,7 +10,7 @@ import {
     createColumnHelper,
 } from '@tanstack/vue-table'
 
-import { MyEnum } from '../Enums/Prefix.js';
+
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router';
 import Chart from './Chart.vue';

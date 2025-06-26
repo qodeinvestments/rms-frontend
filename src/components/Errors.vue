@@ -10,7 +10,6 @@ import {
     createColumnHelper,
 } from '@tanstack/vue-table'
 import { inject } from 'vue'
-import { MyEnum } from '../Enums/Prefix.js';
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router';
 import TanStackTestTable from './TanStackTestTable.vue'

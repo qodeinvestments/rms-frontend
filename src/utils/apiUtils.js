@@ -1,5 +1,5 @@
 // apiUtils.js
-const BASE_URL = 'https://production2.swancapital.in';
+const BASE_URL = 'https://api.swancapital.in';
 
 const getAuthToken = () => {
   const token = localStorage.getItem('access_token');

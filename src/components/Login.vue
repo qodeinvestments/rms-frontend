@@ -35,7 +35,12 @@
         
         <!-- Microsoft OAuth Button -->
         <button @click="handleMicrosoftOAuth" class="microsoft-oauth-button">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;"><rect x="2" y="2" width="9" height="9" fill="#F35325"/><rect x="13" y="2" width="9" height="9" fill="#81BC06"/><rect x="2" y="13" width="9" height="9" fill="#05A6F0"/><rect x="13" y="13" width="9" height="9" fill="#FFBA08"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+            <rect x="2" y="2" width="9" height="9" fill="#F35325"/>
+            <rect x="13" y="2" width="9" height="9" fill="#81BC06"/>
+            <rect x="2" y="13" width="9" height="9" fill="#05A6F0"/>
+            <rect x="13" y="13" width="9" height="9" fill="#FFBA08"/>
+          </svg>
           Sign in with Microsoft
         </button>
       </div>
@@ -43,39 +48,38 @@
   </template>
   
   <script setup>
-  import { API_BASE_URL, WS_BASE_URL } from '../config/url'
   import { ref } from 'vue';
-  import { msalInstance } from '../msal';
+  import { msalInstance, loginRequest } from '../msal';
+  import { API_BASE_URL, WS_BASE_URL } from '../config/url'
 
   const loginUser = async (username, password) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: username,
-        password: password,
-      }),
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,
+        }),
+      });
 
-    const data = await response.json();
-    if (data.success) {
-      // Store user info and token separately for clarity
-      localStorage.setItem('access_token', data.access_token); // Store the token separately
-      
-      alert('Login successful!');
-      // Refresh the page after successful login
-      window.location.reload();
-    } else {
-      alert(data.detail);
+      const data = await response.json();
+      if (data.success) {
+        // Store user info and token separately for clarity
+        localStorage.setItem('access_token', data.access_token); // Store the token separately
+        
+        alert('Login successful!');
+        window.location.reload(); // Refresh the page after login success
+      } else {
+        alert(data.detail);
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      alert('Error during login. Please try again.');
     }
-  } catch (error) {
-    console.error('Error during login:', error);
-    alert('Error during login. Please try again.');
-  }
-};
+  };
   
   // Define the state using ref
   const username = ref('');
@@ -103,30 +107,20 @@
     emit('toggleForm');
   };
   
+  // Handle Microsoft OAuth login
   const handleMicrosoftOAuth = async () => {
     try {
+      // Ensure MSAL is initialized
       await msalInstance.initialize();
-      const loginResponse = await msalInstance.loginPopup({
-        scopes: ["User.Read"],
-      });
-      const accounts = msalInstance.getAllAccounts();
-      if (accounts && accounts.length > 0) {
-        console.log('Microsoft User Details:', accounts[0]);
-        // Get access token
-        const tokenResponse = await msalInstance.acquireTokenSilent({
-          account: accounts[0],
-          scopes: ["User.Read"],
-        });
-        localStorage.setItem('access_token', tokenResponse.accessToken);
-        alert('Login successful!');
-        // Refresh the page after successful Microsoft login
-        window.location.reload();
-      } else {
-        alert('Microsoft login failed: No account found.');
-      }
+      
+      console.log('Starting Microsoft OAuth login with redirect...');
+      
+      // Use redirect flow instead of popup - works more reliably
+      await msalInstance.loginRedirect(loginRequest);
+      
     } catch (error) {
       console.error('Microsoft OAuth error:', error);
-      alert('Microsoft login failed. Please try again.');
+      alert(`Microsoft login failed: ${error.message || 'Unknown error'}`);
     }
   };
   </script>
@@ -265,6 +259,7 @@
     }
   }
   
+  /* Additional enhancements */
   input::placeholder {
     color: #9ca3af;
   }
@@ -273,6 +268,7 @@
     margin-bottom: 1.5rem;
   }
   
+  /* Add smooth transition for all interactive elements */
   button, input {
     transition: all 0.2s ease-in-out;
   }
@@ -289,11 +285,13 @@
     transform: translateY(-2px);
   }
   
+  /* Add focus styles for better accessibility */
   button:focus {
     outline: none;
     box-shadow: 0 0 0 2px #3b82f6;
   }
   
+  /* Error state styles */
   input.error {
     border-color: #ef4444;
   }

@@ -6,7 +6,7 @@ import {
     useVueTable,
     createColumnHelper,
 } from '@tanstack/vue-table'
-import { MyEnum } from '../Enums/Prefix.js'
+
 import TanStackTestTable from './TanStackTestTable.vue'
 import { columns } from '../components/TableVariables/OpenTrades.js'
 import { API_BASE_URL, WS_BASE_URL } from '../config/url'
