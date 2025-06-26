@@ -52,8 +52,6 @@
       <table class="admin-table">
         <thead>
           <tr>
-            <th>Username</th>
-            <th>Password</th>
             <th>Email</th>
             <th>Role</th>
             <th>Account Access</th>
@@ -64,8 +62,6 @@
         </thead>
         <tbody>
           <tr v-for="(user, index) in users" :key="index">
-            <td>{{ user.username }}</td>
-            <td>{{ user.password }}</td>
             <td>{{ user.email }}</td>
             <td>{{ user.role }}</td>
             <td>{{ user.account_access.join(', ') }}</td>
@@ -108,14 +104,6 @@
 
         <div class="modal-body">
           <div class="form-grid">
-            <div class="form-group">
-              <label>Username</label>
-              <input v-model="editingUser.username" type="text" disabled />
-            </div>
-            <div class="form-group">
-              <label>Password</label>
-              <input v-model="editingUser.password" type="text" :disabled="updateLoading" />
-            </div>
             <div class="form-group">
               <label>Email</label>
               <input v-model="editingUser.email" type="email" :disabled="updateLoading" />
@@ -486,7 +474,6 @@ const handleFeatureChange = value => {
 };
 
 const filteredAccountPercentages = computed(() =>
-
   accountPercentages.value.filter(item => item.name.toLowerCase().includes(percentageSearch.value.toLowerCase()))
 );
 
