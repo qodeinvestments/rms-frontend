@@ -17,14 +17,20 @@ app.use(Antd);
 
 // Initialize MSAL and handle redirects
 msalInstance.initialize().then(() => {
+  // Handle redirect promise for Microsoft login
   msalInstance.handleRedirectPromise().then(async (response) => {
-    if (response?.account) {
+    if (response && response.account) {
+      // Microsoft login was successful
+      console.log('Microsoft login successful:', response.account);
+      
       try {
+        // Get access token from Microsoft
         const tokenResponse = await msalInstance.acquireTokenSilent({
           account: response.account,
           scopes: ["User.Read"],
         });
         
+        // Send Microsoft token to your backend
         const backendResponse = await fetch(`${API_BASE_URL}microsoft-login`, {
           method: 'POST',
           headers: {
@@ -38,22 +44,36 @@ msalInstance.initialize().then(() => {
         const data = await backendResponse.json();
         
         if (data.success) {
+          // Store your backend JWT token (same as normal login)
           localStorage.setItem('access_token', data.access_token);
           localStorage.setItem('user_info', JSON.stringify(data.user));
+          
+          console.log('Backend authentication successful');
+          alert('Microsoft login successful!');
+          
+          // Refresh the page to update the app state
           window.location.reload();
+        } else {
+          console.error('Backend authentication failed:', data.detail);
+          alert(`Login failed: ${data.detail}`);
         }
         
       } catch (error) {
-        console.error('Microsoft login error:', error);
+        console.error('Error during Microsoft login process:', error);
+        alert('Error completing Microsoft login. Please try again.');
       }
     }
-  }).catch(error => console.error('MSAL redirect error:', error));
-}).catch(error => console.error('MSAL initialization error:', error));
+  }).catch((error) => {
+    console.error('MSAL redirect handling error:', error);
+  });
+}).catch((error) => {
+  console.error('MSAL initialization error:', error);
+});
 
 app.mount("#app");
 
 // Register Service Worker for Background Notifications
-if ("serviceWorker" in navigator) {
+if ("serviceWorker" in navigator) {  // No import required
     window.addEventListener("load", () => {
         navigator.serviceWorker
             .register("/service-worker.js")
