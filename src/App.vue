@@ -4,7 +4,6 @@ import { RouterView } from 'vue-router'
 import SideBar from './components/SideBar.vue'
 import Toast from './components/Toast.vue'
 import Login from './components/Login.vue'
-import Signup from './components/Signup.vue'
 import { API_BASE_URL, WS_BASE_URL } from './config/url'
 const sideBarState = ref(false)
 const sidebarfeatures = ref([])
@@ -84,13 +83,8 @@ const hideToast = () => {
   toastConfig.value.show = false
 }
 
-
-const showloginorSignup = ref(false)
 const isLoggedIn = ref(false) // Add a ref to track login state
 
-const toggleForm = () => {
-  showloginorSignup.value = !showloginorSignup.value;
-}
 const checkLoginStatus = async () => {
   try {
     const isValid = await validateToken();
@@ -237,8 +231,7 @@ provide('newOrderErrors', computed(() => book.value?.New_Order_Errors || []))
       <div class="loading-spinner"></div>
     </div>
     <template v-else>
-      <Signup v-if="!isLoggedIn && showloginorSignup" @toggleForm="toggleForm" />
-      <Login v-if="!isLoggedIn && !showloginorSignup" @toggleForm="toggleForm" />
+      <Login v-if="!isLoggedIn" />
 
       <SideBar v-if="isLoggedIn" @State="ChangeSideBarState" :sidebarfeatures="sidebarfeatures" class="sideBar" />
       <Toast v-if="toastConfig.show && isLoggedIn" :message="toastConfig.message" :type="toastConfig.type" @close="hideToast" />
