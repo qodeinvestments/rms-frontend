@@ -51,8 +51,14 @@ msalInstance.initialize().then(() => {
           console.log('Backend authentication successful');
           alert('Microsoft login successful!');
           
-          // Refresh the page to update the app state
-          window.location.reload();
+          // Clear the URL fragment and navigate to home using Vue Router
+          window.history.replaceState({}, document.title, window.location.pathname);
+          
+          // Emit a custom event to notify the app of successful authentication
+          window.dispatchEvent(new CustomEvent('auth-success'));
+          
+          // Navigate to home page
+          router.push('/');
         } else {
           console.error('Backend authentication failed:', data.detail);
           alert(`Login failed: ${data.detail}`);
@@ -62,9 +68,16 @@ msalInstance.initialize().then(() => {
         console.error('Error during Microsoft login process:', error);
         alert('Error completing Microsoft login. Please try again.');
       }
+    } else if (window.location.hash.includes('code=')) {
+      // If we have auth params but no response, clear the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
   }).catch((error) => {
     console.error('MSAL redirect handling error:', error);
+    // Clear URL if there's an error
+    if (window.location.hash.includes('code=')) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   });
 }).catch((error) => {
   console.error('MSAL initialization error:', error);

@@ -197,4 +197,14 @@ const router = createRouter({
   ],
 })
 
+// Add navigation guard to handle authentication
+router.beforeEach((to, from, next) => {
+  // Clear URL fragments from Microsoft authentication if present
+  if (window.location.hash.includes('code=') || window.location.hash.includes('state=')) {
+    window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+  }
+  
+  next();
+});
+
 export default router

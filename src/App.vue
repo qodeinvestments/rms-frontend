@@ -212,6 +212,15 @@ onMounted(async () => {
     connectToSSE();
     fetchSidebarFeatures();
   }
+  
+  // Listen for auth-success event from Microsoft authentication
+  window.addEventListener('auth-success', async () => {
+    await checkLoginStatus();
+    if (isLoggedIn.value) {
+      connectToSSE();
+      fetchSidebarFeatures();
+    }
+  });
 })
 
 provide('triggerToast', triggerToast)
